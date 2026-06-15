@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* =============================================
+   TAILWIND THEME
+   "inline" означает: не запекать значения при сборке,
+   а смотреть на CSS-переменные в реальном времени.
+   --tenant-primary и --tenant-accent приходят из layout.tsx
+   (который берет их из MongoDB для каждого клиента).
+   ============================================= */
+@theme inline {
+  /* Брендовые цвета — динамические, приходят из БД через layout.tsx */
+  --color-primary: var(--tenant-primary, #ff0505);
+  --color-accent:  var(--tenant-accent,  #F1A208);
+
+  /* Семантические цвета — статические, из :root ниже */
+  --color-surface-page:    var(--color-surface-page);
+  --color-surface-card:    var(--color-surface-card);
+  --color-surface-hover:   var(--color-surface-hover);
+  --color-surface-inverse: var(--color-surface-inverse);
+
+  --color-text-primary:   var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary:  var(--color-text-tertiary);
+  --color-text-inverse:   var(--color-text-inverse);
+
+  --color-border:       var(--color-border);
+  --color-border-light: var(--color-border-light);
+
+  /* Тени */
+  --shadow-card:     var(--shadow-card);
+  --shadow-dropdown: var(--shadow-dropdown);
+
+  /* Шрифты */
+  --font-heading: var(--font-heading);
+  --font-body:    var(--font-body);
+}
+
+/* =============================================
+   БАЗОВЫЕ ПЕРЕМЕННЫЕ
+   ============================================= */
+@layer base {
+  :root {
+    /* Дефолтные значения брендовых цветов — если tenant не загрузился */
+    --tenant-primary: #ff0505;
+    --tenant-accent:  #F1A208;
+
+    /* Светлая тема */
+    --color-surface-page:    #ffffff;
+    --color-surface-card:    #f9fafb;
+    --color-surface-hover:   #f3f4f6;
+    --color-surface-inverse: #18181b;
+
+    --color-text-primary:   #18181b;
+    --color-text-secondary: #52525b;
+    --color-text-tertiary:  #a1a1aa;
+    --color-text-inverse:   #ffffff;
+
+    --color-border:       #e4e4e7;
+    --color-border-light: #f4f4f5;
+
+    --shadow-card:     0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-dropdown: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+
+    --font-heading: var(--font-playfair), serif;
+    --font-body:    var(--font-inter), sans-serif;
+  }
+
+  .dark {
+    --color-surface-page:    #0f172a;
+    --color-surface-card:    #1e293b;
+    --color-surface-hover:   #334155;
+    --color-surface-inverse: #ffffff;
+
+    --color-text-primary:   #f1f5f9;
+    --color-text-secondary: #94a3b8;
+    --color-text-tertiary:  #64748b;
+    --color-text-inverse:   #18181b;
+
+    --color-border:       #334155;
+    --color-border-light: #1e293b;
+
+    --shadow-card:     0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-dropdown: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.4);
+  }
+}
+
+/* =============================================
+   ГЛОБАЛЬНЫЕ СТИЛИ
+   ============================================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-surface-page);
+  color: var(--color-text-primary);
+  overflow-x: hidden;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}

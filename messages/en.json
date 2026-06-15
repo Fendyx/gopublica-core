@@ -1,0 +1,253 @@
+{
+  "nav": {
+    "home": "Home",
+    "menu": "Menu",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "booking": "Book a table"
+  },
+  "hero": {
+    "booking": "Book a table",
+    "menu": "Menu"
+  },
+  "menu": {
+    "title": "Our menu",
+    "all": "All dishes",
+    "emptyCategory": "No dishes in this category."
+  },
+  "booking": {
+    "title": "Reserve a Table",
+    "eyebrow": "Online Booking",
+    "step1Label": "Details",
+    "step2Label": "Contact",
+    "date": "Date",
+    "guests": "Guests",
+    "time": "Time",
+    "person": "guest",
+    "persons": "guests",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "comment": "Requests",
+    "commentPlaceholder": "Allergies, special requests...",
+    "optional": "optional",
+    "edit": "Edit",
+    "next": "Next",
+    "submit": "Book Now",
+    "sending": "Sending...",
+    "guestsLabel": "guests",
+    "newBooking": "New Booking",
+    "success": "You're booked!",
+    "successMessage": "We will contact you for confirmation.",
+    "error": "Error. Please try again.",
+    "privacyNote": "By clicking \"Book Now\", you agree to the terms and conditions."
+  },
+"contact": {
+  "eyebrow": "Contact Us",
+  "title": "Contact",
+  "address": "Address",
+  "phone": "Phone",
+  "email": "Email",
+  "hours": "Working Hours",
+  "maps": "Open in Google Maps"
+},
+"about": {
+  "title": "About Us"
+},
+"gallery": {
+  "title": "Gallery",
+  "subtitle": "Our Restaurant"
+},
+  "footer": {
+    "admin": "Admin Panel",
+    "home": "Home",
+    "menu": "Menu",
+    "reservations": "Reservations",
+    "contact": "Contact",
+    "privacyPolicy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "navigation": "Navigation",
+    "legal": "Legal",
+    "poweredBy": "Powered by"
+  },
+
+  "admin": {
+    "dashboard": "Dashboard",
+    "menu": "Menu",
+    "gallery": "Gallery",
+    "reservations": "Reservations",
+    "gopublica": "Gopublica",
+    "settings": "Settings",
+    "logout": "Log out",
+    "loading": "Loading...",
+    "siteManagement": "Site management",
+    "loginRequired": "Authorization required",
+          "branches": "Branches",
+"branchesPage": {
+  "title": "Manage Branches",
+  "addBranch": "Add Branch",
+  "empty": "No branches yet. Create your first branch.",
+  "deleteConfirm": "Delete this branch? This action cannot be undone.",
+  "name": "Branch name",
+  "city": "City",
+  "address": "Address",
+  "phone": "Phone",
+  "actions": "Actions",
+  "loading": "Loading..."
+},
+"branchesForm": {
+  "createTitle": "Create New Branch",
+  "editTitle": "Edit Branch",
+  "name": "Branch name *",
+  "city": "City",
+  "address": "Address",
+  "phone": "Phone",
+  "email": "Email",
+  "workingHours": "Working hours",
+  "cancel": "Cancel",
+  "save": "Save",
+  "saving": "Saving...",
+  "loading": "Loading..."
+},
+    "dashboardPage": {
+      "loading": "Loading dashboard...",
+      "welcome": "Welcome, {clientName}!",
+      "summary": "A brief overview of your site.",
+      "menuCount": "Dishes in menu",
+      "todayReservations": "Reservations today",
+      "totalReservations": "Total reservations",
+      "quickActions": "Quick actions",
+      "manageMenu": "Manage menu",
+      "reservations": "Reservations",
+      "gallery": "Gallery",
+      "settings": "Settings",
+      "todayBookings": "Today's bookings",
+      "noBookings": "No bookings for today.",
+      "name": "Name",
+      "time": "Time",
+      "guests": "Guests",
+      "phone": "Phone",
+      "statusHeader": "Status",
+      "status": {
+        "pending": "New",
+        "confirmed": "Confirmed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "menuManager": {
+      "loading": "Loading menu...",
+      "title": "Menu of «{clientName}»",
+      "addDish": "+ Add dish",
+      "close": "✕ Close",
+      "empty": "Menu is empty. Add first dish.",
+      "name": "Dish name",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "customCategory": "Custom category",
+      "categoryName": "Category name",
+      "categoryTranslations": "Category translations",
+      "description": "Description",
+      "price": "Price",
+      "imageUrl": "Image URL",
+      "upload": "Upload",
+      "preview": "Preview",
+      "dishTranslations": "Dish translations (optional)",
+      "save": "Save",
+      "add": "Add",
+      "cancel": "Cancel",
+      "deleteConfirm": "Delete dish?",
+      "uploaderNotReady": "Uploader not ready yet, please wait.",
+      "errorSaveCategory": "Failed to save category",
+      "translations": {
+        "name": "Name",
+        "description": "Description"
+      }
+    },
+    "reservationsPage": {
+  "loading": "Loading...",
+  "title": "Reservations",
+  "empty": "No reservations.",
+  "name": "Name",
+  "date": "Date",
+  "time": "Time",
+  "guests": "Guests",
+  "status": "Status",
+  "actions": "Actions",
+  "confirm": "Confirm",
+  "reject": "Reject",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "deleteConfirm": "Are you sure you want to delete this reservation?",
+  "statusLabels": {
+    "pending": "New",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled"
+  }
+},
+    "galleryPage": {
+      "loading": "Loading...",
+      "title": "Gallery",
+      "addPhoto": "Add photo",
+      "caption": "Caption (optional)",
+      "selectPhoto": "Select photo",
+      "addToGallery": "Add to gallery",
+      "empty": "Gallery is empty.",
+      "deleteConfirm": "Delete image?"
+    },
+"settingsPage": {
+  "loading": "Loading...",
+  "title": "Settings",
+  "phone": "Phone",
+  "address": "Address",
+  "email": "Email",
+  "hours": "Working hours",
+  "googleMapsUrl": "Google Maps URL",
+  "save": "Save",
+  "saved": "Saved!",
+  "primaryLanguage": "Primary restaurant language",
+  "primaryCurrency": "Menu currency",
+  "contactSection": "Contact",
+  "localisationSection": "Localisation",
+  "seoTranslations": "SEO Translations",
+  "seoTitleLabel": "SEO Title",
+  "seoDescriptionLabel": "SEO Description",
+  "hoursTranslations": "Opening hours translations",
+  "notifications": {
+    "title": "Booking notifications",
+    "sound": "Sound notification",
+    "message": "Popup message",
+    "melody": "Melody",
+    "default": "Default",
+    "melody1": "Melody 1",
+    "customUrl": "Custom URL",
+    "listen": "Listen"
+  }
+},
+    "gopublicaPage": {
+      "loading": "Loading news...",
+      "title": "News from Gopublica",
+      "empty": "No news yet",
+      "emptyDesc": "News and notifications from your service provider will appear here.",
+      "expires": "Valid until:"
+    }
+  },
+
+  "notifications": {
+    "new_booking": "🍽️ New booking",
+    "new_booking_body": "{name} · {date} at {time} · {guests} guests",
+    "new_booking_body_no_guests": "{name} · {date} at {time}",
+    "allow_notifications_title": "Enable notifications",
+    "allow_notifications_text": "Receive alerts about new bookings even when tabs are closed.",
+    "allow_button": "Allow",
+    "later_button": "Later",
+    "notifications_blocked": "🚫 Notifications blocked",
+    "notifications_blocked_hint": "Click the lock 🔒 in the address bar → Notifications → Allow.",
+    "background_notifications_title": "⚡ Background notifications",
+    "background_notifications_text": "Without this, notifications won't arrive when tabs are closed.",
+    "enable_button": "Enable",
+    "push_error_prefix": "❌",
+    "sound_hint": "Click anywhere on the page to enable sound",
+    "subscribe_try_again": "Try again",
+    "subscribe_connecting": "Connecting..."
+  }
+}
