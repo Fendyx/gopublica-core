@@ -18,6 +18,7 @@ import {
   Settings,
   LogOut,
   Store,
+  ChartLine
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 
@@ -83,10 +84,11 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
 
   const navItems = [
     { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
+    { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
     { href: '/admin/menu', label: t('menu'), icon: UtensilsCrossed },
     { href: '/admin/gallery', label: t('gallery'), icon: ImageIcon },
     { href: '/admin/reservations', label: t('reservations'), icon: CalendarCheck },
-    { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
+    { href: '/admin/analytics', label: t('analytics'), icon: ChartLine },
     { href: '/admin/branches', label: t('branches'), icon: Store },
     { href: '/admin/settings', label: t('settings'), icon: Settings },
   ];

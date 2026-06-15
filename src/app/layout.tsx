@@ -5,8 +5,11 @@ import LayoutWrapper from '@/shared/ui/LayoutWrapper';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { TenantProvider } from '@/entities/tenant/TenantContext';
 import { ThemeProvider } from '@/shared/ui/ThemeProvider';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Inter, Playfair_Display, Geist } from 'next/font/google';
 import './globals.css';
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -51,7 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable}`}
+      className={cn(inter.variable, playfair.variable, "font-sans", geist.variable)}
       style={{
         '--tenant-primary': primary,
         '--tenant-accent': accent,
