@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/shared/ui/ThemeProvider';
 import { Inter, Playfair_Display, Geist } from 'next/font/google';
 import './globals.css';
 import { cn } from "@/lib/utils";
+import { TrackVisit } from '@/shared/ui/TrackVisit';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -61,16 +62,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       } as React.CSSProperties}
     >
       <body>
-        <ThemeProvider defaultTheme="light">
-          <NextIntlClientProvider messages={messages}>
-            <TenantProvider tenantId={tenantId}>
-              <BranchProvider tenantId={tenantId}>
-                <LayoutWrapper>{children}</LayoutWrapper>
-              </BranchProvider>
-            </TenantProvider>
-          </NextIntlClientProvider>
-        </ThemeProvider>
-      </body>
+      <TrackVisit tenantId={tenantId} />
+      <ThemeProvider defaultTheme="light">
+        <NextIntlClientProvider messages={messages}>
+          <TenantProvider tenantId={tenantId}>
+            <BranchProvider tenantId={tenantId}>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </BranchProvider>
+          </TenantProvider>
+        </NextIntlClientProvider>
+      </ThemeProvider>
+    </body>
     </html>
   );
 }
