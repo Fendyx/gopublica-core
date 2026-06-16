@@ -3,6 +3,19 @@ import { useEffect, useState, useRef } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Upload,
+  Trash2,
+  ImagePlus,
+  X,
+  Loader2,
+  ImageIcon,
+} from 'lucide-react';
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'твой-cloud-name';
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'menu_photos';
@@ -111,38 +124,130 @@ export default function GalleryAdminPage() {
     }
   };
 
-  if (branchLoading || loading) return <div className="text-center py-10">{t('loading')}</div>;
-  if (!selectedBranch) return <div className="text-center py-10">Выберите филиал в переключателе справа вверху</div>;
+  if (branchLoading || loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-6 w-48" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-square rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedBranch) {
+    return (
+      <Card className="text-center py-12">
+        <CardContent>
+          <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">Выберите филиал в переключателе справа вверху</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div>
-      <div className="mb-4 text-sm text-gray-500">
-        Галерея для филиала: <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
-      </div>
-      <h2 className="text-xl font-semibold mb-4">{t('title')}</h2>
-
-      <div className="bg-white p-6 rounded shadow mb-8">
-        <h3 className="text-lg font-medium mb-3">{t('addPhoto')}</h3>
-        <div className="flex gap-4 items-end">
-          <input type="text" placeholder={t('caption')} value={caption} onChange={e => setCaption(e.target.value)} className="border p-2 rounded flex-1" />
-          <button onClick={() => cloudinaryWidgetRef.current?.open()} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">{t('selectPhoto')}</button>
+    <div className="space-y-8">
+      {/* Заголовок */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <ImageIcon className="w-5 h-5 text-primary" />
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
         </div>
-        {imageUrl && (
-          <div className="mt-4 flex items-start gap-4">
-            <img src={imageUrl} alt="preview" className="h-24 object-cover rounded" />
-            <button onClick={handleAdd} className="px-4 py-2 rounded text-white" style={{ backgroundColor: 'var(--color-primary)' }}>{t('addToGallery')}</button>
-          </div>
-        )}
+        <p className="text-sm text-muted-foreground">
+          Галерея для филиала: <strong>{selectedBranch.name}</strong>
+          {selectedBranch.city && ` (${selectedBranch.city})`}
+        </p>
       </div>
 
-      {images.length === 0 ? <p className="text-zinc-500 text-center py-10">{t('empty')}</p> : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map(img => (
-            <div key={img._id} className="group relative aspect-square rounded-lg overflow-hidden shadow-sm">
-              <img src={img.image} alt={img.caption} className="w-full h-full object-cover" />
-              {img.caption && <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">{img.caption}</div>}
-              <button onClick={() => handleDelete(img._id)} className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+      {/* Форма добавления */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t('addPhoto')}</CardTitle>
+          <CardDescription>Загрузите изображение через Cloudinary или вставьте URL вручную</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Input
+              placeholder={t('caption')}
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              variant="outline"
+              onClick={() => cloudinaryWidgetRef.current?.open()}
+              disabled={!widgetReady}
+              className="gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              {t('selectPhoto')}
+            </Button>
+          </div>
+
+          {imageUrl && (
+            <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
+              <img
+                src={imageUrl}
+                alt="preview"
+                className="h-24 w-24 object-cover rounded-lg shadow-sm"
+              />
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground break-all">{imageUrl}</p>
+                <div className="flex gap-2">
+                  <Button onClick={handleAdd} className="gap-2">
+                    <ImagePlus className="w-4 h-4" />
+                    {t('addToGallery')}
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setImageUrl('')}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Сетка изображений */}
+      {images.length === 0 ? (
+        <Card className="border-dashed border-2 bg-muted/20">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <ImageIcon className="w-12 h-12 text-muted-foreground/40 mb-4" />
+            <p className="text-muted-foreground">{t('empty')}</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {images.map((img) => (
+            <Card key={img._id} className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
+              <div className="relative aspect-square">
+                <img
+                  src={img.image}
+                  alt={img.caption || ''}
+                  className="w-full h-full object-cover"
+                />
+                {/* Кнопка удаления */}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleDelete(img._id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+                {/* Подпись */}
+                {img.caption && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs p-2">
+                    {img.caption}
+                  </div>
+                )}
+              </div>
+            </Card>
           ))}
         </div>
       )}

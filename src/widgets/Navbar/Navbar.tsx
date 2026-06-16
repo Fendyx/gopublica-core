@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
-import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check } from 'lucide-react'
+import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart } from 'lucide-react'
 import { useBranch } from '@/entities/branch/BranchContext'
+import { useCartStore } from '@/shared/store/cartStore'
 
 export default function Navbar() {
   const t = useTranslations('nav')
@@ -27,6 +28,10 @@ export default function Navbar() {
 
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false)
   const [branchDropdownOpen, setBranchDropdownOpen] = useState(false)
+
+  // Корзина
+  const cartItemsCount = useCartStore((s) => s.items.length)
+  const hasOnlineOrdering = tenant?.features?.hasOnlineOrdering ?? false
 
   useEffect(() => {
     if (!isOpen) return
@@ -60,7 +65,6 @@ export default function Navbar() {
   ]
 
   const branchesInSelectedCity = branches.filter((b) => b.city === selectedCity)
-
   const hasBooking = tenant?.features?.hasBooking ?? false
 
   return (
@@ -168,6 +172,23 @@ export default function Navbar() {
             <div className="hidden sm:block">
               <LanguageSwitcher />
             </div>
+
+            {/* Иконка корзины (только если включены онлайн-заказы) */}
+            {hasOnlineOrdering && (
+              <Link
+                href={`/${locale}/order/checkout`}
+                className="relative p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                aria-label="Корзина"
+              >
+                <ShoppingCart size={20} />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {hasBooking && (
               <Link href={`/${locale}/reservations`} className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 shadow-sm" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <CalendarDays size={16} />

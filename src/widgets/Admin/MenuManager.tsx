@@ -6,6 +6,38 @@ import type { MenuItem } from '@/entities/menu-item/types';
 import { useTranslations } from 'next-intl';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import { useBranch } from '@/entities/branch/BranchContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
+import {
+  Plus,
+  X,
+  Upload,
+  Save,
+  Trash2,
+  Edit,
+  MapPin,
+  UtensilsCrossed,
+  ChevronDown,
+  ImagePlus,
+  Languages,
+} from 'lucide-react';
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'твой-cloud-name';
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'menu_photos';
@@ -276,270 +308,288 @@ export default function MenuManager({ token }: { token: string }) {
     }
   };
 
-  if (loading || settingsLoading) return <div className="text-center py-10 text-text-secondary">{t('loading')}</div>;
+  if (loading || settingsLoading) return <div className="text-center py-10 text-muted-foreground">{t('loading')}</div>;
   if (!tenantId) return <div className="text-center py-10">Ошибка: не определён клиент</div>;
   if (!selectedBranch) return <div className="text-center py-10">Выберите филиал в переключателе справа вверху</div>;
 
-  const inputBaseClass = "w-full border border-border bg-surface-page text-text-primary p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-text-tertiary";
-
   return (
-    <div className="max-w-6xl mx-auto pb-12">
-      <div className="mb-4 text-sm text-gray-500">
+    <div className="max-w-6xl mx-auto pb-12 space-y-6">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <MapPin className="w-4 h-4" />
         Меню для филиала: <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-        <h2 className="text-2xl font-heading font-semibold text-text-primary">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <UtensilsCrossed className="w-5 h-5 text-primary" />
           {t('title', { clientName: tenant?.clientName ?? '' })}
         </h2>
-        <button
+        <Button
           onClick={() => setShowForm(!showForm)}
-          className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-medium transition-opacity hover:opacity-90 shadow-sm active:scale-95"
+          variant={showForm ? 'secondary' : 'default'}
+          className="gap-2"
         >
-          {showForm ? t('close') : t('addDish')}
-        </button>
+          {showForm ? (
+            <>
+              <X className="w-4 h-4" />
+              {t('close')}
+            </>
+          ) : (
+            <>
+              <Plus className="w-4 h-4" />
+              {t('addDish')}
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Форма */}
       {showForm && (
-        <form onSubmit={handleSave} className="bg-surface-card p-6 sm:p-8 rounded-2xl shadow-card mb-10 border border-border animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-6">
-            
-            <div className="sm:col-span-1">
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">{t('name')}</label>
-              <input
-                type="text"
-                placeholder={t('name')}
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className={inputBaseClass}
-                required
-              />
-            </div>
-
-            <div className="sm:col-span-1">
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">{t('category')}</label>
-              <select
-                value={useCustomCategory ? '__custom__' : selectedCategory}
-                onChange={(e) => {
-                  const val = e.target.value
-                  if (val === '__custom__') {
-                    setUseCustomCategory(true)
-                    setSelectedCategory('')
-                  } else {
-                    updateCategoryFields(val, false)
-                  }
-                }}
-                className={`${inputBaseClass} appearance-none cursor-pointer`}
-                required
-              >
-                <option value="">{t('selectCategory')}</option>
-                {categories.map(c => (
-                  <option key={c.key} value={c.key}>{getCategoryDisplayName(c)}</option>
-                ))}
-                <option value="__custom__">{t('customCategory')}</option>
-              </select>
-            </div>
-
-            {useCustomCategory && (
-              <div className="sm:col-span-2 bg-surface-page border border-border rounded-xl p-5 space-y-5">
-                <div className="relative">
-                  <label className="block text-sm font-medium text-text-secondary mb-1.5">{t('categoryName')}</label>
-                  <input
-                    type="text"
-                    value={customCategoryName}
-                    onChange={(e) => {
-                      const name = e.target.value
-                      setCustomCategoryName(name)
-                      setForm(prev => ({
-                        ...prev,
-                        category: name,
-                        categoryKey: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-                      }))
-                      searchCategories(name)
-                    }}
-                    onFocus={() => categorySuggestions.length > 0 && setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    className={`${inputBaseClass} bg-surface-card`}
+        <Card className="animate-in fade-in slide-in-from-top-4 duration-300">
+          <form onSubmit={handleSave}>
+            <CardContent className="p-6 sm:p-8 space-y-6">
+              <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
+                {/* Название */}
+                <div className="space-y-2">
+                  <Label htmlFor="name">{t('name')}</Label>
+                  <Input
+                    id="name"
+                    placeholder={t('name')}
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
                   />
-                  
-                  {showSuggestions && (
-                    <ul className="absolute z-20 w-full bg-surface-card border border-border rounded-xl shadow-dropdown mt-1 max-h-48 overflow-y-auto overflow-hidden">
-                      {categorySuggestions.map(cat => (
-                        <li
-                          key={cat.key}
-                          onMouseDown={() => {
-                            setCustomCategoryName(getCategoryDisplayName(cat))
-                            setCustomCategoryTranslations(cat.translations || {})
-                            setForm(prev => ({
-                              ...prev,
-                              category: cat.name || cat.key,
-                              categoryKey: cat.key,
-                            }))
-                            setShowSuggestions(false)
-                          }}
-                          className="px-4 py-3 text-sm hover:bg-surface-hover cursor-pointer border-b border-border-light last:border-0 transition-colors"
-                        >
-                          <div className="font-medium text-text-primary">{getCategoryDisplayName(cat)}</div>
-                          {cat.translations && (
-                            <div className="text-xs text-text-tertiary mt-1">
-                              {Object.entries(cat.translations).map(([lang, val]) => `${lang}: ${val}`).join(', ')}
-                            </div>
-                          )}
-                        </li>
+                </div>
+
+                {/* Категория */}
+                <div className="space-y-2">
+                  <Label htmlFor="category">{t('category')}</Label>
+                  <Select
+                    value={useCustomCategory ? '__custom__' : selectedCategory}
+                    onValueChange={(val) => {
+                      if (val === '__custom__') {
+                        setUseCustomCategory(true);
+                        setSelectedCategory('');
+                      } else {
+                        updateCategoryFields(val, false);
+                      }
+                    }}
+                  >
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder={t('selectCategory')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(c => (
+                        <SelectItem key={c.key} value={c.key}>
+                          {getCategoryDisplayName(c)}
+                        </SelectItem>
                       ))}
-                    </ul>
-                  )}
+                      <Separator className="my-1" />
+                      <SelectItem value="__custom__">{t('customCategory')}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <details className="group">
-                  <summary className="cursor-pointer text-sm font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2 list-none [&::-webkit-details-marker]:hidden">
-                    <svg className="w-4 h-4 text-text-tertiary transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    {t('categoryTranslations')}
-                  </summary>
-                  <div className="grid sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-border-light">
-                    {availableLangs.map(lang => (
-                      <div key={lang}>
-                        <p className="text-xs font-semibold text-text-tertiary mb-1.5 uppercase tracking-wider">{lang}</p>
-                        <input
-                          type="text"
-                          placeholder={t('translations.name')}
-                          value={customCategoryTranslations[lang] || ''}
-                          onChange={(e) => setCustomCategoryTranslations(prev => ({
+                {/* Кастомная категория */}
+                {useCustomCategory && (
+                  <div className="sm:col-span-2 bg-muted/30 rounded-xl p-5 space-y-4 border">
+                    <div className="space-y-2 relative">
+                      <Label htmlFor="customCategory">{t('categoryName')}</Label>
+                      <Input
+                        id="customCategory"
+                        value={customCategoryName}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          setCustomCategoryName(name);
+                          setForm(prev => ({
                             ...prev,
-                            [lang]: e.target.value
-                          }))}
-                          className={`${inputBaseClass} p-2.5 text-sm bg-surface-card`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              </div>
-            )}
-
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">{t('description')}</label>
-              <textarea
-                placeholder={t('description')}
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className={inputBaseClass}
-                rows={3}
-              />
-            </div>
-
-            <div className="sm:col-span-1">
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">{t('price')}</label>
-              <input
-                type="number"
-                placeholder={t('price')}
-                value={form.price || ''}
-                onChange={(e) => setForm({ ...form, price: +e.target.value })}
-                className={inputBaseClass}
-                required
-              />
-            </div>
-
-            <div className="sm:col-span-1">
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">{t('imageUrl')}</label>
-              <div className="flex gap-3 items-center">
-                <input
-                  type="text"
-                  placeholder="https://..."
-                  value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  className={inputBaseClass}
-                />
-                <button
-                  type="button"
-                  onClick={openCloudinaryWidget}
-                  className="px-5 py-3 rounded-xl bg-surface-inverse text-text-inverse hover:opacity-90 text-sm font-medium transition-opacity shadow-sm whitespace-nowrap shrink-0"
-                >
-                  {t('upload')}
-                </button>
-              </div>
-            </div>
-
-            {form.image && (
-              <div className="sm:col-span-2">
-                <p className="block text-sm font-medium text-text-secondary mb-2">{t('preview')}</p>
-                <img 
-                  src={form.image} 
-                  alt={t('preview')} 
-                  className="h-40 w-40 object-cover rounded-xl border border-border shadow-sm" 
-                />
-              </div>
-            )}
-
-            <div className="sm:col-span-2">
-              <details className="group border border-border rounded-xl bg-surface-page overflow-hidden">
-                <summary className="cursor-pointer p-4 text-sm font-medium text-text-primary hover:bg-surface-hover transition-colors flex justify-between items-center list-none [&::-webkit-details-marker]:hidden border-b border-transparent group-open:border-border">
-                  {t('dishTranslations')}
-                  <svg className="w-5 h-5 text-text-tertiary transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <div className="p-4 sm:p-6 grid sm:grid-cols-3 gap-5 bg-surface-card/50">
-                  {availableLangs.map(lang => (
-                    <div key={lang} className="bg-surface-page p-4 rounded-xl border border-border-light shadow-sm">
-                      <p className="text-xs font-semibold text-text-tertiary mb-3 uppercase tracking-wider">{lang}</p>
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          placeholder={t('translations.name')}
-                          value={translations[lang]?.name || ''}
-                          onChange={(e) => setTranslations(prev => ({
-                            ...prev,
-                            [lang]: { ...prev[lang], name: e.target.value }
-                          }))}
-                          className={`${inputBaseClass} p-2.5 text-sm`}
-                        />
-                        <textarea
-                          placeholder={t('translations.description')}
-                          value={translations[lang]?.description || ''}
-                          onChange={(e) => setTranslations(prev => ({
-                            ...prev,
-                            [lang]: { ...prev[lang], description: e.target.value }
-                          }))}
-                          className={`${inputBaseClass} p-2.5 text-sm`}
-                          rows={2}
-                        />
-                      </div>
+                            category: name,
+                            categoryKey: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+                          }));
+                          searchCategories(name);
+                        }}
+                        onFocus={() => categorySuggestions.length > 0 && setShowSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        required
+                      />
+                      {showSuggestions && (
+                        <ul className="absolute z-20 w-full bg-card border border-border rounded-xl shadow-dropdown mt-1 max-h-48 overflow-y-auto overflow-hidden">
+                          {categorySuggestions.map(cat => (
+                            <li
+                              key={cat.key}
+                              onMouseDown={() => {
+                                setCustomCategoryName(getCategoryDisplayName(cat));
+                                setCustomCategoryTranslations(cat.translations || {});
+                                setForm(prev => ({
+                                  ...prev,
+                                  category: cat.name || cat.key,
+                                  categoryKey: cat.key,
+                                }));
+                                setShowSuggestions(false);
+                              }}
+                              className="px-4 py-3 text-sm hover:bg-accent cursor-pointer border-b border-border/50 last:border-0 transition-colors"
+                            >
+                              <div className="font-medium">{getCategoryDisplayName(cat)}</div>
+                              {cat.translations && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {Object.entries(cat.translations).map(([lang, val]) => `${lang}: ${val}`).join(', ')}
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </details>
-            </div>
-          </div>
 
-          <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-border">
-            {editingId && (
-              <button 
-                type="button" 
-                onClick={resetForm} 
-                className="px-5 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-surface-hover font-medium transition-colors"
-              >
-                {t('cancel')}
-              </button>
-            )}
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-xl bg-primary text-white font-medium shadow-sm transition-opacity hover:opacity-90 active:scale-95"
-            >
-              {editingId ? t('save') : t('add')}
-            </button>
-          </div>
-        </form>
+                    <Accordion type="single" collapsible>
+                      <AccordionItem value="translations" className="border rounded-lg px-3">
+                        <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                          <div className="flex items-center gap-2">
+                            <Languages className="w-4 h-4 text-muted-foreground" />
+                            {t('categoryTranslations')}
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-2 pb-3">
+                          <div className="grid sm:grid-cols-3 gap-3">
+                            {availableLangs.map(lang => (
+                              <div key={lang} className="space-y-1.5">
+                                <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
+                                <Input
+                                  placeholder={t('translations.name')}
+                                  value={customCategoryTranslations[lang] || ''}
+                                  onChange={(e) => setCustomCategoryTranslations(prev => ({
+                                    ...prev,
+                                    [lang]: e.target.value,
+                                  }))}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </div>
+                )}
+
+                {/* Описание */}
+                <div className="sm:col-span-2 space-y-2">
+                  <Label htmlFor="description">{t('description')}</Label>
+                  <Textarea
+                    id="description"
+                    placeholder={t('description')}
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+
+                {/* Цена */}
+                <div className="space-y-2">
+                  <Label htmlFor="price">{t('price')}</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    placeholder={t('price')}
+                    value={form.price || ''}
+                    onChange={(e) => setForm({ ...form, price: +e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* Изображение */}
+                <div className="space-y-2">
+                  <Label htmlFor="image">{t('imageUrl')}</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="image"
+                      placeholder="https://..."
+                      value={form.image}
+                      onChange={(e) => setForm({ ...form, image: e.target.value })}
+                    />
+                    <Button type="button" variant="outline" onClick={openCloudinaryWidget} className="gap-2 shrink-0">
+                      <ImagePlus className="w-4 h-4" />
+                      {t('upload')}
+                    </Button>
+                  </div>
+                </div>
+
+                {form.image && (
+                  <div className="sm:col-span-2 space-y-2">
+                    <Label>{t('preview')}</Label>
+                    <img
+                      src={form.image}
+                      alt={t('preview')}
+                      className="h-40 w-40 object-cover rounded-lg border shadow-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Переводы блюда */}
+                <div className="sm:col-span-2">
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value="dish-translations" className="border rounded-lg px-3">
+                      <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                        <div className="flex items-center gap-2">
+                          <Languages className="w-4 h-4 text-muted-foreground" />
+                          {t('dishTranslations')}
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-2 pb-3">
+                        <div className="grid sm:grid-cols-3 gap-4">
+                          {availableLangs.map(lang => (
+                            <div key={lang} className="bg-muted/20 p-3 rounded-lg space-y-2">
+                              <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
+                              <Input
+                                placeholder={t('translations.name')}
+                                value={translations[lang]?.name || ''}
+                                onChange={(e) => setTranslations(prev => ({
+                                  ...prev,
+                                  [lang]: { ...prev[lang], name: e.target.value },
+                                }))}
+                              />
+                              <Textarea
+                                placeholder={t('translations.description')}
+                                value={translations[lang]?.description || ''}
+                                onChange={(e) => setTranslations(prev => ({
+                                  ...prev,
+                                  [lang]: { ...prev[lang], description: e.target.value },
+                                }))}
+                                rows={2}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex justify-end gap-3">
+                {editingId && (
+                  <Button type="button" variant="ghost" onClick={resetForm}>
+                    {t('cancel')}
+                  </Button>
+                )}
+                <Button type="submit" className="gap-2">
+                  <Save className="w-4 h-4" />
+                  {editingId ? t('save') : t('add')}
+                </Button>
+              </div>
+            </CardContent>
+          </form>
+        </Card>
       )}
 
       {items.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-surface-card rounded-2xl border border-dashed border-border">
-          <p className="text-text-secondary">{t('empty')}</p>
-        </div>
+        <Card className="border-dashed border-2 bg-muted/20">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <UtensilsCrossed className="w-8 h-8 text-muted-foreground/40 mb-2" />
+            <p className="text-muted-foreground">{t('empty')}</p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => (

@@ -149,8 +149,8 @@
     "menuManager": {
       "loading": "Menü wird geladen...",
       "title": "Menü von «{clientName}»",
-      "addDish": "+ Gericht hinzufügen",
-      "close": "✕ Schließen",
+      "addDish": "Gericht hinzufügen",
+      "close": "Schließen",
       "empty": "Menü ist leer. Fügen Sie das erste Gericht hinzu.",
       "name": "Gerichtsname",
       "category": "Kategorie",

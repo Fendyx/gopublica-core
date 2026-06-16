@@ -149,8 +149,8 @@
     "menuManager": {
       "loading": "Ładowanie menu...",
       "title": "Menu restauracji «{clientName}»",
-      "addDish": "+ Dodaj danie",
-      "close": "✕ Zamknij",
+      "addDish": "Dodaj danie",
+      "close": "Zamknij",
       "empty": "Menu jest puste. Dodaj pierwsze danie.",
       "name": "Nazwa dania",
       "category": "Kategoria",

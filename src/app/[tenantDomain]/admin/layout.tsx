@@ -18,9 +18,11 @@ import {
   Settings,
   LogOut,
   Store,
-  ChartLine
+  ChartLine,
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 const DEFAULT_LOCALE = 'pl';
 
@@ -94,42 +96,52 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   ];
 
   return (
-    <div className="flex min-h-screen bg-zinc-50">
-      <aside className="w-64 bg-white border-r border-zinc-200 flex flex-col">
-        <div className="p-4 border-b border-zinc-200">
-          <h2 className="font-bold text-lg">{tenant?.clientName ?? ''}</h2>
-          <p className="text-xs text-zinc-500">{t('siteManagement')}</p>
+    <div className="flex min-h-screen bg-background">
+      {/* Сайдбар */}
+      <aside className="w-64 bg-card border-r border-border flex flex-col">
+        <div className="p-4">
+          <h2 className="font-bold text-lg text-foreground">{tenant?.clientName ?? ''}</h2>
+          <p className="text-xs text-muted-foreground">{t('siteManagement')}</p>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${
-                pathname === item.href
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-zinc-600 hover:bg-zinc-100'
-              }`}
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
+        <Separator />
+        <nav className="flex-1 p-3 space-y-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                  isActive
+                    ? 'bg-accent text-accent-foreground font-medium'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                }`}
+              >
+                <item.icon size={18} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
-        <div className="p-4 border-t border-zinc-200 space-y-3">
+        <Separator />
+        <div className="p-3 space-y-2">
           <AdminLanguageSwitcher currentLocale={locale} onChange={onLocaleChange} />
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => {
               localStorage.removeItem('saas_token');
               router.push('/admin/login');
             }}
-            className="w-full text-left text-sm text-zinc-500 hover:text-red-600 flex items-center gap-2"
+            className="w-full justify-start text-muted-foreground hover:text-destructive"
           >
-            <LogOut size={16} />
+            <LogOut size={16} className="mr-2" />
             {t('logout')}
-          </button>
+          </Button>
         </div>
       </aside>
+
+      {/* Основной контент */}
       <main className="flex-1 p-6">
         <div className="flex justify-end mb-4">
           <AdminBranchSwitcher />

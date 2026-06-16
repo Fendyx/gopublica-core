@@ -3,6 +3,40 @@ import { useEffect, useState } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Globe,
+  Volume2,
+  Bell,
+  Languages,
+  Banknote,
+  Search,
+  Save,
+  CheckCircle2,
+} from 'lucide-react';
 
 export default function SettingsPageContent() {
   const t = useTranslations('admin.settingsPage');
@@ -115,179 +149,285 @@ export default function SettingsPageContent() {
   };
 
   if (branchLoading || loading) {
-    return <div className="flex items-center justify-center py-20 text-sm text-[var(--color-text-tertiary)]">{t('loading')}</div>;
+    return <div className="flex items-center justify-center py-20 text-muted-foreground">{t('loading')}</div>;
   }
 
   if (!selectedBranch) {
     return <div className="text-center py-20">Выберите филиал в переключателе справа вверху</div>;
   }
 
-  const labelCls = 'block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 uppercase tracking-wide';
-  const inputCls = 'w-full bg-[var(--color-surface-page)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-lg px-3 py-2.5 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 placeholder:text-[var(--color-text-tertiary)]';
-  const selectCls = 'bg-[var(--color-surface-page)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-lg px-3 py-2.5 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 w-full max-w-xs';
-  const sectionTitleCls = 'text-xs font-semibold uppercase tracking-widest text-[var(--color-text-tertiary)] mb-4';
-
   return (
-    <div className="max-w-2xl">
-      <div className="mb-4 text-sm text-gray-500">
-        Настройки для филиала: <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
+    <div className="max-w-2xl space-y-6">
+      <div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <MapPin className="w-4 h-4" />
+          Настройки для филиала: <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
+        </div>
+        <h2 className="text-2xl font-bold">{t('title')}</h2>
       </div>
-      
-      <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-6">{t('title')}</h2>
 
-      <form onSubmit={handleSubmit} className="bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-2xl shadow-[var(--shadow-card)] divide-y divide-[var(--color-border)]">
-        {/* контактная секция */}
-        <div className="p-6 space-y-4">
-          <p className={sectionTitleCls}>{t('contactSection')}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>{t('phone')}</label>
-              <input type="text" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>{t('email')}</label>
-              <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className={inputCls} />
-            </div>
-          </div>
-          <div>
-            <label className={labelCls}>{t('address')}</label>
-            <input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputCls} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>{t('hours')}</label>
-              <input type="text" value={form.hours} onChange={e => setForm({ ...form, hours: e.target.value })} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>{t('googleMapsUrl')}</label>
-              <input type="text" value={form.googleMapsUrl} onChange={e => setForm({ ...form, googleMapsUrl: e.target.value })} className={inputCls} />
-            </div>
-          </div>
-          {/* переводы часов */}
-          <details className="group border border-[var(--color-border)] rounded-xl bg-[var(--color-surface-page)] overflow-hidden">
-            <summary className="cursor-pointer p-3 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-2 list-none [&::-webkit-details-marker]:hidden">
-              <svg className="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              {t('hoursTranslations')}
-            </summary>
-            <div className="px-4 pb-4 grid sm:grid-cols-3 gap-3">
-              {availableLangs.map(lang => (
-                <div key={lang}>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)] mb-1">{lang}</p>
-                  <input type="text" placeholder={`${t('hours')} (${lang})`} value={hoursI18n[lang] || ''} onChange={e => setHoursI18n(prev => ({ ...prev, [lang]: e.target.value }))} className={inputCls} />
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            {/* Контактная секция */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('contactSection')}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('phone')}
+                  </Label>
+                  <Input id="phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
                 </div>
-              ))}
-            </div>
-          </details>
-        </div>
-
-        {/* уведомления */}
-        <div className="p-6 space-y-4">
-          <p className={sectionTitleCls}>{t('notifications.title')}</p>
-          <div className="space-y-3">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <span className="relative inline-flex">
-                <input type="checkbox" checked={notifications.booking.sound} onChange={e => setNotifications({ ...notifications, booking: { ...notifications.booking, sound: e.target.checked } })} className="peer sr-only" />
-                <span className="h-5 w-9 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-page)] transition peer-checked:bg-[var(--color-primary)] peer-checked:border-[var(--color-primary)]" />
-                <span className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-[var(--color-text-tertiary)] transition peer-checked:translate-x-4 peer-checked:bg-white" />
-              </span>
-              <span className="text-sm text-[var(--color-text-primary)]">{t('notifications.sound')}</span>
-            </label>
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <span className="relative inline-flex">
-                <input type="checkbox" checked={notifications.booking.message} onChange={e => setNotifications({ ...notifications, booking: { ...notifications.booking, message: e.target.checked } })} className="peer sr-only" />
-                <span className="h-5 w-9 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-page)] transition peer-checked:bg-[var(--color-primary)] peer-checked:border-[var(--color-primary)]" />
-                <span className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-[var(--color-text-tertiary)] transition peer-checked:translate-x-4 peer-checked:bg-white" />
-              </span>
-              <span className="text-sm text-[var(--color-text-primary)]">{t('notifications.message')}</span>
-            </label>
-            <div className="pt-1">
-              <label className={labelCls}>{t('notifications.melody')}</label>
-              <div className="flex items-center gap-2">
-                <select value={notifications.booking.soundFile} onChange={e => setNotifications({ ...notifications, booking: { ...notifications.booking, soundFile: e.target.value } })} className={selectCls}>
-                  <option value="">{t('notifications.default')}</option>
-                  <option value="/sounds/1.mp3">{t('notifications.melody1')}</option>
-                  <option value="custom">{t('notifications.customUrl')}</option>
-                </select>
-                <button type="button" onClick={() => { const src = notifications.booking.soundFile && notifications.booking.soundFile !== 'custom' ? notifications.booking.soundFile : '/sounds/default.mp3'; new Audio(src).play() }} className="shrink-0 text-xs font-medium text-[var(--color-primary)] border border-[var(--color-primary)]/30 rounded-lg px-3 py-2.5 hover:bg-[var(--color-primary)]/5 transition">{t('notifications.listen')}</button>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('email')}
+                  </Label>
+                  <Input id="email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                </div>
               </div>
-              {notifications.booking.soundFile === 'custom' && (
-                <input type="text" placeholder={t('notifications.customUrl')} onChange={e => setNotifications({ ...notifications, booking: { ...notifications.booking, soundFile: e.target.value } })} className={`${inputCls} mt-2`} />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* локализация */}
-        <div className="p-6">
-          <p className={sectionTitleCls}>{t('localisationSection')}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>{t('primaryLanguage')}</label>
-              <select value={primaryLanguage} onChange={e => setPrimaryLanguage(e.target.value)} className={selectCls}>
-                <option value="pl">Polski</option>
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
-                <option value="ru">Русский</option>
-                <option value="es">Español</option>
-                <option value="ua">Українська</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>{t('primaryCurrency')}</label>
-              <select value={primaryCurrency} onChange={e => setPrimaryCurrency(e.target.value)} className={selectCls}>
-                <option value="PLN">PLN (zł)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="USD">USD ($)</option>
-                <option value="UAH">UAH (₴)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="CZK">CZK (Kč)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* SEO переводы */}
-        <div className="p-6 space-y-4">
-          <p className={sectionTitleCls}>{t('seoTranslations')}</p>
-          <details className="group border border-[var(--color-border)] rounded-xl bg-[var(--color-surface-page)] overflow-hidden">
-            <summary className="cursor-pointer p-3 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-2 list-none [&::-webkit-details-marker]:hidden">
-              <svg className="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              {t('seoTitleLabel')}
-            </summary>
-            <div className="px-4 pb-4 grid sm:grid-cols-3 gap-3">
-              {availableLangs.map(lang => (
-                <div key={lang}>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)] mb-1">{lang}</p>
-                  <input type="text" placeholder={`${t('seoTitleLabel')} (${lang})`} value={seoTitleI18n[lang] || ''} onChange={e => setSeoTitleI18n(prev => ({ ...prev, [lang]: e.target.value }))} className={inputCls} />
+              <div className="space-y-2">
+                <Label htmlFor="address" className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+                  {t('address')}
+                </Label>
+                <Input id="address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="hours" className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('hours')}
+                  </Label>
+                  <Input id="hours" value={form.hours} onChange={e => setForm({ ...form, hours: e.target.value })} />
                 </div>
-              ))}
-            </div>
-          </details>
-          <details className="group border border-[var(--color-border)] rounded-xl bg-[var(--color-surface-page)] overflow-hidden">
-            <summary className="cursor-pointer p-3 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-2 list-none [&::-webkit-details-marker]:hidden">
-              <svg className="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              {t('seoDescriptionLabel')}
-            </summary>
-            <div className="px-4 pb-4 grid sm:grid-cols-3 gap-3">
-              {availableLangs.map(lang => (
-                <div key={lang}>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)] mb-1">{lang}</p>
-                  <textarea placeholder={`${t('seoDescriptionLabel')} (${lang})`} value={seoDescriptionI18n[lang] || ''} onChange={e => setSeoDescriptionI18n(prev => ({ ...prev, [lang]: e.target.value }))} className={inputCls} rows={2} />
+                <div className="space-y-2">
+                  <Label htmlFor="googleMaps" className="flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('googleMapsUrl')}
+                  </Label>
+                  <Input id="googleMaps" value={form.googleMapsUrl} onChange={e => setForm({ ...form, googleMapsUrl: e.target.value })} />
                 </div>
-              ))}
-            </div>
-          </details>
-        </div>
+              </div>
 
-        <div className="px-6 py-4 flex items-center justify-between bg-[var(--color-surface-hover)]/40 rounded-b-2xl">
-          <button type="submit" className="px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-[var(--color-primary)] hover:brightness-110 active:brightness-95 transition">{t('save')}</button>
-          {saved && (
-            <span className="flex items-center gap-1.5 text-sm text-emerald-600 animate-in fade-in duration-300">
-              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-              {t('saved')}
-            </span>
-          )}
-        </div>
+              {/* Переводы часов */}
+              <Accordion type="single" collapsible>
+                <AccordionItem value="hours-translations" className="border rounded-lg px-3">
+                  <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <Languages className="w-4 h-4 text-muted-foreground" />
+                      {t('hoursTranslations')}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2 pb-3">
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      {availableLangs.map(lang => (
+                        <div key={lang} className="space-y-1.5">
+                          <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
+                          <Input
+                            placeholder={`${t('hours')} (${lang})`}
+                            value={hoursI18n[lang] || ''}
+                            onChange={e => setHoursI18n(prev => ({ ...prev, [lang]: e.target.value }))}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+
+            <Separator />
+
+            {/* Уведомления */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('notifications.title')}</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="notif-sound" className="flex items-center gap-2 cursor-pointer">
+                    <Volume2 className="w-4 h-4 text-muted-foreground" />
+                    {t('notifications.sound')}
+                  </Label>
+                  <Switch
+                    id="notif-sound"
+                    checked={notifications.booking.sound}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, booking: { ...notifications.booking, sound: checked } })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="notif-message" className="flex items-center gap-2 cursor-pointer">
+                    <Bell className="w-4 h-4 text-muted-foreground" />
+                    {t('notifications.message')}
+                  </Label>
+                  <Switch
+                    id="notif-message"
+                    checked={notifications.booking.message}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, booking: { ...notifications.booking, message: checked } })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('notifications.melody')}</Label>
+                  <div className="flex gap-2">
+                    <Select
+                      value={notifications.booking.soundFile}
+                      onValueChange={(value) => setNotifications({ ...notifications, booking: { ...notifications.booking, soundFile: value } })}
+                    >
+                      <SelectTrigger className="w-full max-w-xs">
+                        <SelectValue placeholder={t('notifications.default')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">{t('notifications.default')}</SelectItem>
+                        <SelectItem value="/sounds/1.mp3">{t('notifications.melody1')}</SelectItem>
+                        <SelectItem value="custom">{t('notifications.customUrl')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const src = notifications.booking.soundFile && notifications.booking.soundFile !== 'custom'
+                          ? notifications.booking.soundFile
+                          : '/sounds/default.mp3';
+                        new Audio(src).play();
+                      }}
+                    >
+                      <Volume2 className="w-4 h-4 mr-1" />
+                      {t('notifications.listen')}
+                    </Button>
+                  </div>
+                  {notifications.booking.soundFile === 'custom' && (
+                    <Input
+                      placeholder={t('notifications.customUrl')}
+                      value={notifications.booking.soundFile}
+                      onChange={(e) => setNotifications({ ...notifications, booking: { ...notifications.booking, soundFile: e.target.value } })}
+                      className="mt-2"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Локализация */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('localisationSection')}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <Languages className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('primaryLanguage')}
+                  </Label>
+                  <Select value={primaryLanguage} onValueChange={setPrimaryLanguage}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pl">Polski</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="de">Deutsch</SelectItem>
+                      <SelectItem value="ru">Русский</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                      <SelectItem value="ua">Українська</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <Banknote className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('primaryCurrency')}
+                  </Label>
+                  <Select value={primaryCurrency} onValueChange={setPrimaryCurrency}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PLN">PLN (zł)</SelectItem>
+                      <SelectItem value="EUR">EUR (€)</SelectItem>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="UAH">UAH (₴)</SelectItem>
+                      <SelectItem value="GBP">GBP (£)</SelectItem>
+                      <SelectItem value="CZK">CZK (Kč)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* SEO */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('seoTranslations')}</h3>
+              <Accordion type="multiple" className="space-y-2">
+                <AccordionItem value="seo-title" className="border rounded-lg px-3">
+                  <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-muted-foreground" />
+                      {t('seoTitleLabel')}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2 pb-3">
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      {availableLangs.map(lang => (
+                        <div key={lang} className="space-y-1.5">
+                          <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
+                          <Input
+                            placeholder={`${t('seoTitleLabel')} (${lang})`}
+                            value={seoTitleI18n[lang] || ''}
+                            onChange={e => setSeoTitleI18n(prev => ({ ...prev, [lang]: e.target.value }))}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="seo-description" className="border rounded-lg px-3">
+                  <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-muted-foreground" />
+                      {t('seoDescriptionLabel')}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2 pb-3">
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      {availableLangs.map(lang => (
+                        <div key={lang} className="space-y-1.5">
+                          <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
+                          <Textarea
+                            placeholder={`${t('seoDescriptionLabel')} (${lang})`}
+                            value={seoDescriptionI18n[lang] || ''}
+                            onChange={e => setSeoDescriptionI18n(prev => ({ ...prev, [lang]: e.target.value }))}
+                            rows={2}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </CardContent>
+
+          <Separator />
+
+          <div className="flex items-center justify-between p-6 bg-muted/30 rounded-b-xl">
+            <Button type="submit" className="gap-2">
+              <Save className="w-4 h-4" />
+              {t('save')}
+            </Button>
+            {saved && (
+              <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                <CheckCircle2 className="w-4 h-4" />
+                {t('saved')}
+              </span>
+            )}
+          </div>
+        </Card>
       </form>
     </div>
   );

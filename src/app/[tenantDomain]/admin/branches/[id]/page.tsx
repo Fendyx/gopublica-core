@@ -3,6 +3,17 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { ArrowLeft, Save, Loader2, Clock } from 'lucide-react';
 
 export default function BranchFormPage() {
   const t = useTranslations('admin.branchesForm');
@@ -93,63 +104,127 @@ export default function BranchFormPage() {
     }
   };
 
-  if (loading) return <div className="text-center py-10">{t('loading')}</div>;
-
-  const inputClass = "w-full border border-border bg-surface-page text-text-primary rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
-  const labelClass = "block text-sm font-medium text-text-secondary mb-1";
+  if (loading)
+    return <div className="text-center py-10 text-muted-foreground">{t('loading')}</div>;
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-semibold text-text-primary mb-6">
-        {isNew ? t('createTitle') : t('editTitle')}
-      </h2>
-      <form onSubmit={handleSubmit} className="bg-surface-card rounded-2xl shadow-card border border-border p-6 space-y-5">
-        <div>
-          <label className={labelClass}>{t('name')} *</label>
-          <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>{t('city')}</label>
-          <input type="text" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>{t('address')}</label>
-          <input type="text" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>{t('phone')}</label>
-          <input type="text" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>{t('email')}</label>
-          <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className={inputClass} />
-        </div>
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={() => router.push('/admin/branches')}>
+          <ArrowLeft size={18} />
+        </Button>
+        <h2 className="text-2xl font-bold">
+          {isNew ? t('createTitle') : t('editTitle')}
+        </h2>
+      </div>
 
-        <details className="group border border-border rounded-lg p-3">
-          <summary className="cursor-pointer text-sm font-medium text-text-secondary">{t('workingHours')}</summary>
-          <div className="mt-3 space-y-2">
-            {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => (
-              <div key={day} className="flex items-center gap-2">
-                <span className="w-16 text-sm capitalize">{day}</span>
-                <input
-                  type="text" placeholder="09:00-22:00"
-                  value={form.workingHours[day] || ''}
-                  onChange={e => setForm({ ...form, workingHours: { ...form.workingHours, [day]: e.target.value } })}
-                  className={`${inputClass} flex-1`}
-                />
-              </div>
-            ))}
-          </div>
-        </details>
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <CardContent className="p-6 space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="name">{t('name')} *</Label>
+              <Input
+                id="name"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <button type="button" onClick={() => router.push('/admin/branches')} className="px-5 py-2 rounded-lg border border-border text-text-secondary hover:bg-surface-hover">
-            {t('cancel')}
-          </button>
-          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg bg-primary text-white font-medium hover:opacity-90 disabled:opacity-50">
-            {saving ? t('saving') : t('save')}
-          </button>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="city">{t('city')}</Label>
+              <Input
+                id="city"
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address">{t('address')}</Label>
+              <Input
+                id="address"
+                value={form.address}
+                onChange={(e) => setForm({ ...form, address: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">{t('phone')}</Label>
+              <Input
+                id="phone"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">{t('email')}</Label>
+              <Input
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </div>
+
+            <Accordion type="single" collapsible>
+              <AccordionItem value="working-hours" className="border rounded-lg px-3">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    {t('workingHours')}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-2 pb-3">
+                  <div className="space-y-3">
+                    {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((day) => (
+                      <div key={day} className="flex items-center gap-3">
+                        <Label className="w-16 text-sm capitalize">{day}</Label>
+                        <Input
+                          placeholder="09:00-22:00"
+                          value={form.workingHours[day] || ''}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              workingHours: {
+                                ...form.workingHours,
+                                [day]: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/admin/branches')}
+              >
+                {t('cancel')}
+              </Button>
+              <Button type="submit" disabled={saving} className="gap-2">
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {t('saving')}
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    {t('save')}
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
     </div>
   );

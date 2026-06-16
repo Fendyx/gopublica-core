@@ -3,7 +3,17 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, MapPin, Phone, Mail, Building2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 type Branch = {
   _id: string;
@@ -62,58 +72,73 @@ export default function BranchesPage() {
     }
   };
 
-  if (loading || contextLoading) return <div className="text-center py-10">{t('loading')}</div>;
+  if (loading || contextLoading)
+    return <div className="text-center py-10 text-muted-foreground">{t('loading')}</div>;
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-text-primary">{t('title')}</h2>
-        <button
-          onClick={() => router.push('/admin/branches/new')}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90"
-        >
+    <div className="max-w-5xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-primary" />
+          {t('title')}
+        </h2>
+        <Button onClick={() => router.push('/admin/branches/new')} className="gap-2">
           <Plus size={16} /> {t('addBranch')}
-        </button>
+        </Button>
       </div>
 
       {localBranches.length === 0 ? (
-        <div className="text-center py-16 bg-surface-card rounded-2xl border border-dashed border-border">
-          <p className="text-text-secondary">{t('empty')}</p>
-        </div>
+        <Card className="border-dashed border-2 bg-muted/20">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <MapPin className="w-8 h-8 text-muted-foreground/40 mb-2" />
+            <p className="text-muted-foreground">{t('empty')}</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="bg-surface-card rounded-2xl shadow-card border border-border overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-surface-page border-b border-border">
-              <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-text-tertiary uppercase">{t('name')}</th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-tertiary uppercase">{t('city')}</th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-tertiary uppercase">{t('address')}</th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-tertiary uppercase">{t('phone')}</th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-tertiary uppercase">{t('actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-light">
-              {localBranches.map((branch) => (
-                <tr key={branch._id} className="hover:bg-surface-hover transition-colors">
-                  <td className="px-6 py-4 font-medium text-text-primary">{branch.name}</td>
-                  <td className="px-6 py-4 text-text-secondary">{branch.city || '—'}</td>
-                  <td className="px-6 py-4 text-text-secondary">{branch.address || '—'}</td>
-                  <td className="px-6 py-4 text-text-secondary">{branch.phone || '—'}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button onClick={() => router.push(`/admin/branches/${branch._id}`)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50">
-                        <Pencil size={16} />
-                      </button>
-                      <button onClick={() => handleDelete(branch._id)} className="p-1.5 rounded-lg text-red-600 hover:bg-red-50">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[200px]">{t('name')}</TableHead>
+                  <TableHead>{t('city')}</TableHead>
+                  <TableHead>{t('address')}</TableHead>
+                  <TableHead>{t('phone')}</TableHead>
+                  <TableHead className="text-right">{t('actions')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {localBranches.map((branch) => (
+                  <TableRow key={branch._id}>
+                    <TableCell className="font-medium">{branch.name}</TableCell>
+                    <TableCell>{branch.city || '—'}</TableCell>
+                    <TableCell>{branch.address || '—'}</TableCell>
+                    <TableCell>{branch.phone || '—'}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => router.push(`/admin/branches/${branch._id}`)}
+                        >
+                          <Pencil size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleDelete(branch._id)}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

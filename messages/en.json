@@ -149,8 +149,8 @@
     "menuManager": {
       "loading": "Loading menu...",
       "title": "Menu of «{clientName}»",
-      "addDish": "+ Add dish",
-      "close": "✕ Close",
+      "addDish": "Add dish",
+      "close": "Close",
       "empty": "Menu is empty. Add first dish.",
       "name": "Dish name",
       "category": "Category",

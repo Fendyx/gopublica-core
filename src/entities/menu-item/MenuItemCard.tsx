@@ -3,6 +3,8 @@ import type { MenuItem } from '@/entities/menu-item/types';
 import { getLocalizedName, getLocalizedDescription } from '@/shared/lib/localization';
 import { useBranch } from '@/entities/branch/BranchContext';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
+import { useTenant } from '@/entities/tenant/TenantContext';
+import { useCartStore } from '@/shared/store/cartStore';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -35,8 +37,10 @@ export default function MenuItemCard({
   onDelete,
   locale,
 }: MenuItemCardProps) {
+  const tenant = useTenant();
   const { selectedBranch, branches } = useBranch();
   const { primaryLanguage, primaryCurrency, loading: settingsLoading } = useBranchSettings();
+  const addItem = useCartStore((s) => s.addItem);
   const showBranchBadge = branches.length > 1 && selectedBranch;
 
   if (settingsLoading) {
@@ -49,6 +53,15 @@ export default function MenuItemCard({
   const displayDescription = locale && primaryLanguage
     ? getLocalizedDescription(item, locale, primaryLanguage)
     : item.description;
+
+  const handleAddToCart = () => {
+    addItem({
+      menuItemId: item._id!,
+      name: displayName,
+      price: item.price,
+      quantity: 1,
+    });
+  };
 
   if (layout === 'list') {
     return (
@@ -71,7 +84,20 @@ export default function MenuItemCard({
 
           <div className="flex items-center justify-between pt-2 border-t border-border-light">
             <Price value={item.price} currency={primaryCurrency} />
-            {mode === 'admin' && <AdminActions onEdit={() => onEdit?.(item)} onDelete={() => onDelete?.(item._id!)} />}
+            <div className="flex items-center gap-2">
+              {mode === 'public' && tenant?.features?.hasOnlineOrdering && (
+                <button
+                  onClick={handleAddToCart}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary-dark transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h12M7 13h12M16 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM8 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                  </svg>
+                  В корзину
+                </button>
+              )}
+              {mode === 'admin' && <AdminActions onEdit={() => onEdit?.(item)} onDelete={() => onDelete?.(item._id!)} />}
+            </div>
           </div>
 
           {showBranchBadge && (
@@ -84,6 +110,7 @@ export default function MenuItemCard({
     );
   }
 
+  // Grid layout
   return (
     <article className="group flex flex-col bg-surface-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-dropdown">
       <div className="relative w-full aspect-[4/3] overflow-hidden bg-surface-hover">
@@ -107,7 +134,20 @@ export default function MenuItemCard({
 
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-border-light">
           <Price value={item.price} currency={primaryCurrency} />
-          {mode === 'admin' && <AdminActions onEdit={() => onEdit?.(item)} onDelete={() => onDelete?.(item._id!)} hidden />}
+          <div className="flex items-center gap-2">
+            {mode === 'public' && tenant?.features?.hasOnlineOrdering && (
+              <button
+                onClick={handleAddToCart}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary-dark transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h12M7 13h12M16 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM8 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                </svg>
+                В корзину
+              </button>
+            )}
+            {mode === 'admin' && <AdminActions onEdit={() => onEdit?.(item)} onDelete={() => onDelete?.(item._id!)} hidden />}
+          </div>
         </div>
 
         {showBranchBadge && (
