@@ -58,6 +58,7 @@ export function TenantProvider({
             hasClickCollect: data.features?.hasClickCollect ?? false,
             hasGallery: data.features?.hasGallery ?? true,
             hasOnlineOrdering: data.features?.hasOnlineOrdering ?? false,
+            hasJobApplications: data.features?.hasJobApplications ?? false,
           },
           contact: {
             phone: data.phone ?? '',

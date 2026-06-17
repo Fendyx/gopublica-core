@@ -5,6 +5,8 @@ import { useBranch } from '@/entities/branch/BranchContext';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useCartStore } from '@/shared/store/cartStore';
+import { useTranslations } from 'next-intl'
+import { MapPin } from 'lucide-react'
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -42,6 +44,7 @@ export default function MenuItemCard({
   const { primaryLanguage, primaryCurrency, loading: settingsLoading } = useBranchSettings();
   const addItem = useCartStore((s) => s.addItem);
   const showBranchBadge = branches.length > 1 && selectedBranch;
+  const t = useTranslations('menu')
 
   if (settingsLoading) {
     return <div className="h-48 bg-surface-hover animate-pulse rounded-2xl" />;
@@ -93,7 +96,7 @@ export default function MenuItemCard({
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h12M7 13h12M16 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM8 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
                   </svg>
-                  В корзину
+                  {t('addToCart')}
                 </button>
               )}
               {mode === 'admin' && <AdminActions onEdit={() => onEdit?.(item)} onDelete={() => onDelete?.(item._id!)} />}
@@ -102,7 +105,8 @@ export default function MenuItemCard({
 
           {showBranchBadge && (
             <div className="mt-1 text-[10px] text-gray-400 flex items-center gap-1">
-              📍 {selectedBranch.city} · {selectedBranch.name}
+              <MapPin className="w-3 h-3" />
+              {selectedBranch.city} · {selectedBranch.name}
             </div>
           )}
         </div>
@@ -143,7 +147,7 @@ export default function MenuItemCard({
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h12M7 13h12M16 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM8 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
                 </svg>
-                В корзину
+                {t('addToCart')}
               </button>
             )}
             {mode === 'admin' && <AdminActions onEdit={() => onEdit?.(item)} onDelete={() => onDelete?.(item._id!)} hidden />}
@@ -152,7 +156,8 @@ export default function MenuItemCard({
 
         {showBranchBadge && (
           <div className="mt-1 text-[10px] text-gray-400 flex items-center gap-1">
-            📍 {selectedBranch.city} · {selectedBranch.name}
+            <MapPin className="w-3 h-3" />
+            {selectedBranch.city} · {selectedBranch.name}
           </div>
         )}
       </div>

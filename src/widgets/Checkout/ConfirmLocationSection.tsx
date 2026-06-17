@@ -1,53 +1,142 @@
-import { Store, Truck, MapPin, User, Phone, Mail } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+'use client';
 
-export default function ConfirmLocationSection({ 
-  fulfillmentType, setFulfillmentType, address, setAddress, deliveryInstructions, setDeliveryInstructions, customer, setCustomer 
-}: any) {
+import { Store, Truck, MapPin, User, Phone, Mail, MessageSquare } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+interface ConfirmLocationSectionProps {
+  fulfillmentType: 'pickup' | 'delivery';
+  setFulfillmentType: (type: 'pickup' | 'delivery') => void;
+  address: { street: string; city: string; zip: string; lat: number; lng: number };
+  setAddress: (addr: any) => void;
+  deliveryInstructions: string;
+  setDeliveryInstructions: (val: string) => void;
+  customer: { name: string; phone: string; email: string };
+  setCustomer: (cust: any) => void;
+}
+
+export default function ConfirmLocationSection({
+  fulfillmentType,
+  setFulfillmentType,
+  address,
+  setAddress,
+  deliveryInstructions,
+  setDeliveryInstructions,
+  customer,
+  setCustomer,
+}: ConfirmLocationSectionProps) {
+  const t = useTranslations('checkout');
+
   return (
-    <div className="bg-surface-card rounded-2xl shadow-card p-6 border border-border">
-      <h2 className="text-xl font-semibold mb-6">2. Confirm Location & Contact</h2>
-      
-      {/* Тоггл Доставка / Самовывоз */}
+    <section>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('fulfillmentMethod')}</h2>
+
+      {/* Тоггл самовывоз / доставка */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <button
           type="button"
           onClick={() => setFulfillmentType('pickup')}
-          className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-medium transition-all ${fulfillmentType === 'pickup' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-text-secondary hover:border-border-light'}`}
+          className={`flex items-center justify-center gap-2 p-4 rounded-xl border text-sm font-medium transition-colors ${
+            fulfillmentType === 'pickup'
+              ? 'border-primary bg-primary/5 text-primary'
+              : 'border-gray-200 text-gray-600 hover:border-gray-300'
+          }`}
         >
-          <Store size={20} /> Самовывоз
+          <Store size={18} />
+          {t('pickup')}
         </button>
         <button
           type="button"
           onClick={() => setFulfillmentType('delivery')}
-          className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 font-medium transition-all ${fulfillmentType === 'delivery' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-text-secondary hover:border-border-light'}`}
+          className={`flex items-center justify-center gap-2 p-4 rounded-xl border text-sm font-medium transition-colors ${
+            fulfillmentType === 'delivery'
+              ? 'border-primary bg-primary/5 text-primary'
+              : 'border-gray-200 text-gray-600 hover:border-gray-300'
+          }`}
         >
-          <Truck size={20} /> Доставка
+          <Truck size={18} />
+          {t('delivery')}
         </button>
       </div>
 
-      {/* Адрес доставки (анимированный) */}
-      <AnimatePresence>
-        {fulfillmentType === 'delivery' && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-3 overflow-hidden mb-6">
-            <div className="relative">
-              <MapPin size={16} className="absolute left-3 top-3 text-text-tertiary" />
-              <input required className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-surface-page" placeholder="Улица" value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
-            </div>
-            {/* ... остальные инпуты города, индекса и комментариев из твоего кода ... */}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Контакты */}
-      <div className="space-y-3 pt-6 border-t border-border-light">
-        <h3 className="text-sm font-medium text-text-secondary mb-2">Контактные данные</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input required className="w-full px-4 py-3 rounded-xl border border-border bg-surface-page" placeholder="Имя" value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} />
-          <input required className="w-full px-4 py-3 rounded-xl border border-border bg-surface-page" placeholder="Телефон" value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
+      {/* Адрес доставки */}
+      {fulfillmentType === 'delivery' && (
+        <div className="space-y-3 mb-6">
+          <div className="relative">
+            <MapPin size={16} className="absolute left-3 top-3.5 text-gray-400" />
+            <input
+              required
+              placeholder={t('street')}
+              value={address.street}
+              onChange={(e) => setAddress({ ...address, street: e.target.value })}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              required
+              placeholder={t('city')}
+              value={address.city}
+              onChange={(e) => setAddress({ ...address, city: e.target.value })}
+              className="px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            />
+            <input
+              required
+              placeholder={t('zip')}
+              value={address.zip}
+              onChange={(e) => setAddress({ ...address, zip: e.target.value })}
+              className="px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            />
+          </div>
+          <div className="relative">
+            <MessageSquare size={16} className="absolute left-3 top-3.5 text-gray-400" />
+            <textarea
+              rows={2}
+              placeholder={t('courierInstructions')}
+              value={deliveryInstructions}
+              onChange={(e) => setDeliveryInstructions(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow resize-none"
+            />
+          </div>
         </div>
-        <input required type="email" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-page" placeholder="Email" value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} />
+      )}
+
+      {/* Контактные данные */}
+      <div className="border-t border-gray-100 pt-6">
+        <h3 className="text-sm font-medium text-gray-500 mb-4">{t('contactInfo')}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div className="relative">
+            <User size={16} className="absolute left-3 top-3.5 text-gray-400" />
+            <input
+              required
+              placeholder={t('name')}
+              value={customer.name}
+              onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            />
+          </div>
+          <div className="relative">
+            <Phone size={16} className="absolute left-3 top-3.5 text-gray-400" />
+            <input
+              required
+              placeholder={t('phone')}
+              value={customer.phone}
+              onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            />
+          </div>
+        </div>
+        <div className="relative">
+          <Mail size={16} className="absolute left-3 top-3.5 text-gray-400" />
+          <input
+            required
+            type="email"
+            placeholder={t('email')}
+            value={customer.email}
+            onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+          />
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

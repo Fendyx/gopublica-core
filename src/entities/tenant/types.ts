@@ -17,6 +17,7 @@ export type Features = {
   hasClickCollect: boolean
   hasGallery: boolean
   hasOnlineOrdering: boolean
+  hasJobApplications?: boolean;
 }
 
 // Контакты клиента

@@ -1,5 +1,8 @@
+'use client';
+
 import { Clock, Calendar } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface DeliveryTimeSectionProps {
   scheduledFor: Date | null;
@@ -7,63 +10,65 @@ interface DeliveryTimeSectionProps {
 }
 
 export default function DeliveryTimeSection({ scheduledFor, setScheduledFor }: DeliveryTimeSectionProps) {
-  // Локальный стейт, чтобы понимать, выбран ли режим "Как можно скорее"
+  const t = useTranslations('checkout');
   const [isAsap, setIsAsap] = useState(!scheduledFor);
 
   const handleAsapClick = () => {
     setIsAsap(true);
-    setScheduledFor(null); // Сбрасываем дату в оркестраторе
+    setScheduledFor(null);
   };
 
   return (
-    <div className="bg-surface-card rounded-2xl shadow-card p-6 border border-border">
-      <h2 className="text-xl font-semibold mb-6">1. Время получения</h2>
+    <section>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('deliveryTime')}</h2>
 
-      {/* Кнопки выбора режима */}
-      <div className="flex gap-3 mb-4">
+      <div className="flex gap-3">
         <button
           type="button"
           onClick={handleAsapClick}
-          className={`flex-1 p-3 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-2 ${
-            isAsap 
-              ? 'border-primary bg-primary/10 text-primary' 
-              : 'border-border text-text-secondary hover:border-border-light'
+          className={`flex-1 px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${
+            isAsap
+              ? 'border-primary bg-primary/5 text-primary'
+              : 'border-gray-200 text-gray-600 hover:border-gray-300'
           }`}
         >
-          <Clock size={18} />
-          Как можно скорее
+          <span className="flex items-center justify-center gap-2">
+            <Clock size={16} />
+            {t('asap')}
+          </span>
         </button>
-        
+
         <button
           type="button"
           onClick={() => setIsAsap(false)}
-          className={`flex-1 p-3 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-2 ${
-            !isAsap 
-              ? 'border-primary bg-primary/10 text-primary' 
-              : 'border-border text-text-secondary hover:border-border-light'
+          className={`flex-1 px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${
+            !isAsap
+              ? 'border-primary bg-primary/5 text-primary'
+              : 'border-gray-200 text-gray-600 hover:border-gray-300'
           }`}
         >
-          <Calendar size={18} />
-          Запланировать
+          <span className="flex items-center justify-center gap-2">
+            <Calendar size={16} />
+            {t('schedule')}
+          </span>
         </button>
       </div>
 
-      {/* Инпут для выбора конкретного времени (показываем только если не ASAP) */}
       {!isAsap && (
-        <div className="animate-in fade-in zoom-in-95 duration-200 mt-4">
-          <label className="block text-sm font-medium text-text-secondary mb-2">
-            Выберите дату и время
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-600 mb-2">
+            {t('selectDateTime')}
           </label>
           <input
-            required={!isAsap} // Делаем обязательным только если выбрали "Запланировать"
+            required
             type="datetime-local"
-            className="w-full px-4 py-3 rounded-xl border border-border bg-surface-page text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
             onChange={(e) =>
               setScheduledFor(e.target.value ? new Date(e.target.value) : null)
             }
           />
         </div>
       )}
-    </div>
+    </section>
   );
 }

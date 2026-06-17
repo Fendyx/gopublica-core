@@ -13,7 +13,8 @@
   "menu": {
     "title": "Unsere Speisekarte",
     "all": "Alle Gerichte",
-    "emptyCategory": "Keine Gerichte in dieser Kategorie."
+    "emptyCategory": "Keine Gerichte in dieser Kategorie.",
+    "addToCart": "In den Warenkorb"
   },
   "booking": {
     "title": "Tisch reservieren",
@@ -77,6 +78,7 @@
     "reservations": "Reservierungen",
     "gopublica": "Gopublica",
     "settings": "Einstellungen",
+    "jobs": "Bewerbungen",
     "logout": "Abmelden",
     "loading": "Laden...",
     "siteManagement": "Website-Verwaltung",
@@ -241,6 +243,88 @@
       "empty": "Keine Neuigkeiten",
       "emptyDesc": "Hier erscheinen Nachrichten und Benachrichtigungen von Ihrem Dienstleister.",
       "expires": "Gültig bis:"
+    },
+    "jobsSettings": {
+      "title": "Bewerbungsformular-Einstellungen",
+      "subtitle": "Felder, Sortierung und Übersetzungen verwalten",
+      "save": "Formular speichern",
+      "saving": "Speichern...",
+      "saveSuccess": "Einstellungen erfolgreich gespeichert!",
+      "saveError": "Fehler beim Speichern der Einstellungen",
+      "languageLabel": "Aktuelle Textbearbeitungssprache:",
+      "moduleStatus": "Modulstatus (Global)",
+      "moduleStatusDesc": "Karriereseite für Benutzer aktivieren oder deaktivieren",
+      "moduleEnabled": "Auf der Website aktiviert",
+      "moduleDisabled": "Deaktiviert",
+      "formTexts": "Formulartexte",
+      "formTitle": "Formulartitel",
+      "formDescription": "Formularbeschreibung",
+      "submitText": "Text der Senden-Schaltfläche",
+      "successText": "Erfolgsmeldung",
+      "notificationEmail": "Benachrichtigungs-E-Mail (Global)",
+      "fieldBuilder": "Feld-Builder",
+      "fieldBuilderDesc": "Struktur verwalten und zum Sortieren der Felder ziehen",
+      "selectFieldType": "Feldtyp auswählen",
+      "addField": "Neues Feld hinzufügen",
+      "fieldLabel": "Feldbezeichnung",
+      "fieldType": "Typ (Global)",
+      "fieldPlaceholder": "Platzhalter",
+      "requiredField": "Pflichtfeld",
+      "optionsComma": "Optionen (kommagetrennt)",
+      "fieldTypes": {
+        "text": "Text",
+        "email": "E-Mail",
+        "tel": "Telefon",
+        "textarea": "Textbereich",
+        "select": "Dropdown-Menü",
+        "radio": "Optionsfelder",
+        "checkbox": "Kontrollkästchen",
+        "file": "Datei-Upload"
+      },
+      "defaults": {
+        "newField": "Neues Feld",
+        "option1": "Option 1",
+        "placeholderText": "Übersetzung für Bezeichnung",
+        "placeholderInput": "Übersetzung für Platzhalter",
+        "placeholderOptions": "Option 1, Option 2"
+      }
+    },
+    "jobsPage": {
+      "title": "Bewerbungen",
+      "settingsBtn": "Formulareinstellungen",
+      "loading": "Wird geladen...",
+      "allStatuses": "Alle Status",
+      "empty": "Noch keine Bewerbungen",
+      "pageInfo": "Seite {current} von {total}",
+      "back": "Zurück",
+      "next": "Weiter",
+      "table": {
+        "date": "Datum",
+        "name": "Name",
+        "position": "Position",
+        "status": "Status",
+        "actions": "Aktionen",
+        "anonymous": "Anonym"
+      },
+      "statusLabels": {
+        "new": "Neu",
+        "viewed": "Angesehen",
+        "invited": "Eingeladen",
+        "rejected": "Abgelehnt",
+        "hired": "Eingestellt"
+      },
+      "detail": {
+  "loading": "Wird geladen...",
+  "notFound": "Bewerbung nicht gefunden",
+  "title": "Bewerbung #{id}",
+  "back": "Zurück",
+  "candidateData": "Bewerberdaten",
+  "resume": "Lebenslauf:",
+  "download": "Herunterladen",
+  "comment": "Kommentar:",
+  "noComment": "Kein Kommentar",
+  "submittedAt": "Eingereicht am:"
+}
     }
   },
   "notifications": {
@@ -260,5 +344,34 @@
     "sound_hint": "Klicken Sie irgendwo auf die Seite, um den Ton zu aktivieren",
     "subscribe_try_again": "Erneut versuchen",
     "subscribe_connecting": "Verbinden..."
-  }
+  },
+
+  "checkout": {
+  "yourOrder": "Deine Bestellung",
+  "subtotal": "Zwischensumme",
+  "delivery": "Lieferung",
+  "serviceFee": "Servicegebühr",
+  "total": "Gesamt",
+  "deliveryTime": "Lieferzeit",
+  "asap": "So bald wie möglich",
+  "schedule": "Planen",
+  "selectDateTime": "Datum und Uhrzeit wählen",
+  "fulfillmentMethod": "Liefermethode",
+  "pickup": "Abholung",
+  "street": "Straße",
+  "city": "Stadt",
+  "zip": "Postleitzahl",
+  "courierInstructions": "Anweisungen für den Kurier (optional)",
+  "contactInfo": "Kontaktinformationen",
+  "name": "Name",
+  "phone": "Telefon",
+  "email": "E-Mail",
+  "emptyCart": "Dein Warenkorb ist leer",
+  "goToMenu": "Zum Menü",
+  "checkout": "Zur Kasse",
+  "paymentMethod": "Zahlungsmethode",
+  "processing": "Wird verarbeitet...",
+  "payTotal": "{total} {currency} bezahlen",
+  "placeOrder": "Bestellung aufgeben"
+}
 }

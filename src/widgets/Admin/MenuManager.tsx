@@ -47,6 +47,7 @@ interface CategoryOption {
   key: string;
   name?: string;
   translations: Record<string, string>;
+  icon?: string;
 }
 
 export default function MenuManager({ token }: { token: string }) {
@@ -80,6 +81,7 @@ export default function MenuManager({ token }: { token: string }) {
   const { primaryLanguage, primaryCurrency, loading: settingsLoading } = useBranchSettings();
   const SUPPORTED_LANGUAGES = ['pl', 'en', 'de', 'ru', 'es', 'ua'];
   const availableLangs = useMemo(() => SUPPORTED_LANGUAGES.filter(lang => lang !== primaryLanguage), [primaryLanguage]);
+  const [customCategoryIcon, setCustomCategoryIcon] = useState('');
 
   const tenantId = tenant?.tenantId;
 
@@ -172,6 +174,7 @@ export default function MenuManager({ token }: { token: string }) {
     setShowSuggestions(false);
     setEditingId(null);
     setShowForm(false);
+    setCustomCategoryIcon('');
   };
 
   const updateCategoryFields = (key: string, isCustom: boolean, customName?: string) => {
@@ -231,6 +234,7 @@ export default function MenuManager({ token }: { token: string }) {
   };
 
   const getCategoryDisplayName = (cat: CategoryOption) => cat.translations?.[primaryLanguage] || cat.name || cat.key;
+  const getCategoryIcon = (cat: CategoryOption) => cat.icon || '🍽️';
 
   const searchCategories = async (query: string) => {
     if (query.length < 2) {
@@ -270,6 +274,7 @@ export default function MenuManager({ token }: { token: string }) {
             key: categoryKey,
             name: customCategoryName,
             translations: customCategoryTranslations,
+            icon: customCategoryIcon || '🍽️',
             branchId: selectedBranch?._id,
           }),
         });
@@ -381,7 +386,10 @@ export default function MenuManager({ token }: { token: string }) {
                     <SelectContent>
                       {categories.map(c => (
                         <SelectItem key={c.key} value={c.key}>
-                          {getCategoryDisplayName(c)}
+                          <span className="flex items-center gap-2">
+                            <span>{getCategoryIcon(c)}</span>
+                            <span>{getCategoryDisplayName(c)}</span>
+                          </span>
                         </SelectItem>
                       ))}
                       <Separator className="my-1" />
@@ -412,6 +420,18 @@ export default function MenuManager({ token }: { token: string }) {
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                         required
                       />
+
+                      <div className="space-y-2">
+                        <Label htmlFor="customCategoryIcon">Иконка (эмодзи)</Label>
+                        <Input
+                          id="customCategoryIcon"
+                          placeholder="🍔"
+                          value={customCategoryIcon}
+                          onChange={(e) => setCustomCategoryIcon(e.target.value)}
+                          className="w-24 text-center text-xl"
+                          maxLength={2}
+                        />
+                      </div>
                       {showSuggestions && (
                         <ul className="absolute z-20 w-full bg-card border border-border rounded-xl shadow-dropdown mt-1 max-h-48 overflow-y-auto overflow-hidden">
                           {categorySuggestions.map(cat => (
@@ -470,6 +490,7 @@ export default function MenuManager({ token }: { token: string }) {
                     </Accordion>
                   </div>
                 )}
+                
 
                 {/* Описание */}
                 <div className="sm:col-span-2 space-y-2">

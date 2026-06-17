@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useStripe, useElements, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { motion } from 'framer-motion';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Loader2, AlertCircle, Lock } from 'lucide-react';
+import { PaymentElement } from '@stripe/react-stripe-js';
+import { useTranslations } from 'next-intl';
 
 import { useCartStore } from '@/shared/store/cartStore';
 import { useTenant } from '@/entities/tenant/TenantContext';
@@ -18,14 +19,14 @@ import ConfirmLocationSection from './ConfirmLocationSection';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
-// Внутренний компонент, который находится внутри Elements (имеет доступ к stripe/elements)
 function CheckoutForm() {
   const { locale } = useParams<{ tenantDomain: string; locale: string }>();
   const stripe = useStripe();
   const elements = useElements();
   const tenant = useTenant();
   const { primaryCurrency } = useBranchSettings();
-  const { items, clearCart, getSubtotal } = useCartStore();
+  const { items, getSubtotal } = useCartStore();
+  const t = useTranslations('checkout');
 
   const subtotal = getSubtotal();
   const currencySymbol = primaryCurrency === 'PLN' ? 'zł' : primaryCurrency || '€';
@@ -43,7 +44,6 @@ function CheckoutForm() {
 
   const deliveryFee = fulfillmentType === 'delivery' ? 5 : 0;
 
-  // Оценка суммы
   useEffect(() => {
     if (subtotal <= 0) return setFees(null);
     const tenantId = tenant?.tenantId;
@@ -68,7 +68,6 @@ function CheckoutForm() {
     setLoading(true);
     setError(null);
 
-    // 1. Валидация и сбор данных с PaymentElement
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setError(submitError.message || 'Payment validation failed');
@@ -145,49 +144,51 @@ function CheckoutForm() {
     }
   };
 
-  // Заглушка при пустой корзине
   if (items.length === 0) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <ShoppingBag size={48} className="mx-auto text-text-tertiary mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Корзина пуста</h2>
-        <a href={`/${locale}/menu`} className="inline-block mt-6 px-6 py-3 bg-primary text-white rounded-xl">В меню</a>
+        <h2 className="text-xl font-semibold mb-2">{t('emptyCart')}</h2>
+        <a href={`/${locale}/menu`} className="inline-block mt-6 px-6 py-3 bg-primary text-white rounded-xl">
+          {t('goToMenu')}
+        </a>
       </div>
     );
   }
 
+  const payButtonText = fees
+    ? t('payTotal', { total: fees.total.toFixed(2), currency: currencySymbol })
+    : t('placeOrder');
+  const processingContent = (
+    <>
+      <Loader2 size={20} className="animate-spin" />
+      {t('processing')}
+    </>
+  );
+
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-3xl font-heading font-bold text-text-primary mb-8">Checkout</h1>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 pb-28 lg:pb-10">
+      <h1 className="text-3xl font-heading font-bold text-text-primary mb-8 lg:mb-10">{t('checkout')}</h1>
 
-      <motion.form
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        onSubmit={handleSubmit}
-        className="grid gap-10 lg:grid-cols-[1fr_420px] items-start"
-      >
-        <div className="space-y-6">
-          <DeliveryTimeSection scheduledFor={scheduledFor} setScheduledFor={setScheduledFor} />
-          <ConfirmLocationSection
-            fulfillmentType={fulfillmentType}
-            setFulfillmentType={setFulfillmentType}
-            address={address}
-            setAddress={setAddress}
-            deliveryInstructions={deliveryInstructions}
-            setDeliveryInstructions={setDeliveryInstructions}
-            customer={customer}
-            setCustomer={setCustomer}
-          />
-        </div>
+      <form onSubmit={handleSubmit}>
+        <div className="lg:grid lg:grid-cols-[1fr_400px] lg:gap-12">
+          {/* Левая колонка: время и контакты */}
+          <div className="space-y-8">
+            <DeliveryTimeSection scheduledFor={scheduledFor} setScheduledFor={setScheduledFor} />
+            <ConfirmLocationSection
+              fulfillmentType={fulfillmentType}
+              setFulfillmentType={setFulfillmentType}
+              address={address}
+              setAddress={setAddress}
+              deliveryInstructions={deliveryInstructions}
+              setDeliveryInstructions={setDeliveryInstructions}
+              customer={customer}
+              setCustomer={setCustomer}
+            />
+          </div>
 
-        <div className="lg:sticky lg:top-8">
-          {estimating || !fees ? (
-            <div className="bg-surface-card rounded-3xl p-8 animate-pulse space-y-4">
-              <div className="h-6 bg-surface-hover rounded w-1/2" />
-              <div className="h-4 bg-surface-hover rounded w-3/4" />
-              <div className="h-4 bg-surface-hover rounded w-2/3" />
-            </div>
-          ) : (
+          {/* Правая колонка (десктоп + мобильные) */}
+          <div className="mt-8 lg:mt-0 lg:col-start-2 lg:row-start-1 lg:row-span-3 flex flex-col gap-6">
             <OrderSummarySidebar
               items={items}
               subtotal={subtotal}
@@ -196,22 +197,46 @@ function CheckoutForm() {
               deliveryFee={deliveryFee}
               fulfillmentType={fulfillmentType}
               currencySymbol={currencySymbol}
-              loading={loading}
-              error={error}
-              stripeLoaded={!!stripe}
             />
-          )}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-500">{t('paymentMethod')}</h3>
+              <PaymentElement id="payment-element" options={{ layout: 'tabs' }} />
+              {error && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
+                  <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={!stripe || !fees || loading}
+              className="hidden lg:flex items-center justify-center gap-2 w-full bg-primary text-white py-3.5 rounded-xl font-semibold text-base shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {loading ? processingContent : fees ? <><Lock size={16} />{payButtonText}</> : t('placeOrder')}
+            </button>
+          </div>
         </div>
-      </motion.form>
+
+        {/* Мобильная фиксированная кнопка */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+          <button
+            type="submit"
+            disabled={!stripe || !fees || loading}
+            className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            {loading ? processingContent : payButtonText}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
 
-// Основной компонент: оборачивает в Elements с примерной суммой
-// (точная сумма списывается позже через clientSecret из /pay)
 export default function CheckoutLayout() {
   const { primaryCurrency } = useBranchSettings();
   const { items, getSubtotal } = useCartStore();
+  const t = useTranslations('checkout');
 
   const subtotal = getSubtotal();
 
@@ -219,7 +244,7 @@ export default function CheckoutLayout() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <ShoppingBag size={48} className="mx-auto text-text-tertiary mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Корзина пуста</h2>
+        <h2 className="text-xl font-semibold mb-2">{t('emptyCart')}</h2>
       </div>
     );
   }
@@ -230,8 +255,6 @@ export default function CheckoutLayout() {
       options={{
         mode: 'payment',
         currency: primaryCurrency?.toLowerCase() || 'pln',
-        // примерная сумма только для первичного рендера PaymentElement;
-        // реальная сумма списывается по clientSecret, полученному в /pay
         amount: Math.max(Math.round(subtotal * 100), 100),
       }}
     >

@@ -19,6 +19,7 @@ import {
   LogOut,
   Store,
   ChartLine,
+  FileText
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { Separator } from '@/components/ui/separator';
@@ -92,6 +93,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
     { href: '/admin/reservations', label: t('reservations'), icon: CalendarCheck },
     { href: '/admin/analytics', label: t('analytics'), icon: ChartLine },
     { href: '/admin/branches', label: t('branches'), icon: Store },
+    { href: '/admin/jobs', label: t('jobs'), icon: FileText },
     { href: '/admin/settings', label: t('settings'), icon: Settings },
   ];
 
@@ -111,11 +113,10 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                  isActive
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${isActive
                     ? 'bg-accent text-accent-foreground font-medium'
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                }`}
+                  }`}
               >
                 <item.icon size={18} />
                 <span>{item.label}</span>

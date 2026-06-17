@@ -6,6 +6,7 @@ import Footer from '@/widgets/Footer/Footer'
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith('/admin')
+  const isCheckoutPage = pathname.includes('/order/checkout')
 
   if (isAdmin) {
     return <>{children}</>
@@ -15,7 +16,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1 pt-16">{children}</main>
-      <Footer />
+      {!isCheckoutPage && <Footer />}
     </div>
   )
 }

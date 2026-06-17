@@ -13,7 +13,8 @@
   "menu": {
     "title": "Nasze menu",
     "all": "Wszystkie dania",
-    "emptyCategory": "Brak dań w tej kategorii."
+    "emptyCategory": "Brak dań w tej kategorii.",
+    "addToCart": "Dodaj do koszyka"
   },
   "booking": {
     "title": "Zarezerwuj stolik",
@@ -77,6 +78,7 @@
     "reservations": "Rezerwacje",
     "gopublica": "Gopublica",
     "settings": "Ustawienia",
+    "jobs": "Aplikacje o pracę",
     "logout": "Wyloguj się",
     "loading": "Ładowanie...",
     "siteManagement": "Zarządzanie stroną",
@@ -241,6 +243,88 @@
       "empty": "Brak wiadomości",
       "emptyDesc": "Tutaj będą pojawiać się wiadomości i powiadomienia od Twojego dostawcy usług.",
       "expires": "Ważne do:"
+    },
+    "jobsSettings": {
+      "title": "Ustawienia formularza aplikacyjnego",
+      "subtitle": "Zarządzaj polami, sortowaniem i tłumaczeniami",
+      "save": "Zapisz formularz",
+      "saving": "Zapisywanie...",
+      "saveSuccess": "Ustawienia zostały pomyślnie zapisane!",
+      "saveError": "Błąd podczas zapisywania ustawień",
+      "languageLabel": "Aktualny język edycji tekstu:",
+      "moduleStatus": "Status modułu (Globalny)",
+      "moduleStatusDesc": "Włącz lub wyłącz stronę Kariera dla użytkowników",
+      "moduleEnabled": "Włączony na stronie",
+      "moduleDisabled": "Wyłączony",
+      "formTexts": "Teksty formularza",
+      "formTitle": "Tytuł formularza",
+      "formDescription": "Opis formularza",
+      "submitText": "Tekst przycisku przesyłania",
+      "successText": "Komunikat o sukcesie",
+      "notificationEmail": "E-mail powiadomień (Globalny)",
+      "fieldBuilder": "Kreator pól",
+      "fieldBuilderDesc": "Zarządzaj strukturą i przeciągnij, aby posortować pola",
+      "selectFieldType": "Wybierz typ pola",
+      "addField": "Dodaj nowe pole",
+      "fieldLabel": "Etykieta pola",
+      "fieldType": "Typ (Globalny)",
+      "fieldPlaceholder": "Tekst zastępczy (Placeholder)",
+      "requiredField": "Pole wymagane",
+      "optionsComma": "Opcje (oddzielone przecinkami)",
+      "fieldTypes": {
+        "text": "Tekst",
+        "email": "E-mail",
+        "tel": "Telefon",
+        "textarea": "Obszar tekstowy",
+        "select": "Lista rozwijana",
+        "radio": "Przyciski opcji",
+        "checkbox": "Pole wyboru",
+        "file": "Przesyłanie pliku"
+      },
+      "defaults": {
+        "newField": "Nowe pole",
+        "option1": "Opcja 1",
+        "placeholderText": "Tłumaczenie etykiety",
+        "placeholderInput": "Tłumaczenie tekstu zastępczego",
+        "placeholderOptions": "Opcja 1, Opcja 2"
+      }
+    },
+    "jobsPage": {
+      "title": "Aplikacje o pracę",
+      "settingsBtn": "Ustawienia formularza",
+      "loading": "Ładowanie...",
+      "allStatuses": "Wszystkie statusy",
+      "empty": "Brak aplikacji",
+      "pageInfo": "Strona {current} z {total}",
+      "back": "Wstecz",
+      "next": "Dalej",
+      "table": {
+        "date": "Data",
+        "name": "Imię i nazwisko",
+        "position": "Stanowisko",
+        "status": "Status",
+        "actions": "Akcje",
+        "anonymous": "Anonimowy"
+      },
+      "statusLabels": {
+        "new": "Nowy",
+        "viewed": "Wyświetlony",
+        "invited": "Zaproszony",
+        "rejected": "Odrzucony",
+        "hired": "Zatrudniony"
+      },
+      "detail": {
+  "loading": "Ładowanie...",
+  "notFound": "Nie znaleziono aplikacji",
+  "title": "Aplikacja #{id}",
+  "back": "Wstecz",
+  "candidateData": "Dane kandydata",
+  "resume": "CV:",
+  "download": "Pobierz",
+  "comment": "Komentarz:",
+  "noComment": "Brak komentarza",
+  "submittedAt": "Przesłano:"
+}
     }
   },
   "notifications": {
@@ -260,5 +344,34 @@
     "sound_hint": "Kliknij gdziekolwiek na stronie, aby włączyć dźwięk",
     "subscribe_try_again": "Spróbuj ponownie",
     "subscribe_connecting": "Łączenie..."
-  }
+  },
+
+  "checkout": {
+  "yourOrder": "Twoje zamówienie",
+  "subtotal": "Suma częściowa",
+  "delivery": "Dostawa",
+  "serviceFee": "Opłata serwisowa",
+  "total": "Razem",
+  "deliveryTime": "Czas dostawy",
+  "asap": "Jak najszybciej",
+  "schedule": "Zaplanuj",
+  "selectDateTime": "Wybierz datę i godzinę",
+  "fulfillmentMethod": "Sposób realizacji",
+  "pickup": "Odbiór osobisty",
+  "street": "Ulica",
+  "city": "Miasto",
+  "zip": "Kod pocztowy",
+  "courierInstructions": "Instrukcje dla kuriera (opcjonalnie)",
+  "contactInfo": "Dane kontaktowe",
+  "name": "Imię i nazwisko",
+  "phone": "Telefon",
+  "email": "E-mail",
+  "emptyCart": "Twój koszyk jest pusty",
+  "goToMenu": "Przejdź do menu",
+  "checkout": "Do kasy",
+  "paymentMethod": "Metoda płatności",
+  "processing": "Przetwarzanie...",
+  "payTotal": "Zapłać {total} {currency}",
+  "placeOrder": "Złóż zamówienie"
+}
 }

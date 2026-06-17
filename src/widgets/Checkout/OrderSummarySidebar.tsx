@@ -1,20 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Loader2, AlertCircle, Lock, CreditCard, ShieldCheck, BadgeCheck } from 'lucide-react';
-import { PaymentElement } from '@stripe/react-stripe-js';
+import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
-// ─── Хелперы для UI ────────────────────────────────────────────────────────
-function TrustBadge({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5 text-xs text-text-secondary font-medium">
-      <Icon size={14} className="shrink-0 text-green-600" />
-      {label}
-    </span>
-  );
-}
-
-// ─── Главный компонент ───────────────────────────────────────────────────────
 interface OrderSummarySidebarProps {
   items: any[];
   subtotal: number;
@@ -23,9 +11,6 @@ interface OrderSummarySidebarProps {
   deliveryFee: number;
   fulfillmentType: 'pickup' | 'delivery';
   currencySymbol: string;
-  loading: boolean;
-  error: string | null;
-  stripeLoaded: boolean;
 }
 
 export default function OrderSummarySidebar({
@@ -36,125 +21,56 @@ export default function OrderSummarySidebar({
   deliveryFee,
   fulfillmentType,
   currencySymbol,
-  loading,
-  error,
-  stripeLoaded,
 }: OrderSummarySidebarProps) {
-  const [paymentElementValid, setPaymentElementValid] = useState(false);
+  const t = useTranslations('checkout');
 
   return (
-    <div className="bg-surface-card rounded-3xl shadow-card border border-border p-6 lg:p-8">
-      {/* --- СПИСОК БЛЮД И СУММА --- */}
-      <h3 className="text-xl font-bold text-text-primary mb-6">Ваш заказ</h3>
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('yourOrder')}</h3>
 
-      <div className="space-y-4 mb-6 max-h-[30vh] overflow-y-auto pr-2">
+      <ul className="space-y-2 mb-5 max-h-48 overflow-y-auto pr-1">
         {items.map((item: any) => (
-          <div key={item.menuItemId} className="flex justify-between text-sm">
-            <span className="text-text-secondary">
-              <span className="inline-block min-w-[24px] text-center bg-surface-hover rounded text-text-primary font-medium px-1.5 py-0.5 mr-3 text-xs">
+          <li key={item.menuItemId} className="flex justify-between text-sm">
+            <span className="text-gray-600 truncate">
+              <span className="inline-block min-w-[20px] text-center bg-gray-100 rounded text-xs font-medium text-gray-700 mr-2">
                 {item.quantity}
               </span>
               {item.name}
             </span>
-            <span className="text-text-primary font-medium">
+            <span className="text-gray-800 font-medium ml-2">
               {(item.price * item.quantity).toFixed(2)} {currencySymbol}
             </span>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
 
-      <div className="space-y-3 text-sm text-text-secondary border-t border-border-light pt-5 mb-8">
+      <div className="space-y-2 text-sm text-gray-500 border-t border-gray-100 pt-4">
         <div className="flex justify-between">
-          <span>Сумма блюд</span>
-          <span className="font-medium text-text-primary">{subtotal.toFixed(2)} {currencySymbol}</span>
+          <span>{t('subtotal')}</span>
+          <span className="text-gray-800">{subtotal.toFixed(2)} {currencySymbol}</span>
         </div>
         {fulfillmentType === 'delivery' && (
           <div className="flex justify-between">
-            <span>Доставка</span>
-            <span className="font-medium text-text-primary">{deliveryFee.toFixed(2)} {currencySymbol}</span>
+            <span>{t('delivery')}</span>
+            <span className="text-gray-800">{deliveryFee.toFixed(2)} {currencySymbol}</span>
           </div>
         )}
-        <div className="flex justify-between items-center">
-          <span>Сервисный сбор</span>
+        <div className="flex justify-between">
+          <span>{t('serviceFee')}</span>
           {estimating ? (
             <Loader2 size={14} className="animate-spin" />
           ) : (
-            <span className="font-medium text-text-primary">
-              {fees?.serviceFee?.toFixed(2) || '—'} {currencySymbol}
-            </span>
+            <span className="text-gray-800">{fees?.serviceFee?.toFixed(2) || '—'} {currencySymbol}</span>
           )}
         </div>
-        <div className="flex justify-between font-extrabold text-xl text-text-primary pt-3 border-t border-border-light mt-3">
-          <span>Итого</span>
+        <div className="flex justify-between font-bold text-base text-gray-900 pt-3 border-t border-gray-100 mt-2">
+          <span>{t('total')}</span>
           {estimating ? (
-            <Loader2 size={20} className="animate-spin" />
+            <Loader2 size={18} className="animate-spin" />
           ) : (
-            <span className="text-primary">
-              {fees?.total?.toFixed(2) || '—'} {currencySymbol}
-            </span>
+            <span className="text-primary text-lg">{fees?.total?.toFixed(2) || '—'} {currencySymbol}</span>
           )}
         </div>
-      </div>
-
-      {/* --- БЛОК ОПЛАТЫ (PaymentElement) --- */}
-      <div className="space-y-4 mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <CreditCard size={14} className="text-text-tertiary" />
-          <span className="text-sm font-semibold text-text-primary">Способ оплаты</span>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface-page p-4 shadow-sm">
-          <PaymentElement
-            id="payment-element"
-            onChange={(event) => {
-              setPaymentElementValid(event.complete);
-            }}
-            options={{
-              layout: 'tabs', // или 'auto'
-              defaultValues: {
-                billingDetails: {
-                  name: '', // будет передано при подтверждении
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
-
-      {/* --- ОШИБКИ --- */}
-      {error && (
-        <div className="mb-6 flex items-start gap-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
-          <AlertCircle size={18} className="shrink-0 mt-0.5" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* --- КНОПКА --- */}
-      <button
-        type="submit"
-        disabled={!stripeLoaded || !fees || loading || !paymentElementValid}
-        className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-      >
-        <Lock size={18} />
-        {loading ? (
-          <>
-            <Loader2 size={20} className="animate-spin" />
-            Обработка...
-          </>
-        ) : fees ? (
-          `Оплатить ${fees.total.toFixed(2)} ${currencySymbol}`
-        ) : (
-          'Оформить заказ'
-        )}
-      </button>
-
-      {/* --- TRUST BADGES --- */}
-      <div className="mt-6 flex items-center justify-center gap-4 flex-wrap">
-        <TrustBadge icon={ShieldCheck} label="SSL Secured" />
-        <span className="text-border text-lg leading-none">·</span>
-        <TrustBadge icon={Lock} label="Powered by Stripe" />
-        <span className="text-border text-lg leading-none">·</span>
-        <TrustBadge icon={BadgeCheck} label="Safe Payment" />
       </div>
     </div>
   );

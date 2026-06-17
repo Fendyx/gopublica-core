@@ -13,7 +13,8 @@
   "menu": {
     "title": "Our menu",
     "all": "All dishes",
-    "emptyCategory": "No dishes in this category."
+    "emptyCategory": "No dishes in this category.",
+    "addToCart": "Add to cart"
   },
   "booking": {
     "title": "Reserve a Table",
@@ -77,6 +78,7 @@
     "reservations": "Reservations",
     "gopublica": "Gopublica",
     "settings": "Settings",
+    "jobs": "Job applications",
     "logout": "Log out",
     "loading": "Loading...",
     "siteManagement": "Site management",
@@ -241,6 +243,88 @@
       "empty": "No news yet",
       "emptyDesc": "News and notifications from your service provider will appear here.",
       "expires": "Valid until:"
+    },
+    "jobsSettings": {
+      "title": "Application Form Settings",
+      "subtitle": "Manage job fields, sorting, and translations",
+      "save": "Save form",
+      "saving": "Saving...",
+      "saveSuccess": "Settings successfully saved!",
+      "saveError": "Error saving settings",
+      "languageLabel": "Current text editing language:",
+      "moduleStatus": "Module Status (Global)",
+      "moduleStatusDesc": "Enable or disable the Careers page for users",
+      "moduleEnabled": "Enabled on site",
+      "moduleDisabled": "Disabled",
+      "formTexts": "Form Texts",
+      "formTitle": "Form Title",
+      "formDescription": "Form Description",
+      "submitText": "Submit Button Text",
+      "successText": "Success Message",
+      "notificationEmail": "Notification Email (Global)",
+      "fieldBuilder": "Field Builder",
+      "fieldBuilderDesc": "Manage structure and drag to sort fields",
+      "selectFieldType": "Select field type",
+      "addField": "Add new field",
+      "fieldLabel": "Field Label",
+      "fieldType": "Type (Global)",
+      "fieldPlaceholder": "Placeholder",
+      "requiredField": "Required field",
+      "optionsComma": "Options (comma-separated)",
+      "fieldTypes": {
+        "text": "Text",
+        "email": "Email",
+        "tel": "Phone",
+        "textarea": "Textarea",
+        "select": "Dropdown",
+        "radio": "Radio buttons",
+        "checkbox": "Checkbox",
+        "file": "File upload"
+      },
+      "defaults": {
+        "newField": "New Field",
+        "option1": "Option 1",
+        "placeholderText": "Translation for Label",
+        "placeholderInput": "Translation for Placeholder",
+        "placeholderOptions": "Option 1, Option 2"
+      }
+    },
+    "jobsPage": {
+      "title": "Job Applications",
+      "settingsBtn": "Form Settings",
+      "loading": "Loading...",
+      "allStatuses": "All statuses",
+      "empty": "No applications yet",
+      "pageInfo": "Page {current} of {total}",
+      "back": "Back",
+      "next": "Next",
+      "table": {
+        "date": "Date",
+        "name": "Name",
+        "position": "Position",
+        "status": "Status",
+        "actions": "Actions",
+        "anonymous": "Anonymous"
+      },
+      "statusLabels": {
+        "new": "New",
+        "viewed": "Viewed",
+        "invited": "Invited",
+        "rejected": "Rejected",
+        "hired": "Hired"
+      },
+      "detail": {
+        "loading": "Loading...",
+        "notFound": "Application not found",
+        "title": "Application #{id}",
+        "back": "Back",
+        "candidateData": "Candidate Data",
+        "resume": "Resume:",
+        "download": "Download",
+        "comment": "Comment:",
+        "noComment": "No comment",
+        "submittedAt": "Submitted at:"
+      }
     }
   },
   "notifications": {
@@ -260,5 +344,35 @@
     "sound_hint": "Click anywhere on the page to enable sound",
     "subscribe_try_again": "Try again",
     "subscribe_connecting": "Connecting..."
-  }
+  },
+
+  "checkout": {
+    "yourOrder": "Your order",
+    "subtotal": "Subtotal",
+    "delivery": "Delivery",
+    "serviceFee": "Service fee",
+    "total": "Total",
+    "deliveryTime": "Delivery time",
+    "asap": "As soon as possible",
+    "schedule": "Schedule",
+    "selectDateTime": "Select date and time",
+    "fulfillmentMethod": "Fulfillment method",
+    "pickup": "Pickup",
+    "delivery": "Delivery",
+    "street": "Street",
+    "city": "City",
+    "zip": "Postal code",
+    "courierInstructions": "Courier instructions (optional)",
+    "contactInfo": "Contact information",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "emptyCart": "Your cart is empty",
+    "goToMenu": "Go to menu",
+    "checkout": "Checkout",
+    "paymentMethod": "Payment method",
+    "processing": "Processing...",
+    "payTotal": "Pay {total} {currency}",
+    "placeOrder": "Place order"
+}
 }
