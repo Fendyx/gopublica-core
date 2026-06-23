@@ -1,39 +1,45 @@
 'use client'
-import { useTenantSettings } from '@/entities/tenant/useTenantSettings'
+import Link from 'next/link'
+import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale, useTranslations } from 'next-intl'
 
 export default function HeroImageBackground() {
   const tenant = useTenant()
-  const { settings } = useTenantSettings(tenant?.tenantId ?? '')
+  const { seoTitleI18n, seoDescriptionI18n, seoTitle, seoDescription } = useBranchSettings()
   const locale = useLocale()
   const t = useTranslations('hero')
+
+  const title = seoTitleI18n?.[locale] || seoTitle || tenant?.clientName
+  const description = seoDescriptionI18n?.[locale] || seoDescription || ''
+  
+  const bgImage = tenant?.theme?.heroBgImage || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1920&q=80'
 
   return (
     <section
       className="relative h-screen flex items-center justify-center bg-cover bg-center"
-      style={{ backgroundImage: `url(${tenant?.heroBgImage})` }}
+      style={{ backgroundImage: `url(${bgImage})` }}
     >
       <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 text-center text-white px-4 max-w-4xl">
         <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-          {settings?.seoTitle}
+          {title}
         </h1>
         <p className="text-lg lg:text-xl mb-10 opacity-90">
-          {settings?.seoDescription}
+          {description}
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
           {tenant?.features?.hasBooking && (
-            <a href="#booking" className="px-8 py-4 rounded-lg text-white font-medium text-lg transition-opacity hover:opacity-90" style={{ backgroundColor: 'var(--color-primary)' }}>
+            <Link href={`/${locale}/reservations`} className="px-8 py-4 rounded-lg text-white font-medium text-lg transition-opacity hover:opacity-90" style={{ backgroundColor: 'var(--color-primary)' }}>
               {t('booking')}
-            </a>
+            </Link>
           )}
           {tenant?.features?.hasMenu && (
-            <a href="#menu" className="px-8 py-4 rounded-lg font-medium text-lg border-2 transition-colors hover:bg-white/10" style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}>
+            <Link href={`/${locale}/menu`} className="px-8 py-4 rounded-lg font-medium text-lg border-2 transition-colors hover:bg-white/10" style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}>
               {t('menu')}
-            </a>
+            </Link>
           )}
         </div>
       </div>

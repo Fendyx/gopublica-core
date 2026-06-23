@@ -220,3 +220,19 @@ h1, h2, h3, h4, h5, h6 {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+.platform-ui {
+  /* Жестко задаем платформенные цвета */
+  --tenant-primary: #0f172a;   /* Slate 900 (Строгий темный) */
+  --tenant-accent: #1e293b;    /* Slate 800 */
+  
+  /* Отключаем ресторанные шрифты, используем системный sans-serif */
+  --font-heading: var(--font-sans), system-ui, sans-serif;
+  --font-body: var(--font-sans), system-ui, sans-serif;
+
+  /* Для темной темы в админке */
+  .dark & {
+    --tenant-primary: #f8fafc; /* Slate 50 */
+    --tenant-accent: #e2e8f0;  /* Slate 200 */
+  }
+}

@@ -52,6 +52,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const primary = tenant?.theme?.primary ?? '#ff0505';
   const accent = tenant?.theme?.accent ?? '#F1A208';
 
+  // НОВОЕ: Словарь для перевода строк из БД в CSS-значения
+  const radiusMap: Record<string, string> = {
+    none: '0px',
+    sm: '0.25rem',
+    md: '0.5rem',
+    lg: '0.625rem', // Дефолтное значение Shadcn
+    xl: '1rem',
+    '2xl': '1.5rem'
+  };
+  const tenantRadius = radiusMap[tenant?.theme?.radius || 'lg'] || radiusMap['lg'];
+
   return (
     <html
       lang="en"
@@ -59,6 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       style={{
         '--tenant-primary': primary,
         '--tenant-accent': accent,
+        '--radius': tenantRadius, // <--- ВОТ ОН, МАГИЧЕСКИЙ КЛЮЧ
       } as React.CSSProperties}
     >
       <body>

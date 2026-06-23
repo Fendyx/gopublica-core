@@ -1,15 +1,24 @@
 // src/entities/tenant/api.ts
 export interface TenantSettings {
   tenantId: string;
-  niche: 'food' | 'beauty' | 'auto';
+  niche: 'food' | 'beauty' | 'auto' | 'ecommerce';
+  primaryCurrency: string;
   theme: {
     primary: string;
     accent: string;
     fontHeading: string;
+    fontBody?: string;
     heroStyle: string;
-    heroVideoUrl: string;
-    menuStyle: string;
-    galleryStyle: string;
+    heroVideoUrl?: string;
+    heroPosterUrl?: string;
+    heroSliderImages?: string[];
+    heroBgImage?: string;
+    heroSplitImage?: string;
+    menuStyle?: string;
+    galleryStyle?: string;
+    ecommerceLayout?: 'grid-3' | 'grid-4' | 'carousel' | 'dynamic';
+    radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+    productCardVariant?: 'overlay' | 'action-bar' | 'minimal';
   };
   features: {
     hasMenu: boolean;
@@ -17,6 +26,8 @@ export interface TenantSettings {
     hasGallery: boolean;
     hasDelivery: boolean;
     hasClickCollect: boolean;
+    hasOnlineOrdering: boolean;
+    hasJobApplications?: boolean;
   };
   phone: string;
   address: string;
@@ -31,7 +42,7 @@ export async function getTenantByDomain(domain: string): Promise<TenantSettings 
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings/by-domain?domain=${domain}`,
-      { next: { revalidate: 60 } }
+      { cache: 'no-store' }
     );
     if (!res.ok) return null;
     return res.json();

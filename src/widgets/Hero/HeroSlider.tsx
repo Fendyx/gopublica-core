@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useTenantSettings } from '@/entities/tenant/useTenantSettings'
+import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -9,14 +9,21 @@ const INTERVAL = 4000
 
 export default function HeroSlider() {
   const tenant = useTenant()
-  const { settings } = useTenantSettings(tenant?.tenantId ?? '')
+  const { seoTitleI18n, seoDescriptionI18n, seoTitle, seoDescription } = useBranchSettings()
   const locale = useLocale()
   const t = useTranslations('hero')
-  const images = tenant?.heroSliderImages || []
+  
+  const images = tenant?.theme?.heroSliderImages?.length 
+    ? tenant.theme.heroSliderImages 
+    : ['https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1920&q=80']
+    
   const [current, setCurrent] = useState(0)
 
+  const title = seoTitleI18n?.[locale] || seoTitle || tenant?.clientName
+  const description = seoDescriptionI18n?.[locale] || seoDescription || ''
+
   useEffect(() => {
-    if (images.length === 0) return
+    if (images.length <= 1) return
     const timer = setInterval(() => {
       setCurrent(prev => (prev + 1) % images.length)
     }, INTERVAL)
@@ -40,10 +47,10 @@ export default function HeroSlider() {
 
       <div className="relative z-10 text-center text-white px-4 max-w-4xl">
         <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-          {settings?.seoTitle}
+          {title}
         </h1>
         <p className="text-lg lg:text-xl mb-10 opacity-90">
-          {settings?.seoDescription}
+          {description}
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">

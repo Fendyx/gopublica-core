@@ -1,21 +1,27 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { CartModifier } from '@/entities/menu-item/types';
 
 export interface CartItem {
+  uid: string; // Уникальный ID комбинации (menuItemId + модификаторы)
   menuItemId: string;
+  variantId?: string; // <-- добавлено для вариантов
   name: string;
-  price: number;
+  basePrice: number;
+  price: number; // Итоговая цена с учетом модификаторов
   quantity: number;
   notes?: string;
+  modifiers?: CartModifier[];
 }
 
 interface CartState {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (menuItemId: string) => void;
-  updateQuantity: (menuItemId: string, quantity: number) => void;
+  removeItem: (uid: string) => void;
+  updateQuantity: (uid: string, quantity: number) => void;
   clearCart: () => void;
   getSubtotal: () => number;
+  getTotalItems: () => number;
 }
 
 export const useCartStore = create<CartState>()(
@@ -24,11 +30,11 @@ export const useCartStore = create<CartState>()(
       items: [],
       addItem: (item) =>
         set((state) => {
-          const existing = state.items.find((i) => i.menuItemId === item.menuItemId);
+          const existing = state.items.find((i) => i.uid === item.uid);
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.menuItemId === item.menuItemId
+                i.uid === item.uid
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               ),
@@ -36,18 +42,19 @@ export const useCartStore = create<CartState>()(
           }
           return { items: [...state.items, item] };
         }),
-      removeItem: (menuItemId) =>
-        set((state) => ({ items: state.items.filter((i) => i.menuItemId !== menuItemId) })),
-      updateQuantity: (menuItemId, quantity) =>
+      removeItem: (uid) =>
+        set((state) => ({ items: state.items.filter((i) => i.uid !== uid) })),
+      updateQuantity: (uid, quantity) =>
         set((state) => ({
           items:
             quantity <= 0
-              ? state.items.filter((i) => i.menuItemId !== menuItemId)
-              : state.items.map((i) => (i.menuItemId === menuItemId ? { ...i, quantity } : i)),
+              ? state.items.filter((i) => i.uid !== uid)
+              : state.items.map((i) => (i.uid === uid ? { ...i, quantity } : i)),
         })),
       clearCart: () => set({ items: [] }),
       getSubtotal: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      getTotalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
-    { name: 'gp-cart' } // изолирован по домену, как ты и сказал
+    { name: 'gp-cart' }
   )
 );

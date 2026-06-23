@@ -12,6 +12,8 @@ interface ConfirmLocationSectionProps {
   setDeliveryInstructions: (val: string) => void;
   customer: { name: string; phone: string; email: string };
   setCustomer: (cust: any) => void;
+  isLoggedIn: boolean;
+  isEcommerce?: boolean; // <--- Новый пропс
 }
 
 export default function ConfirmLocationSection({
@@ -23,43 +25,49 @@ export default function ConfirmLocationSection({
   setDeliveryInstructions,
   customer,
   setCustomer,
+  isLoggedIn,
+  isEcommerce = false, // <--- По умолчанию false
 }: ConfirmLocationSectionProps) {
   const t = useTranslations('checkout');
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('fulfillmentMethod')}</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        {isEcommerce ? 'Адрес доставки' : t('fulfillmentMethod')}
+      </h2>
 
-      {/* Тоггл самовывоз / доставка */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <button
-          type="button"
-          onClick={() => setFulfillmentType('pickup')}
-          className={`flex items-center justify-center gap-2 p-4 rounded-xl border text-sm font-medium transition-colors ${
-            fulfillmentType === 'pickup'
-              ? 'border-primary bg-primary/5 text-primary'
-              : 'border-gray-200 text-gray-600 hover:border-gray-300'
-          }`}
-        >
-          <Store size={18} />
-          {t('pickup')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setFulfillmentType('delivery')}
-          className={`flex items-center justify-center gap-2 p-4 rounded-xl border text-sm font-medium transition-colors ${
-            fulfillmentType === 'delivery'
-              ? 'border-primary bg-primary/5 text-primary'
-              : 'border-gray-200 text-gray-600 hover:border-gray-300'
-          }`}
-        >
-          <Truck size={18} />
-          {t('delivery')}
-        </button>
-      </div>
+      {/* Тоггл самовывоз / доставка (показываем только для ресторанов) */}
+      {!isEcommerce && (
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            type="button"
+            onClick={() => setFulfillmentType('pickup')}
+            className={`flex items-center justify-center gap-2 p-4 rounded-xl border text-sm font-medium transition-colors ${
+              fulfillmentType === 'pickup'
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-gray-200 text-gray-600 hover:border-gray-300'
+            }`}
+          >
+            <Store size={18} />
+            {t('pickup')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setFulfillmentType('delivery')}
+            className={`flex items-center justify-center gap-2 p-4 rounded-xl border text-sm font-medium transition-colors ${
+              fulfillmentType === 'delivery'
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-gray-200 text-gray-600 hover:border-gray-300'
+            }`}
+          >
+            <Truck size={18} />
+            {t('delivery')}
+          </button>
+        </div>
+      )}
 
-      {/* Адрес доставки */}
-      {fulfillmentType === 'delivery' && (
+      {/* Адрес доставки (всегда показывается для E-commerce) */}
+      {(fulfillmentType === 'delivery' || isEcommerce) && (
         <div className="space-y-3 mb-6">
           <div className="relative">
             <MapPin size={16} className="absolute left-3 top-3.5 text-gray-400" />
@@ -133,7 +141,10 @@ export default function ConfirmLocationSection({
             placeholder={t('email')}
             value={customer.email}
             onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            disabled={isLoggedIn}
+            className={`w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow ${
+              isLoggedIn ? 'bg-gray-100 cursor-not-allowed text-gray-500' : 'bg-white'
+            }`}
           />
         </div>
       </div>

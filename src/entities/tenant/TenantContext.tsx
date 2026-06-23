@@ -41,15 +41,29 @@ export function TenantProvider({
         const data = await res.json()
 
         // Преобразуем плоский ответ бэка в структуру SiteConfig
+        // Преобразуем плоский ответ бэка в структуру SiteConfig
+                // Преобразуем плоский ответ бэка в структуру SiteConfig
         const config: SiteConfig = {
           clientName: data.restaurantName ?? data.name ?? '',
           tenantId: data.tenantId ?? tenantId,
+          niche: data.niche ?? 'food', // <--- ДОБАВИЛИ ЭТУ СТРОКУ
           theme: {
             primary: data.theme?.primary ?? '#ff0505',
             accent: data.theme?.accent ?? '#F1A208',
             fontHeading: data.theme?.fontHeading ?? 'playfair',
             fontBody: data.theme?.fontBody ?? 'inter',
             heroStyle: data.theme?.heroStyle ?? 'video',
+            heroVideoUrl: data.theme?.heroVideoUrl ?? '',
+            heroPosterUrl: data.theme?.heroPosterUrl ?? '',
+            heroSliderImages: data.theme?.heroSliderImages ?? [],
+            heroBgImage: data.theme?.heroBgImage ?? '',
+            heroSplitImage: data.theme?.heroSplitImage ?? '',
+            menuStyle: data.theme?.menuStyle ?? 'grid',
+            galleryStyle: data.theme?.galleryStyle ?? 'bento',
+            ecommerceLayout: data.theme?.ecommerceLayout ?? 'grid-3',
+            radius: data.theme?.radius ?? 'lg',
+            productCardVariant: data.theme?.productCardVariant ?? 'action-bar',
+            categoryBgColor: data.theme?.categoryBgColor ?? '',
           },
           features: {
             hasMenu: data.features?.hasMenu ?? true,
@@ -71,12 +85,6 @@ export function TenantProvider({
             title: data.seoTitle ?? '',
             description: data.seoDescription ?? '',
           },
-          menuStyle: data.theme?.menuStyle ?? 'grid',
-          galleryStyle: data.theme?.galleryStyle ?? 'bento',
-          heroVideoUrl: data.theme?.heroVideoUrl ?? '',
-          heroPosterUrl: data.theme?.heroPosterUrl ?? '',
-          heroSliderImages: data.theme?.heroSliderImages ?? [],
-          heroBgImage: data.theme?.heroBgImage ?? '',
         }
         setTenant(config)
       } catch (err: any) {

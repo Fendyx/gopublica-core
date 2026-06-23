@@ -19,7 +19,8 @@ import {
   LogOut,
   Store,
   ChartLine,
-  FileText
+  FileText,
+  Package // <--- ИМПОРТИРУЕМ ИКОНКУ
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { Separator } from '@/components/ui/separator';
@@ -84,11 +85,15 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const pathname = usePathname();
   const router = useRouter();
   const tenant = useTenant();
+  
+  const isEcommerce = tenant?.niche === 'ecommerce';
 
   const navItems = [
     { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
     { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
-    { href: '/admin/menu', label: t('menu'), icon: UtensilsCrossed },
+    // МЕНЯЕМ ЛОГИКУ ДЛЯ МЕНЮ/ТОВАРОВ:
+    { href: isEcommerce ? '/admin/ecommerce' : '/admin/menu', label: isEcommerce ? 'Catalog' : t('menu'), icon: isEcommerce ? Package : UtensilsCrossed },
+    { href: '/admin/orders', label: t('orders'), icon: FileText },
     { href: '/admin/gallery', label: t('gallery'), icon: ImageIcon },
     { href: '/admin/reservations', label: t('reservations'), icon: CalendarCheck },
     { href: '/admin/analytics', label: t('analytics'), icon: ChartLine },
@@ -98,8 +103,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   ];
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Сайдбар */}
+    <div className="platform-ui flex min-h-screen bg-background">
       <aside className="w-64 bg-card border-r border-border flex flex-col">
         <div className="p-4">
           <h2 className="font-bold text-lg text-foreground">{tenant?.clientName ?? ''}</h2>
@@ -113,10 +117,11 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${isActive
-                    ? 'bg-accent text-accent-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                  isActive
+                    ? 'bg-black/5 dark:bg-white/10 text-foreground font-medium backdrop-blur-sm shadow-sm'
+                    : 'text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground'
+                }`}
               >
                 <item.icon size={18} />
                 <span>{item.label}</span>
@@ -142,7 +147,6 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
         </div>
       </aside>
 
-      {/* Основной контент */}
       <main className="flex-1 p-6">
         <div className="flex justify-end mb-4">
           <AdminBranchSwitcher />

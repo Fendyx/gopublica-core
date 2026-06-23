@@ -20,10 +20,7 @@ interface Application {
 export default function JobApplicationDetailPage() {
   const params = useParams();
   const router = useRouter();
-  
-  // Подключаемся к уровню jobsPage
-  const t = useTranslations('admin.jobsPage'); 
-  
+  const t = useTranslations('admin.jobsPage'); // Подключаем переводы из admin.jobs
   const id = params.id as string;
   
   const [application, setApplication] = useState<Application | null>(null);
@@ -77,7 +74,6 @@ export default function JobApplicationDetailPage() {
     hired: 'default',
   };
 
-  // Обрати внимание: t('detail.loading')
   if (loading) return <div className="text-center py-10 font-medium text-gray-500">{t('detail.loading')}</div>;
   if (!application) return <div className="text-center py-10 font-medium text-red-500">{t('detail.notFound')}</div>;
 

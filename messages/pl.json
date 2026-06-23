@@ -237,6 +237,15 @@
         "listen": "Odsłuchaj"
       }
     },
+    "days": {
+      "monday": "Poniedziałek",
+      "tuesday": "Wtorek",
+      "wednesday": "Środa",
+      "thursday": "Czwartek",
+      "friday": "Piątek",
+      "saturday": "Sobota",
+      "sunday": "Niedziela"
+    },
     "gopublicaPage": {
       "loading": "Ładowanie wiadomości...",
       "title": "Aktualności od Gopublica",

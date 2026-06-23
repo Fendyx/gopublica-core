@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
-import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart } from 'lucide-react'
+import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart, User, LogIn } from 'lucide-react'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useCartStore } from '@/shared/store/cartStore'
 
@@ -15,6 +15,9 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const burgerRef = useRef<HTMLButtonElement>(null)
+
+  // Состояние авторизации
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   const {
     cities,
@@ -29,9 +32,15 @@ export default function Navbar() {
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false)
   const [branchDropdownOpen, setBranchDropdownOpen] = useState(false)
 
-  // Корзина
-  const cartItemsCount = useCartStore((s) => s.items.length)
+  // Корзина: Считаем сумму quantity, а не длину массива
+  const cartItemsCount = useCartStore((s) => s.items.reduce((acc, item) => acc + item.quantity, 0))
   const hasOnlineOrdering = tenant?.features?.hasOnlineOrdering ?? false
+
+  // Проверяем токен при загрузке
+  useEffect(() => {
+    const token = localStorage.getItem('customer_token')
+    setIsLoggedIn(!!token)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
@@ -57,9 +66,10 @@ export default function Navbar() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [isOpen])
 
-  const links = [
+    const links = [
     { href: `/${locale}`, label: t('home') },
-    ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/menu`, label: t('menu') }] : []),
+    // Меняем /menu на /catalog
+    ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/catalog`, label: t('menu') }] : []),
     ...(tenant?.features?.hasGallery ? [{ href: '#gallery', label: t('gallery') }] : []),
     { href: '#contact', label: t('contact') },
   ]
@@ -168,9 +178,30 @@ export default function Navbar() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden sm:block">
               <LanguageSwitcher />
+            </div>
+
+            {/* Профиль / Логин (Desktop) */}
+            <div className="hidden sm:flex items-center">
+              {isLoggedIn ? (
+                <Link
+                  href={`/${locale}/profile`}
+                  className="p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                  aria-label="Профиль"
+                >
+                  <User size={20} />
+                </Link>
+              ) : (
+                <Link
+                  href={`/${locale}/login`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                >
+                  <LogIn size={16} />
+                  {t('login')}
+                </Link>
+              )}
             </div>
 
             {/* Иконка корзины (только если включены онлайн-заказы) */}
@@ -272,6 +303,28 @@ export default function Navbar() {
             <div className="flex justify-center mb-2">
               <LanguageSwitcher />
             </div>
+
+            {/* Профиль / Логин (Mobile) */}
+            {isLoggedIn ? (
+              <Link 
+                href={`/${locale}/profile`} 
+                onClick={() => setIsOpen(false)} 
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium border border-border text-text-primary hover:bg-surface-hover transition-colors"
+              >
+                <User size={18} />
+                {t('profile')}
+              </Link>
+            ) : (
+              <Link 
+                href={`/${locale}/login`} 
+                onClick={() => setIsOpen(false)} 
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium border border-border text-text-primary hover:bg-surface-hover transition-colors"
+              >
+                <LogIn size={18} />
+                {t('login')}
+              </Link>
+            )}
+
             {hasBooking && (
               <Link href={`/${locale}/reservations`} onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium text-white shadow-sm transition-opacity hover:opacity-90" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <CalendarDays size={18} />

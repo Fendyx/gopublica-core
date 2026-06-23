@@ -4,14 +4,22 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useStripe, useElements, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { ShoppingBag, Loader2, AlertCircle, Lock } from 'lucide-react';
+import { ShoppingBag, Loader2, AlertCircle, Lock, User, CheckCircle2, LogOut } from 'lucide-react';
 import { PaymentElement } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
 
+// UI Components
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+
+// Logic
 import { useCartStore } from '@/shared/store/cartStore';
 import { useTenant } from '@/entities/tenant/TenantContext';
+import { useBranch } from '@/entities/branch/BranchContext';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 
+// Widgets
 import OrderSummarySidebar from './OrderSummarySidebar';
 import DeliveryTimeSection from './DeliveryTimeSection';
 import ConfirmLocationSection from './ConfirmLocationSection';
@@ -24,6 +32,7 @@ function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
   const tenant = useTenant();
+  const { selectedBranch } = useBranch();
   const { primaryCurrency } = useBranchSettings();
   const { items, getSubtotal } = useCartStore();
   const t = useTranslations('checkout');
@@ -31,11 +40,19 @@ function CheckoutForm() {
   const subtotal = getSubtotal();
   const currencySymbol = primaryCurrency === 'PLN' ? 'zł' : primaryCurrency || '€';
 
+  // Основные данные
   const [fulfillmentType, setFulfillmentType] = useState<'pickup' | 'delivery'>('pickup');
   const [scheduledFor, setScheduledFor] = useState<Date | null>(null);
   const [address, setAddress] = useState({ street: '', city: '', zip: '', lat: 0, lng: 0 });
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
   const [customer, setCustomer] = useState({ name: '', phone: '', email: '' });
+
+  // NEW: Auth State
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +60,39 @@ function CheckoutForm() {
   const [estimating, setEstimating] = useState(false);
 
   const deliveryFee = fulfillmentType === 'delivery' ? 5 : 0;
+
+  // Валидация создания аккаунта (только для гостей)
+  const isPasswordValid = password.length >= 6;
+  const isPasswordMatch = password === confirmPassword;
+  const isAccountCreationValid = 
+    isLoggedIn || !password || (isPasswordValid && isPasswordMatch && acceptTerms && acceptPrivacy);
+
+  // Проверка авторизации и подгрузка профиля
+  useEffect(() => {
+    const token = localStorage.getItem('customer_token');
+    if (token) {
+      setIsLoggedIn(true);
+      fetch(`${API_BASE}/api/public/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(data => {
+          setCustomer({
+            name: data.name || '',
+            phone: data.phone || '',
+            email: data.email || ''
+          });
+        })
+        .catch(() => {
+          // Если токен протух, просто выходим из режима авторизации
+          localStorage.removeItem('customer_token');
+          setIsLoggedIn(false);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     if (subtotal <= 0) return setFees(null);
@@ -61,9 +111,20 @@ function CheckoutForm() {
       .finally(() => setEstimating(false));
   }, [subtotal, deliveryFee, tenant?.tenantId]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('customer_token');
+    setIsLoggedIn(false);
+    setCustomer({ name: '', phone: '', email: '' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements || !fees) return;
+    
+    if (!isAccountCreationValid) {
+      setError('Проверьте правильность пароля и согласие с условиями.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -79,10 +140,20 @@ function CheckoutForm() {
       const tenantId = tenant?.tenantId;
       if (!tenantId) throw new Error('Tenant not loaded');
 
+      const token = localStorage.getItem('customer_token');
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'x-tenant-id': tenantId,
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const resOrder = await fetch(`${API_BASE}/api/orders/public`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
+        headers,
         body: JSON.stringify({
+          branchId: selectedBranch?._id,
           fulfillment: {
             type: fulfillmentType,
             scheduledFor: scheduledFor?.toISOString(),
@@ -93,12 +164,21 @@ function CheckoutForm() {
           items: items.map((i) => ({
             menuItemId: i.menuItemId,
             name: i.name,
+            basePrice: i.basePrice, // <--- Добавили
             price: i.price,
             quantity: i.quantity,
             notes: i.notes,
+            modifiers: i.modifiers, // <--- Добавили
           })),
           customer,
           locale,
+          // Отправляем данные для создания аккаунта ТОЛЬКО если пользователь гость и ввел пароль
+          password: !isLoggedIn ? (password || undefined) : undefined,
+          consents: !isLoggedIn && password ? {
+            terms: acceptTerms,
+            privacy: acceptPrivacy,
+            marketing: false
+          } : undefined
         }),
       });
 
@@ -167,14 +247,42 @@ function CheckoutForm() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 pb-28 lg:pb-10">
+    <div className="platform-ui max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 pb-28 lg:pb-10">
       <h1 className="text-3xl font-heading font-bold text-text-primary mb-8 lg:mb-10">{t('checkout')}</h1>
 
       <form onSubmit={handleSubmit}>
         <div className="lg:grid lg:grid-cols-[1fr_400px] lg:gap-12">
-          {/* Левая колонка: время и контакты */}
+          {/* Левая колонка: данные */}
           <div className="space-y-8">
-            <DeliveryTimeSection scheduledFor={scheduledFor} setScheduledFor={setScheduledFor} />
+            
+            {/* ИНФОРМЕР АВТОРИЗАЦИИ */}
+            {isLoggedIn ? (
+              <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="text-emerald-600 w-5 h-5 flex-shrink-0" />
+                  <div className="text-sm text-emerald-800">
+                    Вы оформляете заказ как <strong>{customer.email}</strong>. <br/>
+                    <span className="text-emerald-600 text-xs">Детали профиля заполнены автоматически.</span>
+                  </div>
+                </div>
+                <button type="button" onClick={handleLogout} className="text-xs text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1">
+                  <LogOut size={12} /> Выйти
+                </button>
+              </div>
+            ) : (
+              <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-center gap-3">
+                <User className="text-blue-600 w-5 h-5 flex-shrink-0" />
+                <div className="text-sm text-blue-800">
+                  Вы оформляете заказ как гость. <br/>
+                  <span className="text-blue-600 text-xs">Войдите в аккаунт или введите пароль ниже, чтобы создать профиль.</span>
+                </div>
+              </div>
+            )}
+            
+
+            {tenant?.niche !== 'ecommerce' && (
+                <DeliveryTimeSection scheduledFor={scheduledFor} setScheduledFor={setScheduledFor} />
+              )}
             <ConfirmLocationSection
               fulfillmentType={fulfillmentType}
               setFulfillmentType={setFulfillmentType}
@@ -184,10 +292,77 @@ function CheckoutForm() {
               setDeliveryInstructions={setDeliveryInstructions}
               customer={customer}
               setCustomer={setCustomer}
+              isLoggedIn={isLoggedIn}
+              isEcommerce={tenant?.niche === 'ecommerce'} // <--- Передаем флаг
             />
+
+            {/* БЛОК СОЗДАНИЯ АККАУНТА (ТОЛЬКО ДЛЯ ГОСТЕЙ) */}
+            {!isLoggedIn && (
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-5">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <User className="w-4 h-4 text-primary" />
+                  Создать аккаунт (опционально)
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Введите пароль, чтобы создать аккаунт и отслеживать статус заказов в будущем.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Пароль</Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Минимум 6 символов"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Повторите пароль</Label>
+                    <Input 
+                      id="confirmPassword" 
+                      type="password" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={password && !isPasswordMatch ? 'border-red-500' : ''}
+                    />
+                    {password && !isPasswordMatch && (
+                      <p className="text-xs text-red-500 mt-1">Пароли не совпадают</p>
+                    )}
+                  </div>
+                </div>
+
+                {password && (
+                  <div className="space-y-3 pt-2 border-t border-gray-200">
+                    <div className="flex items-start gap-3">
+                      <Checkbox 
+                        id="terms" 
+                        checked={acceptTerms}
+                        onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                      />
+                      <label htmlFor="terms" className="text-sm text-gray-600 leading-tight cursor-pointer select-none">
+                        Я согласен с <a href="#" className="text-primary underline hover:text-primary/80">Условиями использования</a>
+                      </label>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Checkbox 
+                        id="privacy" 
+                        checked={acceptPrivacy}
+                        onCheckedChange={(checked) => setAcceptPrivacy(checked as boolean)}
+                      />
+                      <label htmlFor="privacy" className="text-sm text-gray-600 leading-tight cursor-pointer select-none">
+                        Я согласен с <a href="#" className="text-primary underline hover:text-primary/80">Политикой конфиденциальности</a>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
 
-          {/* Правая колонка (десктоп + мобильные) */}
+          {/* Правая колонка (оплата и сайдбар) */}
           <div className="mt-8 lg:mt-0 lg:col-start-2 lg:row-start-1 lg:row-span-3 flex flex-col gap-6">
             <OrderSummarySidebar
               items={items}
@@ -210,7 +385,7 @@ function CheckoutForm() {
             </div>
             <button
               type="submit"
-              disabled={!stripe || !fees || loading}
+              disabled={!stripe || !fees || loading || !isAccountCreationValid}
               className="hidden lg:flex items-center justify-center gap-2 w-full bg-primary text-white py-3.5 rounded-xl font-semibold text-base shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {loading ? processingContent : fees ? <><Lock size={16} />{payButtonText}</> : t('placeOrder')}
@@ -222,7 +397,7 @@ function CheckoutForm() {
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
           <button
             type="submit"
-            disabled={!stripe || !fees || loading}
+            disabled={!stripe || !fees || loading || !isAccountCreationValid}
             className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? processingContent : payButtonText}

@@ -12,7 +12,7 @@ export default function MenuClient() {
   const [loading, setLoading] = useState(true)
 
   const tenantId = selectedBranch?.tenantId ?? tenant?.tenantId
-  const menuStyle = tenant?.menuStyle ?? 'grid'
+  const menuStyle = tenant?.theme?.menuStyle ?? 'grid'
 
   useEffect(() => {
     if (!selectedBranch || !tenantId) return

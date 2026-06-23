@@ -10,20 +10,22 @@ export default function HeroVideo() {
   const t = useTranslations('hero')
   const tenant = useTenant()
 
-  const title = seoTitleI18n?.[locale] || seoTitle || tenant?.seo?.title || tenant?.clientName
-  const description = seoDescriptionI18n?.[locale] || seoDescription || tenant?.seo?.description || ''
+  const title = seoTitleI18n?.[locale] || seoTitle || tenant?.clientName
+  const description = seoDescriptionI18n?.[locale] || seoDescription || ''
 
-  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>
+  if (loading) return <div className="h-screen flex items-center justify-center bg-zinc-900 text-white">Loading...</div>
+
+  const videoUrl = tenant?.theme?.heroVideoUrl
 
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      {tenant?.heroVideoUrl ? (
-  <video autoPlay muted loop playsInline poster={tenant?.heroPosterUrl} className="absolute inset-0 w-full h-full object-cover">
-    <source src={tenant.heroVideoUrl} type="video/mp4" />
-  </video>
-) : (
-  <div className="absolute inset-0 bg-gray-900" /> // или какой-то фолбэк
-)}
+      {videoUrl ? (
+        <video autoPlay muted loop playsInline poster={tenant?.theme?.heroPosterUrl} className="absolute inset-0 w-full h-full object-cover">
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+      ) : (
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${tenant?.theme?.heroPosterUrl || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1920&q=80'})` }} />
+      )}
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 text-center text-white px-4 max-w-4xl">
         <h1 className="text-4xl lg:text-6xl font-bold mb-6">{title}</h1>

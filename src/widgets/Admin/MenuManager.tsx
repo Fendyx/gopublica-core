@@ -2,11 +2,11 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import MenuItemCard from '@/entities/menu-item/MenuItemCard';
-import type { MenuItem } from '@/entities/menu-item/types';
+import type { MenuItem, MenuItemModifierGroup } from '@/entities/menu-item/types';
 import { useTranslations } from 'next-intl';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import { useBranch } from '@/entities/branch/BranchContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,16 +28,17 @@ import { Separator } from '@/components/ui/separator';
 import {
   Plus,
   X,
-  Upload,
   Save,
   Trash2,
-  Edit,
   MapPin,
   UtensilsCrossed,
-  ChevronDown,
   ImagePlus,
   Languages,
+  Settings2,
+  ChevronDown,
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'твой-cloud-name';
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'menu_photos';
@@ -78,10 +79,13 @@ export default function MenuManager({ token }: { token: string }) {
   const cloudinaryWidgetRef = useRef<any>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const { primaryLanguage, primaryCurrency, loading: settingsLoading } = useBranchSettings();
+  const { primaryLanguage, loading: settingsLoading } = useBranchSettings();
   const SUPPORTED_LANGUAGES = ['pl', 'en', 'de', 'ru', 'es', 'ua'];
   const availableLangs = useMemo(() => SUPPORTED_LANGUAGES.filter(lang => lang !== primaryLanguage), [primaryLanguage]);
+  
   const [customCategoryIcon, setCustomCategoryIcon] = useState('');
+  const [hasPersonalization, setHasPersonalization] = useState(false);
+  const [modifierGroups, setModifierGroups] = useState<MenuItemModifierGroup[]>([]);
 
   const tenantId = tenant?.tenantId;
 
@@ -105,25 +109,15 @@ export default function MenuManager({ token }: { token: string }) {
     try {
       let url = `${apiUrl}/api/saas/categories`;
       if (selectedBranch) url += `?branchId=${selectedBranch._id}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setCategories(data);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
-  useEffect(() => {
-    if (token) fetchCategories();
-  }, [token, selectedBranch, tenantId]);
+  useEffect(() => { if (token) fetchCategories(); }, [token, selectedBranch, tenantId]);
+  useEffect(() => { fetchItems(); }, [selectedBranch, tenantId]);
 
-  useEffect(() => {
-    fetchItems();
-  }, [selectedBranch, tenantId]);
-
-  // Cloudinary widget
   useEffect(() => {
     if (document.getElementById('cloudinary-widget-script')) {
       if ((window as any).cloudinary && !cloudinaryWidgetRef.current) initWidget();
@@ -175,6 +169,8 @@ export default function MenuManager({ token }: { token: string }) {
     setEditingId(null);
     setShowForm(false);
     setCustomCategoryIcon('');
+    setHasPersonalization(false);
+    setModifierGroups([]);
   };
 
   const updateCategoryFields = (key: string, isCustom: boolean, customName?: string) => {
@@ -195,6 +191,8 @@ export default function MenuManager({ token }: { token: string }) {
   };
 
   const handleEdit = (item: MenuItem) => {
+    setHasPersonalization(item.hasPersonalization || false);
+    setModifierGroups(item.modifierGroups || []);
     setEditingId(item._id || null);
     setForm({
       name: item.name,
@@ -223,37 +221,24 @@ export default function MenuManager({ token }: { token: string }) {
   const handleDelete = async (id: string) => {
     if (!confirm(t('deleteConfirm'))) return;
     try {
-      await fetch(`${apiUrl}/api/saas/menu/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await fetch(`${apiUrl}/api/saas/menu/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       await fetchItems();
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const getCategoryDisplayName = (cat: CategoryOption) => cat.translations?.[primaryLanguage] || cat.name || cat.key;
   const getCategoryIcon = (cat: CategoryOption) => cat.icon || '🍽️';
 
   const searchCategories = async (query: string) => {
-    if (query.length < 2) {
-      setCategorySuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
+    if (query.length < 2) { setCategorySuggestions([]); setShowSuggestions(false); return; }
     try {
       let url = `${apiUrl}/api/saas/categories/suggest?q=${encodeURIComponent(query)}`;
       if (selectedBranch) url += `&branchId=${selectedBranch._id}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setCategorySuggestions(data);
       setShowSuggestions(data.length > 0);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -266,21 +251,12 @@ export default function MenuManager({ token }: { token: string }) {
       try {
         await fetch(`${apiUrl}/api/saas/categories`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            key: categoryKey,
-            name: customCategoryName,
-            translations: customCategoryTranslations,
-            icon: customCategoryIcon || '🍽️',
-            branchId: selectedBranch?._id,
+            key: categoryKey, name: customCategoryName, translations: customCategoryTranslations, icon: customCategoryIcon || '🍽️', branchId: selectedBranch?._id,
           }),
         });
-      } catch (err) {
-        console.error(t('errorSaveCategory'), err);
-      }
+      } catch (err) { console.error(t('errorSaveCategory'), err); }
       finalCategory = customCategoryName;
       finalCategoryKey = categoryKey;
     }
@@ -288,29 +264,14 @@ export default function MenuManager({ token }: { token: string }) {
     const url = editingId ? `${apiUrl}/api/saas/menu/${editingId}` : `${apiUrl}/api/saas/menu`;
     const method = editingId ? 'PUT' : 'POST';
     const payload = {
-      ...form,
-      category: finalCategory,
-      categoryKey: finalCategoryKey,
-      translations,
-      branchId: selectedBranch?._id,
+      ...form, category: finalCategory, categoryKey: finalCategoryKey, translations, branchId: selectedBranch?._id,
+      hasPersonalization, modifierGroups: hasPersonalization ? modifierGroups : [],
     };
 
     try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        await fetchItems();
-        resetForm();
-      }
-    } catch (err) {
-      console.error(err);
-    }
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
+      if (res.ok) { await fetchItems(); resetForm(); }
+    } catch (err) { console.error(err); }
   };
 
   if (loading || settingsLoading) return <div className="text-center py-10 text-muted-foreground">{t('loading')}</div>;
@@ -329,67 +290,37 @@ export default function MenuManager({ token }: { token: string }) {
           <UtensilsCrossed className="w-5 h-5 text-primary" />
           {t('title', { clientName: tenant?.clientName ?? '' })}
         </h2>
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          variant={showForm ? 'secondary' : 'default'}
-          className="gap-2"
-        >
-          {showForm ? (
-            <>
-              <X className="w-4 h-4" />
-              {t('close')}
-            </>
-          ) : (
-            <>
-              <Plus className="w-4 h-4" />
-              {t('addDish')}
-            </>
-          )}
+        <Button onClick={() => setShowForm(!showForm)} variant={showForm ? 'secondary' : 'default'} className="gap-2">
+          {showForm ? (<><X className="w-4 h-4" /> {t('close')}</>) : (<><Plus className="w-4 h-4" /> {t('addDish')}</>)}
         </Button>
       </div>
 
-      {/* Форма */}
       {showForm && (
         <Card className="animate-in fade-in slide-in-from-top-4 duration-300">
           <form onSubmit={handleSave}>
             <CardContent className="p-6 sm:p-8 space-y-6">
               <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
-                {/* Название */}
+                
+                {/* Название и Категория (без изменений) */}
                 <div className="space-y-2">
                   <Label htmlFor="name">{t('name')}</Label>
-                  <Input
-                    id="name"
-                    placeholder={t('name')}
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required
-                  />
+                  <Input id="name" placeholder={t('name')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                 </div>
 
-                {/* Категория */}
                 <div className="space-y-2">
                   <Label htmlFor="category">{t('category')}</Label>
                   <Select
                     value={useCustomCategory ? '__custom__' : selectedCategory}
                     onValueChange={(val) => {
-                      if (val === '__custom__') {
-                        setUseCustomCategory(true);
-                        setSelectedCategory('');
-                      } else {
-                        updateCategoryFields(val, false);
-                      }
+                      if (val === '__custom__') { setUseCustomCategory(true); setSelectedCategory(''); } 
+                      else { updateCategoryFields(val, false); }
                     }}
                   >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder={t('selectCategory')} />
-                    </SelectTrigger>
+                    <SelectTrigger id="category"><SelectValue placeholder={t('selectCategory')} /></SelectTrigger>
                     <SelectContent>
                       {categories.map(c => (
                         <SelectItem key={c.key} value={c.key}>
-                          <span className="flex items-center gap-2">
-                            <span>{getCategoryIcon(c)}</span>
-                            <span>{getCategoryDisplayName(c)}</span>
-                          </span>
+                          <span className="flex items-center gap-2"><span>{getCategoryIcon(c)}</span><span>{getCategoryDisplayName(c)}</span></span>
                         </SelectItem>
                       ))}
                       <Separator className="my-1" />
@@ -398,7 +329,6 @@ export default function MenuManager({ token }: { token: string }) {
                   </Select>
                 </div>
 
-                {/* Кастомная категория */}
                 {useCustomCategory && (
                   <div className="sm:col-span-2 bg-muted/30 rounded-xl p-5 space-y-4 border">
                     <div className="space-y-2 relative">
@@ -409,28 +339,16 @@ export default function MenuManager({ token }: { token: string }) {
                         onChange={(e) => {
                           const name = e.target.value;
                           setCustomCategoryName(name);
-                          setForm(prev => ({
-                            ...prev,
-                            category: name,
-                            categoryKey: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-                          }));
+                          setForm(prev => ({ ...prev, category: name, categoryKey: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }));
                           searchCategories(name);
                         }}
                         onFocus={() => categorySuggestions.length > 0 && setShowSuggestions(true)}
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                         required
                       />
-
                       <div className="space-y-2">
-                        <Label htmlFor="customCategoryIcon">Иконка (эмодзи)</Label>
-                        <Input
-                          id="customCategoryIcon"
-                          placeholder="🍔"
-                          value={customCategoryIcon}
-                          onChange={(e) => setCustomCategoryIcon(e.target.value)}
-                          className="w-24 text-center text-xl"
-                          maxLength={2}
-                        />
+                        <Label htmlFor="customCategoryIcon">Icon (emoji)</Label>
+                        <Input id="customCategoryIcon" placeholder="🍔" value={customCategoryIcon} onChange={(e) => setCustomCategoryIcon(e.target.value)} className="w-24 text-center text-xl" maxLength={2} />
                       </div>
                       {showSuggestions && (
                         <ul className="absolute z-20 w-full bg-card border border-border rounded-xl shadow-dropdown mt-1 max-h-48 overflow-y-auto overflow-hidden">
@@ -440,21 +358,13 @@ export default function MenuManager({ token }: { token: string }) {
                               onMouseDown={() => {
                                 setCustomCategoryName(getCategoryDisplayName(cat));
                                 setCustomCategoryTranslations(cat.translations || {});
-                                setForm(prev => ({
-                                  ...prev,
-                                  category: cat.name || cat.key,
-                                  categoryKey: cat.key,
-                                }));
+                                setForm(prev => ({ ...prev, category: cat.name || cat.key, categoryKey: cat.key }));
                                 setShowSuggestions(false);
                               }}
                               className="px-4 py-3 text-sm hover:bg-accent cursor-pointer border-b border-border/50 last:border-0 transition-colors"
                             >
                               <div className="font-medium">{getCategoryDisplayName(cat)}</div>
-                              {cat.translations && (
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {Object.entries(cat.translations).map(([lang, val]) => `${lang}: ${val}`).join(', ')}
-                                </div>
-                              )}
+                              {cat.translations && (<div className="text-xs text-muted-foreground mt-1">{Object.entries(cat.translations).map(([lang, val]) => `${lang}: ${val}`).join(', ')}</div>)}
                             </li>
                           ))}
                         </ul>
@@ -464,24 +374,14 @@ export default function MenuManager({ token }: { token: string }) {
                     <Accordion type="single" collapsible>
                       <AccordionItem value="translations" className="border rounded-lg px-3">
                         <AccordionTrigger className="text-sm font-medium hover:no-underline">
-                          <div className="flex items-center gap-2">
-                            <Languages className="w-4 h-4 text-muted-foreground" />
-                            {t('categoryTranslations')}
-                          </div>
+                          <div className="flex items-center gap-2"><Languages className="w-4 h-4 text-muted-foreground" />{t('categoryTranslations')}</div>
                         </AccordionTrigger>
                         <AccordionContent className="pt-2 pb-3">
                           <div className="grid sm:grid-cols-3 gap-3">
                             {availableLangs.map(lang => (
                               <div key={lang} className="space-y-1.5">
                                 <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
-                                <Input
-                                  placeholder={t('translations.name')}
-                                  value={customCategoryTranslations[lang] || ''}
-                                  onChange={(e) => setCustomCategoryTranslations(prev => ({
-                                    ...prev,
-                                    [lang]: e.target.value,
-                                  }))}
-                                />
+                                <Input placeholder={t('translations.name')} value={customCategoryTranslations[lang] || ''} onChange={(e) => setCustomCategoryTranslations(prev => ({ ...prev, [lang]: e.target.value }))} />
                               </div>
                             ))}
                           </div>
@@ -490,93 +390,39 @@ export default function MenuManager({ token }: { token: string }) {
                     </Accordion>
                   </div>
                 )}
-                
 
-                {/* Описание */}
+                {/* Описание, Цена, Изображение (без изменений) */}
                 <div className="sm:col-span-2 space-y-2">
                   <Label htmlFor="description">{t('description')}</Label>
-                  <Textarea
-                    id="description"
-                    placeholder={t('description')}
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    rows={3}
-                  />
+                  <Textarea id="description" placeholder={t('description')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
                 </div>
-
-                {/* Цена */}
                 <div className="space-y-2">
                   <Label htmlFor="price">{t('price')}</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    placeholder={t('price')}
-                    value={form.price || ''}
-                    onChange={(e) => setForm({ ...form, price: +e.target.value })}
-                    required
-                  />
+                  <Input id="price" type="number" placeholder={t('price')} value={form.price || ''} onChange={(e) => setForm({ ...form, price: +e.target.value })} required />
                 </div>
-
-                {/* Изображение */}
                 <div className="space-y-2">
                   <Label htmlFor="image">{t('imageUrl')}</Label>
                   <div className="flex gap-2">
-                    <Input
-                      id="image"
-                      placeholder="https://..."
-                      value={form.image}
-                      onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    />
-                    <Button type="button" variant="outline" onClick={openCloudinaryWidget} className="gap-2 shrink-0">
-                      <ImagePlus className="w-4 h-4" />
-                      {t('upload')}
-                    </Button>
+                    <Input id="image" placeholder="https://..." value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+                    <Button type="button" variant="outline" onClick={openCloudinaryWidget} className="gap-2 shrink-0"><ImagePlus className="w-4 h-4" />{t('upload')}</Button>
                   </div>
                 </div>
+                {form.image && (<div className="sm:col-span-2 space-y-2"><Label>{t('preview')}</Label><img src={form.image} alt={t('preview')} className="h-40 w-40 object-cover rounded-lg border shadow-sm" /></div>)}
 
-                {form.image && (
-                  <div className="sm:col-span-2 space-y-2">
-                    <Label>{t('preview')}</Label>
-                    <img
-                      src={form.image}
-                      alt={t('preview')}
-                      className="h-40 w-40 object-cover rounded-lg border shadow-sm"
-                    />
-                  </div>
-                )}
-
-                {/* Переводы блюда */}
+                {/* Переводы блюда (без изменений) */}
                 <div className="sm:col-span-2">
                   <Accordion type="single" collapsible>
                     <AccordionItem value="dish-translations" className="border rounded-lg px-3">
                       <AccordionTrigger className="text-sm font-medium hover:no-underline">
-                        <div className="flex items-center gap-2">
-                          <Languages className="w-4 h-4 text-muted-foreground" />
-                          {t('dishTranslations')}
-                        </div>
+                        <div className="flex items-center gap-2"><Languages className="w-4 h-4 text-muted-foreground" />{t('dishTranslations')}</div>
                       </AccordionTrigger>
                       <AccordionContent className="pt-2 pb-3">
                         <div className="grid sm:grid-cols-3 gap-4">
                           {availableLangs.map(lang => (
                             <div key={lang} className="bg-muted/20 p-3 rounded-lg space-y-2">
                               <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
-                              <Input
-                                placeholder={t('translations.name')}
-                                value={translations[lang]?.name || ''}
-                                onChange={(e) => setTranslations(prev => ({
-                                  ...prev,
-                                  [lang]: { ...prev[lang], name: e.target.value },
-                                }))}
-                              />
-                              <Textarea
-                                placeholder={t('translations.description')}
-                                value={translations[lang]?.description || ''}
-                                onChange={(e) => setTranslations(prev => ({
-                                  ...prev,
-                                  [lang]: { ...prev[lang], description: e.target.value },
-                                }))}
-                                rows={2}
-                              />
+                              <Input placeholder={t('translations.name')} value={translations[lang]?.name || ''} onChange={(e) => setTranslations(prev => ({ ...prev, [lang]: { ...prev[lang], name: e.target.value } }))} />
+                              <Textarea placeholder={t('translations.description')} value={translations[lang]?.description || ''} onChange={(e) => setTranslations(prev => ({ ...prev, [lang]: { ...prev[lang], description: e.target.value } }))} rows={2} />
                             </div>
                           ))}
                         </div>
@@ -586,18 +432,224 @@ export default function MenuManager({ token }: { token: string }) {
                 </div>
               </div>
 
+              {/* ============================================= */}
+              {/* БЛОК ПЕРСОНАЛИЗАЦИИ С ПЕРЕВОДАМИ              */}
+              {/* ============================================= */}
+              <div className="sm:col-span-2 space-y-4 border border-border rounded-xl p-4 bg-muted/20">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="hasPersonalization" className="text-base font-semibold flex items-center gap-2">
+                      <Settings2 className="w-4 h-4" /> {t('personalization')}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">{t('personalizationHint')}</p>
+                  </div>
+                  <Switch id="hasPersonalization" checked={hasPersonalization} onCheckedChange={setHasPersonalization} />
+                </div>
+
+                {hasPersonalization && (
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    {modifierGroups.map((group, gIndex) => (
+                      <div key={group.id} className="bg-background border border-border rounded-lg p-4 space-y-4 relative">
+                        <div className="flex items-center justify-between gap-2">
+                          <Input
+                            placeholder={t('groupNamePlaceholder')}
+                            value={group.name}
+                            onChange={(e) => {
+                              const newGroups = [...modifierGroups];
+                              newGroups[gIndex].name = e.target.value;
+                              setModifierGroups(newGroups);
+                            }}
+                            className="font-semibold max-w-xs"
+                          />
+                          <div className="flex items-center gap-3">
+                            <Select
+                              value={group.type}
+                              onValueChange={(val: 'radio' | 'checkbox') => {
+                                const newGroups = [...modifierGroups];
+                                newGroups[gIndex].type = val;
+                                setModifierGroups(newGroups);
+                              }}
+                            >
+                              <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="radio">{t('singleChoice')}</SelectItem>
+                                <SelectItem value="checkbox">{t('multipleChoice')}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => setModifierGroups(modifierGroups.filter((_, i) => i !== gIndex))}>
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-4 text-sm">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={group.required}
+                              onCheckedChange={(v) => {
+                                const newGroups = [...modifierGroups];
+                                newGroups[gIndex].required = v as boolean;
+                                setModifierGroups(newGroups);
+                              }}
+                            />
+                            {t('requiredChoice')}
+                          </label>
+                          {group.type === 'checkbox' && (
+                            <Input
+                              type="number"
+                              min={0}
+                              placeholder={t('maxSelect')}
+                              className="w-32 h-8"
+                              value={group.maxSelect || ''}
+                              onChange={(e) => {
+                                const newGroups = [...modifierGroups];
+                                newGroups[gIndex].maxSelect = +e.target.value;
+                                setModifierGroups(newGroups);
+                              }}
+                            />
+                          )}
+                        </div>
+
+                        {/* Опции */}
+                        <div className="space-y-3 pl-4 border-l-2 border-border">
+                          {group.options.map((opt, oIndex) => (
+                            <div key={opt.id} className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  placeholder={t('optionNamePlaceholder')}
+                                  value={opt.name}
+                                  onChange={(e) => {
+                                    const newGroups = [...modifierGroups];
+                                    newGroups[gIndex].options[oIndex].name = e.target.value;
+                                    setModifierGroups(newGroups);
+                                  }}
+                                  className="h-8"
+                                />
+                                <Input
+                                  type="number"
+                                  placeholder={t('price')}
+                                  value={opt.price || ''}
+                                  onChange={(e) => {
+                                    const newGroups = [...modifierGroups];
+                                    newGroups[gIndex].options[oIndex].price = +e.target.value;
+                                    setModifierGroups(newGroups);
+                                  }}
+                                  className="w-24 h-8"
+                                />
+                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8"
+                                  onClick={() => {
+                                    const newGroups = [...modifierGroups];
+                                    newGroups[gIndex].options.splice(oIndex, 1);
+                                    setModifierGroups(newGroups);
+                                  }}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              
+                              {/* Переводы опции */}
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pl-2 border-l border-border/50 ml-2">
+                                {availableLangs.map(lang => (
+                                  <div key={lang} className="flex items-center gap-2">
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground w-6">{lang}:</span>
+                                    <Input
+                                      placeholder={`(${lang})`}
+                                      value={opt.translations?.[lang]?.name || ''}
+                                      onChange={(e) => {
+                                        const newGroups = [...modifierGroups];
+                                        if (!newGroups[gIndex].options[oIndex].translations) newGroups[gIndex].options[oIndex].translations = {};
+                                        newGroups[gIndex].options[oIndex].translations[lang] = { name: e.target.value };
+                                        setModifierGroups(newGroups);
+                                      }}
+                                      className="h-7 text-xs"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="mt-2 text-xs"
+                            onClick={() => {
+                              const newGroups = [...modifierGroups];
+                              newGroups[gIndex].options.push({
+                                id: Math.random().toString(36).substr(2, 9),
+                                name: '',
+                                price: 0,
+                                translations: {}
+                              });
+                              setModifierGroups(newGroups);
+                            }}
+                          >
+                            <Plus className="w-3 h-3 mr-1" /> {t('addOption')}
+                          </Button>
+                        </div>
+
+                        {/* Переводы названия группы */}
+                        <Accordion type="single" collapsible className="mt-2">
+                          <AccordionItem value={`grp-trans-${group.id}`} className="border rounded-lg px-3 bg-muted/30">
+                            <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                              <div className="flex items-center gap-2"><Languages className="w-4 h-4 text-muted-foreground" />{t('translateGroup')}</div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pt-2 pb-3">
+                              <div className="grid sm:grid-cols-3 gap-3">
+                                {availableLangs.map(lang => (
+                                  <div key={lang} className="space-y-1.5">
+                                    <Label className="text-xs uppercase text-muted-foreground">{lang}</Label>
+                                    <Input
+                                      placeholder={t('translations.name')}
+                                      value={group.translations?.[lang]?.name || ''}
+                                      onChange={(e) => {
+                                        const newGroups = [...modifierGroups];
+                                        if (!newGroups[gIndex].translations) newGroups[gIndex].translations = {};
+                                        newGroups[gIndex].translations[lang] = { name: e.target.value };
+                                        setModifierGroups(newGroups);
+                                      }}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+
+                      </div>
+                    ))}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full border-dashed border-2 hover:bg-muted/50"
+                      onClick={() => {
+                        setModifierGroups([
+                          ...modifierGroups,
+                          {
+                            id: Math.random().toString(36).substr(2, 9),
+                            name: '',
+                            type: 'radio',
+                            required: false,
+                            minSelect: 0,
+                            maxSelect: 0,
+                            options: [],
+                            translations: {}
+                          }
+                        ]);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> {t('addGroup')}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
               <Separator />
 
               <div className="flex justify-end gap-3">
-                {editingId && (
-                  <Button type="button" variant="ghost" onClick={resetForm}>
-                    {t('cancel')}
-                  </Button>
-                )}
-                <Button type="submit" className="gap-2">
-                  <Save className="w-4 h-4" />
-                  {editingId ? t('save') : t('add')}
-                </Button>
+                {editingId && (<Button type="button" variant="ghost" onClick={resetForm}>{t('cancel')}</Button>)}
+                <Button type="submit" className="gap-2"><Save className="w-4 h-4" />{editingId ? t('save') : t('add')}</Button>
               </div>
             </CardContent>
           </form>
@@ -614,13 +666,7 @@ export default function MenuManager({ token }: { token: string }) {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => (
-            <MenuItemCard
-              key={item._id}
-              item={item}
-              mode="admin"
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <MenuItemCard key={item._id} item={item} mode="admin" onEdit={handleEdit} onDelete={handleDelete} />
           ))}
         </div>
       )}

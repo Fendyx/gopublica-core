@@ -4,7 +4,9 @@
     "menu": "Menu",
     "gallery": "Gallery",
     "contact": "Contact",
-    "booking": "Book a table"
+    "booking": "Book a table",
+    "login": "Login",
+    "profile": "Profile"
   },
   "hero": {
     "booking": "Book a table",
@@ -175,7 +177,19 @@
       "translations": {
         "name": "Name",
         "description": "Description"
-      }
+      },
+      "personalization": "Product Personalization",
+      "personalizationHint": "Allows the customer to choose size, add-ons, etc.",
+      "groupNamePlaceholder": "Group name (e.g. Size, Toppings)",
+      "singleChoice": "Single choice",
+      "multipleChoice": "Multiple choice",
+      "requiredChoice": "Required choice",
+      "maxSelect": "Max select",
+      "optionNamePlaceholder": "Name (e.g. Large, Cheese)",
+      "addOption": "Add option",
+      "addGroup": "Add option group",
+      "translateGroup": "Translate group",
+      "translateOptions": "Translate options"
     },
     "reservationsPage": {
       "loading": "Loading...",
@@ -236,6 +250,15 @@
         "customUrl": "Custom URL",
         "listen": "Listen"
       }
+    },
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
     },
     "gopublicaPage": {
       "loading": "Loading news...",
@@ -325,6 +348,55 @@
         "noComment": "No comment",
         "submittedAt": "Submitted at:"
       }
+    },
+    "orders": "Orders",
+    "ordersPage": {
+      "loading": "Loading...",
+      "selectBranch": "Select a branch",
+      "title": "Orders",
+      "branchInfo": "Branch: {name} {city}",
+      "empty": "No active orders",
+      "table": {
+        "idTime": "ID / Time",
+        "customer": "Customer",
+        "typeAddress": "Type / Address",
+        "items": "Items",
+        "total": "Total",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "accept": "Accept",
+        "decline": "Decline",
+        "startCooking": "Start cooking",
+        "ready": "Ready",
+        "sendCourier": "Send courier",
+        "handedOver": "Handed over",
+        "delivered": "Delivered",
+        "noActions": "No actions"
+      },
+      "status": {
+        "needsResponse": "Needs response",
+        "declined": "Declined",
+        "pending_payment": "Pending payment",
+        "paid": "Paid",
+        "preparing": "Preparing",
+        "ready": "Ready",
+        "out_for_delivery": "Out for delivery",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "delivery": "Delivery",
+      "pickup": "Pickup",
+      "scheduledFor": "Scheduled for:",
+      "deliveryFee": "Delivery: {fee}",
+      "moreItems": "+ {count} more items",
+      "alerts": {
+        "acceptError": "Error accepting order",
+        "declinePrompt": "Specify the reason for cancellation (for the client and refund):",
+        "declineError": "Error canceling order",
+        "updateError": "Error updating status"
+      }
     }
   },
   "notifications": {
@@ -345,7 +417,6 @@
     "subscribe_try_again": "Try again",
     "subscribe_connecting": "Connecting..."
   },
-
   "checkout": {
     "yourOrder": "Your order",
     "subtotal": "Subtotal",
@@ -358,7 +429,6 @@
     "selectDateTime": "Select date and time",
     "fulfillmentMethod": "Fulfillment method",
     "pickup": "Pickup",
-    "delivery": "Delivery",
     "street": "Street",
     "city": "City",
     "zip": "Postal code",
@@ -374,5 +444,89 @@
     "processing": "Processing...",
     "payTotal": "Pay {total} {currency}",
     "placeOrder": "Place order"
+  },
+  "profile": {
+    "loadingProfile": "Loading profile...",
+    "loadingOrders": "Loading orders...",
+    "sessionExpired": "Session expired",
+    "pleaseLoginAgain": "Please log in again.",
+    "login": "Log in",
+    "loginToAccount": "Log in to your account",
+    "loginToSeeOrders": "Please log in to see your order history.",
+    "goToMenu": "Main menu",
+    "goToMenuBtn": "Go to menu",
+    "myOrders": "My Orders",
+    "logout": "Log out",
+    "back": "Back",
+    "dataUpdated": "Data updated successfully",
+    "updateError": "Update failed",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeError": "Failed to change password",
+    "serverError": "Server error",
+    "deleteConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+    "deletePrompt": "Type the word \"DELETE\" to confirm:",
+    "deleteCanceled": "Confirmation canceled.",
+    "accountDeleted": "Account deleted.",
+    "deleteError": "Failed to delete account",
+    "defaultName": "User",
+    "personalData": "Personal Data",
+    "updateContactDetails": "Update your contact details",
+    "name": "Name",
+    "phone": "Phone",
+    "emailReadOnly": "Email (cannot be changed)",
+    "saveChanges": "Save changes",
+    "saving": "Saving...",
+    "security": "Security",
+    "changeLoginPassword": "Change your login password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "passwordHint": "At least 8 characters. Use letters and numbers.",
+    "changePassword": "Change password",
+    "updating": "Updating...",
+    "dangerZone": "Danger Zone",
+    "deleteWarning": "Account deletion is irreversible. All your data, order history, and settings will be permanently erased.",
+    "deleteAccount": "Delete my account",
+    "deleting": "Deleting...",
+    "noOrders": "You have no orders yet",
+    "timeToCheckMenu": "It's time to check the menu!",
+    "delivery": "Delivery",
+    "pickup": "Pickup",
+    "total": "Total",
+    "statusLabels": {
+      "pending_payment": "Pending payment",
+      "paid": "Paid",
+      "accepted": "Accepted",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "out_for_delivery": "Out for delivery",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "loginToContinue": "Log in to continue to your profile",
+    "login": "Log In",
+    "enterCredentials": "Enter your credentials below",
+    "loggingIn": "Logging in...",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "register": "Sign Up",
+    "createAccount": "Create Account",
+    "joinUs": "Join us to track orders and checkout faster",
+    "fillInDetails": "Fill in your details below",
+    "registering": "Registering...",
+    "haveAccount": "Already have an account?"
+  },
+  "configurator": {
+    "required": "Required",
+    "optional": "Optional",
+    "notes": "Special instructions",
+    "notesPlaceholder": "e.g., no onions, sauce on the side...",
+    "selectRequired": "Please select: {group}",
+    "addToCart": "Add for {price} {currency}"
+  },
+  "catalog": {
+  "shopByCategory": "SHOP BY CATEGORY"
 }
 }
