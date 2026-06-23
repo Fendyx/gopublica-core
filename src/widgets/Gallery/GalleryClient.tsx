@@ -12,7 +12,7 @@ export default function GalleryClient() {
   const [loading, setLoading] = useState(true)
 
   const tenantId = selectedBranch?.tenantId ?? tenant?.tenantId
-  const galleryStyle = tenant?.galleryStyle ?? 'bento'
+  const galleryStyle = tenant?.theme?.galleryStyle ?? 'bento' // <-- исправлено
 
   useEffect(() => {
     if (!selectedBranch || !tenantId) return
