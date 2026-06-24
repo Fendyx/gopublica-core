@@ -1,6 +1,7 @@
 // src/entities/tenant/api.ts
 export interface TenantSettings {
   tenantId: string;
+  businessName?: string;
   niche: 'food' | 'beauty' | 'auto' | 'ecommerce';
   primaryCurrency: string;
   theme: {
@@ -18,7 +19,8 @@ export interface TenantSettings {
     galleryStyle?: string;
     ecommerceLayout?: 'grid-3' | 'grid-4' | 'carousel' | 'dynamic';
     radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-    productCardVariant?: 'overlay' | 'action-bar' | 'minimal';
+    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay';
+    pageBgColor?: string;
   };
   features: {
     hasMenu: boolean;

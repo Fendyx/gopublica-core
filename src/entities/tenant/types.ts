@@ -17,8 +17,9 @@ export type Theme = {
   galleryStyle?: 'bento' | 'masonry'
   ecommerceLayout?: EcommerceLayout
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
-    productCardVariant?: 'overlay' | 'action-bar' | 'minimal'
+    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay'
     categoryBgColor?: string
+    pageBgColor?: string
 }
 
 // Что включено на сайте
@@ -53,6 +54,7 @@ export type Niche = 'food' | 'beauty' | 'ecommerce' | 'auto';
 // Главный тип конфига (то, что придёт с бэка)
 export type SiteConfig = {
   clientName: string
+  businessName?: string
   tenantId: string
   niche: Niche // <--- ДОБАВИЛИ
   theme: Theme

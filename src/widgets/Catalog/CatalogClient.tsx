@@ -8,7 +8,7 @@ import Menu from '@/widgets/Menu'
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout'
 import EcommerceCarouselLayout from '@/widgets/Catalog/EcommerceCarouselLayout'
 import EcommerceDynamicGrid from '@/widgets/Catalog/EcommerceDynamicGrid'
-import CategoryGrid, { CategoryCardData } from '@/widgets/Catalog/CategoryGrid' // <--- ИМПОРТ
+import CategoryGrid, { CategoryCardData } from '@/widgets/Catalog/CategoryGrid'
 import type { MenuItem } from '@/entities/menu-item/types'
 
 export default function CatalogClient() {
@@ -23,7 +23,7 @@ export default function CatalogClient() {
   const tenantId = selectedBranch?.tenantId ?? tenant?.tenantId
   const menuStyle = tenant?.theme?.menuStyle ?? 'grid'
   const niche = tenant?.niche ?? 'food'
-  
+
   const ecommerceLayout = tenant?.theme?.ecommerceLayout ?? 'grid-3'
   const variant = tenant?.theme?.productCardVariant ?? 'action-bar'
   const currencySymbol = primaryCurrency === 'PLN' ? 'zł' : primaryCurrency || '€'
@@ -52,8 +52,7 @@ export default function CatalogClient() {
 
   if (loading) return <div className="text-center py-10">Загрузка...</div>
 
-    if (niche === 'ecommerce') {
-    // Подготавливаем данные для CategoryGrid (считаем кол-во товаров)
+  if (niche === 'ecommerce') {
     const categoryCardsData: CategoryCardData[] = categories.map(cat => {
       const productCount = items.filter(item => (item.categoryKey || item.category) === cat.key).length;
       return {
@@ -61,11 +60,13 @@ export default function CatalogClient() {
         key: cat.key,
         coverImage: cat.coverImage,
         productCount,
-        cardBgColor: cat.cardBgColor
+        cardBgColor: cat.cardBgColor,
+        description: cat.description,
+        imageAspectRatio: cat.imageAspectRatio,               // <- добавить
+        productImageAspectRatio: cat.productImageAspectRatio,
       };
     }).filter(cat => cat.productCount > 0);
 
-    // Группируем товары по категориям
     const groupedItems = items.reduce((acc, item) => {
       const key = item.categoryKey || item.category || 'uncategorized';
       if (!acc[key]) acc[key] = [];
@@ -74,12 +75,10 @@ export default function CatalogClient() {
     }, {} as Record<string, MenuItem[]>);
 
     return (
-      <div className="bg-background">
-        {/* Сетка категорий сверху */}
+      <div className="bg-transparent">
         <CategoryGrid categories={categoryCardsData} bgColor={tenant?.theme?.categoryBgColor} />
 
-        {/* Сами товары */}
-        <div className="py-16 bg-surface-page space-y-12">
+        <div className="py-16 bg-transparent space-y-12">
           {Object.entries(groupedItems).map(([key, products]) => {
             const category = categories.find(c => c.key === key);
             const layout = category?.layout || 'grid-3';
@@ -87,22 +86,23 @@ export default function CatalogClient() {
             const bgColor = category?.cardBgColor;
 
             return (
-              // Секция с фоном тянется на всю ширину
               <section 
                 key={key} 
                 style={bgColor ? { backgroundColor: bgColor } : undefined}
                 className={!bgColor ? '' : 'py-12 shadow-sm border-y border-border'}
               >
-                {/* Контейнер с отступами внутри секции */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                    <span>{category?.icon}</span> {categoryName}
+                  <h2 className="text-2xl font-bold text-foreground mb-1">
+                    {categoryName}
                   </h2>
+                  {category?.description && (
+                    <p className="text-muted-foreground mb-6">{category.description}</p>
+                  )}
 
-                  {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} />}
-                  {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} />}
-                  {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} />}
-                  {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} />}
+                  {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
+                  {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
+                  {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
+                  {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
                 </div>
               </section>
             );

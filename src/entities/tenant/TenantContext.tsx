@@ -45,6 +45,7 @@ export function TenantProvider({
                 // Преобразуем плоский ответ бэка в структуру SiteConfig
         const config: SiteConfig = {
           clientName: data.restaurantName ?? data.name ?? '',
+          businessName: data.businessName || '',
           tenantId: data.tenantId ?? tenantId,
           niche: data.niche ?? 'food', // <--- ДОБАВИЛИ ЭТУ СТРОКУ
           theme: {

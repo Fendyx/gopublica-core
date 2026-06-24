@@ -1,13 +1,14 @@
 'use client'
-import type { MenuItem } from '@/entities/menu-item/types'
+import type { MenuItem, ProductCardVariant  } from '@/entities/menu-item/types'
 import ProductCard from './ProductCard'
 
-export default function EcommerceGridLayout({ items, locale, columns = 3, variant, currencySymbol }: { 
+export default function EcommerceGridLayout({ items, locale, columns = 3, variant, currencySymbol, productImageAspectRatio  }: { 
   items: MenuItem[], 
   locale?: string, 
   columns?: number,
-  variant: 'overlay' | 'action-bar' | 'minimal',
-  currencySymbol?: string
+  variant: ProductCardVariant,
+  currencySymbol?: string,
+  productImageAspectRatio?: string,
 }) {
   return (
     <div className={`grid grid-cols-2 ${columns === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 lg:gap-6`}>
@@ -18,6 +19,7 @@ export default function EcommerceGridLayout({ items, locale, columns = 3, varian
           variant={variant} 
           locale={locale} 
           currencySymbol={currencySymbol}
+          imageAspectRatio={productImageAspectRatio}
         />
       ))}
     </div>

@@ -50,11 +50,13 @@ export default function SettingsPageContent() {
   const tenant = useTenant();
   const { selectedBranch, loading: branchLoading } = useBranch();
   const [token, setToken] = useState<string | null>(null);
-  
+
+  const [businessName, setBusinessName] = useState('');
+
   const [form, setForm] = useState({
     phone: '', address: '', email: '', hours: '', googleMapsUrl: '',
   });
-  
+
   const [workingHours, setWorkingHours] = useState<Record<string, string>>({
     monday: '', tuesday: '', wednesday: '', thursday: '', friday: '', saturday: '', sunday: ''
   });
@@ -77,9 +79,10 @@ export default function SettingsPageContent() {
   });
 
   const SUPPORTED_LANGUAGES = ['pl', 'en', 'de', 'ru', 'es', 'ua'];
-  const availableLangs = SUPPORTED_LANGUAGES; 
+  const availableLangs = SUPPORTED_LANGUAGES;
 
   const [categoryBgColor, setCategoryBgColor] = useState('');
+  const [pageBgColor, setPageBgColor] = useState('');
 
   useEffect(() => {
     const savedToken = localStorage.getItem('saas_token');
@@ -98,6 +101,7 @@ export default function SettingsPageContent() {
     fetch(url)
       .then(res => res.json())
       .then(data => {
+        setBusinessName(data.businessName || '');
         setForm({
           phone: data.phone || tenant?.contact?.phone || '',
           address: data.address || tenant?.contact?.address || '',
@@ -105,11 +109,11 @@ export default function SettingsPageContent() {
           hours: data.hours || tenant?.contact?.hours || '',
           googleMapsUrl: data.googleMapsUrl || tenant?.contact?.googleMapsUrl || '',
         });
-        
+
         setWorkingHours(data.workingHours || {});
         if (data.primaryLanguage) setPrimaryLanguage(data.primaryLanguage);
         if (data.primaryCurrency) setPrimaryCurrency(data.primaryCurrency);
-        
+
         setRadius(data.theme?.radius || 'lg');
         setCardVariant(data.theme?.productCardVariant || 'action-bar');
 
@@ -117,7 +121,8 @@ export default function SettingsPageContent() {
         setSeoDescriptionI18n(data.seoDescriptionI18n || {});
 
         setCategoryBgColor(data.theme?.categoryBgColor || tenant?.theme?.categoryBgColor || '');
-        
+        setPageBgColor(data.theme?.pageBgColor || '');
+
         if (data.notifications) {
           setNotifications(prev => ({
             ...prev,
@@ -133,10 +138,11 @@ export default function SettingsPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBranch) return alert('Сначала выберите филиал');
-    
+
     try {
       const payload = {
         ...form,
+        businessName,
         workingHours,
         notifications,
         primaryLanguage,
@@ -148,15 +154,16 @@ export default function SettingsPageContent() {
           radius,
           productCardVariant: cardVariant,
           categoryBgColor,
+          pageBgColor,
         },
       };
-      
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
-      
+
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
@@ -197,6 +204,18 @@ export default function SettingsPageContent() {
 
               {/* --- ВКЛАДКА 1: GENERAL --- */}
               <TabsContent value="general" className="space-y-6">
+
+                <div className="space-y-2">
+  <Label htmlFor="businessName" className="flex items-center gap-1.5">
+    Название бизнеса
+  </Label>
+  <Input
+    id="businessName"
+    value={businessName}
+    onChange={e => setBusinessName(e.target.value)}
+    placeholder="Например: ООО «Ромашка»"
+  />
+</div>
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('contactSection')}</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -238,7 +257,7 @@ export default function SettingsPageContent() {
               <TabsContent value="appearance" className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">UI Style</h3>
-                  
+
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Paintbrush className="w-3.5 h-3.5 text-muted-foreground" />Border Radius</Label>
                     <Select value={radius} onValueChange={setRadius}>
@@ -253,28 +272,52 @@ export default function SettingsPageContent() {
                   </div>
 
                   <div className="space-y-2 pt-4">
-  <Label>Category Block Background</Label>
-  <div className="flex items-center gap-4">
-    <input 
-      type="color" 
-      value={categoryBgColor || '#ffffff'} 
-      onChange={(e) => setCategoryBgColor(e.target.value)} 
-      className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
-    />
-    <Input 
-      placeholder="Empty = Default" 
-      value={categoryBgColor} 
-      onChange={(e) => setCategoryBgColor(e.target.value)} 
-      className="max-w-xs"
-    />
-    {categoryBgColor && (
-      <Button type="button" variant="ghost" size="sm" onClick={() => setCategoryBgColor('')}>
-        Reset
-      </Button>
-    )}
-  </div>
-  <p className="text-xs text-muted-foreground">Оставьте пустым для использования цвета страницы по умолчанию.</p>
-</div>
+                    <Label>Category Block Background</Label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="color"
+                        value={categoryBgColor || '#ffffff'}
+                        onChange={(e) => setCategoryBgColor(e.target.value)}
+                        className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
+                      />
+                      <Input
+                        placeholder="Empty = Default"
+                        value={categoryBgColor}
+                        onChange={(e) => setCategoryBgColor(e.target.value)}
+                        className="max-w-xs"
+                      />
+                      {categoryBgColor && (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setCategoryBgColor('')}>
+                          Reset
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Оставьте пустым для использования цвета страницы по умолчанию.</p>
+                  </div>
+
+                  <div className="space-y-2 pt-4">
+                    <Label>Page Background</Label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="color"
+                        value={pageBgColor || '#ffffff'}
+                        onChange={(e) => setPageBgColor(e.target.value)}
+                        className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
+                      />
+                      <Input
+                        placeholder="Empty = Default"
+                        value={pageBgColor}
+                        onChange={(e) => setPageBgColor(e.target.value)}
+                        className="max-w-xs"
+                      />
+                      {pageBgColor && (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setPageBgColor('')}>
+                          Reset
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Оставьте пустым для использования цвета по умолчанию.</p>
+                  </div>
 
                   {/* Настройки каталога для E-commerce (Убран Catalog Layout) */}
                   {tenant?.niche === 'ecommerce' && (
@@ -287,7 +330,9 @@ export default function SettingsPageContent() {
                           {[
                             { val: 'action-bar', label: 'Action Bar', desc: 'Button under image', icon: ShoppingBag },
                             { val: 'overlay', label: 'Hover Overlay', desc: 'Buttons on image', icon: Eye },
-                            { val: 'minimal', label: 'Minimalist', desc: 'Only text & link', icon: MousePointerClick }
+                            { val: 'minimal', label: 'Minimalist', desc: 'Only text & link', icon: MousePointerClick },
+                            { val: 'hover-vertical', label: 'Vertical Overlay', desc: 'Vertical buttons', icon: Eye },
+                            { val: 'action-overlay', label: 'Action + Overlay', desc: 'Info below + overlay', icon: Eye },
                           ].map(opt => (
                             <button
                               key={opt.val}

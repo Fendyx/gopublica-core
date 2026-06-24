@@ -1,17 +1,18 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { MenuItem } from '@/entities/menu-item/types'
+import type { MenuItem, ProductCardVariant  } from '@/entities/menu-item/types'
 import ProductCard from './ProductCard' // <--- ИСПОЛЬЗУЕМ НОВЫЙ
 
 const ROW_UNIT = 8
 const GAP = 16
 
-export default function EcommerceDynamicGrid({ items, locale, variant, currencySymbol }: { 
+export default function EcommerceDynamicGrid({ items, locale, variant, currencySymbol, productImageAspectRatio }: { 
   items: MenuItem[], 
   locale?: string,
-  variant: 'overlay' | 'action-bar' | 'minimal',
-  currencySymbol?: string
+  variant: ProductCardVariant,
+  currencySymbol?: string,
+  productImageAspectRatio?: string,
 }) {
   const gridRef = useRef<HTMLDivElement>(null)
 
@@ -57,6 +58,7 @@ export default function EcommerceDynamicGrid({ items, locale, variant, currencyS
                 variant={variant} 
                 locale={locale} 
                 currencySymbol={currencySymbol}
+                imageAspectRatio={productImageAspectRatio}
               />
             </div>
           </div>

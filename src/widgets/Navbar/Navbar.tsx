@@ -83,7 +83,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href={`/${locale}`} className="font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors">
-            {tenant?.clientName ?? ''}
+            {(tenant?.businessName || tenant?.clientName) || ''}
           </Link>
 
           {/* Desktop Navigation */}

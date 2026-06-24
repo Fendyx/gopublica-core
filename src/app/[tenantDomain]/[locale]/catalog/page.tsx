@@ -11,10 +11,11 @@ export const dynamic = 'force-dynamic';
 export default async function CatalogPage({
   params,
 }: {
-  params: { tenantDomain: string; locale: string };
+  params: Promise<{ tenantDomain: string; locale: string }>;
 }) {
+  const { locale, tenantDomain } = await params; // один раз распаковали
   const headersList = await headers();
-  const host = headersList.get('host') ?? params.tenantDomain;
+  const host = headersList.get('host') ?? tenantDomain;
   const tenant = await getTenantByDomain(host);
 
   if (!tenant || !tenant.features.hasMenu) {
@@ -48,7 +49,7 @@ export default async function CatalogPage({
             items={items} 
             variant={variant} 
             currencySymbol={currencySymbol}
-            locale={params.locale}
+            locale={locale}
           />
         </div>
       </section>

@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 import Hero from '@/widgets/Hero';
 import About from '@/widgets/About/About';
-import CatalogClient from '@/widgets/Catalog/CatalogClient'; // <--- ЗАМЕНИЛИ MenuClient на CatalogClient
+import CatalogClient from '@/widgets/Catalog/CatalogClient';
 import GalleryClient from '@/widgets/Gallery/GalleryClient';
 import BookingSection from '@/widgets/Booking/BookingSection';
 import Contact from '@/widgets/About/Contact';
@@ -26,15 +26,16 @@ export default async function TenantHomePage({
     );
   }
 
+  const isEcommerce = tenant.niche === 'ecommerce';
+
   return (
     <>
       <Hero />
-      <About />
-      {/* Используем умный каталог, он сам решит, что рендерить */}
+      {!isEcommerce && <About />}
       {tenant.features.hasMenu && <CatalogClient />}
       {tenant.features.hasGallery && <GalleryClient />}
       {tenant.features.hasBooking && <BookingSection />}
-      <Contact />
+      {!isEcommerce && <Contact />}
     </>
   );
 }

@@ -37,7 +37,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-8 border-b border-text-inverse/20">
           <div className="lg:col-span-2">
             <p className="font-heading text-2xl font-semibold text-text-inverse mb-3">
-              {tenant?.clientName ?? ''}
+              {(tenant?.businessName || tenant?.clientName) || ''}
             </p>
             {settings.address && <p className="text-sm">{settings.address}</p>}
             {settings.phone && (
@@ -88,7 +88,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 text-sm">
-          <p>© {currentYear} {tenant?.clientName ?? ''}</p>
+          <p>© {(tenant?.businessName || tenant?.clientName) || ''}</p>
           <p className="flex items-center gap-1">
             <span>{t('poweredBy')}</span>
             <a href="https://gopublica.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-text-inverse hover:underline">

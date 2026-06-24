@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import type { MenuItem } from '@/entities/menu-item/types'
+import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types'
 import ProductCard from './ProductCard'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -8,11 +8,12 @@ const AUTO_ADVANCE_INTERVAL = 3500
 const RESUME_DELAY = 3000
 const SCROLL_ANIMATION_DURATION = 600
 
-export default function EcommerceCarouselLayout({ items, locale, variant, currencySymbol }: { 
+export default function EcommerceCarouselLayout({ items, locale, variant, currencySymbol, productImageAspectRatio }: { 
   items: MenuItem[], 
   locale?: string,
-  variant: 'overlay' | 'action-bar' | 'minimal',
-  currencySymbol?: string
+  variant: ProductCardVariant,
+  currencySymbol?: string,
+  productImageAspectRatio?: string,
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const isPausedRef = useRef(false)
@@ -126,6 +127,7 @@ export default function EcommerceCarouselLayout({ items, locale, variant, curren
               variant={variant} 
               locale={locale} 
               currencySymbol={currencySymbol}
+              imageAspectRatio={productImageAspectRatio}
             />
           </div>
         ))}

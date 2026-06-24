@@ -1,5 +1,6 @@
 export type Niche = 'food' | 'beauty' | 'ecommerce' | 'auto';
 export type ProductType = 'food' | 'service' | 'physical_product';
+export type ProductCardVariant = 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay';
 
 export interface ProductVariant {
   id: string;
