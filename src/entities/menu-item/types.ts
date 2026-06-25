@@ -28,12 +28,10 @@ export type MenuItem = {
     name?: string;
     description?: string;
   }>;
-  // Новые поля для персонализации
   hasPersonalization?: boolean;
   modifierGroups?: MenuItemModifierGroup[];
   productType?: ProductType
 
-  // новые поля e-commerce
   sku?: string;
   stock?: number;
   compareAtPrice?: number;
@@ -48,6 +46,7 @@ export type MenuItem = {
   };
   tags?: string[];
   variants?: ProductVariant[];
+  isFeatured?: boolean;   // 👈 добавь это поле
 }
 
 export type MenuCategory = {

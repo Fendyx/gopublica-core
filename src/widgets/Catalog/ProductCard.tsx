@@ -26,12 +26,31 @@ export default function ProductCard({ product, variant, locale, currencySymbol =
 }
 
 function CardImage({ product, aspectRatio = '1/1' }: { product: MenuItem; aspectRatio?: string }) {
+  const isVideo = /\.(mp4|webm|ogg|mov|avi|mkv)$/i.test(product.image || '');
+
   return (
     <div className="relative w-full overflow-hidden bg-muted/50" style={{ aspectRatio }}>
       {product.image ? (
-        <img src={product.image} alt={product.name} className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105" />
+        isVideo ? (
+          <video
+            src={product.image}
+            className="w-full h-full object-contain"
+            muted
+            loop
+            playsInline
+            autoPlay
+          />
+        ) : (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+        )
       ) : (
-        <div className="flex items-center justify-center w-full h-full text-muted-foreground text-sm">No Image</div>
+        <div className="flex items-center justify-center w-full h-full text-muted-foreground text-sm">
+          No Image
+        </div>
       )}
     </div>
   );

@@ -1,15 +1,19 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useBranch } from '@/entities/branch/BranchContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Plus, Search, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Loader2, Star } from 'lucide-react';
 import ProductForm from '@/features/ecommerce-management/ProductForm';
 import CategoryForm from '@/features/ecommerce-management/CategoryForm';
+import SortableCategoryList from '@/features/ecommerce-management/SortableCategoryList';
 import type { MenuItem } from '@/entities/menu-item/types';
+
+const FEATURED_ID = 'featured';
+const STORAGE_KEY = (tenantId: string) => `${tenantId}_categories_order`;
 
 export default function ProductManager({ token }: { token: string }) {
   const tenant = useTenant();
@@ -17,11 +21,11 @@ export default function ProductManager({ token }: { token: string }) {
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<MenuItem | null>(null);
-  const [editingCategory, setEditingCategory] = useState<any | null>(null); // <--- НОВОЕ СОСТОЯНИЕ
+  const [editingCategory, setEditingCategory] = useState<any | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -61,15 +65,12 @@ export default function ProductManager({ token }: { token: string }) {
 
   const handleDeleteProduct = async (id: string) => {
     if (!confirm('Delete this product?')) return;
-    await fetch(`${apiUrl}/api/saas/menu/${id}`, { 
-      method: 'DELETE', 
-      headers: { Authorization: `Bearer ${token}` } 
-    });
+    await fetch(`${apiUrl}/api/saas/menu/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     fetchData();
   };
 
-  // НОВЫЕ ФУНКЦИИ ДЛЯ КАТЕГОРИЙ
   const handleEditCategory = (cat: any) => {
+    if (cat.key === FEATURED_ID) return;
     setEditingCategory(cat);
     setIsCategoryFormOpen(true);
   };
@@ -80,16 +81,67 @@ export default function ProductManager({ token }: { token: string }) {
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (!confirm('Delete this category? Products will remain but become uncategorized.')) return;
-    // Используем роут удаления по ID (убедись что он есть на бекенде, если нет - используй key)
-    await fetch(`${apiUrl}/api/saas/categories/${id}`, { 
-      method: 'DELETE', 
-      headers: { Authorization: `Bearer ${token}` } 
-    });
+    if (id === FEATURED_ID) return;
+    if (!confirm('Delete this category?')) return;
+    await fetch(`${apiUrl}/api/saas/categories/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     fetchData();
   };
 
-  if (loading) return <div className="text-center py-10 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Loading products...</div>;
+  // Переупорядочивание – сохраняем порядок в localStorage, обновляем стейт, серверу отправляем только реальные категории
+  const handleReorderCategories = async (newOrder: any[]) => {
+    // Сохраняем полный порядок (включая Featured) в localStorage
+    try {
+      localStorage.setItem(STORAGE_KEY(tenant?.tenantId || ''), JSON.stringify(newOrder.map(c => c.key)));
+    } catch {}
+    
+    // Отправляем на сервер только реальные категории
+    const realCats = newOrder.filter(c => c.key !== FEATURED_ID);
+    try {
+      const res = await fetch(`${apiUrl}/api/saas/categories/reorder`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds: realCats.map(c => c._id) }),
+      });
+      if (res.ok) {
+        // Обновляем локальный стейт – категории теперь в новом порядке
+        setCategories(realCats);
+      } else {
+        console.error('Failed to reorder categories');
+        // При ошибке можно перезагрузить данные
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Проверяем, есть ли featured товары
+  const hasFeatured = products.some(p => p.isFeatured);
+
+  // Восстанавливаем порядок категорий из localStorage с учётом Featured
+  const orderedCategories = useMemo(() => {
+    const savedOrder = (typeof window !== 'undefined') ? localStorage.getItem(STORAGE_KEY(tenant?.tenantId || '')) : null;
+    // Базовый список: сначала Featured (если есть), потом категории
+    const baseList = [
+      ...(hasFeatured ? [{ _id: FEATURED_ID, key: FEATURED_ID, name: '⭐ Featured', layout: 'featured', order: -1, tenantId: tenant?.tenantId }] : []),
+      ...categories,
+    ];
+
+    if (savedOrder) {
+      try {
+        const orderKeys: string[] = JSON.parse(savedOrder);
+        // Сортируем baseList согласно orderKeys, новые категории добавляем в конец
+        const ordered = orderKeys
+          .map(key => baseList.find(c => c.key === key))
+          .filter(Boolean) as any[];
+        const missingCats = baseList.filter(c => !ordered.some(oc => oc.key === c.key));
+        return [...ordered, ...missingCats];
+      } catch {}
+    }
+    return baseList;
+  }, [categories, hasFeatured, tenant?.tenantId]);
+
+  if (loading) return <div className="text-center py-10 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Loading...</div>;
 
   return (
     <div className="max-w-7xl mx-auto pb-12 space-y-6">
@@ -141,7 +193,10 @@ export default function ProductManager({ token }: { token: string }) {
                           <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">No img</div>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {product.name}
+                        {product.isFeatured && <Star className="inline ml-2 w-4 h-4 text-yellow-500" />}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {product.category || categories.find(c => c.key === product.categoryKey)?.name || 'Uncategorized'}
                       </TableCell>
@@ -167,60 +222,29 @@ export default function ProductManager({ token }: { token: string }) {
           </Card>
         </TabsContent>
 
-        {/* Categories Tab */}
-                {/* Categories Tab */}
+        {/* Categories Tab with Drag & Drop */}
         <TabsContent value="categories" className="mt-6">
           <Card className="p-6">
-            <div className="flex justify-end mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-sm text-muted-foreground">Drag to reorder</p>
               <Button className="gap-2" onClick={handleAddNewCategory}>
                 <Plus className="w-4 h-4" /> Add Category
               </Button>
             </div>
 
-            <div className="rounded-lg border border-border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30">
-                    <TableHead>Name</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Layout</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {/* ФИЛЬТРУЕМ КАТЕГОРИИ ДЛЯ ОТОБРАЖЕНИЯ В ТАБЛИЦЕ */}
-                  {categories
-                    .filter(cat => {
-                      // 1. Показываем, если админ создал её сам (она привязана к тенанту)
-                      if (cat.tenantId === tenant?.tenantId) return true;
-                      // 2. ИЛИ показываем, если это глобальная категория, но в ней ЕСТЬ товары
-                      const hasProducts = products.some(p => (p.categoryKey || p.category) === cat.key);
-                      return hasProducts;
-                    })
-                    .map((cat) => (
-                    <TableRow key={cat._id || cat.key} className="hover:bg-muted/20">
-                      <TableCell className="font-medium flex items-center gap-2">
-                        <span>{cat.icon || '📦'}</span> {cat.name}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground font-mono text-sm">{cat.key}</TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                          {cat.layout || 'grid-3'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditCategory(cat)}>
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(cat._id)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <SortableCategoryList
+              categories={orderedCategories.filter(cat => {
+                // Показываем все категории, которые есть в orderedCategories (включая Featured)
+                if (cat.key === FEATURED_ID) return true;
+                // Фильтрация как раньше
+                if (cat.tenantId === tenant?.tenantId) return true;
+                return products.some(p => (p.categoryKey || p.category) === cat.key);
+              })}
+              onEdit={handleEditCategory}
+              onDelete={handleDeleteCategory}
+              onReorder={handleReorderCategories}
+              featuredId={FEATURED_ID}
+            />
           </Card>
         </TabsContent>
       </Tabs>
@@ -237,7 +261,7 @@ export default function ProductManager({ token }: { token: string }) {
       <CategoryForm 
         isOpen={isCategoryFormOpen} 
         onClose={() => setIsCategoryFormOpen(false)} 
-        editingCategory={editingCategory} // <--- ПЕРЕДАЕМ ОБЪЕКТ
+        editingCategory={editingCategory}
         token={token}
         onSave={fetchData}
       />

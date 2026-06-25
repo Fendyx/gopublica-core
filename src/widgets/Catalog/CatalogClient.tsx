@@ -9,7 +9,10 @@ import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout'
 import EcommerceCarouselLayout from '@/widgets/Catalog/EcommerceCarouselLayout'
 import EcommerceDynamicGrid from '@/widgets/Catalog/EcommerceDynamicGrid'
 import CategoryGrid, { CategoryCardData } from '@/widgets/Catalog/CategoryGrid'
+import FeaturedProductBanner from '@/widgets/Catalog/FeaturedProductBanner'
 import type { MenuItem } from '@/entities/menu-item/types'
+
+const FEATURED_KEY = 'featured';
 
 export default function CatalogClient() {
   const { selectedBranch } = useBranch()
@@ -53,56 +56,100 @@ export default function CatalogClient() {
   if (loading) return <div className="text-center py-10">Загрузка...</div>
 
   if (niche === 'ecommerce') {
-    const categoryCardsData: CategoryCardData[] = categories.map(cat => {
-      const productCount = items.filter(item => (item.categoryKey || item.category) === cat.key).length;
-      return {
-        name: cat.name,
-        key: cat.key,
-        coverImage: cat.coverImage,
-        productCount,
-        cardBgColor: cat.cardBgColor,
-        description: cat.description,
-        imageAspectRatio: cat.imageAspectRatio,               // <- добавить
-        productImageAspectRatio: cat.productImageAspectRatio,
-      };
-    }).filter(cat => cat.productCount > 0);
+    const featuredItems = items.filter(item => item.isFeatured === true);
+    const allItems = items;
 
-    const groupedItems = items.reduce((acc, item) => {
+    // Категории + виртуальная featured, если есть featured‑товары
+    const hasFeatured = featuredItems.length > 0;
+    const allCategories = hasFeatured
+      ? [{ key: FEATURED_KEY, name: 'Featured', layout: 'featured' }, ...categories]
+      : categories;
+
+    // Карточки категорий (без featured)
+    const categoryCardsData: CategoryCardData[] = categories
+      .filter(cat => cat.key !== FEATURED_KEY)
+      .map(cat => {
+        const productCount = allItems.filter(item => (item.categoryKey || item.category) === cat.key).length;
+        return {
+          name: cat.name,
+          key: cat.key,
+          coverImage: cat.coverImage,
+          productCount,
+          cardBgColor: cat.cardBgColor,
+          description: cat.description,
+          imageAspectRatio: cat.imageAspectRatio,
+          productImageAspectRatio: cat.productImageAspectRatio,
+        };
+      })
+      .filter(cat => cat.productCount > 0);
+
+    // Группировка всех товаров по категориям
+    const groupedItems = allItems.reduce((acc, item) => {
       const key = item.categoryKey || item.category || 'uncategorized';
       if (!acc[key]) acc[key] = [];
       acc[key].push(item);
       return acc;
     }, {} as Record<string, MenuItem[]>);
 
+    // Восстановленный порядок категорий (если есть в localStorage)
+    const savedOrder = (typeof window !== 'undefined') ? localStorage.getItem(`${tenant?.tenantId}_categories_order`) : null;
+    let orderedCats = allCategories;
+    if (savedOrder) {
+      try {
+        const orderKeys: string[] = JSON.parse(savedOrder);
+        orderedCats = orderKeys
+          .map(key => allCategories.find(c => c.key === key))
+          .filter(Boolean) as any[];
+        const missingCats = allCategories.filter(c => !orderedCats.some(oc => oc.key === c.key));
+        orderedCats = [...orderedCats, ...missingCats];
+      } catch {}
+    }
+
     return (
       <div className="bg-transparent">
         <CategoryGrid categories={categoryCardsData} bgColor={tenant?.theme?.categoryBgColor} />
 
         <div className="py-16 bg-transparent space-y-12">
-          {Object.entries(groupedItems).map(([key, products]) => {
-            const category = categories.find(c => c.key === key);
-            const layout = category?.layout || 'grid-3';
-            const categoryName = category?.name || key;
-            const bgColor = category?.cardBgColor;
+          {orderedCats.map(cat => {
+            if (cat.key === FEATURED_KEY) {
+              // Рендерим featured‑баннеры
+              return featuredItems.length > 0 ? (
+                <div key={FEATURED_KEY} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+                  {featuredItems.map(product => (
+                    <FeaturedProductBanner
+                      key={product._id}
+                      product={product}
+                      locale={locale}
+                      currencySymbol={currencySymbol}
+                    />
+                  ))}
+                </div>
+              ) : null;
+            }
+            const products = groupedItems[cat.key] || [];
+            if (products.length === 0) return null;
+
+            const layout = cat.layout || 'grid-3';
+            const bgColor = cat.cardBgColor;
 
             return (
               <section 
-                key={key} 
+                key={cat.key} 
                 style={bgColor ? { backgroundColor: bgColor } : undefined}
                 className={!bgColor ? '' : 'py-12 shadow-sm border-y border-border'}
               >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <h2 className="text-2xl font-bold text-foreground mb-1">
-                    {categoryName}
+                    {cat.name}
                   </h2>
-                  {category?.description && (
-                    <p className="text-muted-foreground mb-6">{category.description}</p>
+                  {cat.description && (
+                    <p className="text-muted-foreground mb-6">{cat.description}</p>
                   )}
 
-                  {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
-                  {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
-                  {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
-                  {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={category?.productImageAspectRatio || '1/1'}/>}
+                  {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} />}
+                  {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'}/>}
+                  {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'}/>}
+                  {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'}/>}
                 </div>
               </section>
             );

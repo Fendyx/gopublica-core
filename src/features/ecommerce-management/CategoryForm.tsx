@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Loader2, ImagePlus } from 'lucide-react';
+import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 
 interface CategoryFormProps {
   isOpen: boolean;
@@ -27,6 +29,11 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
     cardBgColor: '',
     imageAspectRatio: '1/1',
     productImageAspectRatio: '1/1',
+    carouselAutoplay: false,
+  });
+
+  const { openWidget, widgetReady, isWidgetOpen } = useCloudinaryUpload({
+    onSuccess: (url) => setForm((prev) => ({ ...prev, coverImage: url })),
   });
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -42,6 +49,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
         cardBgColor: editingCategory.cardBgColor || '',
         imageAspectRatio: editingCategory.imageAspectRatio || '1/1',
         productImageAspectRatio: editingCategory.productImageAspectRatio || '1/1',
+        carouselAutoplay: editingCategory.carouselAutoplay || false,
       });
     } else {
       setForm({
@@ -53,6 +61,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
         cardBgColor: '',
         imageAspectRatio: '1/1',
         productImageAspectRatio: '1/1',
+        carouselAutoplay: false,
       });
     }
   }, [editingCategory, isOpen]);
@@ -85,6 +94,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
           niche: 'ecommerce',
           imageAspectRatio: form.imageAspectRatio,
           productImageAspectRatio: form.productImageAspectRatio,
+          carouselAutoplay: form.carouselAutoplay,
         }),
       });
 
@@ -98,6 +108,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
           cardBgColor: '',
           imageAspectRatio: '1/1',
           productImageAspectRatio: '1/1',
+          carouselAutoplay: false,
         });
         onSave();
         onClose();
@@ -116,7 +127,14 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && isWidgetOpen) return;
+        onClose();
+      }}
+      modal={false}
+    >
       <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
         <SheetHeader className="p-6 border-b border-border">
           <SheetTitle className="text-xl">{editingCategory ? 'Edit Category' : 'Add New Category'}</SheetTitle>
@@ -175,20 +193,36 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
               </div>
             </div>
 
+            {/* Опция авто-скролла для карусели */}
+            {form.layout === 'carousel' && (
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="carouselAutoplay"
+                  checked={form.carouselAutoplay}
+                  onCheckedChange={(checked) => setForm({ ...form, carouselAutoplay: checked })}
+                />
+                <Label htmlFor="carouselAutoplay">Auto‑scroll carousel</Label>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="cat-cover">Cover Image URL</Label>
-              <Input
-                id="cat-cover"
-                placeholder="https://images.unsplash.com/..."
-                value={form.coverImage}
-                onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
-              />
+              <Label htmlFor="cat-cover">Cover Image</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="cat-cover"
+                  placeholder="https://..."
+                  value={form.coverImage}
+                  onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
+                />
+                <Button type="button" variant="outline" onClick={openWidget} disabled={!widgetReady} className="gap-2 shrink-0">
+                  <ImagePlus className="w-4 h-4" /> Upload
+                </Button>
+              </div>
               {form.coverImage && (
                 <img src={form.coverImage} alt="Preview" className="w-full h-24 object-cover rounded-md border" />
               )}
             </div>
 
-            {/* Пропорция для карточек категорий */}
             <div className="space-y-2">
               <Label>Category Card Image Aspect Ratio</Label>
               <Select value={form.imageAspectRatio} onValueChange={(val) => setForm({ ...form, imageAspectRatio: val })}>
@@ -202,7 +236,6 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
               </Select>
             </div>
 
-            {/* Пропорция для карточек продуктов ВНУТРИ категории */}
             <div className="space-y-2">
               <Label>Product Image Aspect Ratio</Label>
               <Select value={form.productImageAspectRatio} onValueChange={(val) => setForm({ ...form, productImageAspectRatio: val })}>
