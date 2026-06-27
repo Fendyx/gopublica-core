@@ -138,25 +138,25 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
         />
         <MetricCard
           icon={<DollarSign className="w-5 h-5" />}
-          label="Выручка"
+          label="Revenue"
           value={`$${salesSummary.totalRevenue.toLocaleString()}`}
           color="bg-green-50 text-green-600"
         />
         <MetricCard
           icon={<ShoppingCart className="w-5 h-5" />}
-          label="Заказы"
+          label="Orders"
           value={salesSummary.totalOrders.toLocaleString()}
           color="bg-purple-50 text-purple-600"
         />
         <MetricCard
           icon={<Activity className="w-5 h-5" />}
-          label="Средний чек"
+          label="Average bill"
           value={`$${salesSummary.avgCheck.toLocaleString()}`}
           color="bg-amber-50 text-amber-600"
         />
         <MetricCard
           icon={<TrendingUp className="w-5 h-5" />}
-          label="Конверсия"
+          label="Conversion"
           value={`${salesSummary.conversionRate}%`}
           color="bg-rose-50 text-rose-600"
         />
@@ -185,7 +185,7 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
       {/* Sales mock chart */}
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Продажи (mock)</CardTitle>
+          <CardTitle className="text-lg font-semibold">Sales</CardTitle>
         </CardHeader>
         <CardContent className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -206,8 +206,8 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
               <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
               <Legend />
-              <Area yAxisId="left" type="monotone" dataKey="revenue" stroke={SALES_COLOR} fill="url(#revGrad)" name="Выручка ($)" />
-              <Area yAxisId="right" type="monotone" dataKey="orders" stroke={ORDERS_COLOR} fill="url(#ordGrad)" name="Заказы" />
+              <Area yAxisId="left" type="monotone" dataKey="revenue" stroke={SALES_COLOR} fill="url(#revGrad)" name="Revenue ($)" />
+              <Area yAxisId="right" type="monotone" dataKey="orders" stroke={ORDERS_COLOR} fill="url(#ordGrad)" name="Orders" />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>

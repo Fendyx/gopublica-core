@@ -87,14 +87,11 @@ export default function ProductManager({ token }: { token: string }) {
     fetchData();
   };
 
-  // Переупорядочивание – сохраняем порядок в localStorage, обновляем стейт, серверу отправляем только реальные категории
   const handleReorderCategories = async (newOrder: any[]) => {
-    // Сохраняем полный порядок (включая Featured) в localStorage
     try {
       localStorage.setItem(STORAGE_KEY(tenant?.tenantId || ''), JSON.stringify(newOrder.map(c => c.key)));
     } catch {}
     
-    // Отправляем на сервер только реальные категории
     const realCats = newOrder.filter(c => c.key !== FEATURED_ID);
     try {
       const res = await fetch(`${apiUrl}/api/saas/categories/reorder`, {
@@ -103,11 +100,9 @@ export default function ProductManager({ token }: { token: string }) {
         body: JSON.stringify({ orderedIds: realCats.map(c => c._id) }),
       });
       if (res.ok) {
-        // Обновляем локальный стейт – категории теперь в новом порядке
         setCategories(realCats);
       } else {
         console.error('Failed to reorder categories');
-        // При ошибке можно перезагрузить данные
         fetchData();
       }
     } catch (err) {
@@ -115,13 +110,10 @@ export default function ProductManager({ token }: { token: string }) {
     }
   };
 
-  // Проверяем, есть ли featured товары
   const hasFeatured = products.some(p => p.isFeatured);
 
-  // Восстанавливаем порядок категорий из localStorage с учётом Featured
   const orderedCategories = useMemo(() => {
     const savedOrder = (typeof window !== 'undefined') ? localStorage.getItem(STORAGE_KEY(tenant?.tenantId || '')) : null;
-    // Базовый список: сначала Featured (если есть), потом категории
     const baseList = [
       ...(hasFeatured ? [{ _id: FEATURED_ID, key: FEATURED_ID, name: '⭐ Featured', layout: 'featured', order: -1, tenantId: tenant?.tenantId }] : []),
       ...categories,
@@ -130,7 +122,6 @@ export default function ProductManager({ token }: { token: string }) {
     if (savedOrder) {
       try {
         const orderKeys: string[] = JSON.parse(savedOrder);
-        // Сортируем baseList согласно orderKeys, новые категории добавляем в конец
         const ordered = orderKeys
           .map(key => baseList.find(c => c.key === key))
           .filter(Boolean) as any[];
@@ -160,7 +151,7 @@ export default function ProductManager({ token }: { token: string }) {
 
         {/* Products Tab */}
         <TabsContent value="products" className="mt-6">
-          <Card className="p-6">
+          <Card className="p-4 lg:p-6">
             <div className="flex justify-between items-center mb-6">
               <div className="relative w-full max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -171,7 +162,8 @@ export default function ProductManager({ token }: { token: string }) {
               </Button>
             </div>
 
-            <div className="rounded-lg border border-border overflow-hidden">
+            {/* Desktop table */}
+            <div className="hidden lg:block rounded-lg border border-border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
@@ -219,12 +211,50 @@ export default function ProductManager({ token }: { token: string }) {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Mobile cards */}
+            <div className="lg:hidden space-y-4">
+              {products.map((product) => (
+                <div key={product._id} className="border rounded-lg p-4 bg-card flex gap-4 items-start">
+                  <div className="shrink-0">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-16 h-16 rounded-md object-cover" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">No img</div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm truncate">{product.name}</h3>
+                      {product.isFeatured && <Star className="w-4 h-4 text-yellow-500 shrink-0" />}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {product.category || categories.find(c => c.key === product.categoryKey)?.name || 'Uncategorized'}
+                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="font-bold text-sm">${product.price.toFixed(2)}</span>
+                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-gray-100 text-gray-500' : 'bg-emerald-100 text-emerald-700'}`}>
+                        {(product as any).status === 'draft' ? 'Draft' : 'Active'}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
+                        <Pencil className="w-3 h-3 mr-1" /> Edit
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product._id!)}>
+                        <Trash2 className="w-3 h-3 mr-1 text-red-500" /> Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </Card>
         </TabsContent>
 
         {/* Categories Tab with Drag & Drop */}
         <TabsContent value="categories" className="mt-6">
-          <Card className="p-6">
+          <Card className="p-4 lg:p-6">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-muted-foreground">Drag to reorder</p>
               <Button className="gap-2" onClick={handleAddNewCategory}>
@@ -234,9 +264,7 @@ export default function ProductManager({ token }: { token: string }) {
 
             <SortableCategoryList
               categories={orderedCategories.filter(cat => {
-                // Показываем все категории, которые есть в orderedCategories (включая Featured)
                 if (cat.key === FEATURED_ID) return true;
-                // Фильтрация как раньше
                 if (cat.tenantId === tenant?.tenantId) return true;
                 return products.some(p => (p.categoryKey || p.category) === cat.key);
               })}

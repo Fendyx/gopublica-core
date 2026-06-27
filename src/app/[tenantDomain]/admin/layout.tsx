@@ -20,7 +20,9 @@ import {
   Store,
   ChartLine,
   FileText,
-  Package // <--- ИМПОРТИРУЕМ ИКОНКУ
+  Package,
+  Menu,
+  X,
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { Separator } from '@/components/ui/separator';
@@ -85,14 +87,19 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const pathname = usePathname();
   const router = useRouter();
   const tenant = useTenant();
-  
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const isEcommerce = tenant?.niche === 'ecommerce';
 
   const navItems = [
     { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
     { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
-    // МЕНЯЕМ ЛОГИКУ ДЛЯ МЕНЮ/ТОВАРОВ:
-    { href: isEcommerce ? '/admin/ecommerce' : '/admin/menu', label: isEcommerce ? 'Catalog' : t('menu'), icon: isEcommerce ? Package : UtensilsCrossed },
+    {
+      href: isEcommerce ? '/admin/ecommerce' : '/admin/menu',
+      label: isEcommerce ? 'Catalog' : t('menu'),
+      icon: isEcommerce ? Package : UtensilsCrossed,
+    },
     { href: '/admin/orders', label: t('orders'), icon: FileText },
     { href: '/admin/gallery', label: t('gallery'), icon: ImageIcon },
     { href: '/admin/reservations', label: t('reservations'), icon: CalendarCheck },
@@ -102,21 +109,61 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
     { href: '/admin/settings', label: t('settings'), icon: Settings },
   ];
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
-    <div className="platform-ui flex min-h-screen bg-background">
-      <aside className="w-64 bg-card border-r border-border flex flex-col">
-        <div className="p-4">
-          <h2 className="font-bold text-lg text-foreground">{tenant?.clientName ?? ''}</h2>
-          <p className="text-xs text-muted-foreground">{t('siteManagement')}</p>
+    <div className="platform-ui flex min-h-screen bg-background relative">
+      
+      {/* Кнопка открытия меню (показываем только когда меню закрыто) */}
+      {!mobileMenuOpen && (
+        <div className="lg:hidden fixed top-4 left-4 z-50">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu size={20} />
+          </Button>
         </div>
+      )}
+
+      {/* Сайдбар */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-in-out
+          lg:relative lg:translate-x-0
+          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        {/* Шапка сайдбара с названием и кнопкой закрытия */}
+        <div className="p-4 flex items-start justify-between">
+          <div>
+            <h2 className="font-bold text-lg text-foreground">
+              {tenant?.businessName || tenant?.clientName || ''}
+            </h2>
+            <p className="text-xs text-muted-foreground">{t('siteManagement')}</p>
+          </div>
+          
+          {/* Кнопка закрытия меню (в правом углу сайдбара) */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden -mt-1 -mr-1 text-muted-foreground hover:text-foreground"
+            onClick={closeMobileMenu}
+          >
+            <X size={20} />
+          </Button>
+        </div>
+        
         <Separator />
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={closeMobileMenu}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                   isActive
                     ? 'bg-black/5 dark:bg-white/10 text-foreground font-medium backdrop-blur-sm shadow-sm'
@@ -147,7 +194,15 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
         </div>
       </aside>
 
-      <main className="flex-1 p-6">
+      {/* Оверлей для мобильного меню (затемнение фона) */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      <main className="flex-1 p-4 lg:p-6 pt-16 lg:pt-6">
         <div className="flex justify-end mb-4">
           <AdminBranchSwitcher />
         </div>
