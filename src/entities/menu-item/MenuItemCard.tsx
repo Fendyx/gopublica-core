@@ -177,11 +177,11 @@ export default function MenuItemCard({
   // Grid layout
   return (
     <>
-      <article
-        className={`group flex flex-col bg-surface-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-dropdown ${
-          isEcommerce && mode === 'public' ? 'cursor-pointer' : ''
-        }`}
-      >
+<article
+  className={`group flex flex-col h-full bg-surface-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-dropdown ${
+    isEcommerce && mode === 'public' ? 'cursor-pointer' : ''
+  }`}
+>
         {isEcommerce && mode === 'public' ? (
           <Link href={`/${locale}/catalog/${item._id}`} className="flex flex-col h-full">
             <CardInner
