@@ -30,6 +30,8 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
     imageAspectRatio: '1/1',
     productImageAspectRatio: '1/1',
     carouselAutoplay: false,
+    productCardVariant: '',
+    productCardWidth: 'default'
   });
 
   const { openWidget, widgetReady, isWidgetOpen } = useCloudinaryUpload({
@@ -50,6 +52,8 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
         imageAspectRatio: editingCategory.imageAspectRatio || '1/1',
         productImageAspectRatio: editingCategory.productImageAspectRatio || '1/1',
         carouselAutoplay: editingCategory.carouselAutoplay || false,
+        productCardVariant: editingCategory.productCardVariant || '',
+        productCardWidth: editingCategory.productCardWidth || 'default'
       });
     } else {
       setForm({
@@ -62,6 +66,8 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
         imageAspectRatio: '1/1',
         productImageAspectRatio: '1/1',
         carouselAutoplay: false,
+        productCardVariant: '',
+        productCardWidth: 'default'
       });
     }
   }, [editingCategory, isOpen]);
@@ -95,6 +101,8 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
           imageAspectRatio: form.imageAspectRatio,
           productImageAspectRatio: form.productImageAspectRatio,
           carouselAutoplay: form.carouselAutoplay,
+          productCardVariant: form.productCardVariant || null,
+          productCardWidth: form.productCardWidth
         }),
       });
 
@@ -109,6 +117,8 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
           imageAspectRatio: '1/1',
           productImageAspectRatio: '1/1',
           carouselAutoplay: false,
+          productCardVariant: '',
+          productCardWidth: 'default'
         });
         onSave();
         onClose();
@@ -147,37 +157,18 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="space-y-2">
               <Label htmlFor="cat-name">Category Name</Label>
-              <Input
-                id="cat-name"
-                placeholder="e.g. Electronics"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-              />
+              <Input id="cat-name" placeholder="e.g. Electronics" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cat-description">Description</Label>
-              <Textarea
-                id="cat-description"
-                placeholder="e.g. Just landed"
-                rows={2}
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
+              <Textarea id="cat-description" placeholder="e.g. Just landed" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="cat-icon">Icon (Emoji)</Label>
-                <Input
-                  id="cat-icon"
-                  placeholder="📦"
-                  value={form.icon}
-                  onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                  className="text-center text-xl"
-                  maxLength={2}
-                />
+                <Input id="cat-icon" placeholder="📦" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="text-center text-xl" maxLength={2} />
               </div>
               <div className="space-y-2">
                 <Label>Display Layout</Label>
@@ -193,14 +184,40 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
               </div>
             </div>
 
-            {/* Опция авто-скролла для карусели */}
+            {/* Новый селект для выбора стиля карточек */}
+            <div className="space-y-2">
+              <Label>Product Card Style</Label>
+              <Select value={form.productCardVariant || '__global__'} onValueChange={(val) => setForm({ ...form, productCardVariant: val === '__global__' ? '' : val })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__global__">Use global setting</SelectItem>
+                  <SelectItem value="action-bar">Action Bar</SelectItem>
+                  <SelectItem value="overlay">Hover Overlay</SelectItem>
+                  <SelectItem value="minimal">Minimalist</SelectItem>
+                  <SelectItem value="clean">Clean (image only)</SelectItem>
+                  <SelectItem value="hover-vertical">Vertical Overlay</SelectItem>
+                  <SelectItem value="action-overlay">Action + Overlay</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Product Card Width</Label>
+              <Select value={form.productCardWidth} onValueChange={(val) => setForm({ ...form, productCardWidth: val })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="large">Large</SelectItem>
+                  <SelectItem value="xlarge">Extra Large</SelectItem>
+                  <SelectItem value="full">Full Width</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {form.layout === 'carousel' && (
               <div className="flex items-center space-x-2 pt-2">
-                <Switch
-                  id="carouselAutoplay"
-                  checked={form.carouselAutoplay}
-                  onCheckedChange={(checked) => setForm({ ...form, carouselAutoplay: checked })}
-                />
+                <Switch id="carouselAutoplay" checked={form.carouselAutoplay} onCheckedChange={(checked) => setForm({ ...form, carouselAutoplay: checked })} />
                 <Label htmlFor="carouselAutoplay">Auto‑scroll carousel</Label>
               </div>
             )}
@@ -208,12 +225,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
             <div className="space-y-2">
               <Label htmlFor="cat-cover">Cover Image</Label>
               <div className="flex gap-2">
-                <Input
-                  id="cat-cover"
-                  placeholder="https://..."
-                  value={form.coverImage}
-                  onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
-                />
+                <Input id="cat-cover" placeholder="https://..." value={form.coverImage} onChange={(e) => setForm({ ...form, coverImage: e.target.value })} />
                 <Button type="button" variant="outline" onClick={openWidget} disabled={!widgetReady} className="gap-2 shrink-0">
                   <ImagePlus className="w-4 h-4" /> Upload
                 </Button>
@@ -265,12 +277,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
                   className="max-w-xs"
                 />
                 {form.cardBgColor && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setForm({ ...form, cardBgColor: '' })}
-                  >
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, cardBgColor: '' })}>
                     Reset
                   </Button>
                 )}

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types';
 import { useCartStore } from '@/shared/store/cartStore';
+import { useCartToast } from '@/shared/ui/CartToast';
 import { ShoppingBag, Eye } from 'lucide-react';
 
 interface Props {
@@ -21,6 +22,7 @@ export default function ProductCard({ product, variant, locale, currencySymbol =
       {variant === 'minimal' && <MinimalCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
       {variant === 'hover-vertical' && <HoverVerticalCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
       {variant === 'action-overlay' && <ActionOverlayCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'clean' && <CleanCard product={product} locale={locale} imageAspectRatio={imageAspectRatio} />}
     </div>
   );
 }
@@ -59,6 +61,7 @@ function CardImage({ product, aspectRatio = '1/1' }: { product: MenuItem; aspect
 /* ---------- 1. OVERLAY ---------- */
 function OverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
+  const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -66,6 +69,7 @@ function OverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { pr
     e.stopPropagation();
     setLoading(true);
     addItem({ uid: product._id!, menuItemId: product._id!, name: product.name, basePrice: product.price, price: product.price, quantity: 1 });
+    showToast(product.name);
     setTimeout(() => setLoading(false), 500);
   };
 
@@ -94,11 +98,13 @@ function OverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { pr
 /* ---------- 2. ACTION-BAR ---------- */
 function ActionBarCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
+  const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
 
   const handleAdd = () => {
     setLoading(true);
     addItem({ uid: product._id!, menuItemId: product._id!, name: product.name, basePrice: product.price, price: product.price, quantity: 1 });
+    showToast(product.name);
     setTimeout(() => setLoading(false), 500);
   };
 
@@ -140,6 +146,7 @@ function MinimalCard({ product, locale, currencySymbol, imageAspectRatio }: { pr
 /* ---------- 4. HOVER-VERTICAL ---------- */
 function HoverVerticalCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
+  const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -147,6 +154,7 @@ function HoverVerticalCard({ product, locale, currencySymbol, imageAspectRatio }
     e.stopPropagation();
     setLoading(true);
     addItem({ uid: product._id!, menuItemId: product._id!, name: product.name, basePrice: product.price, price: product.price, quantity: 1 });
+    showToast(product.name);
     setTimeout(() => setLoading(false), 500);
   };
 
@@ -175,6 +183,7 @@ function HoverVerticalCard({ product, locale, currencySymbol, imageAspectRatio }
 /* ---------- 5. ACTION-OVERLAY ---------- */
 function ActionOverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
+  const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -182,6 +191,7 @@ function ActionOverlayCard({ product, locale, currencySymbol, imageAspectRatio }
     e.stopPropagation();
     setLoading(true);
     addItem({ uid: product._id!, menuItemId: product._id!, name: product.name, basePrice: product.price, price: product.price, quantity: 1 });
+    showToast(product.name);
     setTimeout(() => setLoading(false), 500);
   };
 
@@ -208,5 +218,17 @@ function ActionOverlayCard({ product, locale, currencySymbol, imageAspectRatio }
         <div className="text-lg font-bold text-foreground">{product.price.toFixed(2)} {currencySymbol}</div>
       </div>
     </div>
+  );
+}
+
+/* ---------- 6. CLEAN ---------- */
+function CleanCard({ product, locale, imageAspectRatio }: { product: MenuItem; locale?: string; imageAspectRatio?: string }) {
+  return (
+    <Link href={`/${locale}/catalog/${product._id}`} className="block relative rounded-2xl overflow-hidden border border-border group transition-all duration-300 hover:shadow-lg">
+      <CardImage product={product} aspectRatio={imageAspectRatio} />
+      <div className="absolute bottom-0 left-0 p-4 bg-gradient-to-t from-black/80 to-transparent w-full">
+        <h3 className="text-white font-semibold text-base truncate">{product.name}</h3>
+      </div>
+    </Link>
   );
 }

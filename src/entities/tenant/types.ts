@@ -17,7 +17,7 @@ export type Theme = {
   galleryStyle?: 'bento' | 'masonry'
   ecommerceLayout?: EcommerceLayout
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
-    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay'
+    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay' | 'clean'
     categoryBgColor?: string
     pageBgColor?: string
 }

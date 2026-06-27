@@ -41,6 +41,7 @@ import {
   ShoppingBag,
   MousePointerClick,
   Eye,
+  Image,
 } from 'lucide-react';
 
 const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
@@ -331,6 +332,7 @@ export default function SettingsPageContent() {
                             { val: 'action-bar', label: 'Action Bar', desc: 'Button under image', icon: ShoppingBag },
                             { val: 'overlay', label: 'Hover Overlay', desc: 'Buttons on image', icon: Eye },
                             { val: 'minimal', label: 'Minimalist', desc: 'Only text & link', icon: MousePointerClick },
+                            { val: 'clean', label: 'Clean', desc: 'Image + name overlay', icon: Image },
                             { val: 'hover-vertical', label: 'Vertical Overlay', desc: 'Vertical buttons', icon: Eye },
                             { val: 'action-overlay', label: 'Action + Overlay', desc: 'Info below + overlay', icon: Eye },
                           ].map(opt => (

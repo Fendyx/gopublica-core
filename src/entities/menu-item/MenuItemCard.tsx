@@ -7,6 +7,7 @@ import { useBranch } from '@/entities/branch/BranchContext';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useCartStore } from '@/shared/store/cartStore';
+import { useCartToast } from '@/shared/ui/CartToast';
 import { useTranslations } from 'next-intl';
 import { MapPin } from 'lucide-react';
 import ProductConfiguratorModal from '@/widgets/Menu/ProductConfiguratorModal';
@@ -40,6 +41,7 @@ export default function MenuItemCard({
   const { selectedBranch, branches } = useBranch();
   const { primaryLanguage, primaryCurrency, loading: settingsLoading } = useBranchSettings();
   const addItem = useCartStore((s) => s.addItem);
+  const { showToast } = useCartToast();
   const showBranchBadge = branches.length > 1 && selectedBranch;
   const t = useTranslations('menu');
 
@@ -94,6 +96,7 @@ export default function MenuItemCard({
       price: finalPrice,
       quantity: 1,
     });
+    showToast(finalName);
   };
 
   // List layout

@@ -2,6 +2,7 @@
 import { usePathname } from 'next/navigation'
 import Navbar from '@/widgets/Navbar/Navbar'
 import Footer from '@/widgets/Footer/Footer'
+import { CartToastProvider } from '@/shared/ui/CartToast';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -14,11 +15,13 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   return (
     <div className="flex min-h-screen flex-col public-page">
-      <Navbar />
-      <main className="flex-1 pt-16 space-y-8">
-        {children}
-      </main>
-      {!isCheckoutPage && <Footer />}
+      <CartToastProvider>
+        <Navbar />
+        <main className="flex-1 pt-16 space-y-8">
+          {children}
+        </main>
+        {!isCheckoutPage && <Footer />}
+      </CartToastProvider>
     </div>
   )
 }

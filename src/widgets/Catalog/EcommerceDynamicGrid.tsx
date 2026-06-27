@@ -1,18 +1,18 @@
 'use client'
-
 import { useEffect, useRef } from 'react'
-import type { MenuItem, ProductCardVariant  } from '@/entities/menu-item/types'
-import ProductCard from './ProductCard' // <--- ИСПОЛЬЗУЕМ НОВЫЙ
+import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types'
+import ProductCard from './ProductCard'
 
 const ROW_UNIT = 8
 const GAP = 16
 
-export default function EcommerceDynamicGrid({ items, locale, variant, currencySymbol, productImageAspectRatio }: { 
-  items: MenuItem[], 
+export default function EcommerceDynamicGrid({ items, locale, variant, currencySymbol, productImageAspectRatio, productCardWidth = 'default' }: {
+  items: MenuItem[],
   locale?: string,
   variant: ProductCardVariant,
   currencySymbol?: string,
   productImageAspectRatio?: string,
+  productCardWidth?: string
 }) {
   const gridRef = useRef<HTMLDivElement>(null)
 
@@ -32,7 +32,6 @@ export default function EcommerceDynamicGrid({ items, locale, variant, currencyS
     }
 
     layoutItems()
-
     const observer = new ResizeObserver(layoutItems)
     Array.from(grid.children).forEach((cell) => {
       const content = cell.firstElementChild
@@ -41,6 +40,25 @@ export default function EcommerceDynamicGrid({ items, locale, variant, currencyS
 
     return () => observer.disconnect()
   }, [items, locale])
+
+  // Если full — каждая карточка на всю строку
+  if (productCardWidth === 'full') {
+    return (
+      <div className="flex flex-col gap-4">
+        {items.map((item) => (
+          <div key={item._id}>
+            <ProductCard
+              product={item}
+              variant={variant}
+              locale={locale}
+              currencySymbol={currencySymbol}
+              imageAspectRatio={productImageAspectRatio}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -53,10 +71,10 @@ export default function EcommerceDynamicGrid({ items, locale, variant, currencyS
         return (
           <div key={item._id} className={isLarge ? 'col-span-2' : 'col-span-1'}>
             <div>
-              <ProductCard 
-                product={item} 
-                variant={variant} 
-                locale={locale} 
+              <ProductCard
+                product={item}
+                variant={variant}
+                locale={locale}
                 currencySymbol={currencySymbol}
                 imageAspectRatio={productImageAspectRatio}
               />

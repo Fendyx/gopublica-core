@@ -10,7 +10,15 @@ import EcommerceCarouselLayout from '@/widgets/Catalog/EcommerceCarouselLayout'
 import EcommerceDynamicGrid from '@/widgets/Catalog/EcommerceDynamicGrid'
 import CategoryGrid, { CategoryCardData } from '@/widgets/Catalog/CategoryGrid'
 import FeaturedProductBanner from '@/widgets/Catalog/FeaturedProductBanner'
-import type { MenuItem } from '@/entities/menu-item/types'
+import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types'
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  PLN: 'zł', EUR: '€', USD: '$', UAH: '₴', GBP: '£', CZK: 'Kč', CHF: 'CHF',
+};
+
+function getCurrencySymbol(currencyCode?: string): string {
+  return currencyCode ? CURRENCY_SYMBOLS[currencyCode] || currencyCode : 'zł';
+}
 
 const FEATURED_KEY = 'featured';
 
@@ -28,8 +36,8 @@ export default function CatalogClient() {
   const niche = tenant?.niche ?? 'food'
 
   const ecommerceLayout = tenant?.theme?.ecommerceLayout ?? 'grid-3'
-  const variant = tenant?.theme?.productCardVariant ?? 'action-bar'
-  const currencySymbol = primaryCurrency === 'PLN' ? 'zł' : primaryCurrency || '€'
+  const globalVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
+  const currencySymbol = getCurrencySymbol(primaryCurrency);
 
   useEffect(() => {
     const fetchCatalog = async () => {
@@ -112,7 +120,6 @@ export default function CatalogClient() {
         <div className="py-16 bg-transparent space-y-12">
           {orderedCats.map(cat => {
             if (cat.key === FEATURED_KEY) {
-              // Рендерим featured‑баннеры
               return featuredItems.length > 0 ? (
                 <div key={FEATURED_KEY} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                   {featuredItems.map(product => (
@@ -131,6 +138,7 @@ export default function CatalogClient() {
 
             const layout = cat.layout || 'grid-3';
             const bgColor = cat.cardBgColor;
+            const variant = (cat.productCardVariant || globalVariant) as ProductCardVariant;
 
             return (
               <section 
@@ -146,10 +154,10 @@ export default function CatalogClient() {
                     <p className="text-muted-foreground mb-6">{cat.description}</p>
                   )}
 
-                  {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} />}
-                  {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'}/>}
-                  {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'}/>}
-                  {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'}/>}
+                  {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} productCardWidth={cat.productCardWidth || 'default'}/>}
+                  {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/> }
+                  {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/>}
+                  {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/>}
                 </div>
               </section>
             );

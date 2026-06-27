@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useCartStore } from '@/shared/store/cartStore';
+import { useCartToast } from '@/shared/ui/CartToast';
 import { Loader2, ShoppingBag } from 'lucide-react';
 import type { MenuItem, ProductVariant } from '@/entities/menu-item/types';
 
@@ -11,7 +13,9 @@ export default function AddToCartButton({
   product: MenuItem;
   selectedVariant?: ProductVariant | null;
 }) {
+  const t = useTranslations('productDetail');
   const addItem = useCartStore((s) => s.addItem);
+  const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
 
   const price = selectedVariant?.price ?? product.price;
@@ -19,15 +23,17 @@ export default function AddToCartButton({
 
   const handleAdd = () => {
     setLoading(true);
+    const finalName = variantName ? `${product.name} (${variantName})` : product.name;
     addItem({
       uid: selectedVariant ? `${product._id}-${selectedVariant.id}` : product._id!,
       menuItemId: product._id!,
       variantId: selectedVariant?.id,
-      name: variantName ? `${product.name} (${variantName})` : product.name,
+      name: finalName,
       basePrice: price,
       price: price,
       quantity: 1,
     });
+    showToast(finalName);
     setTimeout(() => setLoading(false), 500);
   };
 
@@ -41,8 +47,8 @@ export default function AddToCartButton({
     >
       {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingBag className="w-5 h-5" />}
       {product.variants && product.variants.length > 0 && !selectedVariant
-        ? 'Выберите вариант'
-        : 'Добавить в корзину'}
+        ? t('selectVariant')
+        : t('addToCart')}
     </button>
   );
 }

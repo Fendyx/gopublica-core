@@ -3,7 +3,15 @@ import Link from 'next/link';
 import EcommerceGridLayout from './EcommerceGridLayout';
 import EcommerceCarouselLayout from './EcommerceCarouselLayout';
 import EcommerceDynamicGrid from './EcommerceDynamicGrid';
-import type { MenuItem } from '@/entities/menu-item/types';
+import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types';
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  PLN: 'zł', EUR: '€', USD: '$', UAH: '₴', GBP: '£', CZK: 'Kč', CHF: 'CHF',
+};
+
+function getCurrencySymbol(currencyCode?: string): string {
+  return currencyCode ? CURRENCY_SYMBOLS[currencyCode] || currencyCode : 'zł';
+}
 
 interface Props {
   category: any;
@@ -14,8 +22,9 @@ interface Props {
 
 export default function CategoryViewClient({ category, products, locale, tenant }: Props) {
   const layout = category.layout || 'grid-3';
-  const variant = tenant?.theme?.productCardVariant || 'action-bar';
-  const currencySymbol = tenant?.primaryCurrency === 'PLN' ? 'zł' : tenant?.primaryCurrency || '€';
+  const globalVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
+  const variant = (category.productCardVariant || globalVariant) as ProductCardVariant;
+  const currencySymbol = getCurrencySymbol(tenant.primaryCurrency);
   const productImageAspectRatio = category.productImageAspectRatio || '1/1';
 
   return (
@@ -71,6 +80,9 @@ export default function CategoryViewClient({ category, products, locale, tenant 
                 locale={locale}
                 variant={variant}
                 currencySymbol={currencySymbol}
+                productImageAspectRatio={category.productImageAspectRatio || '1/1'}
+                autoplay={category.carouselAutoplay ?? false}
+                productCardWidth={category.productCardWidth || 'default'}
               />
             )}
             {layout === 'dynamic' && (
@@ -79,6 +91,7 @@ export default function CategoryViewClient({ category, products, locale, tenant 
                 locale={locale}
                 variant={variant}
                 currencySymbol={currencySymbol}
+                productCardWidth={category.productCardWidth || 'default'}
               />
             )}
             {layout === 'grid-4' && (
@@ -88,6 +101,7 @@ export default function CategoryViewClient({ category, products, locale, tenant 
                 columns={4}
                 variant={variant}
                 currencySymbol={currencySymbol}
+                productCardWidth={category.productCardWidth || 'default'}
               />
             )}
             {(layout === 'grid-3' || !layout) && (
@@ -97,6 +111,7 @@ export default function CategoryViewClient({ category, products, locale, tenant 
                 columns={3}
                 variant={variant}
                 currencySymbol={currencySymbol}
+                productCardWidth={category.productCardWidth || 'default'}
               />
             )}
           </>

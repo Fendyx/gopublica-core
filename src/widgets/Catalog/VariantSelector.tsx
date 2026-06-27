@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import type { ProductVariant } from '@/entities/menu-item/types';
 
 export default function VariantSelector({
@@ -10,12 +11,12 @@ export default function VariantSelector({
   selectedId?: string | null;
   onChange?: (variantId: string) => void;
 }) {
+  const t = useTranslations('productDetail');
   const currentId = selectedId || variants[0]?.id || '';
   const currentVariant = variants.find(v => v.id === currentId) || null;
 
   const handleSelect = (id: string) => onChange?.(id);
 
-  // Collect unique attribute keys across all variants
   const attributeKeys = new Set<string>();
   variants.forEach(v => {
     if (v.attributes) Object.keys(v.attributes).forEach(k => attributeKeys.add(k));
@@ -35,7 +36,6 @@ export default function VariantSelector({
 
           return (
             <div key={key}>
-              {/* Label row: attribute key + current selected value */}
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] tracking-widest uppercase font-medium text-muted-foreground">
                   {key}
@@ -69,7 +69,6 @@ export default function VariantSelector({
                       ].join(' ')}
                     >
                       {value}
-                      {/* Diagonal strike-through for out-of-stock */}
                       {isOos && (
                         <span className="absolute inset-0 overflow-hidden pointer-events-none">
                           <span
@@ -86,10 +85,9 @@ export default function VariantSelector({
           );
         })
       ) : (
-        /* Fallback: variants without attributes — show by name */
         <div>
           <span className="block text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
-            Вариант
+            {t('variant')}
           </span>
           <div className="flex flex-wrap gap-2">
             {variants.map(v => {
@@ -115,14 +113,13 @@ export default function VariantSelector({
         </div>
       )}
 
-      {/* Per-variant stock hint */}
       {currentVariant?.stock != null && (
         <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
           {currentVariant.stock > 10
-            ? 'В наличии'
+            ? t('inStock')
             : currentVariant.stock > 0
-            ? `Осталось: ${currentVariant.stock} шт.`
-            : 'Нет в наличии'}
+            ? t('stockLeft', { count: currentVariant.stock })
+            : t('outOfStock')}
         </p>
       )}
     </div>

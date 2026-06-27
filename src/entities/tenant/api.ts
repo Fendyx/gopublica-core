@@ -19,7 +19,7 @@ export interface TenantSettings {
     galleryStyle?: string;
     ecommerceLayout?: 'grid-3' | 'grid-4' | 'carousel' | 'dynamic';
     radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay';
+    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay' | 'clean';
     pageBgColor?: string;
   };
   features: {
