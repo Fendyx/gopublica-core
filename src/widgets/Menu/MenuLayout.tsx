@@ -139,7 +139,7 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
         {filteredItems.length === 0 ? (
           <p className="text-center text-text-secondary py-10">{t('emptyCategory')}</p>
         ) : menuStyle === 'grid' ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredItems.map(item => (
               <MenuItemCard key={item._id} item={item} mode="public" layout="grid" locale={locale} />
             ))}
