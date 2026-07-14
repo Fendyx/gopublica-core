@@ -42,12 +42,22 @@ function CheckoutForm() {
   // Основные данные
   const [fulfillmentType, setFulfillmentType] = useState<'pickup' | 'delivery'>('delivery');
   
-  // HOLLYWOOD MOCK
+  // HOLLYWOOD MOCK: Доставка
   const [deliveryService, setDeliveryService] = useState(tenant?.niche === 'ecommerce' ? 'usps' : 'courier');
   const [deliveryFee, setDeliveryFee] = useState(tenant?.niche === 'ecommerce' ? 8.50 : 7.00);
 
   const [scheduledFor, setScheduledFor] = useState<Date | null>(null);
-  const [address, setAddress] = useState({ street: '', city: '', zip: '', lat: 0, lng: 0 });
+  
+  // HOLLYWOOD MOCK: Предзаполненный идеальный американский адрес
+  const [address, setAddress] = useState({ 
+    street: '1350 Pennsylvania Avenue NW', 
+    city: 'Washington', 
+    state: 'DC', 
+    zip: '20004', 
+    lat: 0, 
+    lng: 0 
+  });
+  
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
   const [customer, setCustomer] = useState({ name: 'John Doe', phone: '+1 234 567 890', email: 'john@example.com' });
 
@@ -66,7 +76,7 @@ function CheckoutForm() {
   // Валидация
   const isAccountCreationValid = isLoggedIn || !password || (password.length >= 6 && password === confirmPassword && acceptTerms && acceptPrivacy);
 
-  // HOLLYWOOD MOCK
+  // HOLLYWOOD MOCK: Расчет цен
   useEffect(() => {
     if (subtotal <= 0) return setFees(null);
     setEstimating(true);
@@ -316,7 +326,7 @@ export default function CheckoutLayout() {
         appearance: {
           theme: 'stripe',
           variables: {
-            colorPrimary: '#2563eb', // Подгоняем Stripe UI под наш синий цвет (blue-600)
+            colorPrimary: '#2563eb', 
             borderRadius: '8px',
           },
         },

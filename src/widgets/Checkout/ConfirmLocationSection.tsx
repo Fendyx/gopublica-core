@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 interface ConfirmLocationSectionProps {
   fulfillmentType: 'pickup' | 'delivery';
   setFulfillmentType: (type: 'pickup' | 'delivery') => void;
-  address: { street: string; city: string; zip: string; lat: number; lng: number };
+  // Добавили state в тип адреса
+  address: { street: string; city: string; state?: string; zip: string; lat: number; lng: number };
   setAddress: (addr: any) => void;
   deliveryInstructions: string;
   setDeliveryInstructions: (val: string) => void;
@@ -31,7 +32,6 @@ export default function ConfirmLocationSection({
 
   return (
     <section>
-      {/* Адрес доставки показывается только если выбрана доставка (для рестиков) ИЛИ это E-commerce */}
       {(fulfillmentType === 'delivery' || isEcommerce) && (
         <>
           <h2 className="text-lg font-semibold text-gray-900 mb-4 mt-6">
@@ -48,12 +48,20 @@ export default function ConfirmLocationSection({
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            {/* ТУТ МАГИЯ: Сетка на 3 колонки для США */}
+            <div className="grid grid-cols-3 gap-3">
               <input
                 required
                 placeholder={t('city')}
                 value={address.city}
                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                className="px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
+              />
+              <input
+                required
+                placeholder="State"
+                value={address.state || ''}
+                onChange={(e) => setAddress({ ...address, state: e.target.value })}
                 className="px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
               />
               <input
