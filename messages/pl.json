@@ -4,7 +4,9 @@
     "menu": "Menu",
     "gallery": "Galeria",
     "contact": "Kontakt",
-    "booking": "Zarezerwuj"
+    "booking": "Zarezerwuj",
+    "login": "Zaloguj się",
+    "profile": "Profil"
   },
   "hero": {
     "booking": "Zarezerwuj stolik",

@@ -5,18 +5,19 @@ import { useLocale, useTranslations } from 'next-intl'
 import type { MenuItem } from '@/entities/menu-item/types'
 import MenuItemCard from '@/entities/menu-item/MenuItemCard'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
+import { useTenant } from '@/entities/tenant/TenantContext'
 
 interface CategoryData {
   name: string
   translations: Record<string, string>
-  icon: string // 👈 добавить
+  icon: string
 }
 
 interface CategoryApiItem {
   key: string
   name?: string
   translations?: Record<string, string>
-  icon?: string // 👈 добавить
+  icon?: string
 }
 
 export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; menuStyle: 'grid' | 'list' }) {
@@ -26,26 +27,43 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
   const locale = useLocale()
   const { primaryLanguage, loading: settingsLoading } = useBranchSettings()
 
+  // 👇 Достаем данные тенанта из контекста
+  const tenant = useTenant()
+  const tenantId = tenant?.tenantId
+  const niche = tenant?.niche || 'food'
+
   const [categoryMap, setCategoryMap] = useState<Record<string, CategoryData>>({})
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('saas_token') || ''}` },
+    // Ждем, пока прогрузится tenantId
+    if (!tenantId) return
+
+    // Передаем tenantId и niche в параметры запроса
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenantId}&niche=${niche}`, {
+      headers: { 
+        Authorization: typeof window !== 'undefined' ? `Bearer ${localStorage.getItem('saas_token') || ''}` : '' 
+      },
     })
       .then(res => res.json())
-      .then((data: CategoryApiItem[]) => {
+      .then((data: any) => {
+        // Защита на случай, если бэк вернул объект с ошибкой, а не массив
+        if (!Array.isArray(data)) {
+          console.error('Failed to load categories, expected array but got:', data)
+          return
+        }
+
         const map: Record<string, CategoryData> = {}
-        data.forEach(cat => {
+        data.forEach((cat: CategoryApiItem) => {
           map[cat.key] = {
             name: cat.name || cat.key,
             translations: cat.translations || {},
-            icon: cat.icon || '🍽️', // 👈 фоллбэк если иконка не задана
+            icon: cat.icon || '🍽️',
           }
         })
         setCategoryMap(map)
       })
       .catch(console.error)
-  }, [])
+  }, [tenantId, niche]) // Добавили переменные в зависимости
 
   const getCategoryName = (categoryKey: string, locale: string): string => {
     const cat = categoryMap[categoryKey]
@@ -55,7 +73,6 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
     return cat.name || categoryKey
   }
 
-  // 👇 новый хелпер
   const getCategoryIcon = (categoryKey: string): string => {
     return categoryMap[categoryKey]?.icon || '🍽️'
   }
@@ -101,7 +118,6 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
                   : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
               }`}
             >
-              {/* 👇 иконка */}
               <span className="text-base leading-none">
                 {key === 'all' ? '🍽️' : getCategoryIcon(key)}
               </span>
@@ -124,7 +140,6 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
                   : 'bg-surface-card text-text-secondary border border-border hover:bg-surface-hover'
               }`}
             >
-              {/* 👇 иконка */}
               <span className="text-base leading-none">
                 {key === 'all' ? '🍽️' : getCategoryIcon(key)}
               </span>

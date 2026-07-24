@@ -104,15 +104,21 @@ export default function MenuManager({ token }: { token: string }) {
     }
   };
 
-  const fetchCategories = async () => {
+const fetchCategories = async () => {
     if (!token || !tenantId) return;
     try {
-      let url = `${apiUrl}/api/saas/categories`;
-      if (selectedBranch) url += `?branchId=${selectedBranch._id}`;
+      // 👈 ОБЯЗАТЕЛЬНО передаем tenantId в запрос
+      let url = `${apiUrl}/api/saas/categories?tenantId=${tenantId}`;
+      if (selectedBranch) url += `&branchId=${selectedBranch._id}`;
+      
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      setCategories(data);
-    } catch (err) { console.error(err); }
+      
+      // Защита от ошибок бэкенда
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (err) { 
+      console.error(err); 
+    }
   };
 
   useEffect(() => { if (token) fetchCategories(); }, [token, selectedBranch, tenantId]);
@@ -241,7 +247,7 @@ export default function MenuManager({ token }: { token: string }) {
     } catch (err) { console.error(err); }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     let finalCategory = form.category;
     let finalCategoryKey = form.categoryKey;
@@ -253,10 +259,16 @@ export default function MenuManager({ token }: { token: string }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            key: categoryKey, name: customCategoryName, translations: customCategoryTranslations, icon: customCategoryIcon || '🍽️', branchId: selectedBranch?._id,
+            key: categoryKey, 
+            name: customCategoryName, 
+            translations: customCategoryTranslations, 
+            icon: customCategoryIcon || '🍽️', 
+            branchId: selectedBranch?._id,
           }),
         });
-      } catch (err) { console.error(t('errorSaveCategory'), err); }
+      } catch (err) { 
+        console.error(t('errorSaveCategory'), err); 
+      }
       finalCategory = customCategoryName;
       finalCategoryKey = categoryKey;
     }
@@ -264,14 +276,29 @@ export default function MenuManager({ token }: { token: string }) {
     const url = editingId ? `${apiUrl}/api/saas/menu/${editingId}` : `${apiUrl}/api/saas/menu`;
     const method = editingId ? 'PUT' : 'POST';
     const payload = {
-      ...form, category: finalCategory, categoryKey: finalCategoryKey, translations, branchId: selectedBranch?._id,
-      hasPersonalization, modifierGroups: hasPersonalization ? modifierGroups : [],
+      ...form, 
+      category: finalCategory, 
+      categoryKey: finalCategoryKey, 
+      translations, 
+      branchId: selectedBranch?._id,
+      hasPersonalization, 
+      modifierGroups: hasPersonalization ? modifierGroups : [],
     };
 
     try {
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
-      if (res.ok) { await fetchItems(); resetForm(); }
-    } catch (err) { console.error(err); }
+      const res = await fetch(url, { 
+        method, 
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, 
+        body: JSON.stringify(payload) 
+      });
+      if (res.ok) { 
+        await fetchItems(); 
+        await fetchCategories(); // 👈 ДОБАВЛЯЕМ ОБНОВЛЕНИЕ КАТЕГОРИЙ
+        resetForm(); 
+      }
+    } catch (err) { 
+      console.error(err); 
+    }
   };
 
   if (loading || settingsLoading) return <div className="text-center py-10 text-muted-foreground">{t('loading')}</div>;

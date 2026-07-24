@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useStripe, useElements, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { ShoppingBag, Loader2, AlertCircle, Lock, User, CheckCircle2, Truck, Package, Store } from 'lucide-react';
+import { ShoppingBag, Loader2, AlertCircle, Lock, User, CheckCircle2, Truck, Package, Store, MapPin } from 'lucide-react';
 import { PaymentElement } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
 
@@ -23,6 +23,7 @@ import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import OrderSummarySidebar from './OrderSummarySidebar';
 import DeliveryTimeSection from './DeliveryTimeSection';
 import ConfirmLocationSection from './ConfirmLocationSection';
+import ParcelLockerSection from './ParcelLockerSection';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -42,13 +43,14 @@ function CheckoutForm() {
   // Основные данные
   const [fulfillmentType, setFulfillmentType] = useState<'pickup' | 'delivery'>('delivery');
   
-  // HOLLYWOOD MOCK: Доставка
-  const [deliveryService, setDeliveryService] = useState(tenant?.niche === 'ecommerce' ? 'usps' : 'courier');
-  const [deliveryFee, setDeliveryFee] = useState(tenant?.niche === 'ecommerce' ? 8.50 : 7.00);
+  const [deliveryService, setDeliveryService] = useState(tenant?.niche === 'ecommerce' ? 'furgonetka' : 'courier');
+  const [deliveryFee, setDeliveryFee] = useState(tenant?.niche === 'ecommerce' ? 14.99 : 7.00);
+
+  // Стейт для хранения выбранного пачкомата с явной типизацией во избежание конфликтов
+  const [selectedParcelLocker, setSelectedParcelLocker] = useState<{id: string, network: string, address: any} | null>(null);
 
   const [scheduledFor, setScheduledFor] = useState<Date | null>(null);
   
-  // HOLLYWOOD MOCK: Предзаполненный идеальный американский адрес
   const [address, setAddress] = useState({ 
     street: '1350 Pennsylvania Avenue NW', 
     city: 'Washington', 
@@ -73,10 +75,10 @@ function CheckoutForm() {
   const [fees, setFees] = useState<any>(null);
   const [estimating, setEstimating] = useState(false);
 
-  // Валидация
   const isAccountCreationValid = isLoggedIn || !password || (password.length >= 6 && password === confirmPassword && acceptTerms && acceptPrivacy);
 
-  // HOLLYWOOD MOCK: Расчет цен
+  const isDeliveryValid = deliveryService === 'furgonetka' ? selectedParcelLocker !== null : true;
+
   useEffect(() => {
     if (subtotal <= 0) return setFees(null);
     setEstimating(true);
@@ -106,8 +108,24 @@ function CheckoutForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isDeliveryValid) {
+        alert("Пожалуйста, выберите пачкомат на карте.");
+        return;
+    }
+
     setLoading(true);
     setError(null);
+
+    console.log("Отправляем заказ:", {
+        items,
+        customer,
+        fulfillmentType,
+        deliveryService,
+        deliveryFee,
+        parcelLocker: deliveryService === 'furgonetka' ? selectedParcelLocker : null,
+        address: deliveryService !== 'furgonetka' ? address : null,
+    });
 
     setTimeout(() => {
       setLoading(false);
@@ -145,7 +163,6 @@ function CheckoutForm() {
           {/* Левая колонка */}
           <div className="space-y-8">
             
-            {/* ИНФОРМЕР АВТОРИЗАЦИИ */}
             {isLoggedIn ? (
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -166,7 +183,6 @@ function CheckoutForm() {
               </div>
             )}
             
-            {/* СТРАЙП-СТИЛЬ: МИНИМАЛИСТИЧНЫЙ БЛОК ВЫБОРА ДОСТАВКИ */}
             <div className="mb-2">
               <h3 className="text-base font-medium text-gray-900 mb-4">Delivery method</h3>
               
@@ -174,25 +190,25 @@ function CheckoutForm() {
                 {tenant?.niche === 'ecommerce' ? (
                   <>
                     <div 
-                      onClick={() => { setFulfillmentType('delivery'); setDeliveryService('usps'); setDeliveryFee(8.50); }}
+                      onClick={() => { setFulfillmentType('delivery'); setDeliveryService('furgonetka'); setDeliveryFee(14.99); }}
                       className={`relative rounded-xl p-4 cursor-pointer border transition-all duration-150 flex justify-between items-center ${
-                        deliveryService === 'usps' 
+                        deliveryService === 'furgonetka' 
                           ? 'border-blue-600 bg-blue-50/30 ring-1 ring-blue-600' 
                           : 'border-gray-200 bg-white hover:border-gray-300'
                       }`}
                     >
                       <div className="flex gap-3 items-center">
-                        <Package size={20} className={deliveryService === 'usps' ? 'text-blue-600' : 'text-gray-400'}/>
+                        <MapPin size={20} className={deliveryService === 'furgonetka' ? 'text-blue-600' : 'text-gray-400'}/>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">USPS Priority</p>
-                          <p className="text-xs text-gray-500 mt-0.5">2-3 business days</p>
+                          <p className="text-sm font-medium text-gray-900">Paczkomat / Punkty</p>
+                          <p className="text-xs text-gray-500 mt-0.5">InPost, Orlen, DPD...</p>
                         </div>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">+$8.50</span>
+                      <span className="text-sm font-medium text-gray-900">+{14.99} {currencySymbol}</span>
                     </div>
 
                     <div 
-                      onClick={() => { setFulfillmentType('delivery'); setDeliveryService('ups'); setDeliveryFee(12.00); }}
+                      onClick={() => { setFulfillmentType('delivery'); setDeliveryService('ups'); setDeliveryFee(19.00); }}
                       className={`relative rounded-xl p-4 cursor-pointer border transition-all duration-150 flex justify-between items-center ${
                         deliveryService === 'ups' 
                           ? 'border-blue-600 bg-blue-50/30 ring-1 ring-blue-600' 
@@ -202,11 +218,11 @@ function CheckoutForm() {
                       <div className="flex gap-3 items-center">
                         <Truck size={20} className={deliveryService === 'ups' ? 'text-blue-600' : 'text-gray-400'}/>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">UPS Ground</p>
-                          <p className="text-xs text-gray-500 mt-0.5">1-2 business days</p>
+                          <p className="text-sm font-medium text-gray-900">Kurier</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Dostawa do domu</p>
                         </div>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">+$12.00</span>
+                      <span className="text-sm font-medium text-gray-900">+{19.00} {currencySymbol}</span>
                     </div>
                   </>
                 ) : (
@@ -255,18 +271,31 @@ function CheckoutForm() {
                 <DeliveryTimeSection scheduledFor={scheduledFor} setScheduledFor={setScheduledFor} />
             )}
             
-            <ConfirmLocationSection
-              fulfillmentType={fulfillmentType}
-              setFulfillmentType={setFulfillmentType}
-              address={address}
-              setAddress={setAddress}
-              deliveryInstructions={deliveryInstructions}
-              setDeliveryInstructions={setDeliveryInstructions}
-              customer={customer}
-              setCustomer={setCustomer}
-              isLoggedIn={isLoggedIn}
-              isEcommerce={tenant?.niche === 'ecommerce'}
-            />
+            {deliveryService === 'furgonetka' ? (
+                <div className="mt-8">
+                    <ParcelLockerSection 
+                        onSelect={(locker) => setSelectedParcelLocker({
+                            id: locker.id,
+                            network: locker.network || 'Furgonetka',
+                            address: locker.address || {}
+                        })} 
+                        selectedLockerId={selectedParcelLocker?.id}
+                    />
+                </div>
+            ) : (
+                <ConfirmLocationSection
+                  fulfillmentType={fulfillmentType}
+                  setFulfillmentType={setFulfillmentType}
+                  address={address}
+                  setAddress={setAddress}
+                  deliveryInstructions={deliveryInstructions}
+                  setDeliveryInstructions={setDeliveryInstructions}
+                  customer={customer}
+                  setCustomer={setCustomer}
+                  isLoggedIn={isLoggedIn}
+                  isEcommerce={tenant?.niche === 'ecommerce'}
+                />
+            )}
 
           </div>
 
@@ -289,7 +318,7 @@ function CheckoutForm() {
             
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isDeliveryValid}
               className="hidden lg:flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {loading ? processingContent : fees ? <><Lock size={16} />{payButtonText}</> : t('placeOrder')}
