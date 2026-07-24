@@ -46,7 +46,7 @@ function CheckoutForm() {
   const [deliveryService, setDeliveryService] = useState(tenant?.niche === 'ecommerce' ? 'furgonetka' : 'courier');
   const [deliveryFee, setDeliveryFee] = useState(tenant?.niche === 'ecommerce' ? 14.99 : 7.00);
 
-  // Стейт для хранения выбранного пачкомата с явной типизацией во избежание конфликтов
+  // Стейт для хранения выбранного пачкомата с явной типизацией
   const [selectedParcelLocker, setSelectedParcelLocker] = useState<{id: string, network: string, address: any} | null>(null);
 
   const [scheduledFor, setScheduledFor] = useState<Date | null>(null);
@@ -106,6 +106,7 @@ function CheckoutForm() {
     setCustomer({ name: '', phone: '', email: '' });
   };
 
+  // РЕАЛЬНАЯ ОТПРАВКА ЗАКАЗА И ОПЛАТА ЧЕРЕЗ STRIPE
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -114,23 +115,91 @@ function CheckoutForm() {
         return;
     }
 
+    if (!stripe || !elements) {
+      setError("Stripe не инициализирован");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
-    console.log("Отправляем заказ:", {
-        items,
-        customer,
-        fulfillmentType,
-        deliveryService,
-        deliveryFee,
-        parcelLocker: deliveryService === 'furgonetka' ? selectedParcelLocker : null,
-        address: deliveryService !== 'furgonetka' ? address : null,
-    });
+    try {
+      // 1. Создаем заказ на бэкенде
+      const tenantId = tenant?.tenantId || window.location.hostname;
+      const orderRes = await fetch('/api/orders/public', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-tenant-id': tenantId,
+        },
+        body: JSON.stringify({
+          branchId: selectedBranch?._id || null,
+          fulfillment: {
+            type: fulfillmentType,
+            scheduledFor,
+            address: deliveryService !== 'furgonetka' ? address : null,
+            parcelLocker: deliveryService === 'furgonetka' ? selectedParcelLocker : null,
+            deliveryInstructions,
+            deliveryFee,
+          },
+          items: items.map(i => ({
+            menuItemId: i.menuItemId, // <-- исправили i.id на i.menuItemId
+            name: i.name,
+            basePrice: i.price,
+            price: i.price,
+            quantity: i.quantity,
+            notes: i.notes || '',
+            modifiers: i.modifiers || [],
+          })),
+          customer,
+          locale,
+        }),
+      });
 
-    setTimeout(() => {
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData.error || 'Ошибка при создании заказа');
+      }
+
+      const { orderId, token } = orderData;
+      if (token) {
+        localStorage.setItem('customer_token', token);
+      }
+
+      // 2. Получаем PaymentIntent ClientSecret для этого заказа
+      const payRes = await fetch(`/api/orders/public/${orderId}/pay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-tenant-id': tenantId,
+        },
+      });
+
+      const payData = await payRes.json();
+      if (!payRes.ok) {
+        throw new Error(payData.error || 'Ошибка инициализации платежа');
+      }
+
+      const { clientSecret } = payData;
+
+      // 3. Подтверждаем платеж через Stripe Elements
+      const { error: stripeError } = await stripe.confirmPayment({
+        elements,
+        clientSecret,
+        confirmParams: {
+          return_url: `${window.location.origin}/${locale}/order/thank-you?orderId=${orderId}`,
+        },
+      });
+
+      if (stripeError) {
+        setError(stripeError.message || 'Ошибка оплаты');
+        setLoading(false);
+      }
+    } catch (err: any) {
+      console.error("Checkout error:", err);
+      setError(err.message || 'Произошла ошибка при оформлении заказа');
       setLoading(false);
-      window.location.href = `/${locale}/order/thank-you?orderId=MOCK_ORDER_${Math.floor(Math.random() * 10000)}`;
-    }, 1500);
+    }
   };
 
   if (items.length === 0) {
@@ -157,6 +226,13 @@ function CheckoutForm() {
   return (
     <div className="platform-ui max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 pb-28 lg:pb-10">
       <h1 className="text-2xl font-semibold text-gray-900 mb-8 lg:mb-10">{t('checkout')}</h1>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
+          <AlertCircle size={20} />
+          <span>{error}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="lg:grid lg:grid-cols-[1fr_400px] lg:gap-12">
