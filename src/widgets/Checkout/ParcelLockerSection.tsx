@@ -64,7 +64,7 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
       // Инициализируем карту по новой документации
       // @ts-ignore
       const mapWidget = new window.Furgonetka.Map({
-        apiKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJGdXJnb25ldGthLnBsIiwiaWF0IjoxNzg0ODUyODQ5Ljc4MTE4NSwic3ViIjoiMzI3N2JmYjMtNGEyZi00ODY4LTlkMzctNzI0MzRlOTQ1NWZhIn0.LhOEqrkq-8LqWzWVyrd9DKem9d6RlBe8lw0ExG5VjhQ',
+        apiKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJGdXJnb25ldGthLnBsIiwiaWF0IjoxNzg0ODUzOTQwLjIxOTU3Mywic3ViIjoiMzI3N2JmYjMtNGEyZi00ODY4LTlkMzctNzI0MzRlOTQ1NWZhIn0.decVno3WQFqsgy3kL6sVmyNH95C35B_GVeci15t5YFk',
         env: 'sandbox', // <--- ВОТ ЭТОТ ПАРАМЕТР
         courierServices: ['inpost', 'orlen', 'dpd', 'poczta'], // Доступные курьеры
         callback: (params: any) => {
