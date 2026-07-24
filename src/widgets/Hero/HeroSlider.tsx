@@ -80,7 +80,7 @@ export default function HeroSlider() {
               {t('booking')}
             </Link>
           )}
-          {tenant?.features?.hasMenu && (
+          {/* {tenant?.features?.hasMenu && (
             <Link
               href={`/${locale}/menu`}
               className="px-8 py-4 rounded-lg font-medium text-lg border-2 transition-all hover:bg-white/10 hover:scale-105 active:scale-95 shadow-lg backdrop-blur-sm"
@@ -88,7 +88,7 @@ export default function HeroSlider() {
             >
               {t('menu')}
             </Link>
-          )}
+          )} */}
         </div>
       </div>
     </section>

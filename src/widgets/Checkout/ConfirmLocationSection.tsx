@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 interface ConfirmLocationSectionProps {
   fulfillmentType: 'pickup' | 'delivery';
   setFulfillmentType: (type: 'pickup' | 'delivery') => void;
-  // Добавили state в тип адреса
   address: { street: string; city: string; state?: string; zip: string; lat: number; lng: number };
   setAddress: (addr: any) => void;
   deliveryInstructions: string;
@@ -15,6 +14,7 @@ interface ConfirmLocationSectionProps {
   setCustomer: (cust: any) => void;
   isLoggedIn: boolean;
   isEcommerce?: boolean;
+  hideAddress?: boolean; // <--- ДОБАВИЛИ НОВЫЙ ПРОПС
 }
 
 export default function ConfirmLocationSection({
@@ -27,12 +27,14 @@ export default function ConfirmLocationSection({
   setCustomer,
   isLoggedIn,
   isEcommerce = false,
+  hideAddress = false, // <--- ПО УМОЛЧАНИЮ FALSE
 }: ConfirmLocationSectionProps) {
   const t = useTranslations('checkout');
 
   return (
     <section>
-      {(fulfillmentType === 'delivery' || isEcommerce) && (
+      {/* Показываем адрес ТОЛЬКО если это доставка курьером (не пачкомат) */}
+      {!hideAddress && (fulfillmentType === 'delivery' || isEcommerce) && (
         <>
           <h2 className="text-lg font-semibold text-gray-900 mb-4 mt-6">
             Delivery Address
@@ -48,7 +50,6 @@ export default function ConfirmLocationSection({
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
               />
             </div>
-            {/* ТУТ МАГИЯ: Сетка на 3 колонки для США */}
             <div className="grid grid-cols-3 gap-3">
               <input
                 required
@@ -86,8 +87,8 @@ export default function ConfirmLocationSection({
         </>
       )}
 
-      {/* Контактные данные */}
-      <div className="border-t border-gray-100 pt-6">
+      {/* Контактные данные (Теперь они будут показываться ВСЕГДА) */}
+      <div className="border-t border-gray-100 pt-6 mt-4">
         <h3 className="text-sm font-medium text-gray-500 mb-4">{t('contactInfo')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div className="relative">

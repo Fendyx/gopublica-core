@@ -1,7 +1,7 @@
 {
   "nav": {
     "home": "Home",
-    "menu": "Menu",
+    "menu": "Products",
     "gallery": "Gallery",
     "contact": "Contact",
     "booking": "Book a table",
@@ -350,55 +350,55 @@
       }
     },
     "orders": "Orders",
-    "ordersPage": {
-      "loading": "Loading...",
-      "selectBranch": "Select a branch",
-      "title": "Orders",
-      "branchInfo": "Branch: {name} {city}",
-      "empty": "No active orders",
-      "table": {
-        "idTime": "ID / Time",
-        "customer": "Customer",
-        "typeAddress": "Type / Address",
-        "items": "Items",
-        "total": "Total",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "actions": {
-        "accept": "Accept",
-        "decline": "Decline",
-        "startCooking": "Start cooking",
-        "ready": "Ready",
-        "sendCourier": "Send courier",
-        "handedOver": "Handed over",
-        "delivered": "Delivered",
-        "noActions": "No actions"
-      },
-      "status": {
-        "needsResponse": "Needs response",
-        "declined": "Declined",
-        "pending_payment": "Pending payment",
-        "paid": "Paid",
-        "preparing": "Preparing",
-        "ready": "Ready",
-        "out_for_delivery": "Out for delivery",
-        "completed": "Completed",
-        "cancelled": "Cancelled"
-      },
-      "delivery": "Delivery",
-      "pickup": "Pickup",
-      "scheduledFor": "Scheduled for:",
-      "deliveryFee": "Delivery: {fee}",
-      "moreItems": "+ {count} more items",
-      "alerts": {
-        "acceptError": "Error accepting order",
-        "declinePrompt": "Specify the reason for cancellation (for the client and refund):",
-        "declineError": "Error canceling order",
-        "updateError": "Error updating status"
-      }
-    }
+"ordersPage": {
+  "loading": "Loading...",
+  "selectBranch": "Select a branch",
+  "title": "Orders",
+  "branchInfo": "Branch: {name} {city}",
+  "empty": "No active orders",
+  "table": {
+    "idTime": "ID / Time",
+    "customer": "Customer",
+    "shipping": "Shipping",
+    "items": "Items",
+    "total": "Total",
+    "status": "Status",
+    "actions": "Actions"
   },
+  "actions": {
+    "accept": "Accept",
+    "decline": "Decline",
+    "startPacking": "Pack order",
+    "markReady": "Mark ready",
+    "markShipped": "Mark shipped",
+    "handedOver": "Handed over",
+    "delivered": "Delivered",
+    "noActions": "No actions"
+  },
+  "status": {
+    "needsResponse": "Needs response",
+    "declined": "Declined",
+    "pending_payment": "Pending payment",
+    "paid": "Paid",
+    "packing": "Packing",
+    "readyToShip": "Ready to ship",
+    "shipped": "Shipped",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "delivery": "Delivery",
+  "pickup": "Pickup",
+  "scheduledFor": "Scheduled for:",
+  "deliveryFee": "Delivery: {fee}",
+  "moreItems": "+ {count} more items",
+  "alerts": {
+    "acceptError": "Error accepting order",
+    "declinePrompt": "Specify the reason for cancellation (for the client and refund):",
+    "declineError": "Error canceling order",
+    "updateError": "Error updating status"
+  }
+}
+},
   "notifications": {
     "new_booking": "🍽️ New booking",
     "new_booking_body": "{name} · {date} at {time} · {guests} guests",
@@ -443,7 +443,34 @@
     "paymentMethod": "Payment method",
     "processing": "Processing...",
     "payTotal": "Pay {total} {currency}",
-    "placeOrder": "Place order"
+    "placeOrder": "Place order",
+    "deliveryMethod": "Delivery method",
+    "paczkomat": "Parcel Locker / Pickup Points",
+    "paczkomatDesc": "InPost, Orlen, DPD...",
+    "courier": "Courier",
+    "courierDesc": "Home delivery",
+    "localCourier": "Local Courier",
+    "localCourierDesc": "~35 mins",
+    "storePickup": "Store Pickup",
+    "storePickupDesc": "Ready in 15 mins",
+    "free": "Free",
+    "guestCheckout": "Checking out as guest.",
+    "loggedInAs": "Logged in as",
+    "selectLocker": "Select parcel locker",
+    "selectedLocker": "Selected locker:",
+    "change": "Change",
+    "openMap": "📍 Open locker map",
+    "loadingMap": "Loading map widget...",
+    "alerts": {
+      "selectLocker": "Please select a parcel locker on the map.",
+      "stripeNotInitialized": "Stripe is not initialized",
+      "checkCardDetails": "Please check your card details.",
+      "orderError": "Error creating order",
+      "paymentInitError": "Payment initialization error",
+      "paymentError": "Payment error",
+      "generalError": "An error occurred during checkout",
+      "mapError": "Error loading map widget."
+    }
   },
   "profile": {
     "loadingProfile": "Loading profile...",

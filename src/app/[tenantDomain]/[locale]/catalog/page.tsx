@@ -44,7 +44,7 @@ export default async function CatalogPage({
     return (
       <section className="py-10 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold mb-8 text-foreground">Каталог товаров</h1>
+          <h1 className="text-3xl font-bold mb-8 text-foreground">Nasze produkty</h1>
           <EcommerceGridLayout 
             items={items} 
             variant={variant} 
