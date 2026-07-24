@@ -36,7 +36,7 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
       // Подключаем новый правильный скрипт из доки
       script = document.createElement('script');
       script.id = scriptId;
-      script.src = "https://sandbox.furgonetka.pl/js/dist/map/map.js"; // или вернуть старый вариант, если этот не сработает;
+      script.src = "https://furgonetka.pl/js/dist/map/map.js";
       script.async = true;
       
       script.onload = () => {
