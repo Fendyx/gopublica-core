@@ -73,9 +73,11 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
           // Сохраняем данные (API возвращает код в params.point.code)
           onSelect({
             id: params.point.code,
-            network: params.point.name,
+            // Ищем короткий код сети (inpost, dpd и т.д.). 
+            // Обычно Furgonetka отдает его в params.service или params.provider
+            network: params.service || params.provider || params.point.operator || 'inpost', 
             address: {
-              street: params.point.street,
+              street: params.point.street || params.point.name, // можно сохранить name сюда для истории
               city: params.point.city,
               zip: params.point.postcode
             }
