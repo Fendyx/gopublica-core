@@ -107,6 +107,7 @@ function CheckoutForm() {
   };
 
   // РЕАЛЬНАЯ ОТПРАВКА ЗАКАЗА И ОПЛАТА ЧЕРЕЗ STRIPE
+// РЕАЛЬНАЯ ОТПРАВКА ЗАКАЗА И ОПЛАТА ЧЕРЕЗ STRIPE
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -124,7 +125,15 @@ function CheckoutForm() {
     setError(null);
 
     try {
-      // 1. Создаем заказ на бэкенде
+      // ---> 1. ОБЯЗАТЕЛЬНАЯ ВАЛИДАЦИЯ STRIPE ПЕРЕД АСИНХРОННЫМ КОДОМ <---
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        setError(submitError.message || "Пожалуйста, проверьте данные карты.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Создаем заказ на бэкенде
       const tenantId = tenant?.tenantId || window.location.hostname;
       const orderRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/public`, {
         method: 'POST',
@@ -143,7 +152,7 @@ function CheckoutForm() {
             deliveryFee,
           },
           items: items.map(i => ({
-            menuItemId: i.menuItemId, // <-- исправили i.id на i.menuItemId
+            menuItemId: i.menuItemId,
             name: i.name,
             basePrice: i.price,
             price: i.price,
@@ -166,7 +175,7 @@ function CheckoutForm() {
         localStorage.setItem('customer_token', token);
       }
 
-      // 2. Получаем PaymentIntent ClientSecret для этого заказа
+      // 3. Получаем PaymentIntent ClientSecret для этого заказа
       const payRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/public/${orderId}/pay`, {
         method: 'POST',
         headers: {
@@ -182,7 +191,7 @@ function CheckoutForm() {
 
       const { clientSecret } = payData;
 
-      // 3. Подтверждаем платеж через Stripe Elements
+      // 4. Подтверждаем платеж через Stripe Elements
       const { error: stripeError } = await stripe.confirmPayment({
         elements,
         clientSecret,
