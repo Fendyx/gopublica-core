@@ -126,7 +126,7 @@ function CheckoutForm() {
     try {
       // 1. Создаем заказ на бэкенде
       const tenantId = tenant?.tenantId || window.location.hostname;
-      const orderRes = await fetch('/api/orders/public', {
+      const orderRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/public`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ function CheckoutForm() {
       }
 
       // 2. Получаем PaymentIntent ClientSecret для этого заказа
-      const payRes = await fetch(`/api/orders/public/${orderId}/pay`, {
+      const payRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/public/${orderId}/pay`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
