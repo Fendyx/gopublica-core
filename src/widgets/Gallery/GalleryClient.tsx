@@ -29,6 +29,6 @@ export default function GalleryClient() {
       })
   }, [selectedBranch, tenantId])
 
-  if (loading) return <div className="text-center py-10">Загрузка галереи...</div>
+  if (loading) return <div className="text-center py-10">Loading галереи...</div>
   return <Gallery images={images} galleryStyle={galleryStyle as 'bento' | 'masonry'} />
 }

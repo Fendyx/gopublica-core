@@ -100,7 +100,7 @@ export default function BookingForm() {
     return (
       <Section>
         <SectionHeader title={t('title')} />
-        <div className="text-center py-10 text-text-secondary">Загрузка информации о филиале...</div>
+        <div className="text-center py-10 text-text-secondary">Loading информации о филиале...</div>
       </Section>
     )
   }

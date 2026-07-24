@@ -29,6 +29,6 @@ export default function MenuClient() {
       })
   }, [selectedBranch, tenantId])
 
-  if (loading) return <div className="text-center py-10">Загрузка меню...</div>
+  if (loading) return <div className="text-center py-10">Loading меню...</div>
   return <Menu items={items} menuStyle={menuStyle} />
 }

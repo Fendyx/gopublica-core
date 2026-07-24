@@ -61,7 +61,7 @@ export default function CatalogClient() {
     fetchCatalog()
   }, [selectedBranch, tenantId])
 
-  if (loading) return <div className="text-center py-10">Загрузка...</div>
+  if (loading) return <div className="text-center py-10">Loading...</div>
 
   if (niche === 'ecommerce') {
     const featuredItems = items.filter(item => item.isFeatured === true);

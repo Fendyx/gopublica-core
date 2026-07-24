@@ -23,7 +23,7 @@ export function AdminBranchSwitcher() {
     return (
       <div className="flex items-center gap-2 px-3 py-2 text-sm text-text-tertiary">
         <Loader2 size={16} className="animate-spin" />
-        <span>Загрузка...</span>
+        <span>Loading...</span>
       </div>
     )
   }
