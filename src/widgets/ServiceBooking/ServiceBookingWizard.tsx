@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Loader2, Calendar, Clock, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -19,9 +20,9 @@ import {
 } from './types'
 
 const STEPS = [
-  { id: 1, label: 'Usługi', icon: Sparkles },
-  { id: 2, label: 'Termin', icon: Calendar },
-  { id: 3, label: 'Dane', icon: Check },
+  { id: 1, labelKey: 'steps.labels.services', icon: Sparkles },
+  { id: 2, labelKey: 'steps.labels.dateTime', icon: Calendar },
+  { id: 3, labelKey: 'steps.labels.details', icon: Check },
 ]
 
 const slideVariants = {
@@ -38,6 +39,8 @@ const slideVariants = {
 
 export default function ServiceBookingWizard() {
   const { selectedBranch, branches } = useBranch()
+  const t = useTranslations('serviceBooking')
+  const locale = useLocale()
 
   const [step, setStep] = useState(1)
   const [direction, setDirection] = useState(0)
@@ -152,7 +155,7 @@ export default function ServiceBookingWizard() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Booking submission failed:', err)
-      alert('Wystąpił błąd podczas rezerwacji.')
+      alert(t('errors.bookingSubmission'))
     } finally {
       setSubmitting(false)
     }
@@ -187,21 +190,21 @@ export default function ServiceBookingWizard() {
                 <CheckCircle2 className="h-8 w-8 text-green-500" />
               </motion.div>
               <h2 className="font-heading text-2xl font-semibold text-foreground sm:text-3xl">
-                Rezerwacja Przyjęta!
+                {t('success.title')}
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Dziękujemy! Twoja rezerwacja została przesłana. Skontaktujemy się z Tobą w celu potwierdzenia terminu i szczegółów.
+                {t('success.message')}
               </p>
 
               <div className="mx-auto mt-6 max-w-sm space-y-3 rounded-xl border border-border bg-muted/30 p-5 text-left text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Usługi:</span>
+                  <span className="text-muted-foreground">{t('summary.services')}:</span>
                   <span className="font-medium text-foreground">{selectedServices.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Termin:</span>
+                  <span className="text-muted-foreground">{t('summary.date')}:</span>
                   <span className="font-medium text-foreground">
-                    {selectedDate?.toLocaleDateString('pl-PL', {
+                    {selectedDate?.toLocaleDateString(locale, {
                       day: 'numeric',
                       month: 'long',
                     })}{' '}
@@ -209,7 +212,7 @@ export default function ServiceBookingWizard() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Szacowany koszt:</span>
+                  <span className="text-muted-foreground">{t('summary.estimatedCost')}:</span>
                   <span className="font-heading text-base font-semibold text-foreground">
                     {totalPrice} zł
                   </span>
@@ -217,7 +220,7 @@ export default function ServiceBookingWizard() {
               </div>
 
               <Button onClick={handleReset} variant="outline" className="mt-6" size="lg">
-                Nowa rezerwacja
+                {t('success.newBooking')}
               </Button>
             </div>
           </Card>
@@ -232,10 +235,10 @@ export default function ServiceBookingWizard() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Rezerwacja Usług
+            {t('hero.title')}
           </h1>
           <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-            Zarezerwuj wizytę w 3 prostych krokach. Wybierz usługi, termin i podaj dane pojazdu.
+            {t('hero.description')}
           </p>
         </div>
 
@@ -246,6 +249,7 @@ export default function ServiceBookingWizard() {
               const isActive = step === s.id
               const isDone = step > s.id
               const Icon = s.icon
+              const label = t(s.labelKey)
               return (
                 <div key={s.id} className="flex items-center gap-2 sm:gap-4">
                   <div className="flex flex-col items-center gap-1.5">
@@ -269,7 +273,7 @@ export default function ServiceBookingWizard() {
                         isActive ? 'text-foreground' : 'text-muted-foreground'
                       )}
                     >
-                      {s.label}
+                      {label}
                     </span>
                   </div>
                   {idx < STEPS.length - 1 && (
@@ -342,13 +346,10 @@ export default function ServiceBookingWizard() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">
-                      Wybrano usług:{' '}
-                      <span className="font-medium text-foreground">
-                        {selectedServiceIds.length}
-                      </span>
+                      {t('steps.services.selectedCount', { count: selectedServiceIds.length })}{' '}
                     </p>
                     <p className="font-heading text-lg font-semibold text-foreground">
-                      Razem: {totalPrice} zł
+                      {t('summary.total', { totalPrice, currency: t('currency') })}
                     </p>
                   </div>
                 </>
@@ -359,14 +360,14 @@ export default function ServiceBookingWizard() {
                     <Calendar className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Wybrany termin</p>
+                    <p className="text-xs text-muted-foreground">{t('summary.selectedDate')}</p>
                     <p className="truncate font-heading text-base font-semibold text-foreground">
                       {selectedDate
-                        ? selectedDate.toLocaleDateString('pl-PL', {
+                        ? selectedDate.toLocaleDateString(locale, {
                             day: 'numeric',
                             month: 'long',
                           })
-                        : '—'}
+                        : t('summary.selectedDatePlaceholder')}
                       {selectedTime && (
                         <span className="ml-2 inline-flex items-center gap-1 text-sm font-normal text-muted-foreground">
                           <Clock className="h-3.5 w-3.5" />
@@ -383,9 +384,9 @@ export default function ServiceBookingWizard() {
                     <Check className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Podsumowanie</p>
+                    <p className="text-xs text-muted-foreground">{t('summary.title')}</p>
                     <p className="truncate font-heading text-base font-semibold text-foreground">
-                      {selectedServices.length} usług · {totalPrice} zł
+                      {t('summary.servicesCount', { count: selectedServices.length, totalPrice, currency: t('currency') })}
                     </p>
                   </div>
                 </>
@@ -397,7 +398,7 @@ export default function ServiceBookingWizard() {
               {step > 1 && (
                 <Button variant="outline" onClick={handleBack} size="lg" disabled={submitting}>
                   <ArrowLeft className="h-4 w-4" />
-                  Wstecz
+                  {t('navigation.back')}
                 </Button>
               )}
               <Button
@@ -408,16 +409,16 @@ export default function ServiceBookingWizard() {
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Wysyłanie...
+                    {t('navigation.submitting')}
                   </>
                 ) : step === 3 ? (
                   <>
-                    Potwierdź Rezerwację
+                    {t('navigation.confirm')}
                     <Check className="h-4 w-4" />
                   </>
                 ) : (
                   <>
-                    Dalej
+                    {t('navigation.next')}
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}

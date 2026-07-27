@@ -16,6 +16,7 @@ export default async function CatalogSlugPage({
   params: Promise<{ tenantDomain: string; locale: string; slug: string }>;
 }) {
   const { locale, tenantDomain, slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
 
   const headersList = await headers();
   const host = headersList.get('host') ?? tenantDomain;
@@ -27,8 +28,8 @@ export default async function CatalogSlugPage({
   const allItems: MenuItem[] = await fetchMenu(tenant.tenantId, branchId);
 
   // Если слаг — ID товара
-  if (isObjectId(slug)) {
-    const product = allItems.find((p) => p._id === slug);
+  if (isObjectId(decodedSlug)) {
+    const product = allItems.find((p) => p._id === decodedSlug);
     if (!product) return notFound();
 
     return <ProductDetail product={product} locale={locale} tenant={tenant} />;
@@ -39,11 +40,11 @@ export default async function CatalogSlugPage({
     `${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenant.tenantId}&niche=${tenant.niche || 'ecommerce'}`
   );
   const categories = await catRes.json();
-  const categoryData = categories.find((c: any) => c.key === slug);
+  const categoryData = categories.find((c: any) => c.key === decodedSlug);
   if (!categoryData) return notFound();
 
   const products = allItems.filter(
-    (item) => item.categoryKey === slug || item.category === categoryData.name
+    (item) => item.categoryKey === decodedSlug || item.category === categoryData.name
   );
 
   const { default: CategoryViewClient } = await import(

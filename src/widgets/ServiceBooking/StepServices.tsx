@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Check, Clock, Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -15,14 +16,49 @@ interface StepServicesProps {
 }
 
 export function StepServices({ services, selectedIds, onToggle }: StepServicesProps) {
+  const t = useTranslations('serviceBooking')
+
+  const serviceContent = {
+    'svc-ceramic': {
+      name: t('servicesData.ceramicCoating.name'),
+      description: t('servicesData.ceramicCoating.description'),
+      duration: t('servicesData.ceramicCoating.duration'),
+    },
+    'svc-correction': {
+      name: t('servicesData.paintCorrection.name'),
+      description: t('servicesData.paintCorrection.description'),
+      duration: t('servicesData.paintCorrection.duration'),
+    },
+    'svc-interior': {
+      name: t('servicesData.interiorCleaning.name'),
+      description: t('servicesData.interiorCleaning.description'),
+      duration: t('servicesData.interiorCleaning.duration'),
+    },
+    'svc-detailing': {
+      name: t('servicesData.fullDetailing.name'),
+      description: t('servicesData.fullDetailing.description'),
+      duration: t('servicesData.fullDetailing.duration'),
+    },
+    'svc-wax': {
+      name: t('servicesData.waxing.name'),
+      description: t('servicesData.waxing.description'),
+      duration: t('servicesData.waxing.duration'),
+    },
+    'svc-engine': {
+      name: t('servicesData.engineCleaning.name'),
+      description: t('servicesData.engineCleaning.description'),
+      duration: t('servicesData.engineCleaning.duration'),
+    },
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
         <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-          Wybór Usług
+          {t('steps.services.title')}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Wybierz jedną lub kilka usług, które Cię interesują. Ceny są orientacyjne i mogą ulec zmianie po weryfikacji pojazdu.
+          {t('steps.services.description')}
         </p>
       </div>
 
@@ -51,7 +87,7 @@ export function StepServices({ services, selectedIds, onToggle }: StepServicesPr
                   <Checkbox
                     checked={isSelected}
                     onCheckedChange={() => onToggle(service.id)}
-                    aria-label={`Wybierz usługę: ${service.name}`}
+                    aria-label={`${t('steps.services.selectService')}: ${serviceContent[service.id as keyof typeof serviceContent]?.name ?? service.name}`}
                     className="pointer-events-none"
                   />
                 </div>
@@ -70,22 +106,22 @@ export function StepServices({ services, selectedIds, onToggle }: StepServicesPr
 
                 {/* Name + description */}
                 <h3 className="font-heading text-base font-semibold text-foreground pr-8">
-                  {service.name}
+                  {serviceContent[service.id as keyof typeof serviceContent]?.name ?? service.name}
                 </h3>
-                {service.description && (
+                {(serviceContent[service.id as keyof typeof serviceContent]?.description ?? service.description) && (
                   <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">
-                    {service.description}
+                    {serviceContent[service.id as keyof typeof serviceContent]?.description ?? service.description}
                   </p>
                 )}
 
                 {/* Meta row */}
                 <div className="mt-4 flex items-center justify-between">
                   <span className="font-heading text-lg font-semibold text-foreground">
-                    {service.price} zł
+                    {service.price} {t('currency')}
                   </span>
                   <Badge variant="secondary" className="gap-1">
                     <Clock className="h-3 w-3" />
-                    {service.duration}
+                    {serviceContent[service.id as keyof typeof serviceContent]?.duration ?? service.duration}
                   </Badge>
                 </div>
 

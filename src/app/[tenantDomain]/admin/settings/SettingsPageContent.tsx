@@ -179,7 +179,7 @@ export default function SettingsPageContent() {
   }
 
   if (!selectedBranch) {
-    return <div className="text-center py-20">Выберите филиал в переключателе справа вверху</div>;
+    return <div className="text-center py-20">{t('branchSelectionPrompt')}</div>;
   }
 
   return (
@@ -187,7 +187,7 @@ export default function SettingsPageContent() {
       <div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
           <MapPin className="w-4 h-4" />
-          Настройки для филиала: <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
+          {t('branchInfo', { name: selectedBranch.name })} {selectedBranch.city && `(${selectedBranch.city})`}
         </div>
         <h2 className="text-2xl font-bold">{t('title')}</h2>
       </div>
@@ -208,13 +208,13 @@ export default function SettingsPageContent() {
 
                 <div className="space-y-2">
   <Label htmlFor="businessName" className="flex items-center gap-1.5">
-    Название бизнеса
+    {t('businessName')}
   </Label>
   <Input
     id="businessName"
     value={businessName}
     onChange={e => setBusinessName(e.target.value)}
-    placeholder="Например: ООО «Ромашка»"
+    placeholder={t('exampleBusinessName')}
   />
 </div>
                 <div className="space-y-4">
@@ -242,7 +242,7 @@ export default function SettingsPageContent() {
                 <Separator />
 
                 <div className="space-y-3">
-                  <Label className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-muted-foreground" />Часы работы по дням</Label>
+                  <Label className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-muted-foreground" />{t('workingHoursByDay')}</Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-muted/20 p-4 rounded-xl border border-border">
                     {DAY_KEYS.map(day => (
                       <div key={day} className="flex flex-col gap-1.5">
@@ -293,7 +293,7 @@ export default function SettingsPageContent() {
                         </Button>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">Оставьте пустым для использования цвета страницы по умолчанию.</p>
+                    <p className="text-xs text-muted-foreground">{t('leaveEmptyPageColor')}</p>
                   </div>
 
                   <div className="space-y-2 pt-4">
@@ -317,7 +317,7 @@ export default function SettingsPageContent() {
                         </Button>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">Оставьте пустым для использования цвета по умолчанию.</p>
+                    <p className="text-xs text-muted-foreground">{t('leaveEmptyDefaultColor')}</p>
                   </div>
 
                   {/* Настройки каталога для E-commerce (Убран Catalog Layout) */}

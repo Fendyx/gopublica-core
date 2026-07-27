@@ -1,77 +1,6 @@
 {
-  "nav": {
-    "home": "Strona główna",
-    "menu": "Produkty",
-    "gallery": "Galeria",
-    "contact": "Kontakt",
-    "booking": "Zarezerwuj stolik",
-    "login": "Zaloguj się",
-    "profile": "Profil"
-  },
-  "hero": {
-    "booking": "Zarezerwuj stolik",
-    "menu": "Menu"
-  },
-  "menu": {
-    "title": "Nasze menu",
-    "all": "Wszystkie dania",
-    "emptyCategory": "Brak dań w tej kategorii.",
-    "addToCart": "Dodaj do koszyka"
-  },
-  "booking": {
-    "title": "Zarezerwuj stolik",
-    "eyebrow": "Rezerwacja online",
-    "step1Label": "Szczegóły",
-    "step2Label": "Kontakt",
-    "date": "Data",
-    "guests": "Liczba gości",
-    "time": "Godzina",
-    "person": "gość",
-    "persons": "gości",
-    "name": "Imię",
-    "phone": "Telefon",
-    "email": "E-mail",
-    "comment": "Uwagi",
-    "commentPlaceholder": "Alergie, specjalne życzenia...",
-    "optional": "opcjonalnie",
-    "edit": "Edytuj",
-    "next": "Dalej",
-    "submit": "Zarezerwuj",
-    "sending": "Wysyłanie...",
-    "guestsLabel": "gości",
-    "newBooking": "Nowa rezerwacja",
-    "success": "Rezerwacja potwierdzona!",
-    "successMessage": "Skontaktujemy się z Tobą w celu potwierdzenia.",
-    "error": "Błąd. Spróbuj ponownie.",
-    "privacyNote": "Klikając „Zarezerwuj”, akceptujesz regulamin i warunki."
-  },
-  "contact": {
-    "eyebrow": "Skontaktuj się z nami",
-    "title": "Kontakt",
-    "address": "Adres",
-    "phone": "Telefon",
-    "email": "E-mail",
-    "hours": "Godziny otwarcia",
-    "maps": "Otwórz w Mapach Google"
-  },
   "about": {
     "title": "O nas"
-  },
-  "gallery": {
-    "title": "Galeria",
-    "subtitle": "Nasza restauracja"
-  },
-  "footer": {
-    "admin": "Panel administracyjny",
-    "home": "Strona główna",
-    "menu": "Menu",
-    "reservations": "Rezerwacje",
-    "contact": "Kontakt",
-    "privacyPolicy": "Polityka prywatności",
-    "terms": "Regulamin",
-    "navigation": "Nawigacja",
-    "legal": "Informacje prawne",
-    "poweredBy": "Obsługiwane przez"
   },
   "admin": {
     "dashboard": "Panel główny",
@@ -98,23 +27,23 @@
       "devices": "Urządzenia",
       "topCities": "Najpopularniejsze miasta"
     },
-    "branches": "Oddziały",
+    "branches": "Filie",
     "branchesPage": {
-      "title": "Zarządzaj oddziałami",
-      "addBranch": "Dodaj oddział",
-      "empty": "Brak oddziałów. Utwórz swój pierwszy oddział.",
-      "deleteConfirm": "Usunąć ten oddział? Tej czynności nie można cofnąć.",
-      "name": "Nazwa oddziału",
+      "title": "Zarządzaj filiami",
+      "addBranch": "Dodaj filię",
+      "empty": "Brak filii. Utwórz swoją pierwszą filię.",
+      "deleteConfirm": "Usunąć tę filię? Tej operacji nie można cofnąć.",
+      "name": "Nazwa filii",
       "city": "Miasto",
       "address": "Adres",
       "phone": "Telefon",
-      "actions": "Działania",
+      "actions": "Akcje",
       "loading": "Ładowanie..."
     },
     "branchesForm": {
-      "createTitle": "Utwórz nowy oddział",
-      "editTitle": "Edytuj oddział",
-      "name": "Nazwa oddziału *",
+      "createTitle": "Utwórz nową filię",
+      "editTitle": "Edytuj filię",
+      "name": "Nazwa filii *",
       "city": "Miasto",
       "address": "Adres",
       "phone": "Telefon",
@@ -141,7 +70,7 @@
       "noBookings": "Brak rezerwacji na dziś.",
       "name": "Imię",
       "time": "Godzina",
-      "guests": "Liczba gości",
+      "guests": "Goście",
       "phone": "Telefon",
       "statusHeader": "Status",
       "status": {
@@ -172,24 +101,27 @@
       "add": "Dodaj",
       "cancel": "Anuluj",
       "deleteConfirm": "Usunąć danie?",
-      "uploaderNotReady": "Przesyłanie nie jest jeszcze gotowe, poczekaj chwilę.",
+      "uploaderNotReady": "Narzędzie do przesyłania nie jest jeszcze gotowe, poczekaj.",
       "errorSaveCategory": "Nie udało się zapisać kategorii",
       "translations": {
         "name": "Nazwa",
         "description": "Opis"
       },
       "personalization": "Personalizacja produktu",
-      "personalizationHint": "Pozwala klientowi wybrać rozmiar, dodatki itp.",
+      "personalizationHint": "Umożliwia klientowi wybór rozmiaru, dodatków itp.",
       "groupNamePlaceholder": "Nazwa grupy (np. Rozmiar, Dodatki)",
-      "singleChoice": "Pojedynczy wybór",
-      "multipleChoice": "Wielokrotny wybór",
+      "singleChoice": "Wybór pojedynczy",
+      "multipleChoice": "Wybór wielokrotny",
       "requiredChoice": "Wybór wymagany",
-      "maxSelect": "Maks. liczba wyborów",
+      "maxSelect": "Maksymalny wybór",
       "optionNamePlaceholder": "Nazwa (np. Duży, Ser)",
       "addOption": "Dodaj opcję",
       "addGroup": "Dodaj grupę opcji",
       "translateGroup": "Przetłumacz grupę",
-      "translateOptions": "Przetłumacz opcje"
+      "translateOptions": "Przetłumacz opcje",
+      "clientMissing": "Klient nie jest zdefiniowany",
+      "branchSelectionPrompt": "Wybierz filię w przełączniku w prawym górnym rogu",
+      "branchInfo": "Menu dla filii: {name}"
     },
     "reservationsPage": {
       "loading": "Ładowanie...",
@@ -198,9 +130,9 @@
       "name": "Imię",
       "date": "Data",
       "time": "Godzina",
-      "guests": "Liczba gości",
+      "guests": "Goście",
       "status": "Status",
-      "actions": "Działania",
+      "actions": "Akcje",
       "confirm": "Potwierdź",
       "reject": "Odrzuć",
       "cancel": "Anuluj",
@@ -243,13 +175,20 @@
       "notifications": {
         "title": "Powiadomienia o rezerwacjach",
         "sound": "Powiadomienie dźwiękowe",
-        "message": "Wiadomość wyskakująca",
+        "message": "Wiadomość podręczna",
         "melody": "Melodia",
         "default": "Domyślna",
         "melody1": "Melodia 1",
         "customUrl": "Własny URL",
         "listen": "Odsłuchaj"
-      }
+      },
+      "branchSelectionPrompt": "Wybierz filię w przełączniku w prawym górnym rogu",
+      "branchInfo": "Ustawienia dla filii: {name}",
+      "businessName": "Nazwa firmy",
+      "exampleBusinessName": "Na przykład: Sp. z o.o. „Romashka”",
+      "workingHoursByDay": "Godziny pracy według dni",
+      "leaveEmptyPageColor": "Pozostaw puste, aby użyć domyślnego koloru strony.",
+      "leaveEmptyDefaultColor": "Pozostaw puste, aby użyć domyślnego koloru strony."
     },
     "days": {
       "monday": "Poniedziałek",
@@ -264,11 +203,11 @@
       "loading": "Ładowanie wiadomości...",
       "title": "Wiadomości od Gopublica",
       "empty": "Brak wiadomości",
-      "emptyDesc": "Wiadomości i powiadomienia od dostawcy usług pojawią się tutaj.",
+      "emptyDesc": "Tutaj pojawią się wiadomości i powiadomienia od Twojego dostawcy usług.",
       "expires": "Ważne do:"
     },
     "jobsSettings": {
-      "title": "Ustawienia formularza aplikacji",
+      "title": "Ustawienia formularza aplikacyjnego",
       "subtitle": "Zarządzaj polami, sortowaniem i tłumaczeniami",
       "save": "Zapisz formularz",
       "saving": "Zapisywanie...",
@@ -276,9 +215,9 @@
       "saveError": "Błąd podczas zapisywania ustawień",
       "languageLabel": "Aktualny język edycji tekstu:",
       "moduleStatus": "Status modułu (globalny)",
-      "moduleStatusDesc": "Włącz lub wyłącz stronę kariery dla użytkowników",
-      "moduleEnabled": "Włączony na stronie",
-      "moduleDisabled": "Wyłączony",
+      "moduleStatusDesc": "Włącz lub wyłącz stronę Kariera dla użytkowników",
+      "moduleEnabled": "Włączone na stronie",
+      "moduleDisabled": "Wyłączone",
       "formTexts": "Teksty formularza",
       "formTitle": "Tytuł formularza",
       "formDescription": "Opis formularza",
@@ -286,7 +225,7 @@
       "successText": "Wiadomość o sukcesie",
       "notificationEmail": "E-mail powiadomień (globalny)",
       "fieldBuilder": "Kreator pól",
-      "fieldBuilderDesc": "Zarządzaj strukturą i sortuj pola przez przeciąganie",
+      "fieldBuilderDesc": "Zarządzaj strukturą i przeciągnij, aby posortować pola",
       "selectFieldType": "Wybierz typ pola",
       "addField": "Dodaj nowe pole",
       "fieldLabel": "Etykieta pola",
@@ -317,7 +256,7 @@
       "settingsBtn": "Ustawienia formularza",
       "loading": "Ładowanie...",
       "allStatuses": "Wszystkie statusy",
-      "empty": "Brak zgłoszeń",
+      "empty": "Brak aplikacji",
       "pageInfo": "Strona {current} z {total}",
       "back": "Wstecz",
       "next": "Dalej",
@@ -326,44 +265,44 @@
         "name": "Imię",
         "position": "Stanowisko",
         "status": "Status",
-        "actions": "Działania",
+        "actions": "Akcje",
         "anonymous": "Anonimowy"
       },
       "statusLabels": {
-        "new": "Nowe",
-        "viewed": "Wyświetlone",
+        "new": "Nowa",
+        "viewed": "Wyświetlona",
         "invited": "Zaproszony",
-        "rejected": "Odrzucony",
+        "rejected": "Odrzucona",
         "hired": "Zatrudniony"
       },
       "detail": {
         "loading": "Ładowanie...",
-        "notFound": "Nie znaleziono zgłoszenia",
-        "title": "Zgłoszenie #{id}",
+        "notFound": "Nie znaleziono aplikacji",
+        "title": "Aplikacja #{id}",
         "back": "Wstecz",
         "candidateData": "Dane kandydata",
         "resume": "CV:",
         "download": "Pobierz",
         "comment": "Komentarz:",
         "noComment": "Brak komentarza",
-        "submittedAt": "Wysłano:"
+        "submittedAt": "Przesłano o:"
       }
     },
     "orders": "Zamówienia",
     "ordersPage": {
       "loading": "Ładowanie...",
-      "selectBranch": "Wybierz oddział",
+      "selectBranch": "Wybierz filię",
       "title": "Zamówienia",
-      "branchInfo": "Oddział: {name} {city}",
+      "branchInfo": "Filia: {name} {city}",
       "empty": "Brak aktywnych zamówień",
       "table": {
-        "idTime": "ID / Godzina",
+        "idTime": "ID / Czas",
         "customer": "Klient",
         "shipping": "Dostawa",
         "items": "Pozycje",
         "total": "Suma",
         "status": "Status",
-        "actions": "Działania"
+        "actions": "Akcje"
       },
       "actions": {
         "accept": "Zaakceptuj",
@@ -371,9 +310,9 @@
         "startPacking": "Pakuj zamówienie",
         "markReady": "Oznacz jako gotowe",
         "markShipped": "Oznacz jako wysłane",
-        "handedOver": "Przekazano",
-        "delivered": "Dostarczono",
-        "noActions": "Brak działań"
+        "handedOver": "Wydane",
+        "delivered": "Dostarczone",
+        "noActions": "Brak akcji"
       },
       "status": {
         "needsResponse": "Wymaga odpowiedzi",
@@ -383,14 +322,14 @@
         "packing": "Pakowanie",
         "readyToShip": "Gotowe do wysyłki",
         "shipped": "Wysłane",
-        "completed": "Zrealizowane",
+        "completed": "Zakończone",
         "cancelled": "Anulowane"
       },
       "delivery": "Dostawa",
       "pickup": "Odbiór osobisty",
-      "scheduledFor": "Zaplanowane na:",
+      "scheduledFor": "Zaplanowano na:",
       "deliveryFee": "Dostawa: {fee}",
-      "moreItems": "+ {count} więcej pozycji",
+      "moreItems": "+ jeszcze {count} pozycji",
       "alerts": {
         "acceptError": "Błąd podczas akceptowania zamówienia",
         "declinePrompt": "Podaj powód anulowania (dla klienta i zwrotu środków):",
@@ -399,30 +338,71 @@
       }
     }
   },
-  "notifications": {
-    "new_booking": "🍽️ Nowa rezerwacja",
-    "new_booking_body": "{name} · {date} o {time} · {guests} gości",
-    "new_booking_body_no_guests": "{name} · {date} o {time}",
-    "allow_notifications_title": "Włącz powiadomienia",
-    "allow_notifications_text": "Otrzymuj alerty o nowych rezerwacjach, nawet gdy karty są zamknięte.",
-    "allow_button": "Zezwól",
-    "later_button": "Później",
-    "notifications_blocked": "🚫 Powiadomienia zablokowane",
-    "notifications_blocked_hint": "Kliknij kłódkę 🔒 w pasku adresu → Powiadomienia → Zezwól.",
-    "background_notifications_title": "⚡ Powiadomienia w tle",
-    "background_notifications_text": "Bez tego powiadomienia nie będą docierać, gdy karty są zamknięte.",
-    "enable_button": "Włącz",
-    "push_error_prefix": "❌",
-    "sound_hint": "Kliknij gdziekolwiek na stronie, aby włączyć dźwięk",
-    "subscribe_try_again": "Spróbuj ponownie",
-    "subscribe_connecting": "Łączenie..."
+  "auth": {
+    "welcomeBack": "Witaj ponownie",
+    "loginToContinue": "Zaloguj się, aby przejść do profilu",
+    "login": "Zaloguj się",
+    "enterCredentials": "Wprowadź swoje dane poniżej",
+    "loggingIn": "Logowanie...",
+    "forgotPassword": "Zapomniałeś hasła?",
+    "noAccount": "Nie masz konta?",
+    "register": "Zarejestruj się",
+    "createAccount": "Utwórz konto",
+    "joinUs": "Dołącz do nas, aby śledzić zamówienia i szybciej finalizować zakupy",
+    "fillInDetails": "Wypełnij swoje dane poniżej",
+    "registering": "Rejestracja...",
+    "haveAccount": "Masz już konto?"
+  },
+  "booking": {
+    "title": "Zarezerwuj stolik",
+    "eyebrow": "Rezerwacja online",
+    "step1Label": "Szczegóły",
+    "step2Label": "Kontakt",
+    "date": "Data",
+    "guests": "Liczba gości",
+    "time": "Godzina",
+    "person": "gość",
+    "persons": "gości",
+    "name": "Imię",
+    "phone": "Telefon",
+    "email": "E-mail",
+    "comment": "Życzenia",
+    "commentPlaceholder": "Alergie, specjalne życzenia...",
+    "optional": "opcjonalnie",
+    "edit": "Edytuj",
+    "next": "Dalej",
+    "submit": "Zarezerwuj",
+    "sending": "Wysyłanie...",
+    "guestsLabel": "gości",
+    "newBooking": "Nowa rezerwacja",
+    "success": "Rezerwacja zakończona!",
+    "successMessage": "Skontaktujemy się z Tobą w celu potwierdzenia.",
+    "error": "Błąd. Spróbuj ponownie.",
+    "privacyNote": "Klikając „Zarezerwuj”, akceptujesz regulamin.",
+    "form": {
+      "branchSelection": {
+        "loading": "Ładowanie informacji o filii...",
+        "prompt": "Wybierz filię w nawigacji, aby zarezerwować stolik."
+      }
+    }
+  },
+  "careers": {
+    "pageUnavailable": "Strona kariery jest obecnie niedostępna.",
+    "back": "Wróć",
+    "submitting": "Wysyłanie..."
+  },
+  "catalog": {
+    "shopByCategory": "KUPUJ WEDŁUG KATEGORII",
+    "addedToCart": "«{name}» dodano do koszyka",
+    "unavailable": "Katalog niedostępny",
+    "ourProducts": "Nasze produkty"
   },
   "checkout": {
     "yourOrder": "Twoje zamówienie",
     "subtotal": "Suma częściowa",
     "delivery": "Dostawa",
     "serviceFee": "Opłata serwisowa",
-    "total": "Suma",
+    "total": "Razem",
     "deliveryTime": "Czas dostawy",
     "asap": "Jak najszybciej",
     "schedule": "Zaplanuj",
@@ -439,18 +419,18 @@
     "email": "E-mail",
     "emptyCart": "Twój koszyk jest pusty",
     "goToMenu": "Przejdź do menu",
-    "checkout": "Zamów",
+    "checkout": "Zamówienie",
     "paymentMethod": "Metoda płatności",
     "processing": "Przetwarzanie...",
     "payTotal": "Zapłać {total} {currency}",
     "placeOrder": "Złóż zamówienie",
-    "deliveryMethod": "Sposób dostawy",
+    "deliveryMethod": "Metoda dostawy",
     "paczkomat": "Paczkomat / Punkty odbioru",
     "paczkomatDesc": "InPost, Orlen, DPD...",
     "courier": "Kurier",
     "courierDesc": "Dostawa do domu",
     "localCourier": "Kurier lokalny",
-    "localCourierDesc": "~35 min",
+    "localCourierDesc": "~35 minut",
     "storePickup": "Odbiór w sklepie",
     "storePickupDesc": "Gotowe w 15 minut",
     "free": "Bezpłatnie",
@@ -472,6 +452,110 @@
       "mapError": "Błąd ładowania widżetu mapy."
     }
   },
+  "configurator": {
+    "required": "Wymagane",
+    "optional": "Opcjonalne",
+    "notes": "Specjalne instrukcje",
+    "notesPlaceholder": "np. bez cebuli, sos osobno...",
+    "selectRequired": "Wybierz: {group}",
+    "addToCart": "Dodaj za {price} {currency}"
+  },
+  "contact": {
+    "eyebrow": "Skontaktuj się z nami",
+    "title": "Kontakt",
+    "address": "Adres",
+    "phone": "Telefon",
+    "email": "E-mail",
+    "hours": "Godziny pracy",
+    "maps": "Otwórz w Google Maps"
+  },
+  "footer": {
+    "admin": "Panel administracyjny",
+    "home": "Strona główna",
+    "menu": "Menu",
+    "reservations": "Rezerwacje",
+    "contact": "Kontakt",
+    "privacyPolicy": "Polityka prywatności",
+    "terms": "Regulamin",
+    "navigation": "Nawigacja",
+    "legal": "Informacje prawne",
+    "poweredBy": "Obsługiwane przez"
+  },
+  "gallery": {
+    "title": "Galeria",
+    "subtitle": "Nasza restauracja"
+  },
+  "hero": {
+    "booking": "Zarezerwuj stolik",
+    "menu": "Menu"
+  },
+  "homePage": {
+    "siteNotFound": "Nie znaleziono strony"
+  },
+  "menu": {
+    "title": "Nasze menu",
+    "all": "Wszystkie dania",
+    "emptyCategory": "Brak dań w tej kategorii.",
+    "addToCart": "Dodaj do koszyka"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "menu": "Produkty",
+    "gallery": "Galeria",
+    "contact": "Kontakt",
+    "booking": "Zarezerwuj stolik",
+    "login": "Zaloguj się",
+    "profile": "Profil"
+  },
+  "notifications": {
+    "new_booking": "🍽️ Nowa rezerwacja",
+    "new_booking_body": "{name} · {date} o {time} · {guests} gości",
+    "new_booking_body_no_guests": "{name} · {date} o {time}",
+    "allow_notifications_title": "Włącz powiadomienia",
+    "allow_notifications_text": "Otrzymuj alerty o nowych rezerwacjach nawet po zamknięciu kart.",
+    "allow_button": "Zezwól",
+    "later_button": "Później",
+    "notifications_blocked": "🚫 Powiadomienia zablokowane",
+    "notifications_blocked_hint": "Kliknij ikonę kłódki 🔒 na pasku adresu → Powiadomienia → Zezwól.",
+    "background_notifications_title": "⚡ Powiadomienia w tle",
+    "background_notifications_text": "Bez tego powiadomienia nie będą docierać po zamknięciu kart.",
+    "enable_button": "Włącz",
+    "push_error_prefix": "❌",
+    "sound_hint": "Kliknij gdziekolwiek na stronie, aby włączyć dźwięk",
+    "subscribe_try_again": "Spróbuj ponownie",
+    "subscribe_connecting": "Łączenie..."
+  },
+  "order": {
+    "cancel": {
+      "title": "Płatność anulowana",
+      "description": "Możesz wrócić do koszyka i spróbować ponownie.",
+      "backToHome": "Powrót do strony głównej"
+    }
+  },
+  "productDetail": {
+    "backToCatalog": "Katalog",
+    "sku": "Art.",
+    "description": "Opis",
+    "specifications": "Specyfikacje",
+    "weight": "Waga",
+    "dimensions": "Wymiary",
+    "tags": "Tagi",
+    "noPhoto": "Brak zdjęcia",
+    "noPrice": "Cena nieokreślona",
+    "inStock": "Dostępny",
+    "outOfStock": "Niedostępny",
+    "delivery": "Dostawa 1–3 dni robocze",
+    "returnPolicy": "Zwroty w ciągu 14 dni",
+    "addToWishlist": "Dodaj do listy życzeń",
+    "removeFromWishlist": "Usuń z listy życzeń",
+    "inWishlist": "Na liście życzeń",
+    "share": "Udostępnij",
+    "variant": "Wariant",
+    "stockLeft": "Zostało tylko {count} szt.",
+    "view": "wyświetleń",
+    "selectVariant": "Wybierz wariant",
+    "addToCart": "Dodaj do koszyka"
+  },
   "profile": {
     "loadingProfile": "Ładowanie profilu...",
     "loadingOrders": "Ładowanie zamówień...",
@@ -490,7 +574,7 @@
     "passwordChanged": "Hasło zostało pomyślnie zmienione",
     "passwordChangeError": "Nie udało się zmienić hasła",
     "serverError": "Błąd serwera",
-    "deleteConfirm": "Czy na pewno chcesz usunąć swoje konto? Tej czynności nie można cofnąć.",
+    "deleteConfirm": "Czy na pewno chcesz usunąć swoje konto? Tej operacji nie można cofnąć.",
     "deletePrompt": "Wpisz słowo „DELETE”, aby potwierdzić:",
     "deleteCanceled": "Potwierdzenie anulowane.",
     "accountDeleted": "Konto zostało usunięte.",
@@ -505,12 +589,12 @@
     "saving": "Zapisywanie...",
     "security": "Bezpieczeństwo",
     "changeLoginPassword": "Zmień hasło logowania",
-    "currentPassword": "Obecne hasło",
+    "currentPassword": "Aktualne hasło",
     "newPassword": "Nowe hasło",
     "passwordHint": "Co najmniej 8 znaków. Użyj liter i cyfr.",
     "changePassword": "Zmień hasło",
     "updating": "Aktualizowanie...",
-    "dangerZone": "Strefa zagrożenia",
+    "dangerZone": "Strefa niebezpieczna",
     "deleteWarning": "Usunięcie konta jest nieodwracalne. Wszystkie Twoje dane, historia zamówień i ustawienia zostaną trwale usunięte.",
     "deleteAccount": "Usuń moje konto",
     "deleting": "Usuwanie...",
@@ -518,67 +602,130 @@
     "timeToCheckMenu": "Czas sprawdzić menu!",
     "delivery": "Dostawa",
     "pickup": "Odbiór osobisty",
-    "total": "Suma",
+    "total": "Razem",
     "statusLabels": {
       "pending_payment": "Oczekuje na płatność",
       "paid": "Opłacone",
       "accepted": "Zaakceptowane",
       "preparing": "W przygotowaniu",
       "ready": "Gotowe",
-      "out_for_delivery": "W drodze",
-      "completed": "Zrealizowane",
+      "out_for_delivery": "W dostawie",
+      "completed": "Zakończone",
       "cancelled": "Anulowane"
     }
   },
-  "auth": {
-    "welcomeBack": "Witaj ponownie",
-    "loginToContinue": "Zaloguj się, aby przejść do swojego profilu",
-    "login": "Zaloguj się",
-    "enterCredentials": "Wprowadź poniżej swoje dane logowania",
-    "loggingIn": "Logowanie...",
-    "forgotPassword": "Nie pamiętasz hasła?",
-    "noAccount": "Nie masz konta?",
-    "register": "Zarejestruj się",
-    "createAccount": "Utwórz konto",
-    "joinUs": "Dołącz do nas, aby śledzić zamówienia i szybciej finalizować zakupy",
-    "fillInDetails": "Wypełnij poniższe dane",
-    "registering": "Rejestrowanie...",
-    "haveAccount": "Masz już konto?"
-  },
-  "configurator": {
-    "required": "Wymagane",
-    "optional": "Opcjonalne",
-    "notes": "Specjalne instrukcje",
-    "notesPlaceholder": "np. bez cebuli, sos osobno...",
-    "selectRequired": "Wybierz: {group}",
-    "addToCart": "Dodaj za {price} {currency}"
-  },
-  "catalog": {
-    "shopByCategory": "KUPUJ WEDŁUG KATEGORII",
-    "addedToCart": "«{name}» dodano do koszyka"
-  },
-  "productDetail": {
-    "backToCatalog": "Katalog",
-    "sku": "Nr art.",
-    "description": "Opis",
-    "specifications": "Specyfikacja",
-    "weight": "Waga",
-    "dimensions": "Wymiary",
-    "tags": "Tagi",
-    "noPhoto": "Brak zdjęcia",
-    "noPrice": "Cena nieokreślona",
-    "inStock": "Dostępny",
-    "outOfStock": "Niedostępny",
-    "delivery": "Dostawa 1–3 dni robocze",
-    "returnPolicy": "Zwroty w ciągu 14 dni",
-    "addToWishlist": "Dodaj do listy życzeń",
-    "removeFromWishlist": "Usuń z listy życzeń",
-    "inWishlist": "Na liście życzeń",
-    "share": "Udostępnij",
-    "variant": "Wariant",
-    "stockLeft": "Zostało tylko {count}",
-    "view": "wyświetleń",
-    "selectVariant": "Wybierz wariant",
-    "addToCart": "Dodaj do koszyka"
+  "serviceBooking": {
+    "currency": "zł",
+    "steps": {
+      "labels": {
+        "services": "Usługi",
+        "dateTime": "Data",
+        "details": "Szczegóły"
+      },
+      "services": {
+        "title": "Wybierz usługi",
+        "description": "Wybierz jedną lub więcej interesujących Cię usług. Ceny są orientacyjne i mogą się zmienić po oględzinach pojazdu.",
+        "selectService": "Wybierz usługę",
+        "selectedCount": "Wybrane usługi: {count}"
+      },
+      "dateTime": {
+        "title": "Data wizyty",
+        "description": "Wybierz dogodny termin. Dostępne godziny pojawią się po wybraniu daty."
+      },
+      "details": {
+        "title": "Dane kontaktowe i dane pojazdu",
+        "description": "Wypełnij swoje dane kontaktowe i informacje o pojeździe, abyśmy mogli przygotować się na Twoją wizytę."
+      }
+    },
+    "summary": {
+      "services": "Usługi:",
+      "date": "Data:",
+      "estimatedCost": "Szacowany koszt:",
+      "selectedDate": "Wybrana data",
+      "selectedDatePlaceholder": "—",
+      "selectedServices": "Wybrane usługi",
+      "total": "Razem: {totalPrice} {currency}",
+      "servicesCount": "{count} usług · {totalPrice} {currency}",
+      "back": "Wstecz",
+      "next": "Dalej",
+      "confirm": "Potwierdź rezerwację",
+      "submitting": "Wysyłanie...",
+      "newReservation": "Nowa rezerwacja"
+    },
+    "success": {
+      "title": "Rezerwacja przyjęta!",
+      "message": "Dziękujemy! Twoja rezerwacja została przesłana. Skontaktujemy się z Tobą w celu potwierdzenia daty i szczegółów.",
+      "services": "Usługi:",
+      "date": "Data:",
+      "estimatedCost": "Szacowany koszt:",
+      "newReservation": "Nowa rezerwacja"
+    },
+    "forms": {
+      "contact": {
+        "title": "Dane kontaktowe",
+        "nameLabel": "Imię i nazwisko *",
+        "phoneLabel": "Telefon *",
+        "emailLabel": "E-mail (opcjonalnie)",
+        "placeholderName": "Jan Kowalski",
+        "placeholderPhone": "+48 600 100 200",
+        "placeholderEmail": "jan@example.com"
+      },
+      "vehicle": {
+        "title": "Dane pojazdu",
+        "makeLabel": "Marka *",
+        "makePlaceholder": "Wybierz markę",
+        "modelLabel": "Model *",
+        "modelPlaceholder": "np. X5, A4, Golf",
+        "bodyTypeLabel": "Typ nadwozia *",
+        "bodyTypePlaceholder": "Wybierz typ nadwozia"
+      },
+      "notes": {
+        "title": "Dodatkowe uwagi",
+        "placeholder": "Opisz szczegóły pojazdu, uszkodzenia, oczekiwania lub preferencje dotyczące wizyty..."
+      }
+    },
+    "calendar": {
+      "previousMonth": "Poprzedni miesiąc",
+      "nextMonth": "Następny miesiąc",
+      "sundayUnavailable": "* Niedziele są niedostępne. Wybierz inny dzień.",
+      "availableHours": "Dostępne godziny",
+      "selectDateFirst": "Najpierw wybierz datę w kalendarzu.",
+      "selectedDate": "Wybrana data:"
+    },
+    "servicesData": {
+      "ceramicCoating": {
+        "name": "Powłoka ceramiczna",
+        "description": "Trwała ochrona lakieru z efektem hydrofobowym na 24 miesiące.",
+        "duration": "2 dni"
+      },
+      "paintCorrection": {
+        "name": "Korekta lakieru",
+        "description": "Dwuetapowe polerowanie usuwające rysy i hologramy.",
+        "duration": "1-2 dni"
+      },
+      "interiorCleaning": {
+        "name": "Czyszczenie wnętrza",
+        "description": "Kompleksowe czyszczenie tapicerki, dywaników i podsufitki.",
+        "duration": "6 godzin"
+      },
+      "fullDetailing": {
+        "name": "Pełny detailing",
+        "description": "Pakiet: korekta lakieru, powłoka ceramiczna i czyszczenie wnętrza.",
+        "duration": "3 dni"
+      },
+      "waxing": {
+        "name": "Woskowanie lakieru",
+        "description": "Nałożenie wosku premium dla głębokiego połysku i ochrony.",
+        "duration": "3 godziny"
+      },
+      "engineCleaning": {
+        "name": "Czyszczenie komory silnika",
+        "description": "Bezpieczne czyszczenie silnika przy użyciu dedykowanej chemii.",
+        "duration": "2 godziny"
+      }
+    },
+    "errors": {
+      "bookingSubmission": "Wystąpił błąd podczas rezerwacji."
+    }
   }
 }

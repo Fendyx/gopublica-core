@@ -1,5 +1,6 @@
 // src/app/[tenantDomain]/[locale]/catalog/page.tsx
 import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import Menu from '@/widgets/Menu';
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout';
 import { getTenantByDomain } from '@/entities/tenant/api';
@@ -13,13 +14,14 @@ export default async function CatalogPage({
 }: {
   params: Promise<{ tenantDomain: string; locale: string }>;
 }) {
-  const { locale, tenantDomain } = await params; // один раз распаковали
+  const { locale, tenantDomain } = await params;
+  const t = await getTranslations('catalog');
   const headersList = await headers();
   const host = headersList.get('host') ?? tenantDomain;
   const tenant = await getTenantByDomain(host);
 
   if (!tenant || !tenant.features.hasMenu) {
-    return <div className="text-center py-20">Каталог недоступен</div>;
+    return <div className="text-center py-20">{t('unavailable')}</div>;
   }
 
   const branchId = await resolveBranchId(tenant.tenantId);
@@ -44,10 +46,10 @@ export default async function CatalogPage({
     return (
       <section className="py-10 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold mb-8 text-foreground">Nasze produkty</h1>
-          <EcommerceGridLayout 
-            items={items} 
-            variant={variant} 
+          <h1 className="text-3xl font-bold mb-8 text-foreground">{t('ourProducts')}</h1>
+          <EcommerceGridLayout
+            items={items}
+            variant={variant}
             currencySymbol={currencySymbol}
             locale={locale}
           />

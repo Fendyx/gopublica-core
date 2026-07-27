@@ -1,77 +1,6 @@
 {
-  "nav": {
-    "home": "Home",
-    "menu": "Products",
-    "gallery": "Gallery",
-    "contact": "Contact",
-    "booking": "Book a table",
-    "login": "Login",
-    "profile": "Profile"
-  },
-  "hero": {
-    "booking": "Book a table",
-    "menu": "Menu"
-  },
-  "menu": {
-    "title": "Our menu",
-    "all": "All dishes",
-    "emptyCategory": "No dishes in this category.",
-    "addToCart": "Add to cart"
-  },
-  "booking": {
-    "title": "Reserve a Table",
-    "eyebrow": "Online Booking",
-    "step1Label": "Details",
-    "step2Label": "Contact",
-    "date": "Date",
-    "guests": "Guests",
-    "time": "Time",
-    "person": "guest",
-    "persons": "guests",
-    "name": "Name",
-    "phone": "Phone",
-    "email": "Email",
-    "comment": "Requests",
-    "commentPlaceholder": "Allergies, special requests...",
-    "optional": "optional",
-    "edit": "Edit",
-    "next": "Next",
-    "submit": "Book Now",
-    "sending": "Sending...",
-    "guestsLabel": "guests",
-    "newBooking": "New Booking",
-    "success": "You're booked!",
-    "successMessage": "We will contact you for confirmation.",
-    "error": "Error. Please try again.",
-    "privacyNote": "By clicking \"Book Now\", you agree to the terms and conditions."
-  },
-  "contact": {
-    "eyebrow": "Contact Us",
-    "title": "Contact",
-    "address": "Address",
-    "phone": "Phone",
-    "email": "Email",
-    "hours": "Working Hours",
-    "maps": "Open in Google Maps"
-  },
   "about": {
     "title": "About Us"
-  },
-  "gallery": {
-    "title": "Gallery",
-    "subtitle": "Our Restaurant"
-  },
-  "footer": {
-    "admin": "Admin Panel",
-    "home": "Home",
-    "menu": "Menu",
-    "reservations": "Reservations",
-    "contact": "Contact",
-    "privacyPolicy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "navigation": "Navigation",
-    "legal": "Legal",
-    "poweredBy": "Powered by"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -189,7 +118,10 @@
       "addOption": "Add option",
       "addGroup": "Add option group",
       "translateGroup": "Translate group",
-      "translateOptions": "Translate options"
+      "translateOptions": "Translate options",
+      "clientMissing": "Client is not defined",
+      "branchSelectionPrompt": "Select a branch in the switcher at the top right",
+      "branchInfo": "Menu for branch: {name}"
     },
     "reservationsPage": {
       "loading": "Loading...",
@@ -249,7 +181,14 @@
         "melody1": "Melody 1",
         "customUrl": "Custom URL",
         "listen": "Listen"
-      }
+      },
+      "branchSelectionPrompt": "Select a branch in the switcher at the top right",
+      "branchInfo": "Settings for branch: {name}",
+      "businessName": "Business name",
+      "exampleBusinessName": "For example: LLC 'Romashka'",
+      "workingHoursByDay": "Working hours by day",
+      "leaveEmptyPageColor": "Leave empty to use the default page color.",
+      "leaveEmptyDefaultColor": "Leave empty to use the default page color."
     },
     "days": {
       "monday": "Monday",
@@ -350,72 +289,113 @@
       }
     },
     "orders": "Orders",
-"ordersPage": {
-  "loading": "Loading...",
-  "selectBranch": "Select a branch",
-  "title": "Orders",
-  "branchInfo": "Branch: {name} {city}",
-  "empty": "No active orders",
-  "table": {
-    "idTime": "ID / Time",
-    "customer": "Customer",
-    "shipping": "Shipping",
-    "items": "Items",
-    "total": "Total",
-    "status": "Status",
-    "actions": "Actions"
+    "ordersPage": {
+      "loading": "Loading...",
+      "selectBranch": "Select a branch",
+      "title": "Orders",
+      "branchInfo": "Branch: {name} {city}",
+      "empty": "No active orders",
+      "table": {
+        "idTime": "ID / Time",
+        "customer": "Customer",
+        "shipping": "Shipping",
+        "items": "Items",
+        "total": "Total",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "accept": "Accept",
+        "decline": "Decline",
+        "startPacking": "Pack order",
+        "markReady": "Mark ready",
+        "markShipped": "Mark shipped",
+        "handedOver": "Handed over",
+        "delivered": "Delivered",
+        "noActions": "No actions"
+      },
+      "status": {
+        "needsResponse": "Needs response",
+        "declined": "Declined",
+        "pending_payment": "Pending payment",
+        "paid": "Paid",
+        "packing": "Packing",
+        "readyToShip": "Ready to ship",
+        "shipped": "Shipped",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "delivery": "Delivery",
+      "pickup": "Pickup",
+      "scheduledFor": "Scheduled for:",
+      "deliveryFee": "Delivery: {fee}",
+      "moreItems": "+ {count} more items",
+      "alerts": {
+        "acceptError": "Error accepting order",
+        "declinePrompt": "Specify the reason for cancellation (for the client and refund):",
+        "declineError": "Error canceling order",
+        "updateError": "Error updating status"
+      }
+    }
   },
-  "actions": {
-    "accept": "Accept",
-    "decline": "Decline",
-    "startPacking": "Pack order",
-    "markReady": "Mark ready",
-    "markShipped": "Mark shipped",
-    "handedOver": "Handed over",
-    "delivered": "Delivered",
-    "noActions": "No actions"
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "loginToContinue": "Log in to continue to your profile",
+    "login": "Log In",
+    "enterCredentials": "Enter your credentials below",
+    "loggingIn": "Logging in...",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "register": "Sign Up",
+    "createAccount": "Create Account",
+    "joinUs": "Join us to track orders and checkout faster",
+    "fillInDetails": "Fill in your details below",
+    "registering": "Registering...",
+    "haveAccount": "Already have an account?"
   },
-  "status": {
-    "needsResponse": "Needs response",
-    "declined": "Declined",
-    "pending_payment": "Pending payment",
-    "paid": "Paid",
-    "packing": "Packing",
-    "readyToShip": "Ready to ship",
-    "shipped": "Shipped",
-    "completed": "Completed",
-    "cancelled": "Cancelled"
+  "booking": {
+    "title": "Reserve a Table",
+    "eyebrow": "Online Booking",
+    "step1Label": "Details",
+    "step2Label": "Contact",
+    "date": "Date",
+    "guests": "Guests",
+    "time": "Time",
+    "person": "guest",
+    "persons": "guests",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "comment": "Requests",
+    "commentPlaceholder": "Allergies, special requests...",
+    "optional": "optional",
+    "edit": "Edit",
+    "next": "Next",
+    "submit": "Book Now",
+    "sending": "Sending...",
+    "guestsLabel": "guests",
+    "newBooking": "New Booking",
+    "success": "You're booked!",
+    "successMessage": "We will contact you for confirmation.",
+    "error": "Error. Please try again.",
+    "privacyNote": "By clicking \"Book Now\", you agree to the terms and conditions.",
+    "form": {
+      "branchSelection": {
+        "loading": "Loading branch information...",
+        "prompt": "Please select a branch in the navigation to book a table."
+      }
+    }
   },
-  "delivery": "Delivery",
-  "pickup": "Pickup",
-  "scheduledFor": "Scheduled for:",
-  "deliveryFee": "Delivery: {fee}",
-  "moreItems": "+ {count} more items",
-  "alerts": {
-    "acceptError": "Error accepting order",
-    "declinePrompt": "Specify the reason for cancellation (for the client and refund):",
-    "declineError": "Error canceling order",
-    "updateError": "Error updating status"
-  }
-}
-},
-  "notifications": {
-    "new_booking": "🍽️ New booking",
-    "new_booking_body": "{name} · {date} at {time} · {guests} guests",
-    "new_booking_body_no_guests": "{name} · {date} at {time}",
-    "allow_notifications_title": "Enable notifications",
-    "allow_notifications_text": "Receive alerts about new bookings even when tabs are closed.",
-    "allow_button": "Allow",
-    "later_button": "Later",
-    "notifications_blocked": "🚫 Notifications blocked",
-    "notifications_blocked_hint": "Click the lock 🔒 in the address bar → Notifications → Allow.",
-    "background_notifications_title": "⚡ Background notifications",
-    "background_notifications_text": "Without this, notifications won't arrive when tabs are closed.",
-    "enable_button": "Enable",
-    "push_error_prefix": "❌",
-    "sound_hint": "Click anywhere on the page to enable sound",
-    "subscribe_try_again": "Try again",
-    "subscribe_connecting": "Connecting..."
+  "careers": {
+    "pageUnavailable": "Careers page is currently unavailable.",
+    "back": "Go back",
+    "submitting": "Sending..."
+  },
+  "catalog": {
+    "shopByCategory": "SHOP BY CATEGORY",
+    "addedToCart": "«{name}» added to cart",
+    "unavailable": "Catalog unavailable",
+    "ourProducts": "Our products"
   },
   "checkout": {
     "yourOrder": "Your order",
@@ -471,6 +451,110 @@
       "generalError": "An error occurred during checkout",
       "mapError": "Error loading map widget."
     }
+  },
+  "configurator": {
+    "required": "Required",
+    "optional": "Optional",
+    "notes": "Special instructions",
+    "notesPlaceholder": "e.g., no onions, sauce on the side...",
+    "selectRequired": "Please select: {group}",
+    "addToCart": "Add for {price} {currency}"
+  },
+  "contact": {
+    "eyebrow": "Contact Us",
+    "title": "Contact",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Working Hours",
+    "maps": "Open in Google Maps"
+  },
+  "footer": {
+    "admin": "Admin Panel",
+    "home": "Home",
+    "menu": "Menu",
+    "reservations": "Reservations",
+    "contact": "Contact",
+    "privacyPolicy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "navigation": "Navigation",
+    "legal": "Legal",
+    "poweredBy": "Powered by"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "subtitle": "Our Restaurant"
+  },
+  "hero": {
+    "booking": "Book a table",
+    "menu": "Menu"
+  },
+  "homePage": {
+    "siteNotFound": "Site not found"
+  },
+  "menu": {
+    "title": "Our menu",
+    "all": "All dishes",
+    "emptyCategory": "No dishes in this category.",
+    "addToCart": "Add to cart"
+  },
+  "nav": {
+    "home": "Home",
+    "menu": "Products",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "booking": "Book a table",
+    "login": "Login",
+    "profile": "Profile"
+  },
+  "notifications": {
+    "new_booking": "🍽️ New booking",
+    "new_booking_body": "{name} · {date} at {time} · {guests} guests",
+    "new_booking_body_no_guests": "{name} · {date} at {time}",
+    "allow_notifications_title": "Enable notifications",
+    "allow_notifications_text": "Receive alerts about new bookings even when tabs are closed.",
+    "allow_button": "Allow",
+    "later_button": "Later",
+    "notifications_blocked": "🚫 Notifications blocked",
+    "notifications_blocked_hint": "Click the lock 🔒 in the address bar → Notifications → Allow.",
+    "background_notifications_title": "⚡ Background notifications",
+    "background_notifications_text": "Without this, notifications won't arrive when tabs are closed.",
+    "enable_button": "Enable",
+    "push_error_prefix": "❌",
+    "sound_hint": "Click anywhere on the page to enable sound",
+    "subscribe_try_again": "Try again",
+    "subscribe_connecting": "Connecting..."
+  },
+  "order": {
+    "cancel": {
+      "title": "Payment canceled",
+      "description": "You can return to your cart and try again.",
+      "backToHome": "Back to home"
+    }
+  },
+  "productDetail": {
+    "backToCatalog": "Catalog",
+    "sku": "Art.",
+    "description": "Description",
+    "specifications": "Specifications",
+    "weight": "Weight",
+    "dimensions": "Dimensions",
+    "tags": "Tags",
+    "noPhoto": "No photo",
+    "noPrice": "Price not specified",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "delivery": "Delivery 1–3 business days",
+    "returnPolicy": "Returns within 14 days",
+    "addToWishlist": "Add to Wishlist",
+    "removeFromWishlist": "Remove from Wishlist",
+    "inWishlist": "In Wishlist",
+    "share": "Share",
+    "variant": "Variant",
+    "stockLeft": "Only {count} left",
+    "view": "view",
+    "selectVariant": "Select a variant",
+    "addToCart": "Add to Cart"
   },
   "profile": {
     "loadingProfile": "Loading profile...",
@@ -530,55 +614,118 @@
       "cancelled": "Cancelled"
     }
   },
-  "auth": {
-    "welcomeBack": "Welcome Back",
-    "loginToContinue": "Log in to continue to your profile",
-    "login": "Log In",
-    "enterCredentials": "Enter your credentials below",
-    "loggingIn": "Logging in...",
-    "forgotPassword": "Forgot password?",
-    "noAccount": "Don't have an account?",
-    "register": "Sign Up",
-    "createAccount": "Create Account",
-    "joinUs": "Join us to track orders and checkout faster",
-    "fillInDetails": "Fill in your details below",
-    "registering": "Registering...",
-    "haveAccount": "Already have an account?"
-  },
-  "configurator": {
-    "required": "Required",
-    "optional": "Optional",
-    "notes": "Special instructions",
-    "notesPlaceholder": "e.g., no onions, sauce on the side...",
-    "selectRequired": "Please select: {group}",
-    "addToCart": "Add for {price} {currency}"
-  },
-  "catalog": {
-    "shopByCategory": "SHOP BY CATEGORY",
-    "addedToCart": "«{name}» added to cart"
-  },
-  "productDetail": {
-    "backToCatalog": "Catalog",
-    "sku": "Art.",
-    "description": "Description",
-    "specifications": "Specifications",
-    "weight": "Weight",
-    "dimensions": "Dimensions",
-    "tags": "Tags",
-    "noPhoto": "No photo",
-    "noPrice": "Price not specified",
-    "inStock": "In stock",
-    "outOfStock": "Out of stock",
-    "delivery": "Delivery 1–3 business days",
-    "returnPolicy": "Returns within 14 days",
-    "addToWishlist": "Add to Wishlist",
-    "removeFromWishlist": "Remove from Wishlist",
-    "inWishlist": "In Wishlist",
-    "share": "Share",
-    "variant": "Variant",
-    "stockLeft": "Only {count} left",
-    "view": "view",
-    "selectVariant": "Select a variant",
-    "addToCart": "Add to Cart"
+  "serviceBooking": {
+    "currency": "zł",
+    "steps": {
+      "labels": {
+        "services": "Services",
+        "dateTime": "Date",
+        "details": "Details"
+      },
+      "services": {
+        "title": "Select services",
+        "description": "Choose one or more services that interest you. Prices are approximate and may change after vehicle inspection.",
+        "selectService": "Select service",
+        "selectedCount": "Selected services: {count}"
+      },
+      "dateTime": {
+        "title": "Visit date",
+        "description": "Choose a convenient time. Available hours will appear after you select a date."
+      },
+      "details": {
+        "title": "Contact and vehicle details",
+        "description": "Fill in your contact details and vehicle information so we can prepare for your visit."
+      }
+    },
+    "summary": {
+      "services": "Services:",
+      "date": "Date:",
+      "estimatedCost": "Estimated cost:",
+      "selectedDate": "Selected date",
+      "selectedDatePlaceholder": "—",
+      "selectedServices": "Selected services",
+      "total": "Total: {totalPrice} {currency}",
+      "servicesCount": "{count} services · {totalPrice} {currency}",
+      "back": "Back",
+      "next": "Next",
+      "confirm": "Confirm reservation",
+      "submitting": "Submitting...",
+      "newReservation": "New reservation"
+    },
+    "success": {
+      "title": "Reservation accepted!",
+      "message": "Thank you! Your reservation has been submitted. We will contact you to confirm the date and details.",
+      "services": "Services:",
+      "date": "Date:",
+      "estimatedCost": "Estimated cost:",
+      "newReservation": "New reservation"
+    },
+    "forms": {
+      "contact": {
+        "title": "Contact details",
+        "nameLabel": "Full name *",
+        "phoneLabel": "Phone *",
+        "emailLabel": "Email (optional)",
+        "placeholderName": "Jan Kowalski",
+        "placeholderPhone": "+48 600 100 200",
+        "placeholderEmail": "jan@example.com"
+      },
+      "vehicle": {
+        "title": "Vehicle details",
+        "makeLabel": "Make *",
+        "makePlaceholder": "Select make",
+        "modelLabel": "Model *",
+        "modelPlaceholder": "e.g. X5, A4, Golf",
+        "bodyTypeLabel": "Body type *",
+        "bodyTypePlaceholder": "Select body type"
+      },
+      "notes": {
+        "title": "Additional notes",
+        "placeholder": "Describe the vehicle details, damage, expectations, or preferences for the visit..."
+      }
+    },
+    "calendar": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "sundayUnavailable": "* Sundays are unavailable. Please choose another day.",
+      "availableHours": "Available hours",
+      "selectDateFirst": "Please select a date in the calendar first.",
+      "selectedDate": "Selected date:"
+    },
+    "servicesData": {
+      "ceramicCoating": {
+        "name": "Ceramic coating",
+        "description": "Durable paint protection with a hydrophobic effect for 24 months.",
+        "duration": "2 days"
+      },
+      "paintCorrection": {
+        "name": "Paint correction",
+        "description": "Two-step polishing to remove scratches and swirl marks.",
+        "duration": "1-2 days"
+      },
+      "interiorCleaning": {
+        "name": "Interior cleaning",
+        "description": "Comprehensive cleaning of upholstery, carpets, and headliner.",
+        "duration": "6 hours"
+      },
+      "fullDetailing": {
+        "name": "Full detailing",
+        "description": "Package: paint correction, ceramic coating, and interior cleaning.",
+        "duration": "3 days"
+      },
+      "waxing": {
+        "name": "Paint waxing",
+        "description": "Application of premium wax for deep shine and protection.",
+        "duration": "3 hours"
+      },
+      "engineCleaning": {
+        "name": "Engine bay cleaning",
+        "description": "Safe engine cleaning using dedicated chemicals.",
+        "duration": "2 hours"
+      }
+    },
+    "errors": {
+      "bookingSubmission": "An error occurred during booking."
+    }
   }
 }

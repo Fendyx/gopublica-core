@@ -302,14 +302,14 @@ const handleSave = async (e: React.FormEvent) => {
   };
 
   if (loading || settingsLoading) return <div className="text-center py-10 text-muted-foreground">{t('loading')}</div>;
-  if (!tenantId) return <div className="text-center py-10">Ошибка: не определён клиент</div>;
-  if (!selectedBranch) return <div className="text-center py-10">Выберите филиал в переключателе справа вверху</div>;
+  if (!tenantId) return <div className="text-center py-10">{t('clientMissing')}</div>;
+  if (!selectedBranch) return <div className="text-center py-10">{t('branchSelectionPrompt')}</div>;
 
   return (
     <div className="max-w-6xl mx-auto pb-12 space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <MapPin className="w-4 h-4" />
-        Меню для филиала: <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
+        {t('branchInfo', { name: selectedBranch.name })} {selectedBranch.city && `(${selectedBranch.city})`}
       </div>
 
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

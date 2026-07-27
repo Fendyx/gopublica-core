@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { User, Phone, Mail, Car, FileText } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -33,14 +34,16 @@ export function StepDetails({
   onVehicleChange,
   onNotesChange,
 }: StepDetailsProps) {
+  const t = useTranslations('serviceBooking')
+
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
         <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-          Dane i Pojazd
+          {t('steps.details.title')}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Uzupełnij dane kontaktowe oraz informacje o pojeździe, abyśmy mogli przygotować się do wizyty.
+          {t('steps.details.description')}
         </p>
       </div>
 
@@ -57,24 +60,24 @@ export function StepDetails({
               <User className="h-4 w-4" />
             </div>
             <h3 className="font-heading text-base font-semibold text-foreground">
-              Dane kontaktowe
+              {t('forms.contact.title')}
             </h3>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Imię i Nazwisko *</Label>
+            <Label htmlFor="name">{t('forms.contact.nameLabel')}</Label>
             <Input
               id="name"
               value={guestInfo.name}
               onChange={(e) => onGuestInfoChange({ ...guestInfo, name: e.target.value })}
-              placeholder="Jan Kowalski"
+              placeholder={t('forms.contact.placeholderName')}
               className={inputBase}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefon *</Label>
+            <Label htmlFor="phone">{t('forms.contact.phoneLabel')}</Label>
             <div className="relative">
               <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -82,7 +85,7 @@ export function StepDetails({
                 type="tel"
                 value={guestInfo.phone}
                 onChange={(e) => onGuestInfoChange({ ...guestInfo, phone: e.target.value })}
-                placeholder="+48 600 100 200"
+                placeholder={t('forms.contact.placeholderPhone')}
                 className={`${inputBase} pl-9`}
                 required
               />
@@ -90,7 +93,7 @@ export function StepDetails({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email (opcjonalnie)</Label>
+            <Label htmlFor="email">{t('forms.contact.emailLabel')}</Label>
             <div className="relative">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -98,7 +101,7 @@ export function StepDetails({
                 type="email"
                 value={guestInfo.email ?? ''}
                 onChange={(e) => onGuestInfoChange({ ...guestInfo, email: e.target.value })}
-                placeholder="jan@example.com"
+                placeholder={t('forms.contact.placeholderEmail')}
                 className={`${inputBase} pl-9`}
               />
             </div>
@@ -117,18 +120,18 @@ export function StepDetails({
               <Car className="h-4 w-4" />
             </div>
             <h3 className="font-heading text-base font-semibold text-foreground">
-              Dane pojazdu
+              {t('forms.vehicle.title')}
             </h3>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="carMake">Marka *</Label>
+            <Label htmlFor="carMake">{t('forms.vehicle.makeLabel')}</Label>
             <Select
               value={vehicle.carMake}
               onValueChange={(v) => onVehicleChange({ ...vehicle, carMake: v })}
             >
               <SelectTrigger id="carMake" className={`${inputBase} w-full`}>
-                <SelectValue placeholder="Wybierz markę" />
+                <SelectValue placeholder={t('forms.vehicle.makePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {CAR_MAKES.map((make) => (
@@ -141,25 +144,25 @@ export function StepDetails({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="carModel">Model *</Label>
+            <Label htmlFor="carModel">{t('forms.vehicle.modelLabel')}</Label>
             <Input
               id="carModel"
               value={vehicle.carModel}
               onChange={(e) => onVehicleChange({ ...vehicle, carModel: e.target.value })}
-              placeholder="np. X5, A4, Golf"
+              placeholder={t('forms.vehicle.modelPlaceholder')}
               className={inputBase}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bodyType">Typ nadwozia *</Label>
+            <Label htmlFor="bodyType">{t('forms.vehicle.bodyTypeLabel')}</Label>
             <Select
               value={vehicle.bodyType}
               onValueChange={(v) => onVehicleChange({ ...vehicle, bodyType: v as BodyType })}
             >
               <SelectTrigger id="bodyType" className={`${inputBase} w-full`}>
-                <SelectValue placeholder="Wybierz typ nadwozia" />
+                <SelectValue placeholder={t('forms.vehicle.bodyTypePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {BODY_TYPES.map((type) => (
@@ -185,14 +188,14 @@ export function StepDetails({
             <FileText className="h-4 w-4" />
           </div>
           <Label htmlFor="notes" className="font-heading text-base font-semibold text-foreground">
-            Dodatkowe uwagi
+            {t('forms.notes.title')}
           </Label>
         </div>
         <Textarea
           id="notes"
           value={notes}
           onChange={(e) => onNotesChange(e.target.value)}
-          placeholder="Opisz szczegóły pojazdu, uszkodzenia, oczekiwania lub preferencje dotyczące wizyty..."
+          placeholder={t('forms.notes.placeholder')}
           className="min-h-24"
         />
       </motion.div>

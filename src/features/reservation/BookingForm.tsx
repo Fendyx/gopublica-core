@@ -35,7 +35,7 @@ export default function BookingForm() {
 
   const handleSubmit = async () => {
     if (!selectedBranch) {
-      alert(t('selectBranchFirst') || 'Выберите филиал в навигации')
+      alert(t('form.branchSelection.prompt'))
       return
     }
     setStatus('loading')
@@ -100,7 +100,7 @@ export default function BookingForm() {
     return (
       <Section>
         <SectionHeader title={t('title')} />
-        <div className="text-center py-10 text-text-secondary">Loading информации о филиале...</div>
+        <div className="text-center py-10 text-text-secondary">{t('form.branchSelection.loading')}</div>
       </Section>
     )
   }
@@ -109,7 +109,7 @@ export default function BookingForm() {
     return (
       <Section>
         <SectionHeader title={t('title')} />
-        <div className="text-center py-10 text-text-secondary">Пожалуйста, выберите филиал в навигации, чтобы забронировать столик.</div>
+        <div className="text-center py-10 text-text-secondary">{t('form.branchSelection.prompt')}</div>
       </Section>
     )
   }

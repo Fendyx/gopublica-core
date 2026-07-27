@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ interface JobSettings {
 export default function PublicCareersPage() {
   const params = useParams();
   const tenant = useTenant();
+  const t = useTranslations('careers');
   
   // Берем локаль из URL
   const locale = (params?.locale as string) || 'en';
@@ -158,7 +160,7 @@ export default function PublicCareersPage() {
   if (!settings || !settings.isActive) {
     return (
       <div className="max-w-md mx-auto my-12 p-6 text-center">
-        <p className="text-gray-500 font-medium">Careers page is currently unavailable.</p>
+        <p className="text-gray-500 font-medium">{t('pageUnavailable')}</p>
       </div>
     );
   }
@@ -173,7 +175,7 @@ export default function PublicCareersPage() {
               {getLocText(settings.successMessage, settings.successMessageI18n)}
             </CardTitle>
             <Button onClick={() => setSubmitSuccess(false)} variant="outline" className="mt-4">
-              {locale === 'ru' ? 'Назад' : locale === 'pl' ? 'Wróć' : 'Go back'}
+              {t('back')}
             </Button>
           </CardContent>
         </Card>
@@ -267,7 +269,7 @@ export default function PublicCareersPage() {
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {locale === 'ru' ? 'Отправка...' : locale === 'pl' ? 'Wysyłanie...' : 'Sending...'}
+                  {t('submitting')}
                 </>
               ) : (
                 getLocText(settings.submitButtonText, settings.submitButtonTextI18n)

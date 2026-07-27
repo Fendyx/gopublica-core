@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, CalendarDays, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -12,12 +13,6 @@ interface StepDateTimeProps {
   onSelectDate: (date: Date) => void
   onSelectTime: (time: string) => void
 }
-
-const WEEKDAYS_PL = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd']
-const MONTHS_PL = [
-  'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
-  'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień',
-]
 
 function isSameDay(a: Date, b: Date) {
   return (
@@ -47,6 +42,8 @@ export function StepDateTime({
   onSelectDate,
   onSelectTime,
 }: StepDateTimeProps) {
+  const t = useTranslations('serviceBooking')
+  const locale = useLocale()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -56,6 +53,18 @@ export function StepDateTime({
   const grid = useMemo(
     () => buildMonthGrid(viewYear, viewMonth),
     [viewYear, viewMonth]
+  )
+
+  const weekdayLabels = useMemo(
+    () => Array.from({ length: 7 }, (_, idx) =>
+      new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2024, 0, idx + 1))
+    ),
+    [locale]
+  )
+
+  const monthLabel = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(viewYear, viewMonth, 1)),
+    [locale, viewYear, viewMonth]
   )
 
   const goPrevMonth = () => {
@@ -86,10 +95,10 @@ export function StepDateTime({
     <div className="space-y-6">
       <div className="space-y-1.5">
         <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-          Termin Wizyty
+          {t('steps.dateTime.title')}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Wybierz dogodny termin. Dostępne godziny pojawią się po wybraniu daty.
+          {t('steps.dateTime.description')}
         </p>
       </div>
 
@@ -100,7 +109,7 @@ export function StepDateTime({
             <div className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-primary" />
               <span className="font-heading text-base font-semibold text-foreground">
-                {MONTHS_PL[viewMonth]} {viewYear}
+                {monthLabel}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -108,7 +117,7 @@ export function StepDateTime({
                 type="button"
                 onClick={goPrevMonth}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                aria-label="Poprzedni miesiąc"
+                aria-label={t('calendar.previousMonth')}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -116,7 +125,7 @@ export function StepDateTime({
                 type="button"
                 onClick={goNextMonth}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                aria-label="Następny miesiąc"
+                aria-label={t('calendar.nextMonth')}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -125,7 +134,7 @@ export function StepDateTime({
 
           {/* Weekday header */}
           <div className="mb-2 grid grid-cols-7 gap-1">
-            {WEEKDAYS_PL.map((d) => (
+            {weekdayLabels.map((d) => (
               <div
                 key={d}
                 className="text-center text-xs font-medium text-muted-foreground"
@@ -172,7 +181,7 @@ export function StepDateTime({
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            * Niedziele nie są dostępne. Wybierz inny dzień.
+            {t('calendar.sundayUnavailable')}
           </p>
         </div>
 
@@ -181,14 +190,14 @@ export function StepDateTime({
           <div className="mb-4 flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
             <span className="font-heading text-base font-semibold text-foreground">
-              Dostępne godziny
+              {t('calendar.availableHours')}
             </span>
           </div>
 
           {!selectedDate ? (
             <div className="flex h-48 flex-col items-center justify-center text-center text-sm text-muted-foreground">
               <CalendarDays className="mb-2 h-8 w-8 opacity-40" />
-              Najpierw wybierz datę w kalendarzu.
+              {t('calendar.selectDateFirst')}
             </div>
           ) : (
             <motion.div
@@ -225,8 +234,8 @@ export function StepDateTime({
               animate={{ opacity: 1, y: 0 }}
               className="mt-5 rounded-lg bg-primary/5 px-4 py-3 text-sm text-foreground"
             >
-              <span className="font-medium">Wybrany termin:</span>{' '}
-              {selectedDate.toLocaleDateString('pl-PL', {
+              <span className="font-medium">{t('calendar.selectedDate')}</span>{' '}
+              {selectedDate.toLocaleDateString(locale, {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
