@@ -621,6 +621,15 @@
       "cta": "Book Now"
     },
     "currency": "zł",
+    "navigation": {
+      "services": "Services",
+      "dateTime": "Date & Time",
+      "details": "Details",
+      "summary": "Summary",
+      "next": "Next",
+      "back": "Back",
+      "confirm": "Confirm"
+    },
     "steps": {
       "labels": {
         "services": "Services",

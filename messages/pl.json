@@ -617,7 +617,7 @@
   "serviceBooking": {
     "hero": {
       "title": "Zarezerwuj usługę",
-      "subtitle": "Wybierz usługę, datę i wypełnij swoje dane kontaktowe.",
+      "description": "Wybierz usługę, datę i wypełnij swoje dane kontaktowe.",
       "cta": "Zarezerwuj teraz"
     },
     "currency": "zł",
@@ -625,7 +625,10 @@
       "services": "Usługi",
       "dateTime": "Data i godzina",
       "details": "Dane kontaktowe i pojazdu",
-      "summary": "Podsumowanie"
+      "summary": "Podsumowanie",
+      "next": "Dalej",
+      "back": "Wstecz",
+      "confirm": "Potwierdź"
     },
     "steps": {
       "labels": {

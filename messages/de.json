@@ -621,6 +621,15 @@
       "cta": "Jetzt reservieren"
     },
     "currency": "zł",
+    "navigation": {
+      "services": "Leistungen",
+      "dateTime": "Datum & Uhrzeit",
+      "details": "Kontakt & Fahrzeug",
+      "summary": "Zusammenfassung",
+      "next": "Weiter",
+      "back": "Zurück",
+      "confirm": "Reservierung bestätigen"
+    },
     "steps": {
       "labels": {
         "services": "Leistungen",
