@@ -615,6 +615,11 @@
     }
   },
   "serviceBooking": {
+    "hero": {
+      "title": "Online Service Booking",
+      "description": "Select a service, choose a date, and provide your contact details to book an appointment.",
+      "cta": "Book Now"
+    },
     "currency": "zł",
     "steps": {
       "labels": {

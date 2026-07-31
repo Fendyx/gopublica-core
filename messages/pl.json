@@ -615,7 +615,18 @@
     }
   },
   "serviceBooking": {
+    "hero": {
+      "title": "Zarezerwuj usługę",
+      "subtitle": "Wybierz usługę, datę i wypełnij swoje dane kontaktowe.",
+      "cta": "Zarezerwuj teraz"
+    },
     "currency": "zł",
+    "navigation": {
+      "services": "Usługi",
+      "dateTime": "Data i godzina",
+      "details": "Dane kontaktowe i pojazdu",
+      "summary": "Podsumowanie"
+    },
     "steps": {
       "labels": {
         "services": "Usługi",

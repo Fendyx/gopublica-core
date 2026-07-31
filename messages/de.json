@@ -615,6 +615,11 @@
     }
   },
   "serviceBooking": {
+    "hero": {
+      "title": "Online-Terminreservierung",
+      "description": "Wählen Sie eine Leistung, ein Datum und geben Sie Ihre Kontaktdaten ein, um einen Termin zu reservieren.",
+      "cta": "Jetzt reservieren"
+    },
     "currency": "zł",
     "steps": {
       "labels": {
