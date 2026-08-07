@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
+import type { Branch } from '@/entities/branch/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,10 @@ import {
   MousePointerClick,
   Eye,
   Image,
+  Sparkles,
+  Plus,
+  Trash2,
+  Store,
 } from 'lucide-react';
 
 const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
@@ -49,7 +54,7 @@ const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'satur
 export default function SettingsPageContent() {
   const t = useTranslations('admin.settingsPage');
   const tenant = useTenant();
-  const { selectedBranch, loading: branchLoading } = useBranch();
+  const { selectedBranch, branches, loading: branchLoading, refetchBranches } = useBranch();
   const [token, setToken] = useState<string | null>(null);
 
   const [businessName, setBusinessName] = useState('');
@@ -84,6 +89,16 @@ export default function SettingsPageContent() {
 
   const [categoryBgColor, setCategoryBgColor] = useState('');
   const [pageBgColor, setPageBgColor] = useState('');
+
+  // 👈 НОВОЕ: фича "тизер скоро открытие" для ТЕКУЩЕГО выбранного филиала
+  const [hasVeganTeaser, setHasVeganTeaser] = useState(false);
+
+  // 👈 НОВОЕ: подфилии (sub-venues) — только для основных филиалов (без parentBranchId)
+  const isMainBranch = !!selectedBranch && !selectedBranch.parentBranchId;
+  const subBranches = branches.filter(b => selectedBranch && b.parentBranchId === selectedBranch._id);
+  const [newSubName, setNewSubName] = useState('');
+  const [creatingSub, setCreatingSub] = useState(false);
+  const [subError, setSubError] = useState('');
 
   useEffect(() => {
     const savedToken = localStorage.getItem('saas_token');
@@ -124,6 +139,9 @@ export default function SettingsPageContent() {
         setCategoryBgColor(data.theme?.categoryBgColor || tenant?.theme?.categoryBgColor || '');
         setPageBgColor(data.theme?.pageBgColor || '');
 
+        // 👈 НОВОЕ: подтягиваем features.hasVeganTeaser текущего филиала
+        setHasVeganTeaser(Boolean(data.features?.hasVeganTeaser));
+
         if (data.notifications) {
           setNotifications(prev => ({
             ...prev,
@@ -151,6 +169,10 @@ export default function SettingsPageContent() {
         seoTitleI18n,
         seoDescriptionI18n,
         branchId: selectedBranch._id,
+        // 👈 НОВОЕ: сохраняем фичи филиала (уходит в branch.settingsOverride.features)
+        features: {
+          hasVeganTeaser,
+        },
         theme: {
           radius,
           productCardVariant: cardVariant,
@@ -174,6 +196,53 @@ export default function SettingsPageContent() {
     }
   };
 
+  // 👈 НОВОЕ: создать подфилию у текущего (основного) филиала
+  const handleCreateSubBranch = async () => {
+    if (!selectedBranch || !newSubName.trim() || !token) return;
+    setCreatingSub(true);
+    setSubError('');
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          name: newSubName.trim(),
+          city: selectedBranch.city,
+          address: selectedBranch.address,
+          phone: selectedBranch.phone,
+          email: selectedBranch.email,
+          parentBranchId: selectedBranch._id,
+          venueType: 'concept',
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to create sub-venue');
+      }
+      setNewSubName('');
+      await refetchBranches();
+    } catch (err: any) {
+      setSubError(err.message || 'Ошибка создания подфилии');
+    } finally {
+      setCreatingSub(false);
+    }
+  };
+
+  // 👈 НОВОЕ: удалить (soft-delete) подфилию
+  const handleDeleteSubBranch = async (branch: Branch) => {
+    if (!token) return;
+    if (!confirm(`Удалить "${branch.name}"?`)) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branch._id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) await refetchBranches();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (branchLoading || loading) {
     return <div className="flex items-center justify-center py-20 text-muted-foreground">{t('loading')}</div>;
   }
@@ -188,6 +257,11 @@ export default function SettingsPageContent() {
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
           <MapPin className="w-4 h-4" />
           {t('branchInfo', { name: selectedBranch.name })} {selectedBranch.city && `(${selectedBranch.city})`}
+          {!isMainBranch && (
+            <span className="ml-2 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+              Sub-venue
+            </span>
+          )}
         </div>
         <h2 className="text-2xl font-bold">{t('title')}</h2>
       </div>
@@ -196,11 +270,12 @@ export default function SettingsPageContent() {
         <Card>
           <CardContent className="p-6">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-8">
+              <TabsList className={`grid w-full mb-8 ${isMainBranch ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'}`}>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="appearance">Appearance</TabsTrigger>
                 <TabsTrigger value="localization">Localization</TabsTrigger>
                 <TabsTrigger value="seo">SEO & Alerts</TabsTrigger>
+                {isMainBranch && <TabsTrigger value="subvenues">Sub-venues</TabsTrigger>}
               </TabsList>
 
               {/* --- ВКЛАДКА 1: GENERAL --- */}
@@ -252,6 +327,29 @@ export default function SettingsPageContent() {
                     ))}
                   </div>
                 </div>
+
+                {/* 👈 НОВОЕ: тизер "скоро открытие" в Hero — только имеет смысл для основных филиалов,
+                    у которых есть/будет подфилия в том же здании */}
+                {isMainBranch && (
+                  <>
+                    <Separator />
+                    <div className="flex items-center justify-between bg-muted/20 p-4 rounded-xl border border-border">
+                      <div className="flex items-start gap-3">
+                        <Sparkles className="w-4 h-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          <Label htmlFor="vegan-teaser" className="cursor-pointer">
+                            Показать тизер «Wkrótce otwarcie» в Hero
+                          </Label>
+                          <p className="text-xs text-muted-foreground mt-1 max-w-md">
+                            Включает 2-й слайд на главной с анонсом подфилии (например, вегетарианского
+                            кафе в том же здании). Слайд появится только для этого филиала.
+                          </p>
+                        </div>
+                      </div>
+                      <Switch id="vegan-teaser" checked={hasVeganTeaser} onCheckedChange={setHasVeganTeaser} />
+                    </div>
+                  </>
+                )}
               </TabsContent>
 
               {/* --- ВКЛАДКА 2: APPEARANCE --- */}
@@ -439,6 +537,75 @@ export default function SettingsPageContent() {
                   </Accordion>
                 </div>
               </TabsContent>
+
+              {/* --- ВКЛАДКА 5 (НОВАЯ): SUB-VENUES --- */}
+              {isMainBranch && (
+                <TabsContent value="subvenues" className="space-y-6">
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
+                      <Store className="w-3.5 h-3.5" />
+                      Sub-venues в этом здании
+                    </h3>
+                    <p className="text-xs text-muted-foreground max-w-lg">
+                      Подфилия — отдельное заведение в том же здании (например, веганское кафе в подвале
+                      той же основной точки). У подфилии своё меню и настройки, но общий адрес/город
+                      с родительским филиалом.
+                    </p>
+                  </div>
+
+                  {subBranches.length > 0 && (
+                    <div className="space-y-2">
+                      {subBranches.map(sub => (
+                        <div
+                          key={sub._id}
+                          className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20"
+                        >
+                          <div>
+                            <div className="text-sm font-medium">{sub.name}</div>
+                            <div className="text-xs text-muted-foreground">{sub.city}</div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteSubBranch(sub)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-end gap-3 bg-muted/20 p-4 rounded-xl border border-border">
+                    <div className="flex-1 space-y-1.5">
+                      <Label htmlFor="new-sub-name">Название подфилии</Label>
+                      <Input
+                        id="new-sub-name"
+                        placeholder="Kawiarnia wegańska"
+                        value={newSubName}
+                        onChange={e => setNewSubName(e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleCreateSubBranch}
+                      disabled={!newSubName.trim() || creatingSub}
+                      className="gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Добавить
+                    </Button>
+                  </div>
+                  {subError && <p className="text-xs text-destructive">{subError}</p>}
+
+                  <p className="text-xs text-muted-foreground">
+                    После создания подфилии выберите её в переключателе филиалов вверху, чтобы настроить
+                    её собственное меню, часы работы и SEO — независимо от основного филиала.
+                  </p>
+                </TabsContent>
+              )}
 
             </Tabs>
           </CardContent>

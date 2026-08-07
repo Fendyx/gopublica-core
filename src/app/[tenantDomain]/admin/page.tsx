@@ -64,6 +64,9 @@ export default function DashboardPage() {
 
   if (loading) return <div className="text-center py-10">{t('loading')}</div>;
 
+  const canManageMenu = tenant?.canManageMenu ?? tenant?.moduleAccess?.menu?.canManage ?? false;
+  const canManageOrders = tenant?.canManageOrders ?? tenant?.moduleAccess?.orders?.canManage ?? false;
+
   const stats = [
     { label: t('menuCount'), value: data?.menuCount ?? 0, icon: UtensilsCrossed },
     { label: t('todayReservations'), value: data?.todayReservationsCount ?? 0, icon: CalendarCheck },
@@ -71,7 +74,8 @@ export default function DashboardPage() {
   ];
 
   const quickLinks = [
-    { label: t('manageMenu'), href: '/admin/menu', icon: UtensilsCrossed },
+    ...(canManageMenu ? [{ label: t('manageMenu'), href: '/admin/menu', icon: UtensilsCrossed }] : []),
+    ...(canManageOrders ? [{ label: t('orders'), href: '/admin/orders', icon: ClipboardList }] : []),
     { label: t('reservations'), href: '/admin/reservations', icon: CalendarCheck },
     { label: t('gallery'), href: '/admin/gallery', icon: ImageIcon },
     { label: t('settings'), href: '/admin/settings', icon: Settings },

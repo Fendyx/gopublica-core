@@ -23,6 +23,8 @@ import {
   Package,
   Menu,
   X,
+  Sparkles,
+  Users2,
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { Separator } from '@/components/ui/separator';
@@ -91,16 +93,25 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isEcommerce = tenant?.niche === 'ecommerce';
+  const isBeauty = tenant?.niche === 'beauty';
+  const canManageMenu = tenant?.canManageMenu ?? tenant?.moduleAccess?.menu?.canManage ?? false;
+  const canManageOrders = tenant?.canManageOrders ?? tenant?.moduleAccess?.orders?.canManage ?? false;
 
   const navItems = [
     { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
     { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
-    {
-      href: isEcommerce ? '/admin/ecommerce' : '/admin/menu',
-      label: isEcommerce ? 'Catalog' : t('menu'),
-      icon: isEcommerce ? Package : UtensilsCrossed,
-    },
-    { href: '/admin/orders', label: t('orders'), icon: FileText },
+    ...(!isBeauty && (isEcommerce || canManageMenu)
+      ? [{
+          href: isEcommerce ? '/admin/ecommerce' : '/admin/menu',
+          label: isEcommerce ? 'Catalog' : t('menu'),
+          icon: isEcommerce ? Package : UtensilsCrossed,
+        }]
+      : []),
+    ...(canManageOrders ? [{ href: '/admin/orders', label: t('orders'), icon: FileText }] : []),
+    ...(isBeauty ? [
+      { href: '/admin/beauty-services', label: 'Beauty Services', icon: Sparkles },
+      { href: '/admin/beauty-masters', label: 'Beauty Masters', icon: Users2 },
+    ] : []),
     { href: '/admin/gallery', label: t('gallery'), icon: ImageIcon },
     { href: '/admin/reservations', label: t('reservations'), icon: CalendarCheck },
     { href: '/admin/analytics', label: t('analytics'), icon: ChartLine },

@@ -11,6 +11,9 @@ import BeforeAfterSlider from '@/widgets/Gallery/BeforeAfterSlider';
 import AnimatedSection from '@/shared/ui/AnimatedSection';
 import { getTenantByDomain } from '@/entities/tenant/api';
 
+// 👇 Добавляем импорт нашего нового виджета
+import BranchCrossLink from '@/widgets/BranchCrossLink/BranchCrossLink';
+
 export const dynamic = 'force-dynamic';
 
 export default async function TenantHomePage({
@@ -49,11 +52,11 @@ export default async function TenantHomePage({
         </AnimatedSection>
       )}
 
-      {!isEcommerce && (
+      {/* {!isEcommerce && (
         <AnimatedSection>
           <About />
         </AnimatedSection>
-      )}
+      )} */}
 
       {tenant.features.hasMenu && (
         <AnimatedSection>
@@ -72,6 +75,11 @@ export default async function TenantHomePage({
           <BookingSection />
         </AnimatedSection>
       )}
+
+      {/* 👇 Оборачиваем в AnimatedSection для красивого эффекта при скролле */}
+      <AnimatedSection>
+        <BranchCrossLink />
+      </AnimatedSection>
 
       {!isEcommerce && (
         <AnimatedSection>

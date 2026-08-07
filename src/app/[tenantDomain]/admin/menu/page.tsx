@@ -1,18 +1,33 @@
 // src/app/[tenantDomain]/admin/menu/page.tsx
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useBranch } from '@/entities/branch/BranchContext';
+import { useTenant } from '@/entities/tenant/TenantContext';
 import MenuManager from '@/widgets/Admin/MenuManager';
 
 export default function AdminMenuPage() {
   const { selectedBranch } = useBranch();
+  const router = useRouter();
+  const tenant = useTenant();
   const [token] = useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('saas_token');
     return null;
   });
 
+  const canAccessMenu = tenant?.canManageMenu ?? tenant?.moduleAccess?.menu?.canManage ?? false;
+
+  useEffect(() => {
+    if (tenant && !canAccessMenu) {
+      router.replace('/admin');
+    }
+  }, [canAccessMenu, router, tenant]);
+
   if (!token) return <div className="text-center py-10">Требуется авторизация</div>;
 
-  // Теперь здесь только MenuManager для ресторанов
+  if (!canAccessMenu) {
+    return <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Раздел меню недоступен для текущей ниши.</div>;
+  }
+
   return <MenuManager key={selectedBranch?._id} token={token} />;
 }

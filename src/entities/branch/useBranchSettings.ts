@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useBranch } from '@/entities/branch/BranchContext';
 import { useTenant } from '@/entities/tenant/TenantContext';
+import type { BranchFeatures } from '@/entities/branch/types';
 
 interface BranchSettings {
   phone: string;
@@ -17,6 +18,7 @@ interface BranchSettings {
   seoTitleI18n: Record<string, string>;
   seoDescriptionI18n: Record<string, string>;
   hoursI18n: Record<string, string>;
+  features: BranchFeatures; // <- ДОБАВИЛИ: фичи конкретного филиала (напр. hasVeganTeaser)
 }
 
 export function useBranchSettings(): BranchSettings & { loading: boolean } {
@@ -36,6 +38,7 @@ export function useBranchSettings(): BranchSettings & { loading: boolean } {
     seoTitleI18n: {},
     seoDescriptionI18n: {},
     hoursI18n: {},
+    features: {}, // <- ДОБАВИЛИ
   });
   const [loading, setLoading] = useState(true);
 
@@ -63,6 +66,7 @@ export function useBranchSettings(): BranchSettings & { loading: boolean } {
           seoTitleI18n: data.seoTitleI18n || {},
           seoDescriptionI18n: data.seoDescriptionI18n || {},
           hoursI18n: data.hoursI18n || {},
+          features: data.features || {}, // <- ДОБАВИЛИ: приходит из branch.settingsOverride.features
         };
         setSettings(newSettings);
         setLoading(false);

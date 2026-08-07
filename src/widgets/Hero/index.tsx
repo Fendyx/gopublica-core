@@ -8,6 +8,7 @@ import HeroCentered from './HeroCentered'
 import HeroVideo from './HeroVideo'
 import HeroSlider from './HeroSlider'
 import HeroImageBackground from './HeroImageBackground'
+import HeroCompact from './HeroCompactVeganTeaser'
 
 export default function Hero() {
   const tenant = useTenant()
@@ -31,6 +32,7 @@ export default function Hero() {
     case 'video':    return <HeroVideo />
     case 'slider':   return <HeroSlider />
     case 'image-bg': return <HeroImageBackground />
+    case 'compact': return <HeroCompact />
     default:         return <HeroSplit />
   }
 }

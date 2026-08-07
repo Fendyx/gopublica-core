@@ -1,6 +1,6 @@
 'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import type { Branch } from '@/entities/branch/types'
+import type { Branch, BranchGroup } from '@/entities/branch/types'
 
 interface BranchContextType {
   branches: Branch[]
@@ -12,6 +12,9 @@ interface BranchContextType {
   setBranch: (branch: Branch) => void
   detectCityByIp: () => Promise<void>
   refetchBranches: () => Promise<void>
+  // 👈 НОВОЕ: группировка филиалов по city -> [{ parent, children }]
+  // children — подфилии (venueType 'concept'), у которых parentBranchId === parent._id
+  getBranchGroups: (city: string) => BranchGroup[]
 }
 
 const BranchContext = createContext<BranchContextType | undefined>(undefined)
@@ -34,6 +37,10 @@ export function BranchProvider({ children, tenantId }: Props) {
   const [loading, setLoading] = useState(true)
 
   const cities = [...new Set(branches.map((b: Branch) => b.city).filter((c): c is string => !!c))]
+
+  // 👈 "Основные" филиалы — те, у которых нет parentBranchId (или явно venueType 'main').
+  // Именно они участвуют в авто-детекции по IP и в верхнеуровневом списке городов.
+  const mainBranches = branches.filter(b => !b.parentBranchId)
 
   const fetchBranches = async () => {
     if (!tenantId) return []
@@ -63,37 +70,40 @@ export function BranchProvider({ children, tenantId }: Props) {
     })
   }, [tenantId])
 
+  const mainOf = (data: Branch[]) => data.filter(b => !b.parentBranchId)
+
   const detectCityByIp = async (branchesData?: Branch[]) => {
+    const mains = branchesData ? mainOf(branchesData) : []
     try {
       const res = await fetch('/api/geolocation')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { city } = await res.json()
 
-      if (city && branchesData?.length) {
-        const foundCity = branchesData.some(b => b.city?.toLowerCase() === city.toLowerCase())
+      if (city && mains.length) {
+        const foundCity = mains.some(b => b.city?.toLowerCase() === city.toLowerCase())
         if (foundCity) {
           setSelectedCity(city)
-          const firstBranchInCity = branchesData.find(b => b.city?.toLowerCase() === city.toLowerCase())
+          const firstBranchInCity = mains.find(b => b.city?.toLowerCase() === city.toLowerCase())
           if (firstBranchInCity) setSelectedBranch(firstBranchInCity)
           return
         }
       }
       // fallback
-      if (branchesData?.length) {
-        const uniqueCities = [...new Set(branchesData.map(b => b.city).filter(Boolean) as string[])]
-        const firstCity = uniqueCities[0] || branchesData[0].city
+      if (mains.length) {
+        const uniqueCities = [...new Set(mains.map(b => b.city).filter(Boolean) as string[])]
+        const firstCity = uniqueCities[0] || mains[0].city
         if (firstCity) setSelectedCity(firstCity)
-        const firstBranch = branchesData.find(b => b.city === firstCity)
+        const firstBranch = mains.find(b => b.city === firstCity)
         if (firstBranch) setSelectedBranch(firstBranch)
       }
     } catch (err) {
       console.error('IP detection failed', err)
       // fallback
-      if (branchesData?.length) {
-        const uniqueCities = [...new Set(branchesData.map(b => b.city).filter(Boolean) as string[])]
-        const firstCity = uniqueCities[0] || branchesData[0].city
+      if (mains.length) {
+        const uniqueCities = [...new Set(mains.map(b => b.city).filter(Boolean) as string[])]
+        const firstCity = uniqueCities[0] || mains[0].city
         if (firstCity) setSelectedCity(firstCity)
-        const firstBranch = branchesData.find(b => b.city === firstCity)
+        const firstBranch = mains.find(b => b.city === firstCity)
         if (firstBranch) setSelectedBranch(firstBranch)
       }
     }
@@ -101,13 +111,25 @@ export function BranchProvider({ children, tenantId }: Props) {
 
   const setCity = (city: string) => {
     setSelectedCity(city)
-    const branchInCity = branches.find(b => b.city === city)
+    // При смене города выбираем основной (не под-заведение) филиал в этом городе
+    const branchInCity = mainBranches.find(b => b.city === city)
     if (branchInCity) setSelectedBranch(branchInCity)
   }
 
   const setBranch = (branch: Branch) => {
     setSelectedBranch(branch)
     setSelectedCity(branch.city)
+  }
+
+  // 👈 Группировка для UI-свитчера: для указанного города возвращает список
+  // { parent, children } — родительский филиал и вложенные под-заведения.
+  const getBranchGroups = (city: string): BranchGroup[] => {
+    const inCity = branches.filter(b => b.city === city)
+    const parents = inCity.filter(b => !b.parentBranchId)
+    return parents.map(parent => ({
+      parent,
+      children: inCity.filter(b => b.parentBranchId === parent._id),
+    }))
   }
 
   return (
@@ -121,6 +143,7 @@ export function BranchProvider({ children, tenantId }: Props) {
       setBranch,
       detectCityByIp,
       refetchBranches,
+      getBranchGroups,
     }}>
       {children}
     </BranchContext.Provider>

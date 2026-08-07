@@ -43,7 +43,7 @@ export default function LoginPage() {
       if (data.mustChangePassword) {
         setMustChangePassword(true)
       } else {
-        router.push('/admin/menu')
+        router.push('/admin')
       }
     } catch (err: any) {
       setError(err.message)
@@ -57,7 +57,7 @@ export default function LoginPage() {
           token={token}
           onPasswordChanged={() => {
             setMustChangePassword(false)
-            router.push('/admin/menu')
+            router.push('/admin')
           }}
         />
       </div>

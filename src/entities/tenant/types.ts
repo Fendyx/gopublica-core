@@ -1,5 +1,5 @@
 // Тема оформления
-export type HeroStyle = 'centered' | 'split' | 'video' | 'slider' | 'image-bg'
+export type HeroStyle = 'centered' | 'split' | 'video' | 'slider' | 'image-bg' | 'compact'
 export type EcommerceLayout = 'grid-3' | 'grid-4' | 'carousel' | 'dynamic';
 
 export type Theme = {
@@ -33,6 +33,20 @@ export type Features = {
   hasJobApplications?: boolean;
 }
 
+export type ModuleAccessState = {
+  enabled: boolean
+  canManage: boolean
+}
+
+export type ModuleAccess = {
+  orders?: ModuleAccessState
+  menu?: ModuleAccessState
+  reservations?: ModuleAccessState
+  gallery?: ModuleAccessState
+  news?: ModuleAccessState
+  jobs?: ModuleAccessState
+}
+
 // Контакты клиента
 export type Contact = {
   phone: string
@@ -56,7 +70,16 @@ export type SiteConfig = {
   clientName: string
   businessName?: string
   tenantId: string
-  niche: Niche // <--- ДОБАВИЛИ
+  niche: Niche
+  businessType?: string
+  moduleAccess?: ModuleAccess
+  availableModules?: string[]
+  canManageOrders?: boolean
+  canManageMenu?: boolean
+  canManageReservations?: boolean
+  canManageGallery?: boolean
+  canManageNews?: boolean
+  canManageJobs?: boolean
   theme: Theme
   features: Features
   contact: Contact
