@@ -63,12 +63,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         '--tenant-primary': primary,
         '--tenant-accent': accent,
         '--radius': tenantRadius,
-        '--page-bg-color': pageBgColor,   // сохраняем для возможного использования в других элементах
+        '--page-bg-color': pageBgColor,
       } as React.CSSProperties}
+      suppressHydrationWarning
     >
       <body style={{ backgroundColor: pageBgColor || undefined }}>
         <TrackVisit tenantId={tenantId} />
-        <ThemeProvider defaultTheme="light">
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
           <NextIntlClientProvider messages={messages}>
             <TenantProvider tenantId={tenantId}>
               <BranchProvider tenantId={tenantId}>

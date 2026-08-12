@@ -9,6 +9,7 @@ import AdminNotifications from '@/widgets/Admin/AdminNotifications';
 import AdminLanguageSwitcher from '@/widgets/Admin/AdminLanguageSwitcher';
 import { AdminBranchSwitcher } from '@/widgets/Admin/AdminBranchSwitcher';
 import { loadMessages } from '@/shared/lib/adminLocale';
+import ThemeToggle from '@/shared/ui/ThemeToggle';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -123,7 +124,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <div className="platform-ui flex min-h-screen bg-background relative">
+    <div className="flex min-h-screen bg-background relative">
       
       {/* Кнопка открытия меню (показываем только когда меню закрыто) */}
       {!mobileMenuOpen && (
@@ -177,8 +178,8 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
                 onClick={closeMobileMenu}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                   isActive
-                    ? 'bg-black/5 dark:bg-white/10 text-foreground font-medium backdrop-blur-sm shadow-sm'
-                    : 'text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground'
+                    ? 'bg-muted/50 text-foreground font-medium backdrop-blur-sm shadow-sm'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
               >
                 <item.icon size={18} />
@@ -190,6 +191,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
         <Separator />
         <div className="p-3 space-y-2">
           <AdminLanguageSwitcher currentLocale={locale} onChange={onLocaleChange} />
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="sm"

@@ -155,7 +155,7 @@ export default function MenuItemCard({
               </div>
             </div>
             {showBranchBadge && (
-              <div className="mt-1 text-[10px] text-gray-400 flex items-center gap-1">
+              <div className="mt-1 text-[10px] text-muted-foreground flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {selectedBranch.city} · {selectedBranch.name}
               </div>

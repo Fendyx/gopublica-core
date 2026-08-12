@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
+import ThemeToggle from '@/shared/ui/ThemeToggle'
 import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart, User, LogIn } from 'lucide-react'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useCartStore } from '@/shared/store/cartStore'
@@ -88,7 +89,7 @@ export default function Navbar() {
   const hasBooking = tenant?.features?.hasBooking ?? false
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface-page border-b border-border-light transition-colors">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background backdrop-blur-md border-b border-border-light transition-colors">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -167,6 +168,11 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="hidden sm:block">
               <LanguageSwitcher />
+            </div>
+
+            {/* Переключатель темы (Desktop) */}
+            <div className="hidden lg:flex items-center">
+              <ThemeToggle />
             </div>
 
             {/* Профиль / Логин (Desktop) */}
@@ -283,6 +289,11 @@ export default function Navbar() {
           <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-border-light">
             <div className="flex justify-center mb-2 sm:hidden">
               <LanguageSwitcher />
+            </div>
+
+            {/* Переключатель темы (Mobile) */}
+            <div className="flex justify-center mb-2">
+              <ThemeToggle />
             </div>
 
             {/* Профиль / Логин (Mobile) */}

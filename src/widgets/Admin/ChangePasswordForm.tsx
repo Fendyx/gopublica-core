@@ -36,17 +36,17 @@ export default function ChangePasswordForm({
   }
 
   return (
-    <div className="max-w-sm mx-auto mt-10 bg-white p-6 rounded shadow">
-      <h2 className="text-lg font-bold mb-4">Смена пароля</h2>
-      {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-      {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
+    <div className="max-w-sm mx-auto mt-10 bg-card p-6 rounded-lg border border-border shadow-sm">
+      <h2 className="text-lg font-bold mb-4 text-foreground">Смена пароля</h2>
+      {error && <p className="text-destructive text-sm mb-4">{error}</p>}
+      {success && <p className="text-emerald-600 dark:text-emerald-400 text-sm mb-4">{success}</p>}
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="password"
           placeholder="Старый пароль (временный)"
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
-          className="w-full border p-2 rounded"
+          className="w-full border border-input bg-background p-2 rounded text-foreground placeholder:text-muted-foreground"
           required
         />
         <input
@@ -54,12 +54,12 @@ export default function ChangePasswordForm({
           placeholder="Новый пароль"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full border p-2 rounded"
+          className="w-full border border-input bg-background p-2 rounded text-foreground placeholder:text-muted-foreground"
           required
         />
         <button
           type="submit"
-          className="w-full py-2 rounded text-white"
+          className="w-full py-2 rounded text-primary-foreground font-medium"
           style={{ backgroundColor: 'var(--color-primary)' }}
         >
           Сменить пароль

@@ -15,8 +15,8 @@ export default function AdminLanguageSwitcher({ currentLocale, onChange }: Props
           onClick={() => onChange(locale)}
           className={`px-2 py-1 text-xs rounded ${
             locale === currentLocale
-              ? 'bg-primary text-white'
-              : 'text-text-secondary hover:bg-surface-hover'
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           }`}
         >
           {locale.toUpperCase()}

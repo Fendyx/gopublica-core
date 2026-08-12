@@ -132,6 +132,21 @@ export default function ProductManager({ token }: { token: string }) {
     return baseList;
   }, [categories, hasFeatured, tenant?.tenantId]);
 
+    // Сортировка продуктов по полю order (если есть), иначе по _id для стабильности
+  const sortedProducts = useMemo(() => {
+    return [...products].sort((a, b) => {
+      // Сначала featured продукты
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+      // Затем по order (если заполнено)
+      const orderA = a.order ?? 0;
+      const orderB = b.order ?? 0;
+      if (orderA !== orderB) return orderA - orderB;
+      // Фоллбэк: по _id для стабильного порядка
+      return String(a._id).localeCompare(String(b._id));
+    });
+  }, [products]);
+
   if (loading) return <div className="text-center py-10 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Loading...</div>;
 
   return (
@@ -176,7 +191,7 @@ export default function ProductManager({ token }: { token: string }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map((product) => (
+                  {sortedProducts.map((product) => (
                     <TableRow key={product._id} className="hover:bg-muted/20">
                       <TableCell>
                         {product.image ? (
@@ -194,7 +209,7 @@ export default function ProductManager({ token }: { token: string }) {
                       </TableCell>
                       <TableCell className="font-medium">${product.price.toFixed(2)}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-gray-100 text-gray-500' : 'bg-emerald-100 text-emerald-700'}`}>
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-muted text-muted-foreground' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
                           {(product as any).status === 'draft' ? 'Draft' : 'Active'}
                         </span>
                       </TableCell>
@@ -203,7 +218,7 @@ export default function ProductManager({ token }: { token: string }) {
                           <Pencil className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product._id!)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -214,8 +229,8 @@ export default function ProductManager({ token }: { token: string }) {
 
             {/* Mobile cards */}
             <div className="lg:hidden space-y-4">
-              {products.map((product) => (
-                <div key={product._id} className="border rounded-lg p-4 bg-card flex gap-4 items-start">
+              {sortedProducts.map((product) => (
+                <div key={product._id} className="border border-border rounded-lg p-4 bg-card flex gap-4 items-start">
                   <div className="shrink-0">
                     {product.image ? (
                       <img src={product.image} alt={product.name} className="w-16 h-16 rounded-md object-cover" />
@@ -233,7 +248,7 @@ export default function ProductManager({ token }: { token: string }) {
                     </p>
                     <div className="flex items-center justify-between mt-2">
                       <span className="font-bold text-sm">${product.price.toFixed(2)}</span>
-                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-gray-100 text-gray-500' : 'bg-emerald-100 text-emerald-700'}`}>
+                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-muted text-muted-foreground' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
                         {(product as any).status === 'draft' ? 'Draft' : 'Active'}
                       </span>
                     </div>
@@ -242,7 +257,7 @@ export default function ProductManager({ token }: { token: string }) {
                         <Pencil className="w-3 h-3 mr-1" /> Edit
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product._id!)}>
-                        <Trash2 className="w-3 h-3 mr-1 text-red-500" /> Delete
+                        <Trash2 className="w-3 h-3 mr-1 text-destructive" /> Delete
                       </Button>
                     </div>
                   </div>

@@ -285,7 +285,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
             </div>
           </div>
 
-          <SheetFooter className="p-6 border-t border-border bg-background">
+          <SheetFooter className="p-6 border-t border-border">
             <div className="flex justify-end gap-3 w-full">
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
               <Button type="submit" disabled={loading}>

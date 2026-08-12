@@ -52,7 +52,7 @@ export default function LoginPage() {
 
   if (token && mustChangePassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+      <div className="platform-ui min-h-screen flex items-center justify-center bg-background">
         <ChangePasswordForm
           token={token}
           onPasswordChanged={() => {
@@ -65,20 +65,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-      <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h1 className="text-xl font-bold mb-6 text-center">Вход в управление</h1>
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+    <div className="platform-ui min-h-screen flex items-center justify-center bg-background">
+      <form onSubmit={handleLogin} className="bg-card p-8 rounded-lg shadow-md w-full max-w-sm border border-border">
+        <h1 className="text-xl font-bold mb-6 text-center text-foreground">Вход в управление</h1>
+        {error && <p className="text-destructive text-sm mb-4">{error}</p>}
         <input
           type="email" placeholder="Email" value={email}
-          onChange={e => setEmail(e.target.value)} className="w-full p-2 border rounded mb-4" required
+          onChange={e => setEmail(e.target.value)} className="w-full p-2 border border-input bg-background rounded mb-4 text-foreground" required
         />
         <input
           type="password" placeholder="Пароль" value={password}
-          onChange={e => setPassword(e.target.value)} className="w-full p-2 border rounded mb-6" required
+          onChange={e => setPassword(e.target.value)} className="w-full p-2 border border-input bg-background rounded mb-6 text-foreground" required
         />
-        <button type="submit" className="w-full py-2 rounded text-white font-medium"
-          style={{ backgroundColor: 'var(--color-primary)' }}>
+        <button type="submit" className="w-full py-2 rounded text-primary-foreground font-medium" style={{ backgroundColor: 'var(--color-primary)' }}>
           Войти
         </button>
       </form>
