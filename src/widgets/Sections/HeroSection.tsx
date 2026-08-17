@@ -37,7 +37,7 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
 
   const containerClasses =
     layout === 'compact'
-      ? 'relative h-[40vh] md:h-[60vh] w-[calc(100%-2rem)] md:w-[calc(100%-3rem)] mx-auto my-4 md:my-6 rounded-3xl overflow-hidden flex items-center justify-center'
+      ? 'relative h-[40vh] md:h-[60vh] w-[calc(100%-2rem)] md:w-[calc(100%-2rem)] mx-auto my-4 md:my-6 rounded-3xl overflow-hidden flex items-center justify-center'
       : 'relative h-screen w-full flex items-center justify-center overflow-hidden';
   return (
     <section className={containerClasses}>

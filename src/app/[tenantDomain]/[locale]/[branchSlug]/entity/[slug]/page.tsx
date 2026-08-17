@@ -31,7 +31,7 @@ export default async function EntityDetailPage({
             <div className="flex flex-col gap-6">
               {/* Кнопка «Назад» */}
               <Link
-                href={`/${locale}/${branchSlug}/catalog`}
+                href={`/${locale}/${branchSlug}`}
                 className="self-start inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
               >
                 ← Back
