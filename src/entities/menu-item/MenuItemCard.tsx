@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import type { MenuItem, ProductVariant } from '@/entities/menu-item/types';
 import { getLocalizedName, getLocalizedDescription } from '@/shared/lib/localization';
 import { useBranch } from '@/entities/branch/BranchContext';
@@ -15,7 +16,7 @@ import ProductConfiguratorModal from '@/widgets/Menu/ProductConfiguratorModal';
 interface MenuItemCardProps {
   item: MenuItem;
   mode?: 'public' | 'admin';
-  layout?: 'grid' | 'list';
+  layout?: 'grid' | 'list' | 'carousel';
   onEdit?: (item: MenuItem) => void;
   onDelete?: (id: string) => void;
   locale?: string;
@@ -39,6 +40,7 @@ export default function MenuItemCard({
 }: MenuItemCardProps) {
   const tenant = useTenant();
   const { selectedBranch, branches } = useBranch();
+  const { branchSlug } = useParams();
   const { primaryLanguage, primaryCurrency, loading: settingsLoading } = useBranchSettings();
   const addItem = useCartStore((s) => s.addItem);
   const { showToast } = useCartToast();
@@ -98,6 +100,41 @@ export default function MenuItemCard({
     });
     showToast(finalName);
   };
+
+  // Carousel layout — same visual structure as grid, but sized for horizontal scroll
+  if (layout === 'carousel') {
+    return (
+      <>
+        <article className={`group flex flex-col h-full bg-surface-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-dropdown ${
+          isEcommerce && mode === 'public' ? 'cursor-pointer' : ''
+        }`}>
+          <Link href={`/${locale}/${branchSlug}/catalog/${item._id}`} className="flex flex-col h-full">
+            <CardInner
+              item={item}
+              displayName={displayName}
+              displayDescription={displayDescription}
+              displayPrice={displayPrice}
+              displayCompareAt={displayCompareAt}
+              hasDiscount={hasDiscount}
+              primaryCurrency={primaryCurrency}
+              handleAddToCart={handleAddToCart}
+              t={t}
+              mode={mode}
+              tenant={tenant}
+            />
+          </Link>
+        </article>
+        <ProductConfiguratorModal
+          item={item}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          currency={primaryCurrency || 'PLN'}
+          locale={locale || primaryLanguage || 'en'}
+          primaryLanguage={primaryLanguage || 'en'}
+        />
+      </>
+    );
+  }
 
   // List layout
   if (layout === 'list') {
@@ -183,7 +220,7 @@ export default function MenuItemCard({
   }`}
 >
         {isEcommerce && mode === 'public' ? (
-          <Link href={`/${locale}/catalog/${item._id}`} className="flex flex-col h-full">
+          <Link href={`/${locale}/${branchSlug}/catalog/${item._id}`} className="flex flex-col h-full">
             <CardInner
               item={item}
               displayName={displayName}

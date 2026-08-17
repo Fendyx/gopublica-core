@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale, useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const INTERVAL = 5000
@@ -19,6 +20,7 @@ export default function HeroCompactVeganTeaser() {
   const tenant = useTenant()
   const { seoTitleI18n, seoDescriptionI18n, seoTitle, seoDescription, features } = useBranchSettings()
   const locale = useLocale()
+  const { branchSlug } = useParams()
   const t = useTranslations('hero')
 
   // 👇 1. Флаг для ГЛАВНОГО филиала (показывает карусель с анонсом 2-м слайдом)
@@ -113,7 +115,7 @@ const isVeganBranch = seoTitle === 'Cat&Alice Vegan' || seoTitleI18n?.['pl'] ===
         )}
         {tenant?.features?.hasBooking && (
           <Link
-            href={`/${locale}/reservations`}
+            href={`/${locale}/${branchSlug}/reservations`}
             className="inline-block px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg text-white font-medium text-sm sm:text-base transition-transform hover:scale-105 active:scale-95 shadow-lg"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >

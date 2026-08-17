@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { Heart, Share2, ChevronLeft, Truck, RotateCcw } from 'lucide-react';
 import AddToCartButton from '@/widgets/Catalog/AddToCartButton';
 import ProductGallery from '@/widgets/Catalog/ProductGallery';
@@ -27,6 +28,7 @@ export default function ProductDetail({
   tenant: any;
 }) {
   const t = useTranslations('productDetail');
+  const { branchSlug } = useParams();
   const { primaryCurrency } = useBranchSettings();
   const currencySymbol = getCurrencySymbol(primaryCurrency);
 
@@ -81,7 +83,7 @@ export default function ProductDetail({
 
           <div className="absolute inset-x-0 top-0 px-4 pt-4 flex items-center justify-between z-10">
             <Link
-              href={`/${locale}/catalog`}
+              href={`/${locale}/${branchSlug}/catalog`}
               className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] tracking-widest uppercase text-foreground bg-background/60 backdrop-blur-md"
             >
               <ChevronLeft size={10} strokeWidth={2.5} />
@@ -157,7 +159,7 @@ export default function ProductDetail({
         <div className="max-w-[1400px] mx-auto px-12 py-10">
           <nav className="flex items-center gap-2.5 text-[10px] tracking-widest uppercase text-muted-foreground mb-12">
             <Link
-              href={`/${locale}/catalog`}
+              href={`/${locale}/${branchSlug}/catalog`}
               className="hover:text-foreground transition-colors"
             >
               {t('backToCatalog')}

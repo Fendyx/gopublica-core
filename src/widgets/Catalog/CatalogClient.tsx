@@ -4,6 +4,7 @@ import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useEffect, useState } from 'react'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale } from 'next-intl'
+import { usePathname } from 'next/navigation'
 import Menu from '@/widgets/Menu'
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout'
 import EcommerceCarouselLayout from '@/widgets/Catalog/EcommerceCarouselLayout'
@@ -39,6 +40,8 @@ export default function CatalogClient() {
   const globalVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
   const currencySymbol = getCurrencySymbol(primaryCurrency);
 
+  const pathname = usePathname()
+
   useEffect(() => {
     const fetchCatalog = async () => {
       if (!selectedBranch || !tenantId) return
@@ -59,7 +62,7 @@ export default function CatalogClient() {
       }
     }
     fetchCatalog()
-  }, [selectedBranch, tenantId])
+  }, [selectedBranch, tenantId, pathname])
 
   if (loading) return <div className="text-center py-10">Loading...</div>
 

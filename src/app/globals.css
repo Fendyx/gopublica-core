@@ -230,3 +230,16 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
   --font-body:    var(--font-sans), system-ui, sans-serif;
   --font-sans:    var(--font-sans), system-ui, sans-serif;
 }
+
+/* =============================================
+   SCROLLBAR HIDING UTILITY
+   Hides native scrollbar while preserving scroll,
+   scroll-snap, and touch-swipe behavior.
+   ============================================= */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

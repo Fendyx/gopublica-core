@@ -3,11 +3,13 @@ import Link from 'next/link'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale, useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 
 export default function HeroSplit() {
   const tenant = useTenant()
   const { seoTitleI18n, seoDescriptionI18n, seoTitle, seoDescription } = useBranchSettings()
   const locale = useLocale()
+  const { branchSlug } = useParams()
   const t = useTranslations('hero')
 
   const title = seoTitleI18n?.[locale] || seoTitle || tenant?.clientName
@@ -30,7 +32,7 @@ export default function HeroSplit() {
             <div className="flex flex-wrap gap-4">
               {tenant?.features?.hasBooking && (
                 <Link
-                  href={`/${locale}/reservations`}
+                  href={`/${locale}/${branchSlug}/reservations`}
                   className="inline-flex items-center px-6 py-3 rounded-lg text-white font-medium transition-opacity hover:opacity-90"
                   style={{ backgroundColor: 'var(--color-primary)' }}
                 >
@@ -39,7 +41,7 @@ export default function HeroSplit() {
               )}
               {tenant?.features?.hasMenu && (
                 <Link
-                  href={`/${locale}/menu`}
+                  href={`/${locale}/${branchSlug}/catalog`}
                   className="inline-flex items-center px-6 py-3 rounded-lg font-medium border-2 transition-colors hover:bg-zinc-100"
                   style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
                 >

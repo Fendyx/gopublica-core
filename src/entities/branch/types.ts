@@ -8,6 +8,7 @@ export interface Branch {
   _id: string;
   tenantId: string;
   name: string;
+  slug: string;
   city: string;
   address?: string;
   phone?: string;
@@ -15,6 +16,7 @@ export interface Branch {
   workingHours?: Record<string, string>;
   coordinates?: { lat: number; lng: number };
   isActive: boolean;
+  isDefault?: boolean;
 
   // "Подфилия": если parentBranchId задан — это под-заведение (напр. веганское
   // кафе в подвале того же здания), отображается вложенно под родителем.

@@ -28,13 +28,18 @@ export function useBranch() {
 interface Props {
   children: React.ReactNode
   tenantId: string
+  initialBranch?: Branch | null
 }
 
-export function BranchProvider({ children, tenantId }: Props) {
+export function BranchProvider({ children, tenantId, initialBranch }: Props) {
   const [branches, setBranches] = useState<Branch[]>([])
-  const [selectedCity, setSelectedCity] = useState<string | null>(null)
-  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [selectedCity, setSelectedCity] = useState<string | null>(
+    initialBranch ? initialBranch.city : null
+  )
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(
+    initialBranch ?? null
+  )
+  const [loading, setLoading] = useState(!initialBranch)
 
   const cities = [...new Set(branches.map((b: Branch) => b.city).filter((c): c is string => !!c))]
 
@@ -48,6 +53,10 @@ export function BranchProvider({ children, tenantId }: Props) {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/public/${tenantId}`)
       const data: Branch[] = await res.json()
       setBranches(data)
+      // If we have an initialBranch, ensure it's in the branches list
+      if (initialBranch && !data.some(b => b._id === initialBranch._id)) {
+        setBranches([initialBranch, ...data])
+      }
       return data
     } catch (err) {
       console.error(err)
@@ -64,11 +73,16 @@ export function BranchProvider({ children, tenantId }: Props) {
   }
 
   useEffect(() => {
+    // If initialBranch was provided (from [branchSlug] layout), skip IP detection
+    if (initialBranch) {
+      fetchBranches()
+      return
+    }
     fetchBranches().then(data => {
       detectCityByIp(data)
       setLoading(false)
     })
-  }, [tenantId])
+  }, [tenantId, initialBranch])
 
   const mainOf = (data: Branch[]) => data.filter(b => !b.parentBranchId)
 

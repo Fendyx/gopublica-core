@@ -3,12 +3,14 @@ import Link from 'next/link'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale, useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import { Truck, ShoppingBag } from 'lucide-react'
 
 export default function HeroCentered() {
   const tenant = useTenant()
   const { seoTitleI18n, seoDescriptionI18n, seoTitle, seoDescription } = useBranchSettings()
   const locale = useLocale()
+  const { branchSlug } = useParams()
   const t = useTranslations('hero')
 
   const title = seoTitleI18n?.[locale] || seoTitle || tenant?.clientName
@@ -29,7 +31,7 @@ export default function HeroCentered() {
         <div className="flex flex-wrap justify-center gap-4">
           {tenant?.features?.hasBooking && (
             <Link
-              href={`/${locale}/reservations`}
+              href={`/${locale}/${branchSlug}/reservations`}
               className="inline-flex items-center px-8 py-4 rounded-lg text-white font-medium text-lg transition-opacity hover:opacity-90"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >
@@ -38,7 +40,7 @@ export default function HeroCentered() {
           )}
           {tenant?.features?.hasMenu && (
             <Link
-              href={`/${locale}/menu`}
+              href={`/${locale}/${branchSlug}/catalog`}
               className="inline-flex items-center px-8 py-4 rounded-lg font-medium text-lg border-2 transition-colors hover:bg-white/10"
               style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
             >

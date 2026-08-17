@@ -18,16 +18,24 @@ export function useCloudinaryUpload({
   const [isWidgetOpen, setIsWidgetOpen] = useState(false);
 
   useEffect(() => {
-    if (document.getElementById('cloudinary-widget-script')) {
-      if ((window as any).cloudinary && !widgetRef.current) initWidget();
-      return;
+    const checkCloudinary = setInterval(() => {
+      if ((window as any).cloudinary) {
+        clearInterval(checkCloudinary);
+        if (!widgetRef.current) {
+          initWidget();
+        }
+      }
+    }, 100);
+
+    if (!document.getElementById('cloudinary-widget-script')) {
+      const script = document.createElement('script');
+      script.id = 'cloudinary-widget-script';
+      script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+      script.async = true;
+      document.body.appendChild(script);
     }
-    const script = document.createElement('script');
-    script.id = 'cloudinary-widget-script';
-    script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
-    script.async = true;
-    script.onload = () => initWidget();
-    document.body.appendChild(script);
+
+    return () => clearInterval(checkCloudinary);
   }, []);
 
   const initWidget = () => {

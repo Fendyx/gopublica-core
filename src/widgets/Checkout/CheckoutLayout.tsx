@@ -23,7 +23,7 @@ import ParcelLockerSection from './ParcelLockerSection';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 function CheckoutForm() {
-  const { locale } = useParams<{ tenantDomain: string; locale: string }>();
+  const { locale, branchSlug } = useParams<{ tenantDomain: string; locale: string; branchSlug: string }>();
   const stripe = useStripe();
   const elements = useElements();
   const tenant = useTenant();
@@ -179,7 +179,7 @@ function CheckoutForm() {
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <ShoppingBag size={48} className="mx-auto text-gray-300 mb-4" />
         <h2 className="text-xl font-semibold mb-2">{t('emptyCart')}</h2>
-        <a href={`/${locale}/menu`} className="inline-block mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg">
+          <a href={`/${locale}/${branchSlug}/catalog`} className="inline-block mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg">
           {t('goToMenu')}
         </a>
       </div>

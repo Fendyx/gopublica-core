@@ -1,11 +1,12 @@
 // src/app/[tenantDomain]/[locale]/menu/page.tsx
 import { redirect } from 'next/navigation';
 
-export default function MenuRedirect({
+export default async function MenuRedirect({
   params,
 }: {
-  params: { tenantDomain: string; locale: string };
+  params: Promise<{ tenantDomain: string; locale: string }>;
 }) {
+  const { locale } = await params;
   // Мягко перенаправляем на новый универсальный роут
-  redirect(`/${params.locale}/catalog`);
+  redirect(`/${locale}/catalog`);
 }

@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 
@@ -9,13 +10,15 @@ export default function Footer() {
   const tenant = useTenant()
   const settings = useBranchSettings()
   const locale = useLocale()
+  const { branchSlug } = useParams()
   const currentYear = new Date().getFullYear()
 
   const navLinks = [
-    { href: `/${locale}`, label: t('home') },
-    { href: `/${locale}/menu`, label: t('menu') },
-    { href: `/${locale}/reservations`, label: t('reservations') },
-    { href: '#contact', label: t('contact') },
+    { href: `/${locale}/${branchSlug}`, label: t('home') },
+    ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/${branchSlug}/menu`, label: t('menu') }] : []),
+    ...(tenant?.features?.hasOnlineOrdering ? [{ href: `/${locale}/${branchSlug}/catalog`, label: t('catalog') }] : []),
+    ...(tenant?.features?.hasBooking ? [{ href: `/${locale}/${branchSlug}/reservations`, label: t('reservations') }] : []),
+    { href: `/${locale}/${branchSlug}/#contact`, label: t('contact') },
   ]
 
   const legalLinks = [

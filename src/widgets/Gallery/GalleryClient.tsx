@@ -2,6 +2,7 @@
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useEffect, useState } from 'react'
 import { useTenant } from '@/entities/tenant/TenantContext'
+import { usePathname } from 'next/navigation'
 import Gallery from '@/widgets/Gallery/Gallery'
 import type { GalleryItem } from '@/entities/gallery/types'
 
@@ -13,6 +14,8 @@ export default function GalleryClient() {
 
   const tenantId = selectedBranch?.tenantId ?? tenant?.tenantId
   const galleryStyle = tenant?.theme?.galleryStyle ?? 'bento' // <-- исправлено
+
+  const pathname = usePathname()
 
   useEffect(() => {
     if (!selectedBranch || !tenantId) return
@@ -27,7 +30,7 @@ export default function GalleryClient() {
         console.error(err)
         setLoading(false)
       })
-  }, [selectedBranch, tenantId])
+  }, [selectedBranch, tenantId, pathname])
 
   if (loading) return <div className="text-center py-10">Loading галереи...</div>
   return <Gallery images={images} galleryStyle={galleryStyle as 'bento' | 'masonry'} />

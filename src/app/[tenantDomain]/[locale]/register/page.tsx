@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { User, Mail, Lock, Phone, UserPlus, Loader2, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTenant } from '@/entities/tenant/TenantContext';
+import { useBranch } from '@/entities/branch/BranchContext';
 
 export default function RegisterPage() {
   const { locale } = useParams();
@@ -21,6 +22,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const tenant = useTenant();
+  const { selectedBranch } = useBranch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,10 +46,12 @@ export default function RegisterPage() {
         // Если бекенд сразу возвращает токен при регистрации - сохраняем и редиректим
         if (data.token) {
           localStorage.setItem('customer_token', data.token);
-          router.push(`/${locale}/profile`);
+          const branchSlug = selectedBranch?.slug || '';
+          router.push(`/${locale}/${branchSlug}/profile`);
         } else {
           // Если нужно сначала залогиниться - кидаем на страницу логина
-          router.push(`/${locale}/login`);
+          const branchSlug = selectedBranch?.slug || '';
+          router.push(`/${locale}/${branchSlug}/login`);
         }
       } else {
         setError(data.error || 'Registration failed');
@@ -68,7 +72,7 @@ export default function RegisterPage() {
         className="w-full max-w-md"
       >
         <div className="mb-6 text-center">
-          <Link href={`/${locale}/menu`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <Link href={`/${locale}/${selectedBranch?.slug || ''}/catalog`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to menu
           </Link>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('createAccount')}</h1>
@@ -161,7 +165,7 @@ export default function RegisterPage() {
             </form>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              {t('haveAccount')} <Link href={`/${locale}/login`} className="text-primary font-medium hover:underline">{t('login')}</Link>
+              {t('haveAccount')} <Link href={`/${locale}/${selectedBranch?.slug || ''}/login`} className="text-primary font-medium hover:underline">{t('login')}</Link>
             </div>
           </CardContent>
         </Card>

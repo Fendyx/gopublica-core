@@ -97,16 +97,17 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const isBeauty = tenant?.niche === 'beauty';
   const canManageMenu = tenant?.canManageMenu ?? tenant?.moduleAccess?.menu?.canManage ?? false;
   const canManageOrders = tenant?.canManageOrders ?? tenant?.moduleAccess?.orders?.canManage ?? false;
+  const hasMenu = tenant?.features?.hasMenu ?? false;
+  const hasOnlineOrdering = tenant?.features?.hasOnlineOrdering ?? false;
 
   const navItems = [
     { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
     { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
-    ...(!isBeauty && (isEcommerce || canManageMenu)
-      ? [{
-          href: isEcommerce ? '/admin/ecommerce' : '/admin/menu',
-          label: isEcommerce ? 'Catalog' : t('menu'),
-          icon: isEcommerce ? Package : UtensilsCrossed,
-        }]
+    ...(!isBeauty && hasMenu && canManageMenu
+      ? [{ href: '/admin/menu', label: t('menu'), icon: UtensilsCrossed }]
+      : []),
+    ...(!isBeauty && hasOnlineOrdering
+      ? [{ href: '/admin/ecommerce', label: 'Catalog', icon: Package }]
       : []),
     ...(canManageOrders ? [{ href: '/admin/orders', label: t('orders'), icon: FileText }] : []),
     ...(isBeauty ? [
@@ -114,6 +115,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
       { href: '/admin/beauty-masters', label: 'Beauty Masters', icon: Users2 },
     ] : []),
     { href: '/admin/gallery', label: t('gallery'), icon: ImageIcon },
+    { href: '/admin/articles', label: t('articles'), icon: FileText },
     { href: '/admin/reservations', label: t('reservations'), icon: CalendarCheck },
     { href: '/admin/analytics', label: t('analytics'), icon: ChartLine },
     { href: '/admin/branches', label: t('branches'), icon: Store },

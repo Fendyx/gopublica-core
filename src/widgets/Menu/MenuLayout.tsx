@@ -2,6 +2,7 @@
 'use client'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 import type { MenuItem } from '@/entities/menu-item/types'
 import MenuItemCard from '@/entities/menu-item/MenuItemCard'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
@@ -21,7 +22,9 @@ interface CategoryApiItem {
 }
 
 export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; menuStyle: 'grid' | 'list' }) {
-  const [activeCategory, setActiveCategory] = useState<string>('all')
+  const searchParams = useSearchParams()
+  const urlCategory = searchParams.get('category')
+  const [activeCategory, setActiveCategory] = useState<string>(urlCategory || 'all')
   const menuContainerRef = useRef<HTMLDivElement>(null)
   const t = useTranslations('menu')
   const locale = useLocale()
@@ -30,7 +33,8 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
   // 👇 Достаем данные тенанта из контекста
   const tenant = useTenant()
   const tenantId = tenant?.tenantId
-  const niche = tenant?.niche || 'food'
+  // Always use 'food' niche for menu categories — hybrid tenants may have niche='ecommerce'
+  const niche = 'food'
 
   const [categoryMap, setCategoryMap] = useState<Record<string, CategoryData>>({})
 

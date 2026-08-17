@@ -1,0 +1,421 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { BranchSectionItem } from '@/entities/branch-section/types';
+import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
+import { fetchBranchSectionItems } from '@/entities/branch-section/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Trash2, Plus, Edit, X } from 'lucide-react';
+
+interface SectionItemListProps {
+  sectionId: string;
+  initialItems?: BranchSectionItem[];
+  onSaveItem: (item: Partial<BranchSectionItem>) => Promise<void>;
+  onDeleteItem: (id: string) => Promise<void>;
+}
+
+const LOCALES = ['pl', 'en', 'de'] as const;
+
+export default function SectionItemList({
+  sectionId,
+  initialItems = [],
+  onSaveItem,
+  onDeleteItem,
+}: SectionItemListProps) {
+  const [items, setItems] = useState<BranchSectionItem[]>(initialItems);
+  const [loading, setLoading] = useState(false);
+  const [editingItem, setEditingItem] = useState<Partial<BranchSectionItem> | null>(null);
+
+  const { openWidget, widgetReady } = useCloudinaryUpload({
+    onSuccess: (url: string, resourceType?: string) => {
+      const mediaType = resourceType === 'video' ? 'video' : 'image';
+      setEditingItem((prev) =>
+        prev ? { ...prev, media: { type: mediaType, url } } : null
+      );
+    },
+  });
+
+  const fetchItems = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchBranchSectionItems(sectionId);
+      setItems(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch items on mount based on sectionId
+  useEffect(() => {
+    fetchItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionId]);
+
+  const handleEdit = (item: BranchSectionItem) => {
+    setEditingItem({ ...item });
+  };
+
+  const handleAddNew = () => {
+    setEditingItem({
+      _id: '',
+      tenantId: '',
+      branchId: '',
+      sectionId,
+      slug: '',
+      media: { type: 'image', url: '' },
+      order: items.length,
+      translations: {},
+      isActive: true,
+      body: '',
+      gallery: [],
+      attributes: [],
+    });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+    await onDeleteItem(id);
+    fetchItems();
+  };
+
+  const handleSave = async () => {
+    if (!editingItem) return;
+    await onSaveItem(editingItem);
+    setEditingItem(null);
+    fetchItems();
+  };
+
+  const handleCancel = () => {
+    setEditingItem(null);
+  };
+
+  const updateTranslation = (locale: string, field: 'title' | 'subtitle', value: string) => {
+    if (!editingItem) return;
+    setEditingItem((prev) => {
+      if (!prev) return prev;
+      const translations = prev.translations || {};
+      return {
+        ...prev,
+        translations: {
+          ...translations,
+          [locale]: {
+            ...(translations[locale] || {}),
+            [field]: value,
+          },
+        },
+      };
+    });
+  };
+
+  // --- List Mode ---
+  if (!editingItem) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">Section Items</h3>
+          <Button onClick={handleAddNew} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Add Item
+          </Button>
+        </div>
+
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading items...</p>
+        ) : items.length === 0 ? (
+          <Card className="border-dashed border-2 bg-muted/20">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-muted-foreground">No items yet. Add one to get started.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {items.map((item) => (
+              <Card key={item._id} className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-3 space-y-2">
+                  <div className="relative aspect-square rounded-lg overflow-hidden bg-muted/30">
+                    {item.media?.url ? (
+                      item.media.type === 'video' ? (
+                        <video
+                          src={item.media.url}
+                          className="w-full h-full object-cover rounded-lg"
+                          controls
+                        />
+                      ) : (
+                        <img
+                          src={item.media.url}
+                          alt={item.slug || 'preview'}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      )
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        No media
+                      </div>
+                    )}
+                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-6 h-6"
+                        onClick={() => handleEdit(item)}
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="w-6 h-6"
+                        onClick={() => handleDelete(item._id)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-sm font-medium truncate">{item.slug || 'No slug'}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // --- Edit Mode ---
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">
+          {editingItem._id ? 'Edit Item' : 'Add New Item'}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Slug */}
+        <div className="space-y-1">
+          <Label htmlFor="slug">Slug</Label>
+          <Input
+            id="slug"
+            placeholder="Enter slug"
+            value={editingItem.slug || ''}
+            onChange={(e) =>
+              setEditingItem({ ...editingItem, slug: e.target.value })
+            }
+          />
+        </div>
+
+        {/* Media Upload */}
+        <div className="space-y-2">
+          <Label>Media</Label>
+          <Button
+            variant="outline"
+            onClick={openWidget}
+            disabled={!widgetReady}
+            className="gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Upload Media
+          </Button>
+          {editingItem.media?.url && (
+            <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
+              {editingItem.media.type === 'video' ? (
+                <video
+                  src={editingItem.media.url}
+                  className="h-24 w-24 object-cover rounded-lg shadow-sm"
+                  controls
+                />
+              ) : (
+                <img
+                  src={editingItem.media.url}
+                  alt="preview"
+                  className="h-24 w-24 object-cover rounded-lg shadow-sm"
+                />
+              )}
+              <div className="space-y-2 flex-1">
+                <p className="text-sm text-muted-foreground break-all">
+                  {editingItem.media.url}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Translations */}
+        <div className="space-y-3">
+          <Label>Translations</Label>
+          {LOCALES.map((locale) => (
+            <div key={locale} className="space-y-2 p-3 border rounded-lg">
+              <p className="text-sm font-medium uppercase">{locale}</p>
+              <div className="space-y-1">
+                <Label htmlFor={`title-${locale}`}>Title</Label>
+                <Input
+                  id={`title-${locale}`}
+                  placeholder={`Title in ${locale}`}
+                  value={editingItem.translations?.[locale]?.title || ''}
+                  onChange={(e) =>
+                    updateTranslation(locale, 'title', e.target.value)
+                  }
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor={`subtitle-${locale}`}>Subtitle</Label>
+                <Input
+                  id={`subtitle-${locale}`}
+                  placeholder={`Subtitle in ${locale}`}
+                  value={editingItem.translations?.[locale]?.subtitle || ''}
+                  onChange={(e) =>
+                    updateTranslation(locale, 'subtitle', e.target.value)
+                  }
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Body */}
+        <div className="space-y-1">
+          <Label htmlFor="body">Body</Label>
+          <textarea
+            id="body"
+            placeholder="Enter body text..."
+            value={editingItem.body || ''}
+            onChange={(e) =>
+              setEditingItem({ ...editingItem, body: e.target.value })
+            }
+            className="flex h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+          />
+        </div>
+
+        {/* Gallery Manager */}
+        <div className="space-y-2">
+          <Label>Gallery</Label>
+          {editingItem.gallery && editingItem.gallery.length > 0 ? (
+            <div className="space-y-2">
+              {editingItem.gallery.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <Input
+                    value={item.url}
+                    onChange={(e) => {
+                      const newGallery = [...(editingItem.gallery || [])];
+                      newGallery[idx] = { ...newGallery[idx], url: e.target.value };
+                      setEditingItem({ ...editingItem, gallery: newGallery });
+                    }}
+                    placeholder="Media URL"
+                  />
+                  <select
+                    value={item.type}
+                    onChange={(e) => {
+                      const newGallery = [...(editingItem.gallery || [])];
+                      newGallery[idx] = { ...newGallery[idx], type: e.target.value as 'video' | 'image' };
+                      setEditingItem({ ...editingItem, gallery: newGallery });
+                    }}
+                    className="px-2 py-1 border rounded text-sm"
+                  >
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                  </select>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      const newGallery = [...(editingItem.gallery || [])];
+                      newGallery.splice(idx, 1);
+                      setEditingItem({ ...editingItem, gallery: newGallery });
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No gallery items yet.</p>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const newGallery = [...(editingItem.gallery || []), { type: 'image' as const, url: '' }];
+              setEditingItem({ ...editingItem, gallery: newGallery });
+            }}
+            className="gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Gallery Item
+          </Button>
+        </div>
+
+        {/* Attributes Manager */}
+        <div className="space-y-2">
+          <Label>Attributes</Label>
+          {editingItem.attributes && editingItem.attributes.length > 0 ? (
+            <div className="space-y-2">
+              {editingItem.attributes.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <Input
+                    value={item.key}
+                    onChange={(e) => {
+                      const newAttrs = [...(editingItem.attributes || [])];
+                      newAttrs[idx] = { ...newAttrs[idx], key: e.target.value };
+                      setEditingItem({ ...editingItem, attributes: newAttrs });
+                    }}
+                    placeholder="Key"
+                  />
+                  <Input
+                    value={item.value}
+                    onChange={(e) => {
+                      const newAttrs = [...(editingItem.attributes || [])];
+                      newAttrs[idx] = { ...newAttrs[idx], value: e.target.value };
+                      setEditingItem({ ...editingItem, attributes: newAttrs });
+                    }}
+                    placeholder="Value"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      const newAttrs = [...(editingItem.attributes || [])];
+                      newAttrs.splice(idx, 1);
+                      setEditingItem({ ...editingItem, attributes: newAttrs });
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No attributes yet.</p>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const newAttrs = [...(editingItem.attributes || []), { key: '', value: '' }];
+              setEditingItem({ ...editingItem, attributes: newAttrs });
+            }}
+            className="gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Attribute
+          </Button>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-2">
+          <Button onClick={handleSave} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Save
+          </Button>
+          <Button variant="outline" onClick={handleCancel} className="gap-2">
+            <X className="w-4 h-4" />
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

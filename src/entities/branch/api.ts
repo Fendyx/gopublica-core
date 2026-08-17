@@ -16,6 +16,26 @@ export async function fetchBranches(tenantId: string): Promise<Branch[]> {
 }
 
 /**
+ * Resolves a branch by its slug for the [branchSlug] URL segment.
+ * Uses the new public endpoint that looks up a branch by slug.
+ */
+export async function fetchBranchBySlug(
+  tenantId: string,
+  slug: string
+): Promise<Branch | null> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/public/branches/slug?tenantId=${tenantId}&slug=${slug}`,
+      { cache: 'no-store' }
+    )
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
+  }
+}
+
+/**
  * Определяет branchId для SSR-запроса по IP/гео-заголовкам.
  * Повторяет логику BranchContext.detectCityByIp, но на сервере.
  * Возвращает null, если у тенанта нет филиалов вообще (старая single-branch логика).

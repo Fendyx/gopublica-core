@@ -15,7 +15,12 @@ const today = new Date().toISOString().split('T')[0]
 
 type Step = 1 | 2
 
-export default function BookingForm() {
+interface BookingFormProps {
+  title?: string
+  subtitle?: string
+}
+
+export default function BookingForm({ title, subtitle }: BookingFormProps) {
   const t = useTranslations('booking')
   const locale = useLocale()
   const tenant = useTenant()
@@ -68,7 +73,7 @@ export default function BookingForm() {
   if (status === 'success') {
     return (
       <Section>
-        <SectionHeader title={t('title')} />
+        <SectionHeader title={title || t('title')} subtitle={subtitle} />
         <div className="max-w-md mx-auto">
           <div className="bg-surface-card border border-border rounded-2xl p-8 text-center shadow-card">
             <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mx-auto mb-5">
@@ -99,7 +104,7 @@ export default function BookingForm() {
   if (branchLoading) {
     return (
       <Section>
-        <SectionHeader title={t('title')} />
+        <SectionHeader title={title || t('title')} subtitle={subtitle} />
         <div className="text-center py-10 text-text-secondary">{t('form.branchSelection.loading')}</div>
       </Section>
     )
@@ -108,7 +113,7 @@ export default function BookingForm() {
   if (!selectedBranch) {
     return (
       <Section>
-        <SectionHeader title={t('title')} />
+        <SectionHeader title={title || t('title')} subtitle={subtitle} />
         <div className="text-center py-10 text-text-secondary">{t('form.branchSelection.prompt')}</div>
       </Section>
     )
@@ -116,7 +121,7 @@ export default function BookingForm() {
 
   return (
     <Section>
-      <SectionHeader title={t('title')} />
+      <SectionHeader title={title || t('title')} subtitle={subtitle} />
 
       <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-center gap-3 mb-8">
@@ -272,9 +277,12 @@ export default function BookingForm() {
 function Section({ children }: { children: React.ReactNode }) {
   return <section id="booking" className="pt-6 pb-24 bg-surface-page"><div className="max-w-5xl mx-auto px-4 sm:px-6">{children}</div></section>
 }
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return <div className="flex flex-col items-center text-center mb-14">
     <h2 className="font-heading text-4xl sm:text-5xl text-text-primary leading-tight">{title}</h2>
+    {subtitle && (
+      <p className="mt-3 text-sm text-text-secondary">{subtitle}</p>
+    )}
     <div className="flex items-center gap-3 mt-5">
       <div className="h-px w-12 bg-border" />
       <div className="w-1.5 h-1.5 rounded-full bg-primary opacity-70" />

@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types';
 import { useCartStore } from '@/shared/store/cartStore';
@@ -15,14 +16,16 @@ interface Props {
 }
 
 export default function ProductCard({ product, variant, locale, currencySymbol = 'zł', imageAspectRatio = '1/1' }: Props) {
+  const { branchSlug } = useParams();
+  const branchSlugStr = Array.isArray(branchSlug) ? branchSlug[0] : branchSlug;
   return (
     <div className="group">
-      {variant === 'overlay' && <OverlayCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {variant === 'action-bar' && <ActionBarCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {variant === 'minimal' && <MinimalCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {variant === 'hover-vertical' && <HoverVerticalCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {variant === 'action-overlay' && <ActionOverlayCard product={product} locale={locale} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {variant === 'clean' && <CleanCard product={product} locale={locale} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'overlay' && <OverlayCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'action-bar' && <ActionBarCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'minimal' && <MinimalCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'hover-vertical' && <HoverVerticalCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'action-overlay' && <ActionOverlayCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'clean' && <CleanCard product={product} locale={locale} branchSlug={branchSlugStr} imageAspectRatio={imageAspectRatio} />}
     </div>
   );
 }
@@ -59,7 +62,7 @@ function CardImage({ product, aspectRatio = '1/1' }: { product: MenuItem; aspect
 }
 
 /* ---------- 1. OVERLAY ---------- */
-function OverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
+function OverlayCard({ product, locale, branchSlug, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; branchSlug?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
   const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
@@ -74,7 +77,7 @@ function OverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { pr
   };
 
   return (
-    <Link href={`/${locale}/catalog/${product._id}`} className="block relative rounded-2xl overflow-hidden border border-border transition-all duration-300 hover:shadow-lg">
+    <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`} className="block relative rounded-2xl overflow-hidden border border-border transition-all duration-300 hover:shadow-lg">
       <CardImage product={product} aspectRatio={imageAspectRatio} />
       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center gap-3">
         <button onClick={handleAdd} disabled={loading} className="bg-white text-black px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-200 transition-colors">
@@ -96,7 +99,7 @@ function OverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { pr
 }
 
 /* ---------- 2. ACTION-BAR ---------- */
-function ActionBarCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
+function ActionBarCard({ product, locale, branchSlug, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; branchSlug?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
   const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
@@ -110,11 +113,11 @@ function ActionBarCard({ product, locale, currencySymbol, imageAspectRatio }: { 
 
   return (
     <div className="flex flex-col h-full border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md">
-      <Link href={`/${locale}/catalog/${product._id}`}>
+      <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`}>
         <CardImage product={product} aspectRatio={imageAspectRatio} />
       </Link>
       <div className="flex flex-col flex-1 p-4 gap-2 bg-transparent">
-        <Link href={`/${locale}/catalog/${product._id}`}>
+        <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`}>
           <h3 className="font-semibold text-base text-foreground leading-snug line-clamp-2 hover:underline">{product.name}</h3>
         </Link>
         <div className="text-lg font-bold text-foreground mb-3">{product.price.toFixed(2)} {currencySymbol}</div>
@@ -131,9 +134,9 @@ function ActionBarCard({ product, locale, currencySymbol, imageAspectRatio }: { 
 }
 
 /* ---------- 3. MINIMAL ---------- */
-function MinimalCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
+function MinimalCard({ product, locale, branchSlug, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; branchSlug?: string; currencySymbol: string; imageAspectRatio?: string }) {
   return (
-    <Link href={`/${locale}/catalog/${product._id}`} className="block group">
+    <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`} className="block group">
       <CardImage product={product} aspectRatio={imageAspectRatio} />
       <div className="mt-3 flex justify-between items-start gap-2 border-b border-transparent group-hover:border-border pb-2 transition-all">
         <h3 className="text-sm font-medium text-foreground leading-snug">{product.name}</h3>
@@ -144,7 +147,7 @@ function MinimalCard({ product, locale, currencySymbol, imageAspectRatio }: { pr
 }
 
 /* ---------- 4. HOVER-VERTICAL ---------- */
-function HoverVerticalCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
+function HoverVerticalCard({ product, locale, branchSlug, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; branchSlug?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
   const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
@@ -159,7 +162,7 @@ function HoverVerticalCard({ product, locale, currencySymbol, imageAspectRatio }
   };
 
   return (
-    <Link href={`/${locale}/catalog/${product._id}`} className="block relative rounded-2xl overflow-hidden border border-border transition-all duration-300 hover:shadow-lg">
+    <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`} className="block relative rounded-2xl overflow-hidden border border-border transition-all duration-300 hover:shadow-lg">
       <CardImage product={product} aspectRatio={imageAspectRatio} />
       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col items-center justify-center gap-3">
         <button onClick={handleAdd} disabled={loading} className="bg-white text-black px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-200 transition-colors">
@@ -181,7 +184,7 @@ function HoverVerticalCard({ product, locale, currencySymbol, imageAspectRatio }
 }
 
 /* ---------- 5. ACTION-OVERLAY ---------- */
-function ActionOverlayCard({ product, locale, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; currencySymbol: string; imageAspectRatio?: string }) {
+function ActionOverlayCard({ product, locale, branchSlug, currencySymbol, imageAspectRatio }: { product: MenuItem; locale?: string; branchSlug?: string; currencySymbol: string; imageAspectRatio?: string }) {
   const addItem = useCartStore((s) => s.addItem);
   const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
@@ -197,7 +200,7 @@ function ActionOverlayCard({ product, locale, currencySymbol, imageAspectRatio }
 
   return (
     <div className="flex flex-col h-full border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md group">
-      <Link href={`/${locale}/catalog/${product._id}`} className="relative block">
+      <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`} className="relative block">
         <CardImage product={product} aspectRatio={imageAspectRatio} />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col items-center justify-center gap-3">
           <button onClick={handleAdd} disabled={loading} className="bg-white text-black px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-200 transition-colors">
@@ -212,7 +215,7 @@ function ActionOverlayCard({ product, locale, currencySymbol, imageAspectRatio }
         </div>
       </Link>
       <div className="flex flex-col flex-1 p-4 gap-1 bg-transparent">
-        <Link href={`/${locale}/catalog/${product._id}`}>
+        <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`}>
           <h3 className="font-semibold text-base text-foreground leading-snug line-clamp-2 hover:underline">{product.name}</h3>
         </Link>
         <div className="text-lg font-bold text-foreground">{product.price.toFixed(2)} {currencySymbol}</div>
@@ -222,9 +225,9 @@ function ActionOverlayCard({ product, locale, currencySymbol, imageAspectRatio }
 }
 
 /* ---------- 6. CLEAN ---------- */
-function CleanCard({ product, locale, imageAspectRatio }: { product: MenuItem; locale?: string; imageAspectRatio?: string }) {
+function CleanCard({ product, locale, branchSlug, imageAspectRatio }: { product: MenuItem; locale?: string; branchSlug?: string; imageAspectRatio?: string }) {
   return (
-    <Link href={`/${locale}/catalog/${product._id}`} className="block relative rounded-2xl overflow-hidden border border-border group transition-all duration-300 hover:shadow-lg">
+    <Link href={`/${locale}/${branchSlug}/catalog/${product._id}`} className="block relative rounded-2xl overflow-hidden border border-border group transition-all duration-300 hover:shadow-lg">
       <CardImage product={product} aspectRatio={imageAspectRatio} />
       <div className="absolute bottom-0 left-0 p-4 bg-gradient-to-t from-black/80 to-transparent w-full">
         <h3 className="text-white font-semibold text-base truncate">{product.name}</h3>

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
+import { useParams, useRouter } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
 import ThemeToggle from '@/shared/ui/ThemeToggle'
@@ -12,6 +13,8 @@ import { useCartStore } from '@/shared/store/cartStore'
 export default function Navbar() {
   const t = useTranslations('nav')
   const locale = useLocale()
+  const { branchSlug } = useParams()
+  const router = useRouter()
   const tenant = useTenant()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -80,10 +83,11 @@ export default function Navbar() {
   }, [isOpen])
 
   const links = [
-    { href: `/${locale}`, label: t('home') },
-    ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/catalog`, label: t('menu') }] : []),
-    ...(tenant?.features?.hasGallery ? [{ href: `/${locale}#gallery`, label: t('gallery') }] : []),
-    { href: `/${locale}#contact`, label: t('contact') },
+    { href: `/${locale}/${branchSlug}`, label: t('home') },
+    ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/${branchSlug}/menu`, label: t('menu') }] : []),
+    ...(tenant?.features?.hasOnlineOrdering ? [{ href: `/${locale}/${branchSlug}/catalog`, label: t('catalog') }] : []),
+    ...(tenant?.features?.hasGallery ? [{ href: `/${locale}/${branchSlug}/#gallery`, label: t('gallery') }] : []),
+    { href: `/${locale}/${branchSlug}/#contact`, label: t('contact') },
   ]
 
   const hasBooking = tenant?.features?.hasBooking ?? false
@@ -93,7 +97,7 @@ export default function Navbar() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href={`/${locale}`} className="font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors shrink-0">
+          <Link href={`/${locale}/${branchSlug}`} className="font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors shrink-0">
             {(tenant?.businessName || tenant?.clientName) || ''}
           </Link>
 
@@ -139,6 +143,8 @@ export default function Navbar() {
                                 setCity(city)
                                 setBranch(branch)
                                 setLocationDropdownOpen(false)
+                                // Navigate to the new branch's root page
+                                router.push(`/${locale}/${branch.slug}`)
                               }}
                               className="flex flex-col w-full text-left px-4 py-2 text-sm hover:bg-surface-hover transition-colors group"
                             >
@@ -179,7 +185,7 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center">
               {isLoggedIn ? (
                 <Link
-                  href={`/${locale}/profile`}
+                  href={`/${locale}/${branchSlug}/profile`}
                   className="flex items-center gap-1.5 p-2 xl:px-3 xl:py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
                   aria-label="Профиль"
                 >
@@ -188,7 +194,7 @@ export default function Navbar() {
                 </Link>
               ) : (
                 <Link
-                  href={`/${locale}/login`}
+                  href={`/${locale}/${branchSlug}/login`}
                   className="flex items-center gap-1.5 p-2 xl:px-3 xl:py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
                   aria-label="Логин"
                 >
@@ -201,7 +207,7 @@ export default function Navbar() {
             {/* Иконка корзины */}
             {hasOnlineOrdering && (
               <Link
-                href={`/${locale}/order/checkout`}
+                href={`/${locale}/${branchSlug}/order/checkout`}
                 className="relative p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
                 aria-label="Корзина"
               >
@@ -216,7 +222,7 @@ export default function Navbar() {
 
             {/* Кнопка бронирования */}
             {hasBooking && (
-              <Link href={`/${locale}/reservations`} className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 shadow-sm whitespace-nowrap" style={{ backgroundColor: 'var(--color-primary)' }}>
+              <Link href={`/${locale}/${branchSlug}/reservations`} className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 shadow-sm whitespace-nowrap" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <CalendarDays size={16} />
                 <span className="hidden xl:inline-block">{t('booking')}</span>
               </Link>
@@ -261,6 +267,8 @@ export default function Navbar() {
                             setCity(city)
                             setBranch(branch)
                             setIsOpen(false)
+                            // Navigate to the new branch's root page
+                            router.push(`/${locale}/${branch.slug}`)
                           }}
                           className={`flex flex-col text-left px-4 py-3 rounded-xl text-sm transition-all border ${
                             selectedBranch?._id === branch._id 
@@ -299,7 +307,7 @@ export default function Navbar() {
             {/* Профиль / Логин (Mobile) */}
             {isLoggedIn ? (
               <Link 
-                href={`/${locale}/profile`} 
+                href={`/${locale}/${branchSlug}/profile`} 
                 onClick={() => setIsOpen(false)} 
                 className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium border border-border text-text-primary hover:bg-surface-hover transition-colors"
               >
@@ -308,7 +316,7 @@ export default function Navbar() {
               </Link>
             ) : (
               <Link 
-                href={`/${locale}/login`} 
+                href={`/${locale}/${branchSlug}/login`} 
                 onClick={() => setIsOpen(false)} 
                 className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium border border-border text-text-primary hover:bg-surface-hover transition-colors"
               >
@@ -318,7 +326,7 @@ export default function Navbar() {
             )}
 
             {hasBooking && (
-              <Link href={`/${locale}/reservations`} onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium text-white shadow-sm transition-opacity hover:opacity-90" style={{ backgroundColor: 'var(--color-primary)' }}>
+              <Link href={`/${locale}/${branchSlug}/reservations`} onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium text-white shadow-sm transition-opacity hover:opacity-90" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <CalendarDays size={18} />
                 {t('booking')}
               </Link>

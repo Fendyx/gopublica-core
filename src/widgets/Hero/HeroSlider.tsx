@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale, useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion' // 👈 Импортируем Framer Motion
 
 const INTERVAL = 5000 // Чуть увеличил интервал, чтобы свайпы не сильно мельтешили
@@ -19,6 +20,7 @@ export default function HeroSlider() {
   const tenant = useTenant()
   const { seoTitleI18n, seoDescriptionI18n, seoTitle, seoDescription } = useBranchSettings()
   const locale = useLocale()
+  const { branchSlug } = useParams()
   const t = useTranslations('hero')
   
   const images = tenant?.theme?.heroSliderImages?.length 
@@ -73,7 +75,7 @@ export default function HeroSlider() {
         <div className="flex flex-wrap justify-center gap-4">
           {tenant?.features?.hasBooking && (
             <Link
-              href={`/${locale}/reservations`}
+              href={`/${locale}/${branchSlug}/reservations`}
               className="px-8 py-4 rounded-lg text-white font-medium text-lg transition-transform hover:scale-105 active:scale-95 shadow-lg"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >

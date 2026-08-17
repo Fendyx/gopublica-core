@@ -2,9 +2,11 @@
 import { useBranch } from '@/entities/branch/BranchContext'
 import { ChevronDown, Store, Check, Loader2 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export function AdminBranchSwitcher() {
   const { branches, selectedBranch, setBranch, loading } = useBranch()
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -60,6 +62,9 @@ export function AdminBranchSwitcher() {
               onClick={() => {
                 setBranch(branch);
                 setIsOpen(false);
+                // Stay in the admin panel — just refresh the current route
+                // so data refetches for the newly selected branch.
+                router.refresh();
               }}
               className="flex flex-col w-full text-left px-4 py-2.5 text-sm hover:bg-surface-hover transition-colors group"
             >

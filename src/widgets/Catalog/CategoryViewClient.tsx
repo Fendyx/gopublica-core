@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import EcommerceGridLayout from './EcommerceGridLayout';
 import EcommerceCarouselLayout from './EcommerceCarouselLayout';
 import EcommerceDynamicGrid from './EcommerceDynamicGrid';
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function CategoryViewClient({ category, products, locale, tenant }: Props) {
+  const { branchSlug } = useParams();
   const layout = category.layout || 'grid-3';
   const globalVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
   const variant = (category.productCardVariant || globalVariant) as ProductCardVariant;
@@ -31,7 +33,7 @@ export default function CategoryViewClient({ category, products, locale, tenant 
     <section className="py-10 lg:py-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-sm text-muted-foreground">
-          <Link href={`/${locale}/catalog`} className="hover:text-foreground transition-colors">
+          <Link href={`/${locale}/${branchSlug}/catalog`} className="hover:text-foreground transition-colors">
             Catalog
           </Link>
           <span className="mx-2">/</span>

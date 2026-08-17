@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { ImageOff } from 'lucide-react';
 
 export interface CategoryCardData {
@@ -15,6 +16,7 @@ export interface CategoryCardData {
 
 export default function CategoryGrid({ categories, bgColor }: { categories: CategoryCardData[], bgColor?: string }) {
   const locale = useLocale();
+  const { branchSlug } = useParams();
   const t = useTranslations('catalog');
 
   if (!categories || categories.length === 0) return null;
@@ -30,7 +32,7 @@ export default function CategoryGrid({ categories, bgColor }: { categories: Cate
           {categories.map((cat) => (
             <Link
               key={cat.key}
-              href={`/${locale}/catalog/${cat.key}`}
+              href={`/${locale}/${branchSlug}/catalog/${cat.key}`}
               className="relative overflow-hidden rounded-xl border border-border group"
               style={{
                 aspectRatio: cat.imageAspectRatio || '1/1',

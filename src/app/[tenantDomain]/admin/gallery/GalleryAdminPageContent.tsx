@@ -64,16 +64,24 @@ export default function GalleryAdminPage() {
   }, [token, selectedBranch, branchLoading, tenant]);
 
   useEffect(() => {
-    if (document.getElementById('cloudinary-widget-script')) {
-      if ((window as any).cloudinary && !cloudinaryWidgetRef.current) initWidget();
-      return;
+    const checkCloudinary = setInterval(() => {
+      if ((window as any).cloudinary) {
+        clearInterval(checkCloudinary);
+        if (!cloudinaryWidgetRef.current) {
+          initWidget();
+        }
+      }
+    }, 100);
+
+    if (!document.getElementById('cloudinary-widget-script')) {
+      const script = document.createElement('script');
+      script.id = 'cloudinary-widget-script';
+      script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+      script.async = true;
+      document.body.appendChild(script);
     }
-    const script = document.createElement('script');
-    script.id = 'cloudinary-widget-script';
-    script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
-    script.async = true;
-    script.onload = () => initWidget();
-    document.body.appendChild(script);
+
+    return () => clearInterval(checkCloudinary);
   }, []);
 
   const initWidget = () => {

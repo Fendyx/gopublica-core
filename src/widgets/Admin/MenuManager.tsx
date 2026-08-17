@@ -96,7 +96,11 @@ export default function MenuManager({ token }: { token: string }) {
       if (selectedBranch) url += `&branchId=${selectedBranch._id}`;
       const res = await fetch(url);
       const data = await res.json();
-      setItems(data);
+      // Filter out e-commerce products — admin menu section should only show food/service items
+      const menuItems = Array.isArray(data)
+        ? data.filter((item: MenuItem) => item.productType !== 'physical_product')
+        : [];
+      setItems(menuItems);
     } catch (err) {
       console.error(err);
     } finally {
@@ -125,16 +129,24 @@ const fetchCategories = async () => {
   useEffect(() => { fetchItems(); }, [selectedBranch, tenantId]);
 
   useEffect(() => {
-    if (document.getElementById('cloudinary-widget-script')) {
-      if ((window as any).cloudinary && !cloudinaryWidgetRef.current) initWidget();
-      return;
+    const checkCloudinary = setInterval(() => {
+      if ((window as any).cloudinary) {
+        clearInterval(checkCloudinary);
+        if (!cloudinaryWidgetRef.current) {
+          initWidget();
+        }
+      }
+    }, 100);
+
+    if (!document.getElementById('cloudinary-widget-script')) {
+      const script = document.createElement('script');
+      script.id = 'cloudinary-widget-script';
+      script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+      script.async = true;
+      document.body.appendChild(script);
     }
-    const script = document.createElement('script');
-    script.id = 'cloudinary-widget-script';
-    script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
-    script.async = true;
-    script.onload = () => initWidget();
-    document.body.appendChild(script);
+
+    return () => clearInterval(checkCloudinary);
   }, []);
 
   const initWidget = () => {

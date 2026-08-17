@@ -2,9 +2,12 @@
 import { useBranch } from '@/entities/branch/BranchContext'
 import { ArrowDownToLine, ArrowUpFromLine, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useRouter, useParams } from 'next/navigation'
 
 export default function BranchCrossLink() {
   const { selectedBranch, branches, setBranch } = useBranch()
+  const router = useRouter()
+  const { locale } = useParams()
 
   if (!selectedBranch) return null
 
@@ -21,6 +24,8 @@ export default function BranchCrossLink() {
   // Функция для смены филиала со скроллом наверх
   const handleBranchSwitch = (branch: any) => {
     setBranch(branch);
+    // Navigate to the new branch's root page (safe default, no sub-path preservation)
+    router.push(`/${locale}/${branch.slug}`);
     // Плавно скроллим в самое начало страницы
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
