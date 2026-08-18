@@ -3,8 +3,6 @@ import { headers } from 'next/headers';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { fetchBranches } from '@/entities/branch/api';
 
-export const dynamic = 'force-dynamic';
-
 export default async function TenantHomePage(props: {
   params: Promise<{ tenantDomain: string; locale: string }>;
 }) {
@@ -22,7 +20,7 @@ export default async function TenantHomePage(props: {
     );
   }
 
-  // Redirect to the default branch's catalog page.
+  // Redirect to the default branch's home page.
   // The backend may not be ready yet, so we wrap in try/catch
   // and fall back to a hardcoded 'main' slug.
   let defaultBranchSlug = 'main';
@@ -36,5 +34,5 @@ export default async function TenantHomePage(props: {
     console.error('[locale] page: fetchBranches failed:', err);
   }
 
-  redirect(`/${locale}/${defaultBranchSlug}/catalog`);
+  redirect(`/${locale}/${defaultBranchSlug}`);
 }

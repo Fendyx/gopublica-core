@@ -6,8 +6,6 @@ import { fetchPublicBranchSections } from '@/entities/branch-section/api';
 import SectionRenderer from '@/widgets/Sections/SectionRenderer';
 import type { Branch } from '@/entities/branch/types';
 
-export const dynamic = 'force-dynamic';
-
 export default async function BranchRootPage({
   params,
 }: {

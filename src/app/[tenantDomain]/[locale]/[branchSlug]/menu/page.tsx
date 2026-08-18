@@ -6,8 +6,6 @@ import { fetchMenu } from '@/entities/menu-item/api';
 import { fetchBranchBySlug } from '@/entities/branch/api';
 import type { Branch } from '@/entities/branch/types';
 
-export const dynamic = 'force-dynamic';
-
 export default async function MenuPage({
   params,
 }: {

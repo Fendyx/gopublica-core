@@ -93,7 +93,7 @@ export default function ArticleGridSection({ section, locale, tenantDomain }: Ar
           {filteredArticles.map((article) => (
             <Link
               key={article._id}
-              href={`/${locale}/${branchSlug}/articles/${article.slug}`}
+              href={`/${branchSlug}/articles/${article.slug}`}
               className="group block"
             >
               <article className="h-full flex flex-col bg-card border border-border rounded-xl overflow-hidden shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:-translate-y-1">

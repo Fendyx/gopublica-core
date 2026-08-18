@@ -6,7 +6,7 @@ export async function fetchBranches(tenantId: string): Promise<Branch[]> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/public/${tenantId}`,
-      { cache: 'no-store' }
+      { next: { tags: [`branches:${tenantId}`] } }
     )
     if (!res.ok) return []
     return res.json()
@@ -26,7 +26,7 @@ export async function fetchBranchBySlug(
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/public/branches/slug?tenantId=${tenantId}&slug=${slug}`,
-      { cache: 'no-store' }
+      { next: { tags: [`branches:${tenantId}`] } }
     )
     if (!res.ok) return null
     return res.json()

@@ -4,7 +4,7 @@ export async function fetchGallery(tenantId: string, branchId?: string | null) {
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/saas/gallery?${params.toString()}`,
-    { cache: 'no-store' }
+    { next: { tags: [`gallery:${tenantId}`] } }
   )
   if (!res.ok) throw new Error('Failed to fetch gallery')
   return res.json()

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { Link as IntlLink } from '@/i18n/routing'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
@@ -97,9 +98,9 @@ export default function Navbar() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href={`/${locale}/${branchSlug}`} className="font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors shrink-0">
+          <IntlLink href={branchSlug ? `/${branchSlug}` : '/'} className="font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors shrink-0">
             {(tenant?.businessName || tenant?.clientName) || ''}
-          </Link>
+          </IntlLink>
 
           {/* Desktop Navigation (скрываем до lg, чтобы не теснилось) */}
           <div className="hidden lg:flex items-center gap-4 xl:gap-8 flex-1 justify-center">

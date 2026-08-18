@@ -91,7 +91,7 @@ export async function fetchPublicArticles(
   if (branchId) params.set('branchId', branchId);
 
   const res = await fetch(`${API_URL}/api/public/articles?${params.toString()}`, {
-    cache: 'no-store',
+    next: { tags: [`articles:${tenantId}`] },
   });
 
   if (!res.ok) throw new Error('Failed to fetch public articles');
@@ -104,7 +104,9 @@ export async function fetchPublicArticleBySlug(
 ): Promise<Article> {
   const url = `${API_URL}/api/public/articles/${slug}?tenantId=${tenantId}`;
   console.log('FRONTEND FETCH URL:', url);
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, {
+    next: { tags: [`articles:${tenantId}`] },
+  });
 
   if (!res.ok) throw new Error('Failed to fetch article');
   const data = await res.json();

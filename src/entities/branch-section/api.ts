@@ -138,8 +138,8 @@ export async function fetchPublicBranchSections(
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api/public/branch-sections?${params.toString()}`;
   try {
     const res = await fetch(url, {
-      cache: 'no-store',
-      headers: { 
+      next: { tags: [`sections:${tenantDomain}:${branchId}`] },
+      headers: {
         'Host': tenantDomain,
         'x-tenant-host': tenantDomain // Fallback custom header for backend resolution
       }
