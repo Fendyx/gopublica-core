@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import MenuItemCard from '@/entities/menu-item/MenuItemCard';
@@ -446,7 +447,7 @@ const handleSave = async (e: React.FormEvent) => {
                     <Button type="button" variant="outline" onClick={openCloudinaryWidget} className="gap-2 shrink-0"><ImagePlus className="w-4 h-4" />{t('upload')}</Button>
                   </div>
                 </div>
-                {form.image && (<div className="sm:col-span-2 space-y-2"><Label>{t('preview')}</Label><img src={form.image} alt={t('preview')} className="h-40 w-40 object-cover rounded-lg border shadow-sm" /></div>)}
+                {form.image && (<div className="sm:col-span-2 space-y-2"><Label>{t('preview')}</Label><Image src={form.image} alt={t('preview')} width={160} height={160} className="object-cover rounded-lg border shadow-sm" /></div>)}
 
                 {/* Переводы блюда (без изменений) */}
                 <div className="sm:col-span-2">

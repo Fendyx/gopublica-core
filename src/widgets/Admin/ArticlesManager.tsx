@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useBranch } from '@/entities/branch/BranchContext';
@@ -276,10 +277,12 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                   </Button>
                 </div>
                 {form.coverImage && (
-                  <img
+                  <Image
                     src={form.coverImage}
                     alt={t('coverPreview')}
-                    className="h-32 w-32 object-cover rounded-lg border shadow-sm mt-2"
+                    width={128}
+                    height={128}
+                    className="object-cover rounded-lg border shadow-sm mt-2"
                   />
                 )}
               </div>

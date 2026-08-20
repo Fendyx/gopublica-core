@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState } from 'react';
 
 /**
@@ -29,11 +30,16 @@ export default function ProductGallery({ images }: { images: string[] }) {
   return (
     <div className="relative w-full h-full select-none">
       {/* Main image */}
-      <img
-        src={images[selected]}
-        alt=""
-        className="w-full h-full object-cover transition-opacity duration-300"
-      />
+      <div className="relative w-full h-full">
+        <Image
+          src={images[selected]}
+          alt=""
+          fill
+          sizes="100vw"
+          className="w-full h-full object-cover transition-opacity duration-300"
+          priority
+        />
+      </div>
 
       {/* Invisible tap zones for prev/next */}
       {images.length > 1 && (

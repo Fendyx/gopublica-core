@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
@@ -197,10 +198,12 @@ export default function GalleryAdminPage() {
 
           {imageUrl && (
             <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
-              <img
+              <Image
                 src={imageUrl}
                 alt="preview"
-                className="h-24 w-24 object-cover rounded-lg shadow-sm"
+                width={96}
+                height={96}
+                className="object-cover rounded-lg shadow-sm"
               />
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground break-all">{imageUrl}</p>
@@ -234,10 +237,12 @@ export default function GalleryAdminPage() {
           {images.map((img) => (
             <Card key={img._id} className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
               <div className="relative aspect-square">
-                <img
+                <Image
                   src={img.image}
                   alt={img.caption || ''}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover"
                 />
                 {/* Кнопка удаления */}
                 <Button

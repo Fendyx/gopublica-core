@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react'
 import type { GalleryItem } from '@/entities/gallery/types'
 
@@ -102,11 +103,12 @@ function GalleryTile({
       aria-label={img.caption || 'Открыть фото'}
       className={`group relative overflow-hidden rounded-xl bg-surface-hover cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${spanClass}`}
     >
-      <img
+      <Image
         src={img.image}
         alt={img.caption || 'Фото'}
+        fill
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-        loading="lazy"
       />
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors duration-400" />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -168,11 +170,14 @@ function Lightbox({
             <IconChevronLeft />
           </button>
 
-          <img
+          <Image
             key={img._id}
             src={img.image}
             alt={img.caption || 'Фото'}
+            width={1200}
+            height={800}
             className="max-h-[75vh] max-w-full rounded-xl object-contain shadow-2xl"
+            priority
           />
 
           <button

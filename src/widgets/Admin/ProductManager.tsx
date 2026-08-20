@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useEffect, useMemo } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useBranch } from '@/entities/branch/BranchContext';
@@ -195,7 +196,13 @@ export default function ProductManager({ token }: { token: string }) {
                     <TableRow key={product._id} className="hover:bg-muted/20">
                       <TableCell>
                         {product.image ? (
-                          <img src={product.image} alt={product.name} className="w-12 h-12 rounded-md object-cover" />
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            width={48}
+                            height={48}
+                            className="rounded-md object-cover"
+                          />
                         ) : (
                           <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">No img</div>
                         )}
@@ -233,7 +240,13 @@ export default function ProductManager({ token }: { token: string }) {
                 <div key={product._id} className="border border-border rounded-lg p-4 bg-card flex gap-4 items-start">
                   <div className="shrink-0">
                     {product.image ? (
-                      <img src={product.image} alt={product.name} className="w-16 h-16 rounded-md object-cover" />
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        width={64}
+                        height={64}
+                        className="rounded-md object-cover"
+                      />
                     ) : (
                       <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">No img</div>
                     )}

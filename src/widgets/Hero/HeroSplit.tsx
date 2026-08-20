@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image';
 import Link from 'next/link'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useTenant } from '@/entities/tenant/TenantContext'
@@ -53,10 +54,13 @@ export default function HeroSplit() {
 
           <div className="order-1 lg:order-2">
             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl">
-              <img
+              <Image
                 src={imageUrl}
                 alt={tenant?.clientName ?? 'Restaurant'}
+                fill
+                sizes="(max-width: 1024px) 50vw, 50vw"
                 className="object-cover w-full h-full"
+                priority
               />
             </div>
           </div>

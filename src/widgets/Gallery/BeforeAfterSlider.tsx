@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { MoveHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -157,21 +158,31 @@ export default function BeforeAfterSlider({
         aria-valuenow={Math.round(position.get())}
       >
         {/* Warstwa PRZED (pełna szerokość, pod spodem). */}
-        <img
-          src={beforeImage}
-          alt="Stan lakieru przed zabiegiem"
-          draggable={false}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        />
+        <div className="pointer-events-none absolute inset-0 h-full w-full">
+          <Image
+            src={beforeImage}
+            alt="Stan lakieru przed zabiegiem"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            draggable={false}
+          />
+        </div>
 
         {/* Warstwa PO (przycięta do lewej części przez clip-path). */}
-        <motion.img
-          src={afterImage}
-          alt="Stan lakieru po zabiegu"
-          draggable={false}
+        <motion.div
           style={{ clipPath: clipInset }}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        />
+          className="pointer-events-none absolute inset-0 h-full w-full"
+        >
+          <Image
+            src={afterImage}
+            alt="Stan lakieru po zabiegu"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            draggable={false}
+          />
+        </motion.div>
 
         {/* Etykieta "Przed" — prawy górny róg. */}
         <span

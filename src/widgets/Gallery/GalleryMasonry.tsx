@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image';
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { GalleryItem } from '@/entities/gallery/types'
 
@@ -113,11 +114,12 @@ function MasonryTile({ img, onClick }: { img: GalleryItem; onClick: () => void }
       aria-label={img.caption || 'Открыть фото'}
       className="group relative overflow-hidden rounded-xl bg-surface-hover cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full"
     >
-      <img
+      <Image
         src={img.image}
         alt={img.caption || 'Фото'}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         className="w-full h-auto object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-        loading="lazy"
       />
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors duration-400" />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -164,7 +166,7 @@ function Lightbox({
           <button onClick={onPrev} aria-label="Предыдущее фото" className="absolute left-0 z-10 -translate-x-2 sm:-translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors">
             <IconChevronLeft />
           </button>
-          <img key={img._id} src={img.image} alt={img.caption || 'Фото'} className="max-h-[75vh] max-w-full rounded-xl object-contain shadow-2xl" />
+          <Image key={img._id} src={img.image} alt={img.caption || 'Фото'} width={1200} height={800} className="max-h-[75vh] max-w-full rounded-xl object-contain shadow-2xl" priority />
           <button onClick={onNext} aria-label="Следующее фото" className="absolute right-0 z-10 translate-x-2 sm:translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors">
             <IconChevronRight />
           </button>

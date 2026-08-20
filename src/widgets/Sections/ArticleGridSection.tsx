@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { BranchSection, ArticleGridSettings } from '@/entities/branch-section/types';
@@ -90,19 +91,24 @@ export default function ArticleGridSection({ section, locale, tenantDomain }: Ar
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {filteredArticles.map((article) => (
+{filteredArticles.map((article) => (
             <Link
               key={article._id}
               href={`/${branchSlug}/articles/${article.slug}`}
-              className="group block"
+              className="group block relative"
             >
-              <article className="h-full flex flex-col bg-card border border-border rounded-xl overflow-hidden shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:-translate-y-1">
+              <article className="relative h-full flex flex-col bg-card border border-border rounded-xl overflow-hidden shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:-translate-y-1">
                 {article.coverImage && (
-                  <div className="aspect-[16/9] overflow-hidden">
-                    <img
+                  <div 
+                    className="relative w-full shrink-0 aspect-[16/9] overflow-hidden"
+                    style={{ position: 'relative', display: 'block' }}
+                  >
+                    <Image
                       src={article.coverImage}
                       alt={article.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
                 )}

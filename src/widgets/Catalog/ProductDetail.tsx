@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -176,9 +177,11 @@ export default function ProductDetail({
                     key={idx}
                     className="group relative overflow-hidden bg-muted w-full aspect-[3/4]"
                   >
-                    <img
+                    <Image
                       src={img}
                       alt={`${product.name} — ${t('view')} ${idx + 1}`}
+                      fill
+                      sizes="(max-width: 768px) 33vw, 25vw"
                       className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03]"
                     />
                   </div>

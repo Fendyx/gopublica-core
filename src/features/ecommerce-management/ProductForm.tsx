@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
@@ -345,14 +346,14 @@ export default function ProductForm({
                     <ImagePlus className="w-4 h-4" /> Upload
                   </Button>
                 </div>
-                {form.image && <img src={form.image} alt="Preview" className="w-full h-32 object-cover rounded-lg border" />}
+                {form.image && <Image src={form.image} alt="Preview" width={384} height={128} className="object-cover rounded-lg border" />}
               </div>
               <div className="space-y-2">
                 <Label>Additional Images</Label>
                 <div className="flex flex-wrap gap-2">
                   {form.images.map((url, idx) => (
                     <div key={idx} className="relative w-16 h-16 rounded overflow-hidden border">
-                      <img src={url} className="w-full h-full object-cover" />
+                      <Image src={url} fill alt="Additional image" className="object-cover" sizes="64px" />
                       <button type="button" onClick={() => removeImage(url)} className="absolute top-0 right-0 bg-black/60 text-white p-0.5"><X size={12} /></button>
                     </div>
                   ))}

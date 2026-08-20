@@ -1,6 +1,7 @@
 // src/app/[tenantDomain]/[locale]/[branchSlug]/articles/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
+import Image from 'next/image';
 import { fetchPublicArticleBySlug } from '@/entities/article/api';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { Link } from '@/i18n/routing';
@@ -46,11 +47,15 @@ export default async function ArticlePage({
         </Link>
       </div>
       {article.coverImage && (
-        <img
-          src={article.coverImage}
-          alt={article.title}
-          className="w-full h-96 object-cover rounded-xl mb-8"
-        />
+        <div className="relative w-full h-96 rounded-xl mb-8 overflow-hidden">
+          <Image
+            src={article.coverImage}
+            alt={article.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="object-cover"
+          />
+        </div>
       )}
       <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
       <div className="flex items-center text-gray-500 mb-8 space-x-4">

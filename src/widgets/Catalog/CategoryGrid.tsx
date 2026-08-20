@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
@@ -40,9 +41,11 @@ export default function CategoryGrid({ categories, bgColor }: { categories: Cate
               }}
             >
               {cat.coverImage ? (
-                <img
+                <Image
                   src={cat.coverImage}
                   alt={cat.name}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover w-full h-full transition-transform duration-500 ease-out group-hover:scale-105"
                 />
               ) : (

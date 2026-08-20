@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import EcommerceGridLayout from './EcommerceGridLayout';
 import EcommerceCarouselLayout from './EcommerceCarouselLayout';
@@ -42,7 +43,14 @@ export default function CategoryViewClient({ category, products, locale, tenant 
 
         {category.coverImage ? (
           <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden mb-10 border border-border">
-            <img src={category.coverImage} alt={category.name} className="w-full h-full object-cover" />
+            <Image
+              src={category.coverImage}
+              alt={category.name}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6 md:p-8">
               <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">

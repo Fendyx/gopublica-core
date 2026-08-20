@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { BranchSection, BranchSectionItem, EntityCarouselSettings } from '@/entities/branch-section/types';
 import { useTenant } from '@/entities/tenant/TenantContext';
@@ -76,13 +77,9 @@ export default function EntityCarousel({ section, locale, tenantDomain }: Entity
 
       setLoading(true);
       try {
-        const params = new URLSearchParams({ tenantId: currentTenantId });
-        if (selectedBranch?._id) params.set('branchId', selectedBranch._id);
-
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/saas/menu?${params.toString()}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Failed to fetch menu');
-        const allItems: MenuItem[] = await res.json();
+        // Use the cached fetchMenu function which includes proper cache tags for ISR
+        const { fetchMenu } = await import('@/entities/menu-item/api');
+        const allItems: MenuItem[] = await fetchMenu(currentTenantId, selectedBranch?._id ?? null);
 
         let filtered: MenuItem[];
 
@@ -170,10 +167,12 @@ export default function EntityCarousel({ section, locale, tenantDomain }: Entity
                         <source src={item.media.url} type="video/mp4" />
                       </video>
                     ) : (
-                      <img
+                      <Image
                         src={item.media.url}
                         alt={itemTranslations.title ?? ''}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        fill
+                        sizes="(max-width: 640px) 80vw, (max-width: 1024px) 60vw, 30vw"
+                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                       />
                     )}
                     {/* Bottom-to-top gradient scrim */}

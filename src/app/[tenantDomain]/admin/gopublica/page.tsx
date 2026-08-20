@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
@@ -102,9 +103,11 @@ function BusinessHelpSection() {
           </a>
         </div>
         <div className="flex items-center justify-center bg-muted/50 p-5 md:border-l border-t md:border-t-0 border-border">
-          <img
+          <Image
             src="https://s.alicdn.com/@sc04/kf/H2df321f633dd4fa7859dd19cfc0f065eY.png?avif=close&webp=close"
             alt="QR- und NFC-Schilder für das Restaurant"
+            width={180}
+            height={180}
             className="w-full max-w-[180px] object-contain rounded-lg"
           />
         </div>

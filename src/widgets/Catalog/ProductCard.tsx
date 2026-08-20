@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types';
@@ -46,10 +47,12 @@ function CardImage({ product, aspectRatio = '1/1' }: { product: MenuItem; aspect
             autoPlay
           />
         ) : (
-          <img
+          <Image
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, (max-width: 1600px) 33vw, 25vw"
+            className="object-contain transition-transform duration-500 ease-out group-hover:scale-105"
           />
         )
       ) : (

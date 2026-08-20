@@ -1,5 +1,6 @@
 // src/app/[tenantDomain]/[locale]/[branchSlug]/entity/[slug]/page.tsx
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { fetchBranchSectionItemBySlug } from '@/entities/branch-section/api';
@@ -50,10 +51,12 @@ export default async function EntityDetailPage({
                     <source src={item.media.url} type="video/mp4" />
                   </video>
                 ) : (
-                  <img
+                  <Image
                     src={item.media.url}
                     alt={t.title ?? ''}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 40vw, 40vw"
+                    className="object-cover"
                   />
                 )}
               </div>
@@ -131,10 +134,12 @@ export default async function EntityDetailPage({
                             controls
                           />
                         ) : (
-                          <img
+                          <Image
                             src={media.url}
                             alt={`Gallery item ${idx + 1}`}
-                            className="absolute inset-0 w-full h-full object-cover"
+                            fill
+                            sizes="(max-width: 768px) 50vw, 33vw"
+                            className="object-cover"
                           />
                         )}
                       </div>

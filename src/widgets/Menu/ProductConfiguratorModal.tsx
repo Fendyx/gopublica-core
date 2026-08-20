@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -140,7 +141,13 @@ export default function ProductConfiguratorModal({ item, isOpen, onClose, curren
         {/* Фото блюда */}
         {item.image && (
           <div className="relative w-full h-52 shrink-0 overflow-hidden bg-muted">
-            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+            <Image
+              src={item.image}
+              alt={item.name}
+              fill
+              sizes="(max-width: 640px) 100vw, 520px"
+              className="object-cover"
+            />
           </div>
         )}
 

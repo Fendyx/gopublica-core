@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { BranchSectionItem } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
@@ -145,9 +146,11 @@ export default function SectionItemList({
                           controls
                         />
                       ) : (
-                        <img
+                        <Image
                           src={item.media.url}
                           alt={item.slug || 'preview'}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
                           className="w-full h-full object-cover rounded-lg"
                         />
                       )
@@ -228,10 +231,12 @@ export default function SectionItemList({
                   controls
                 />
               ) : (
-                <img
+                <Image
                   src={editingItem.media.url}
                   alt="preview"
-                  className="h-24 w-24 object-cover rounded-lg shadow-sm"
+                  width={96}
+                  height={96}
+                  className="object-cover rounded-lg shadow-sm"
                 />
               )}
               <div className="space-y-2 flex-1">

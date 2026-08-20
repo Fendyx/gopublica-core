@@ -3,6 +3,8 @@ export interface TenantSettings {
   tenantId: string;
   businessName?: string;
   niche: 'food' | 'beauty' | 'auto' | 'ecommerce';
+  domain?: string;
+  aliases?: string[];
   primaryCurrency: string;
   theme: {
     primary: string;
@@ -51,4 +53,44 @@ export async function getTenantByDomain(domain: string): Promise<TenantSettings 
   } catch {
     return null;
   }
+}
+
+/**
+ * Cached lookup of the canonical domain for a request host.
+ *
+ * The backend now supports tenant `aliases` (e.g. `tenant.localhost:3000`).
+ * This helper:
+ *   1. Queries `/api/saas/settings/by-domain?domain=<host>` — the backend
+ *      matches against both `domain` and `aliases`.
+ *   2. Returns the canonical `domain` (always the primary domain, never the alias).
+ *   3. Caches the result in a module-level Map with a TTL so the middleware
+ *      does not hammer the backend on every request.
+ *
+ * Returns `null` when the tenant cannot be resolved.
+ */
+const DOMAIN_CACHE_TTL = 60_000; // 1 minute
+const domainCache = new Map<
+  string,
+  { canonicalDomain: string; tenantId: string; expires: number }>()
+;
+
+export async function resolveCanonicalDomain(
+  host: string
+): Promise<{ canonicalDomain: string; tenantId: string } | null> {
+  const cached = domainCache.get(host);
+  if (cached && cached.expires > Date.now()) {
+    return { canonicalDomain: cached.canonicalDomain, tenantId: cached.tenantId };
+  }
+
+  const tenant = await getTenantByDomain(host);
+  if (!tenant) return null;
+
+  const canonicalDomain = tenant.domain ?? host;
+  domainCache.set(host, {
+    canonicalDomain,
+    tenantId: tenant.tenantId,
+    expires: Date.now() + DOMAIN_CACHE_TTL,
+  });
+
+  return { canonicalDomain, tenantId: tenant.tenantId };
 }

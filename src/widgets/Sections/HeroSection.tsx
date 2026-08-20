@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import Link from 'next/link';
 import { BranchSection, HeroSettings, HeroCta } from '@/entities/branch-section/types';
 
@@ -54,21 +55,27 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
       )}
 
       {mediaType === 'image' && settings.imageUrl && (
-        <img
+        <Image
           src={settings.imageUrl}
           alt={translations.title || 'Hero image'}
+          fill
+          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover"
+          priority
         />
       )}
 
       {mediaType === 'slider' && settings.slides && settings.slides.length > 0 && (
         <div className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide">
           {settings.slides.map((slide, idx) => (
-            <img
+            <Image
               key={idx}
               src={slide.imageUrl}
               alt={translations.title || `Slide ${idx + 1}`}
+              fill
+              sizes="100vw"
               className="w-full h-full object-cover flex-shrink-0 snap-center"
+              priority={idx === 0}
             />
           ))}
         </div>

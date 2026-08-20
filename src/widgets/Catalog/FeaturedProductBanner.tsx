@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { MenuItem } from '@/entities/menu-item/types';
 import AddToCartButton from '@/widgets/Catalog/AddToCartButton';
@@ -16,9 +17,11 @@ export default function FeaturedProductBanner({
       {/* Левая часть – изображение, растянутое на всю доступную высоту */}
       <div className="w-2/5 lg:w-1/2 flex-shrink-0 relative bg-muted/50">
         {product.image ? (
-          <img
+          <Image
             src={product.image}
             alt={product.name}
+            fill
+            sizes="(max-width: 1024px) 50vw, 50vw"
             className="absolute inset-0 w-full h-full object-contain"
           />
         ) : (

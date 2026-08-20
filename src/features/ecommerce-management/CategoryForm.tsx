@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
@@ -231,7 +232,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
                 </Button>
               </div>
               {form.coverImage && (
-                <img src={form.coverImage} alt="Preview" className="w-full h-24 object-cover rounded-md border" />
+                <Image src={form.coverImage} alt="Preview" width={384} height={96} className="object-cover rounded-md border" />
               )}
             </div>
 

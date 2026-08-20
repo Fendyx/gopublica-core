@@ -70,6 +70,8 @@ export type SiteConfig = {
   clientName: string
   businessName?: string
   tenantId: string
+  domain?: string
+  aliases?: string[]
   niche: Niche
   businessType?: string
   moduleAccess?: ModuleAccess
