@@ -35,7 +35,10 @@
   --color-card-foreground: var(--color-text-primary);
   --color-popover: var(--color-surface-card);
   --color-popover-foreground: var(--color-text-primary);
-  
+
+  /* FIX: surface-card token needed for bg-surface-card utility generation */
+  --color-surface-card: var(--color-surface-card);
+
   /* ВОТ ЗДЕСЬ БЫЛА ПРОБЛЕМА: Эти токены ДОЛЖНЫ быть в @theme для работы opacity (например bg-primary/80) */
   --color-primary: var(--theme-primary);
   --color-primary-foreground: var(--color-text-inverse);

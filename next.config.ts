@@ -21,14 +21,6 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1024, 1200, 1600, 2048],
     minimumCacheTTL: 31536000,
   },
-  async headers() {
-    return [
-      { source: '/_next/static/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-      { source: '/images/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-      { source: '/sounds/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-      { source: '/video/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-    ];
-  },
 };
 
 // Оборачиваем конфиг

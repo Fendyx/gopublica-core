@@ -129,7 +129,7 @@ export default function Navbar() {
                 </button>
                 
                 {locationDropdownOpen && (
-                  <div className="absolute top-full left-0 xl:right-0 xl:left-auto mt-2 min-w-[260px] bg-surface-card shadow-dropdown rounded-xl border border-border overflow-hidden z-50 py-2">
+                  <div className="absolute top-full left-0 xl:right-0 xl:left-auto mt-2 min-w-[260px] bg-popover shadow-dropdown rounded-xl border border-border overflow-hidden z-50 py-2">
                     {cities.map((city) => {
                       const cityBranches = branches.filter((b) => b.city === city)
                       return (
