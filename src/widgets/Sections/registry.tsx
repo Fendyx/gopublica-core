@@ -1,6 +1,7 @@
 import { SectionType } from '@/entities/branch-section/types';
 import type { BranchSection } from '@/entities/branch-section/types';
 import type { ComponentType } from 'react';
+import type { MenuItem } from '@/entities/menu-item/types';
 import HeroSection from './HeroSection';
 import EntityCarousel from './EntityCarousel';
 import FeatureCarousel from './FeatureCarousel';
@@ -13,6 +14,10 @@ interface SectionProps {
   section: BranchSection;
   locale: string;
   tenantDomain: string;
+  /** Pre-fetched dynamic items for carousel sections */
+  dynamicItems?: MenuItem[];
+  /** Currency symbol for price display */
+  currencySymbol?: string;
 }
 
 const MenuCategories: ComponentType<SectionProps> = ({ section }) => (

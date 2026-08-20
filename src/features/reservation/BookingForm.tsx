@@ -18,9 +18,15 @@ type Step = 1 | 2
 interface BookingFormProps {
   title?: string
   subtitle?: string
+  /**
+   * Layout variant:
+   * - 'centered' (default): single-column, max-w-xl mx-auto
+   * - 'split': fills its grid column (no max-width, no centering)
+   */
+  variant?: 'centered' | 'split'
 }
 
-export default function BookingForm({ title, subtitle }: BookingFormProps) {
+export default function BookingForm({ title, subtitle, variant = 'centered' }: BookingFormProps) {
   const t = useTranslations('booking')
   const locale = useLocale()
   const tenant = useTenant()
@@ -120,10 +126,10 @@ export default function BookingForm({ title, subtitle }: BookingFormProps) {
   }
 
   return (
-    <Section>
+    <Section variant={variant}>
       <SectionHeader title={title || t('title')} subtitle={subtitle} />
 
-      <div className="max-w-xl mx-auto">
+      <div className={variant === 'split' ? 'w-full' : 'max-w-xl mx-auto'}>
         <div className="flex items-center justify-center gap-3 mb-8">
           {([1, 2] as Step[]).map((s, i) => (
             <div key={s} className="flex items-center gap-3">
@@ -274,8 +280,14 @@ export default function BookingForm({ title, subtitle }: BookingFormProps) {
 }
 
 /* Вспомогательные компоненты остаются без изменений */
-function Section({ children }: { children: React.ReactNode }) {
-  return <section id="booking" className="pt-6 pb-24 bg-surface-page"><div className="max-w-5xl mx-auto px-4 sm:px-6">{children}</div></section>
+function Section({ children, variant = 'centered' }: { children: React.ReactNode; variant?: 'centered' | 'split' }) {
+  return (
+    <section id="booking" className={variant === 'split' ? 'py-0 bg-surface-page' : 'pt-6 pb-24 bg-surface-page'}>
+      <div className={variant === 'split' ? 'w-full px-4 sm:px-6' : 'max-w-5xl mx-auto px-4 sm:px-6'}>
+        {children}
+      </div>
+    </section>
+  )
 }
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return <div className="flex flex-col items-center text-center mb-14">

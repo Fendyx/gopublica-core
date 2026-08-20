@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -476,6 +477,64 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
             onChange={setSettings}
           />
         );
+      case 'booking': {
+        const sideContentType = settings.sideContentType || 'none';
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Side Content Type</Label>
+              <Select
+                value={sideContentType}
+                onValueChange={(val) =>
+                  setSettings({
+                    ...settings,
+                    sideContentType: val as 'none' | 'map' | 'text',
+                    // Clear stale fields when switching away from a mode
+                    ...(val === 'map' ? {} : { customText: undefined }),
+                    ...(val === 'text' ? {} : { address: undefined }),
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select side content type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (single column)</SelectItem>
+                  <SelectItem value="map">Google Map</SelectItem>
+                  <SelectItem value="text">Custom Text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {sideContentType === 'map' && (
+              <div className="space-y-2">
+                <Label>Address</Label>
+                <Input
+                  placeholder="e.g. 123 Main St, Warsaw, Poland"
+                  value={settings.address || ''}
+                  onChange={(e) =>
+                    setSettings({ ...settings, address: e.target.value })
+                  }
+                />
+              </div>
+            )}
+
+            {sideContentType === 'text' && (
+              <div className="space-y-2">
+                <Label>Custom Text</Label>
+                <Textarea
+                  placeholder="Enter custom text to display on the right side..."
+                  value={settings.customText || ''}
+                  onChange={(e) =>
+                    setSettings({ ...settings, customText: e.target.value })
+                  }
+                  rows={6}
+                />
+              </div>
+            )}
+          </div>
+        );
+      }
       default:
         return <p className="text-sm text-gray-500">Additional items/settings are managed elsewhere.</p>;
     }

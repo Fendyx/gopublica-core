@@ -36,6 +36,23 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
     return undefined;
   };
 
+  /**
+   * Handles smooth scrolling for anchor links (#section-...).
+   * Prevents default link behavior and uses scrollIntoView for smooth animation.
+   */
+  const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string | undefined) => {
+    if (!href || !href.startsWith('#')) return; // Let normal links work as usual
+
+    const targetId = href.slice(1); // Remove the '#'
+    const targetElement = document.getElementById(targetId);
+
+    if (targetElement) {
+      e.preventDefault();
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // If element not found, let the browser handle it (will do nothing or jump to top)
+  };
+
   const containerClasses =
     layout === 'compact'
       ? 'relative h-[40vh] md:h-[60vh] w-[calc(100%-2rem)] md:w-[calc(100%-2rem)] mx-auto my-4 md:my-6 rounded-3xl overflow-hidden flex items-center justify-center'
@@ -92,27 +109,35 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
         )}
 
         <div className="flex flex-wrap justify-center gap-4">
-          {settings.primaryCta && (
-            <Link
-              href={resolveCtaHref(settings.primaryCta) || '#'}
-              className="inline-block px-8 py-4 rounded-lg text-white font-medium text-lg transition-opacity hover:opacity-90"
-              style={{ backgroundColor: 'var(--color-primary)' }}
-            >
-              {settings.primaryCta.label}
-            </Link>
-          )}
-          {settings.secondaryCta && (
-            <Link
-              href={resolveCtaHref(settings.secondaryCta) || '#'}
-              className="inline-block px-8 py-4 rounded-lg font-medium text-lg border-2 transition-colors hover:bg-white/10"
-              style={{
-                borderColor: 'var(--color-accent)',
-                color: 'var(--color-accent)',
-              }}
-            >
-              {settings.secondaryCta.label}
-            </Link>
-          )}
+          {settings.primaryCta && (() => {
+            const href = resolveCtaHref(settings.primaryCta) || '#';
+            return (
+              <Link
+                href={href}
+                onClick={(e) => handleCtaClick(e, href)}
+                className="inline-block px-8 py-4 rounded-lg text-white font-medium text-lg transition-opacity hover:opacity-90"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                {settings.primaryCta.label}
+              </Link>
+            );
+          })()}
+          {settings.secondaryCta && (() => {
+            const href = resolveCtaHref(settings.secondaryCta) || '#';
+            return (
+              <Link
+                href={href}
+                onClick={(e) => handleCtaClick(e, href)}
+                className="inline-block px-8 py-4 rounded-lg font-medium text-lg border-2 transition-colors hover:bg-white/10"
+                style={{
+                  borderColor: 'var(--color-accent)',
+                  color: 'var(--color-accent)',
+                }}
+              >
+                {settings.secondaryCta.label}
+              </Link>
+            );
+          })()}
         </div>
       </div>
     </section>

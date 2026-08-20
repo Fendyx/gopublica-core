@@ -82,7 +82,14 @@ export interface FeatureCarouselSettings extends BaseCarouselSettings {
   selectedMenuItemIds?: string[];
 }
 
-export interface BookingSettings {}
+export interface BookingSettings {
+  /** Layout mode for the right side of the booking section */
+  sideContentType?: 'none' | 'map' | 'text';
+  /** Address used when sideContentType === 'map' */
+  address?: string;
+  /** Custom text shown when sideContentType === 'text' */
+  customText?: string;
+}
 
 export interface MapSettings {
   latitude: number;

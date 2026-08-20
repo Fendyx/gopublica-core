@@ -1,24 +1,24 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { BranchSection, BranchSectionItem, FeatureCarouselSettings } from '@/entities/branch-section/types';
-import { useTenant } from '@/entities/tenant/TenantContext';
-import { useBranch } from '@/entities/branch/BranchContext';
-import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import type { MenuItem } from '@/entities/menu-item/types';
 import ProductCard from '@/widgets/Catalog/ProductCard';
 import MenuItemCard from '@/entities/menu-item/MenuItemCard';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { usePathname, useParams } from 'next/navigation';
 
 interface FeatureCarouselProps {
   section: BranchSection;
   locale: string;
   tenantDomain: string;
+  /** Pre-fetched dynamic items for ecommerce/menu modes (server-side resolved) */
+  dynamicItems?: MenuItem[];
+  /** Currency symbol for price display (server-side resolved) */
+  currencySymbol?: string;
 }
 
-export default function FeatureCarousel({ section, locale, tenantDomain }: FeatureCarouselProps) {
+export default function FeatureCarousel({ section, locale, tenantDomain, dynamicItems = [], currencySymbol = 'zł' }: FeatureCarouselProps) {
   const settings = (section.settings || {}) as FeatureCarouselSettings;
   const mode = settings.mode || 'manual';
   const selectionMode = settings.selectionMode || 'items';
@@ -29,12 +29,6 @@ export default function FeatureCarousel({ section, locale, tenantDomain }: Featu
   const menuItemIdsKey = selectedMenuItemIds.join(',');
   const categoryKeysKey = selectedCategoryKeys.join(',');
 
-  const tenant = useTenant();
-  const { selectedBranch } = useBranch();
-  const { branchSlug } = useParams();
-  const { primaryCurrency } = useBranchSettings();
-  const [dynamicItems, setDynamicItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -65,48 +59,6 @@ export default function FeatureCarousel({ section, locale, tenantDomain }: Featu
       window.removeEventListener('resize', updateScrollButtons);
     };
   }, [updateScrollButtons]);
-
-  const pathname = usePathname()
-
-  useEffect(() => {
-    if (mode === 'manual') return;
-
-    const loadItems = async () => {
-      const currentTenantId = selectedBranch?.tenantId ?? tenant?.tenantId;
-      if (!currentTenantId) return;
-
-      setLoading(true);
-      try {
-        // Use the cached fetchMenu function which includes proper cache tags for ISR
-        const { fetchMenu } = await import('@/entities/menu-item/api');
-        const allItems: MenuItem[] = await fetchMenu(currentTenantId, selectedBranch?._id ?? null);
-
-        let filtered: MenuItem[];
-
-        if (selectionMode === 'categories' && selectedCategoryKeys.length > 0) {
-          // Category mode: filter items by categoryKey or category name
-          filtered = allItems.filter((item) => {
-            const itemCategory = item.categoryKey || item.category || '';
-            return selectedCategoryKeys.includes(itemCategory);
-          });
-        } else {
-          // Item mode: filter by selected IDs
-          const ids = mode === 'ecommerce' ? selectedProductIds : selectedMenuItemIds;
-          filtered = allItems.filter((item) => {
-            const itemId = item._id || item.id || '';
-            return ids.includes(itemId);
-          });
-        }
-
-        setDynamicItems(filtered);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadItems();
-  }, [mode, selectionMode, selectedBranch?.tenantId, selectedBranch?._id, tenant?.tenantId, productIdsKey, menuItemIdsKey, categoryKeysKey, pathname]);
 
   const sectionTitle = section.translations?.[locale]?.title;
 
@@ -205,42 +157,16 @@ export default function FeatureCarousel({ section, locale, tenantDomain }: Featu
     );
   }
 
-  // Dynamic modes: ecommerce or menu
-  if (loading) {
-    return (
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            {sectionTitle && (
-              <h2 className="text-3xl font-bold">{sectionTitle}</h2>
-            )}
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-card border border-border" />
-              <div className="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-card border border-border" />
-            </div>
-          </div>
-          <div className="flex overflow-x-auto gap-4 snap-x snap-mandatory scrollbar-hide">
-            <div className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[25%] p-4 bg-muted animate-pulse rounded-xl">
-              <div className="h-40 w-full rounded-xl mb-4 bg-muted/50"></div>
-              <div className="h-4 bg-muted/50 rounded mb-2"></div>
-              <div className="h-4 bg-muted/50 rounded w-2/3"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
+  // Dynamic modes: ecommerce or menu - use pre-fetched items from props
   if (dynamicItems.length === 0) return null;
 
   const productCardVariant = settings.productCardVariant || 'action-bar';
   const productImageAspectRatio = settings.productImageAspectRatio || '1/1';
-  const currencySymbol = primaryCurrency ? (primaryCurrency === 'PLN' ? 'zł' : primaryCurrency === 'EUR' ? '€' : primaryCurrency === 'USD' ? '$' : primaryCurrency) : 'zł';
 
   // Calculate "View All" URL
   const baseViewAllHref = mode === 'ecommerce'
-    ? `/${locale}/${branchSlug}/catalog`
-    : `/${locale}/${branchSlug}/menu`;
+    ? `/${locale}/${tenantDomain}/catalog`
+    : `/${locale}/${tenantDomain}/menu`;
   const viewAllHref = (selectionMode === 'categories' && selectedCategoryKeys.length === 1)
     ? `${baseViewAllHref}?category=${encodeURIComponent(selectedCategoryKeys[0])}`
     : baseViewAllHref;
