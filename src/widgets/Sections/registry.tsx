@@ -14,6 +14,7 @@ interface SectionProps {
   section: BranchSection;
   locale: string;
   tenantDomain: string;
+  branchSlug?: string;
   /** Pre-fetched dynamic items for carousel sections */
   dynamicItems?: MenuItem[];
   /** Currency symbol for price display */

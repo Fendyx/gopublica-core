@@ -12,13 +12,15 @@ interface FeatureCarouselProps {
   section: BranchSection;
   locale: string;
   tenantDomain: string;
+  branchSlug?: string;
   /** Pre-fetched dynamic items for ecommerce/menu modes (server-side resolved) */
   dynamicItems?: MenuItem[];
   /** Currency symbol for price display (server-side resolved) */
   currencySymbol?: string;
 }
 
-export default function FeatureCarousel({ section, locale, tenantDomain, dynamicItems = [], currencySymbol = 'zł' }: FeatureCarouselProps) {
+export default function FeatureCarousel({ section, locale, tenantDomain, branchSlug, dynamicItems = [], currencySymbol = 'zł' }: FeatureCarouselProps) {
+  const effectiveBranchSlug = branchSlug || tenantDomain;
   const settings = (section.settings || {}) as FeatureCarouselSettings;
   const mode = settings.mode || 'manual';
   const selectionMode = settings.selectionMode || 'items';
@@ -165,8 +167,8 @@ export default function FeatureCarousel({ section, locale, tenantDomain, dynamic
 
   // Calculate "View All" URL
   const baseViewAllHref = mode === 'ecommerce'
-    ? `/${locale}/${tenantDomain}/catalog`
-    : `/${locale}/${tenantDomain}/menu`;
+    ? `/${locale}/${effectiveBranchSlug}/catalog`
+    : `/${locale}/${effectiveBranchSlug}/menu`;
   const viewAllHref = (selectionMode === 'categories' && selectedCategoryKeys.length === 1)
     ? `${baseViewAllHref}?category=${encodeURIComponent(selectedCategoryKeys[0])}`
     : baseViewAllHref;

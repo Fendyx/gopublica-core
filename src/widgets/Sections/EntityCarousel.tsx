@@ -12,13 +12,15 @@ interface EntityCarouselProps {
   section: BranchSection;
   locale: string;
   tenantDomain: string;
+  branchSlug?: string;
   /** Pre-fetched dynamic items for ecommerce/menu modes (server-side resolved) */
   dynamicItems?: MenuItem[];
   /** Currency symbol for price display (server-side resolved) */
   currencySymbol?: string;
 }
 
-export default function EntityCarousel({ section, locale, tenantDomain, dynamicItems = [], currencySymbol = 'zł' }: EntityCarouselProps) {
+export default function EntityCarousel({ section, locale, tenantDomain, branchSlug, dynamicItems = [], currencySymbol = 'zł' }: EntityCarouselProps) {
+  const effectiveBranchSlug = branchSlug || tenantDomain;
   const settings = (section.settings || {}) as EntityCarouselSettings;
   const mode = settings.mode || 'manual';
   const selectionMode = settings.selectionMode || 'items';
@@ -104,7 +106,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, dynamicI
               return (
                 <Link
                   key={item._id}
-                  href={`/${locale || 'en'}/${tenantDomain}/entity/${item.slug}`}
+                  href={`/${locale || 'en'}/${effectiveBranchSlug}/entity/${item.slug}`}
                   className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[30%] block group"
                 >
                   <div className="relative aspect-[4/5] overflow-hidden rounded-xl">
@@ -160,8 +162,8 @@ export default function EntityCarousel({ section, locale, tenantDomain, dynamicI
 
   // Calculate "View All" URL
   const baseViewAllHref = mode === 'ecommerce'
-    ? `/${locale}/${tenantDomain}/catalog`
-    : `/${locale}/${tenantDomain}/menu`;
+    ? `/${locale}/${effectiveBranchSlug}/catalog`
+    : `/${locale}/${effectiveBranchSlug}/menu`;
   const viewAllHref = (selectionMode === 'categories' && selectedCategoryKeys.length === 1)
     ? `${baseViewAllHref}?category=${encodeURIComponent(selectedCategoryKeys[0])}`
     : baseViewAllHref;

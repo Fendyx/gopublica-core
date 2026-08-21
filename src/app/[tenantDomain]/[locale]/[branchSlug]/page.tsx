@@ -138,6 +138,7 @@ export default async function BranchRootPage({
       sections={sections}
       locale={locale}
       tenantDomain={tenantDomain}
+      branchSlug={branchSlug}
       dynamicItemsMap={dynamicItemsMap}
       currencySymbol={currencySymbol}
     />
