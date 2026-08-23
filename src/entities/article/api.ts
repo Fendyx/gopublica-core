@@ -1,4 +1,4 @@
-import type { Article } from './types';
+import type { Article, Event } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -81,6 +81,85 @@ export async function deleteArticle(
   if (!res.ok) throw new Error('Failed to delete article');
 }
 
+// ─── Event endpoints ────────────────────────────────────────────────
+
+export async function fetchEvents(
+  tenantId: string,
+  token: string,
+  branchId?: string | null
+): Promise<Event[]> {
+  const params = new URLSearchParams({ tenantId });
+  if (branchId) params.set('branchId', branchId);
+
+  const res = await fetch(`${API_URL}/api/saas/events?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch events');
+  return res.json();
+}
+
+export async function fetchEventById(
+  id: string,
+  token: string
+): Promise<Event> {
+  const res = await fetch(`${API_URL}/api/saas/events/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch event');
+  return res.json();
+}
+
+export async function createEvent(
+  data: Partial<Event>,
+  token: string
+): Promise<Event> {
+  const res = await fetch(`${API_URL}/api/saas/events`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error('Failed to create event');
+  return res.json();
+}
+
+export async function updateEvent(
+  id: string,
+  data: Partial<Event>,
+  token: string
+): Promise<Event> {
+  const res = await fetch(`${API_URL}/api/saas/events/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error('Failed to update event');
+  return res.json();
+}
+
+export async function deleteEvent(
+  id: string,
+  token: string
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/saas/events/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) throw new Error('Failed to delete event');
+}
+
 // ─── Public endpoints ───────────────────────────────────────────────
 
 export async function fetchPublicArticles(
@@ -112,4 +191,35 @@ export async function fetchPublicArticleBySlug(
   const data = await res.json();
   console.log('FRONTEND API RESPONSE:', data);
   return data.article || data;
+}
+
+// ─── Public Event endpoints ─────────────────────────────────────────
+
+export async function fetchPublicEvents(
+  tenantId: string,
+  branchId?: string | null
+): Promise<Event[]> {
+  const params = new URLSearchParams({ tenantId });
+  if (branchId) params.set('branchId', branchId);
+
+  const res = await fetch(`${API_URL}/api/public/events?${params.toString()}`, {
+    next: { tags: [`events:${tenantId}`] },
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch public events');
+  return res.json();
+}
+
+export async function fetchPublicEventBySlug(
+  tenantId: string,
+  slug: string
+): Promise<Event> {
+  const url = `${API_URL}/api/public/events/${slug}?tenantId=${tenantId}`;
+  const res = await fetch(url, {
+    next: { tags: [`events:${tenantId}`] },
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch event');
+  const data = await res.json();
+  return data.event || data;
 }

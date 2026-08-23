@@ -13,7 +13,7 @@ export interface OrderCustomer {
 }
 
 export interface OrderFulfillment {
-  type: 'pickup' | 'delivery';
+  type: 'pickup' | 'delivery' | 'digital';
   scheduledFor: string | null;
   address?: {
     street: string;

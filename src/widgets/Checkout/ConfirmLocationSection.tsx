@@ -4,8 +4,8 @@ import { MapPin, User, Phone, Mail, MessageSquare } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface ConfirmLocationSectionProps {
-  fulfillmentType: 'pickup' | 'delivery';
-  setFulfillmentType: (type: 'pickup' | 'delivery') => void;
+  fulfillmentType: 'pickup' | 'delivery' | 'digital';
+  setFulfillmentType: (type: 'pickup' | 'delivery' | 'digital') => void;
   address: { street: string; city: string; state?: string; zip: string; lat: number; lng: number };
   setAddress: (addr: any) => void;
   deliveryInstructions: string;

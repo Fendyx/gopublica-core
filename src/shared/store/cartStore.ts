@@ -12,6 +12,12 @@ export interface CartItem {
   quantity: number;
   notes?: string;
   modifiers?: CartModifier[];
+  // Digital tickets (event tickets delivered via email)
+  itemType?: 'menu_item' | 'ticket';
+  articleId?: string;
+  ticketMeta?: {
+    eventDate?: string;
+  };
 }
 
 interface CartState {

@@ -10,7 +10,8 @@ interface OrderSummarySidebarProps {
   fees: any;
   estimating: boolean;
   deliveryFee: number;
-  fulfillmentType: 'pickup' | 'delivery';
+  fulfillmentType: 'pickup' | 'delivery' | 'digital';
+  isDigitalOnly?: boolean;
   currencySymbol: string;
 }
 
@@ -21,6 +22,7 @@ export default function OrderSummarySidebar({
   estimating,
   deliveryFee,
   fulfillmentType,
+  isDigitalOnly = false,
   currencySymbol,
 }: OrderSummarySidebarProps) {
   const t = useTranslations('checkout');
@@ -111,7 +113,12 @@ export default function OrderSummarySidebar({
           <span>{t('subtotal')}</span>
           <span className="text-gray-800">{subtotal.toFixed(2)} {currencySymbol}</span>
         </div>
-        {fulfillmentType === 'delivery' && (
+        {isDigitalOnly ? (
+          <div className="flex justify-between">
+            <span>{t('digitalDelivery')}</span>
+            <span className="text-gray-800">{t('free')}</span>
+          </div>
+        ) : fulfillmentType === 'delivery' && (
           <div className="flex justify-between">
             <span>{t('delivery')}</span>
             <span className="text-gray-800">{deliveryFee.toFixed(2)} {currencySymbol}</span>

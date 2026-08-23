@@ -10,6 +10,7 @@ import AdminLanguageSwitcher from '@/widgets/Admin/AdminLanguageSwitcher';
 import { AdminBranchSwitcher } from '@/widgets/Admin/AdminBranchSwitcher';
 import { loadMessages } from '@/shared/lib/adminLocale';
 import ThemeToggle from '@/shared/ui/ThemeToggle';
+import { ToastProvider } from '@/shared/ui/Toast';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -75,9 +76,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <NextIntlClientProvider locale={locale} messages={messages}>
       <NotificationProvider token={token} tenantId={tenantId}>
         <BranchProvider tenantId={tenantId}>
-          <AdminLayoutInner token={token} locale={locale} onLocaleChange={handleLocaleChange}>
-            {children}
-          </AdminLayoutInner>
+          <ToastProvider>
+            <AdminLayoutInner token={token} locale={locale} onLocaleChange={handleLocaleChange}>
+              {children}
+            </AdminLayoutInner>
+          </ToastProvider>
         </BranchProvider>
         <AdminNotifications />
       </NotificationProvider>

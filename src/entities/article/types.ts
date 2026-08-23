@@ -13,4 +13,20 @@ export interface Article {
   seoDescription?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Event fields
+  isEvent?: boolean;
+  ticketPrice?: number;
+  totalTickets?: number;
+  eventDate?: string;
+  venueName?: string;
+  ticketsSold?: number;
+}
+
+export interface Event extends Article {
+  isEvent: true;
+  ticketPrice: number;
+  totalTickets: number;
+  eventDate: string;
+  venueName: string;
+  ticketsSold?: number;
 }

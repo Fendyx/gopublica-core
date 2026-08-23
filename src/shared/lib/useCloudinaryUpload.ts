@@ -7,11 +7,14 @@ const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'menu_
 interface UseCloudinaryUploadOptions {
   onSuccess?: (url: string, resourceType?: string) => void;
   resourceType?: 'image' | 'video' | 'auto'; // по умолчанию auto
+  /** Разрешить выбор нескольких файлов за раз (widget вызовет onSuccess для каждого) */
+  multiple?: boolean;
 }
 
 export function useCloudinaryUpload({
   onSuccess,
   resourceType = 'auto',
+  multiple = false,
 }: UseCloudinaryUploadOptions = {}) {
   const widgetRef = useRef<any>(null);
   const [widgetReady, setWidgetReady] = useState(false);
@@ -44,7 +47,7 @@ export function useCloudinaryUpload({
       cloudName: CLOUD_NAME,
       uploadPreset: UPLOAD_PRESET,
       sources: ['local', 'url', 'camera'],
-      multiple: false,
+      multiple,
       maxFileSize: 10000000, // увеличим лимит для видео
       resourceType: resourceType, // разрешаем и фото, и видео
       language: 'ru',

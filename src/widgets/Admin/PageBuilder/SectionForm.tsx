@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { BranchSection, SectionType, ArticleGridSettings, HeroSettings, HeroMediaType, HeroLayout, CarouselMode, HeroCta, CtaTargetMode } from '@/entities/branch-section/types';
+import { BranchSection, SectionType, ArticleGridSettings, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, CarouselMode, HeroCta, CtaTargetMode, HeroSlide } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { saveBranchSectionItem, deleteBranchSectionItem } from '@/entities/branch-section/api';
 import { fetchArticles } from '@/entities/article/api';
@@ -118,6 +118,10 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
     initialData?.translations ?? { pl: {}, en: {}, de: {} }
   );
 
+  // FIX: хуки вызываем ТОЛЬКО на верхнем уровне (раньше useTenant/useBranch были внутри switch-case)
+  const tenant = useTenant();
+  const branch = useBranch();
+
   // Ensure hero sections have default mediaType and layout on initial load
   useEffect(() => {
     if (type === 'hero' && !settings.mediaType) {
@@ -128,24 +132,76 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
       }));
     }
   }, [type, settings.mediaType]);
-  const handleCloudinarySuccess = (url: string, resourceType?: string) => {
+
+  // ─── Архитектура загрузчиков Cloudinary ───
+  // Отдельный экземпляр хука на каждое назначение — каждый со своим onSuccess.
+  // Это убирает хрупкую логику "роутинга по текущему mediaType".
+
+  // 1. Одиночное видео Hero
+  const { openWidget: openVideoUpload } = useCloudinaryUpload({
+    resourceType: 'video',
+    onSuccess: (url) => setSettings((prev: any) => ({ ...prev, videoUrl: url })),
+  });
+
+  // 2. Одиночное изображение Hero
+  const { openWidget: openImageUpload } = useCloudinaryUpload({
+    resourceType: 'image',
+    onSuccess: (url) => setSettings((prev: any) => ({ ...prev, imageUrl: url })),
+  });
+
+  // 3. Слайдер: мультизагрузка новых слайдов ИЛИ замена конкретного слайда.
+  // uploadingSlideIndex === null → добавляем в конец; число → заменяем слайд с этим индексом.
+  const [uploadingSlideIndex, setUploadingSlideIndex] = useState<number | null>(null);
+
+  const { openWidget: openSlideUpload } = useCloudinaryUpload({
+    multiple: true,
+    onSuccess: (url, resourceType) => {
+      setSettings((prev: any) => {
+        const slides: HeroSlide[] = [...(prev.slides || [])];
+        const newSlide: HeroSlide =
+          resourceType === 'video' ? { videoUrl: url } : { imageUrl: url };
+        if (uploadingSlideIndex !== null && slides[uploadingSlideIndex]) {
+          // Замена существующего слайда — сохраняем его позицию
+          slides[uploadingSlideIndex] = newSlide;
+        } else {
+          slides.push(newSlide);
+        }
+        return { ...prev, slides };
+      });
+      setUploadingSlideIndex(null);
+    },
+  });
+
+  /** Открыть виджет для добавления новых слайдов */
+  const handleAddSlides = () => {
+    setUploadingSlideIndex(null);
+    openSlideUpload();
+  };
+
+  /** Открыть виджет для замены слайда по индексу */
+  const handleReplaceSlide = (idx: number) => {
+    setUploadingSlideIndex(idx);
+    openSlideUpload();
+  };
+
+  /** Перестановка слайдов местами */
+  const handleMoveSlide = (idx: number, direction: -1 | 1) => {
     setSettings((prev: any) => {
-      const currentMediaType = prev.mediaType || 'video';
-      if (currentMediaType === 'video') {
-        return { ...prev, videoUrl: url };
-      } else if (currentMediaType === 'image') {
-        return { ...prev, imageUrl: url };
-      } else if (currentMediaType === 'slider') {
-        const currentSlides = prev.slides || [];
-        return { ...prev, slides: [...currentSlides, { imageUrl: url }] };
-      }
-      return prev;
+      const slides: HeroSlide[] = [...(prev.slides || [])];
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= slides.length) return prev;
+      [slides[idx], slides[targetIdx]] = [slides[targetIdx], slides[idx]];
+      return { ...prev, slides };
     });
   };
 
-  const { openWidget } = useCloudinaryUpload({
-    onSuccess: handleCloudinarySuccess,
-  });
+  /** Удаление слайда по индексу */
+  const handleRemoveSlide = (idx: number) => {
+    setSettings((prev: any) => ({
+      ...prev,
+      slides: (prev.slides || []).filter((_: HeroSlide, i: number) => i !== idx),
+    }));
+  };
 
   const handleSave = () => {
     const finalSettings = { ...settings };
@@ -197,6 +253,25 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
               </Select>
             </div>
 
+            <div className="space-y-2">
+              <Label>Text Alignment</Label>
+              <Select
+                value={settings.textAlign || 'center'}
+                onValueChange={(val) =>
+                  setSettings({ ...settings, textAlign: val as HeroTextAlign })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select text alignment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {settings.mediaType === 'video' && (
               <div>
                 <Label>Video URL</Label>
@@ -205,7 +280,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                     value={settings.videoUrl || ''}
                     onChange={(e) => setSettings({ ...settings, videoUrl: e.target.value })}
                   />
-                  <Button type="button" onClick={() => openWidget()}>
+                  <Button type="button" onClick={() => openVideoUpload()}>
                     Upload
                   </Button>
                 </div>
@@ -220,7 +295,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                     value={settings.imageUrl || ''}
                     onChange={(e) => setSettings({ ...settings, imageUrl: e.target.value })}
                   />
-                  <Button type="button" onClick={() => openWidget()}>
+                  <Button type="button" onClick={() => openImageUpload()}>
                     Upload
                   </Button>
                 </div>
@@ -229,41 +304,87 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
 
             {settings.mediaType === 'slider' && (
               <div className="space-y-2">
-                <Label>Slides</Label>
-                {(settings.slides || []).map((slide: { imageUrl: string }, idx: number) => (
-                  <div key={idx} className="flex gap-2">
-                    <Input
-                      value={slide.imageUrl || ''}
-                      onChange={(e) => {
-                        const newSlides = [...(settings.slides || [])];
-                        newSlides[idx] = { imageUrl: e.target.value };
-                        setSettings({ ...settings, slides: newSlides });
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        const newSlides = [...(settings.slides || [])];
-                        newSlides.splice(idx, 1);
-                        setSettings({ ...settings, slides: newSlides });
-                      }}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const newSlides = [...(settings.slides || []), { imageUrl: '' }];
-                    setSettings({ ...settings, slides: newSlides });
-                  }}
-                >
-                  Add Slide
+                <Label>Slides (images & videos)</Label>
+
+                {(settings.slides || []).map((slide: HeroSlide, idx: number) => {
+                  const isVideo = Boolean(slide.videoUrl) && !slide.imageUrl;
+                  return (
+                    <div key={idx} className="flex items-center gap-2 p-2 border rounded-md bg-muted/40">
+                      {/* Превью */}
+                      <div className="w-14 h-10 shrink-0 rounded overflow-hidden bg-muted flex items-center justify-center text-[10px] uppercase font-bold text-muted-foreground">
+                        {isVideo ? (
+                          <span>▶ vid</span>
+                        ) : slide.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={slide.imageUrl} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>?</span>
+                        )}
+                      </div>
+
+                      {/* URL слайда */}
+                      <Input
+                        className="flex-1"
+                        placeholder="https://res.cloudinary.com/..."
+                        value={slide.imageUrl || slide.videoUrl || ''}
+                        onChange={(e) => {
+                          const newSlides = [...(settings.slides || [])];
+                          newSlides[idx] = isVideo
+                            ? { videoUrl: e.target.value }
+                            : { imageUrl: e.target.value };
+                          setSettings({ ...settings, slides: newSlides });
+                        }}
+                      />
+
+                      {/* Замена через Cloudinary */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        title="Replace via Cloudinary"
+                        onClick={() => handleReplaceSlide(idx)}
+                      >
+                        Upload
+                      </Button>
+
+                      {/* Перестановка */}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={idx === 0}
+                        title="Move up"
+                        onClick={() => handleMoveSlide(idx, -1)}
+                      >
+                        ↑
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={idx === (settings.slides?.length || 0) - 1}
+                        title="Move down"
+                        onClick={() => handleMoveSlide(idx, 1)}
+                      >
+                        ↓
+                      </Button>
+
+                      {/* Удаление */}
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        title="Remove slide"
+                        onClick={() => handleRemoveSlide(idx)}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  );
+                })}
+
+                <Button type="button" variant="outline" size="sm" onClick={handleAddSlides}>
+                  + Add Slides (multi-upload)
                 </Button>
               </div>
             )}
@@ -363,8 +484,6 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
       case 'feature_carousel': {
         const carouselMode: CarouselMode = settings.mode || 'manual';
         const selectionMode = settings.selectionMode || 'items';
-        const tenant = useTenant();
-        const branch = useBranch();
 
         return (
           <div className="space-y-4">
@@ -397,6 +516,25 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                   <SelectItem value="manual">Manual (Custom Cards)</SelectItem>
                   <SelectItem value="ecommerce">E-commerce Products</SelectItem>
                   <SelectItem value="menu">Menu Items</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Items per row (desktop)</Label>
+              <Select
+                value={String(settings.desktopItemsPerRow ?? (initialData?.type === 'feature_carousel' ? 4 : 3))}
+                onValueChange={(val) =>
+                  setSettings({ ...settings, desktopItemsPerRow: Number(val) as 3 | 4 | 5 })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select items per row" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 items</SelectItem>
+                  <SelectItem value="4">4 items</SelectItem>
+                  <SelectItem value="5">5 items</SelectItem>
                 </SelectContent>
               </Select>
             </div>

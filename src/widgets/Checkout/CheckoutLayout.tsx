@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useStripe, useElements, Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { ShoppingBag, Loader2, AlertCircle, Lock, User, Truck, Store, MapPin } from 'lucide-react';
+import { ShoppingBag, Loader2, AlertCircle, Lock, User, Truck, Store, MapPin, Mail } from 'lucide-react';
 import { PaymentElement } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
 
@@ -35,9 +35,15 @@ function CheckoutForm() {
   const subtotal = getSubtotal();
   const currencySymbol = primaryCurrency === 'PLN' ? 'zł' : primaryCurrency || '$';
 
-  const [fulfillmentType, setFulfillmentType] = useState<'pickup' | 'delivery'>('delivery');
+  // Digital-only cart: every item is an event ticket delivered via email.
+  // Items without itemType (old persisted carts, regular products) are treated as physical.
+  const isDigitalOnly = items.length > 0 && items.every((i) => i.itemType === 'ticket');
+
+  const [fulfillmentType, setFulfillmentType] = useState<'pickup' | 'delivery' | 'digital'>(
+    isDigitalOnly ? 'digital' : 'delivery'
+  );
   const [deliveryService, setDeliveryService] = useState(tenant?.niche === 'ecommerce' ? 'furgonetka' : 'courier');
-  const [deliveryFee, setDeliveryFee] = useState(tenant?.niche === 'ecommerce' ? 14.99 : 7.00);
+  const [deliveryFee, setDeliveryFee] = useState(isDigitalOnly ? 0 : tenant?.niche === 'ecommerce' ? 14.99 : 7.00);
 
   const [selectedParcelLocker, setSelectedParcelLocker] = useState<{id: string, network: string, address: any} | null>(null);
   const [scheduledFor, setScheduledFor] = useState<Date | null>(null);
@@ -109,12 +115,12 @@ function CheckoutForm() {
         body: JSON.stringify({
           branchId: selectedBranch?._id || null,
           fulfillment: {
-            type: fulfillmentType,
-            scheduledFor,
-            address: deliveryService !== 'furgonetka' ? address : null,
-            parcelLocker: deliveryService === 'furgonetka' ? selectedParcelLocker : null,
-            deliveryInstructions,
-            deliveryFee,
+            type: isDigitalOnly ? 'digital' : fulfillmentType,
+            scheduledFor: isDigitalOnly ? null : scheduledFor,
+            address: !isDigitalOnly && deliveryService !== 'furgonetka' ? address : null,
+            parcelLocker: !isDigitalOnly && deliveryService === 'furgonetka' ? selectedParcelLocker : null,
+            deliveryInstructions: isDigitalOnly ? '' : deliveryInstructions,
+            deliveryFee: isDigitalOnly ? 0 : deliveryFee,
           },
           items: items.map(i => ({
             menuItemId: i.menuItemId,
@@ -124,6 +130,10 @@ function CheckoutForm() {
             quantity: i.quantity,
             notes: i.notes || '',
             modifiers: i.modifiers || [],
+            // Ticket metadata so the backend can deliver tickets via email
+            itemType: i.itemType || 'menu_item',
+            articleId: i.articleId,
+            ticketMeta: i.ticketMeta,
           })),
           customer,
           locale,
@@ -231,6 +241,7 @@ function CheckoutForm() {
               </div>
             )}
             
+            {!isDigitalOnly && (
             <div className="mb-2">
               <h3 className="text-base font-medium text-gray-900 mb-4">{t('deliveryMethod')}</h3>
               
@@ -314,13 +325,14 @@ function CheckoutForm() {
                 )}
               </div>
             </div>
+            )}
 
-            {tenant?.niche !== 'ecommerce' && (
+            {!isDigitalOnly && tenant?.niche !== 'ecommerce' && (
                 <DeliveryTimeSection scheduledFor={scheduledFor} setScheduledFor={setScheduledFor} />
             )}
             
             {/* Показываем карту пачкоматов ЕСЛИ выбрана Фургонетка */}
-            {deliveryService === 'furgonetka' && (
+            {!isDigitalOnly && deliveryService === 'furgonetka' && (
                 <div className="mt-8">
                     <ParcelLockerSection 
                         onSelect={(locker) => setSelectedParcelLocker({
@@ -331,6 +343,13 @@ function CheckoutForm() {
                         selectedLockerId={selectedParcelLocker?.id}
                     />
                 </div>
+            )}
+
+            {isDigitalOnly && (
+              <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800">
+                <Mail size={18} className="mt-0.5 flex-shrink-0" />
+                <span>{t('digitalDeliveryNote')}</span>
+              </div>
             )}
 
             <ConfirmLocationSection
@@ -344,7 +363,7 @@ function CheckoutForm() {
                 setCustomer={setCustomer}
                 isLoggedIn={isLoggedIn}
                 isEcommerce={tenant?.niche === 'ecommerce'}
-                hideAddress={deliveryService === 'furgonetka'}
+                hideAddress={isDigitalOnly || deliveryService === 'furgonetka'}
             />
           </div>
 
@@ -357,6 +376,7 @@ function CheckoutForm() {
               estimating={estimating}
               deliveryFee={deliveryFee} 
               fulfillmentType={fulfillmentType}
+              isDigitalOnly={isDigitalOnly}
               currencySymbol={currencySymbol}
             />
             

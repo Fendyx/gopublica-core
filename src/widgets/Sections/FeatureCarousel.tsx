@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRef, useCallback, useEffect, useState } from 'react';
 import { BranchSection, BranchSectionItem, FeatureCarouselSettings } from '@/entities/branch-section/types';
 import type { MenuItem } from '@/entities/menu-item/types';
+import { DESKTOP_SIZES, DESKTOP_WIDTH_CLASSES, DEFAULT_ITEMS_PER_ROW } from '@/widgets/Sections/CarouselWidths';
 import ProductCard from '@/widgets/Catalog/ProductCard';
 import MenuItemCard from '@/entities/menu-item/MenuItemCard';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -22,6 +23,9 @@ interface FeatureCarouselProps {
 export default function FeatureCarousel({ section, locale, tenantDomain, branchSlug, dynamicItems = [], currencySymbol = 'zł' }: FeatureCarouselProps) {
   const effectiveBranchSlug = branchSlug || tenantDomain;
   const settings = (section.settings || {}) as FeatureCarouselSettings;
+  const itemsPerRow = settings.desktopItemsPerRow ?? DEFAULT_ITEMS_PER_ROW.feature;
+  const widthClass = DESKTOP_WIDTH_CLASSES[itemsPerRow];
+  const imageSizes = DESKTOP_SIZES[itemsPerRow];
   const mode = settings.mode || 'manual';
   const selectionMode = settings.selectionMode || 'items';
   const selectedProductIds = settings.selectedProductIds || [];
@@ -106,7 +110,7 @@ export default function FeatureCarousel({ section, locale, tenantDomain, branchS
               return (
                 <div
                   key={item._id}
-                  className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[25%] block group"
+                  className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block group`}
                 >
                   <div className="relative aspect-[4/5] overflow-hidden rounded-xl">
                     {item.media?.url ? (
@@ -217,7 +221,7 @@ export default function FeatureCarousel({ section, locale, tenantDomain, branchS
           {dynamicItems.map((item) => (
             <div
               key={item._id || item.id}
-              className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[25%] block"
+              className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block`}
             >
               {mode === 'ecommerce' ? (
                 <ProductCard
@@ -241,7 +245,7 @@ export default function FeatureCarousel({ section, locale, tenantDomain, branchS
           {settings.showViewAll && (
             <Link
               href={viewAllHref}
-              className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[25%] block"
+              className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block`}
             >
               <div className="h-full flex flex-col items-center justify-center bg-muted/30 border border-border rounded-xl p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors">
                 <ArrowRight className="w-8 h-8 text-muted-foreground mb-2" />

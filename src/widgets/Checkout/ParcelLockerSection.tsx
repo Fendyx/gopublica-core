@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { Box, Fuel, Truck, type LucideIcon } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 interface ParcelLocker {
   id: string;
@@ -18,8 +20,18 @@ interface Props {
   selectedLockerId?: string;
 }
 
+// IDs must match Furgonetka courier service identifiers (see furgonetka.pl/api/mapa).
+const CARRIERS: { id: string; labelKey: string; Icon: LucideIcon }[] = [
+  { id: 'inpost', labelKey: 'carrierInpost', Icon: Box },
+  { id: 'orlen', labelKey: 'carrierOrlen', Icon: Fuel },
+  { id: 'dpd', labelKey: 'carrierDpd', Icon: Truck },
+];
+
+const ALL_CARRIER_IDS = CARRIERS.map((c) => c.id);
+
 export default function ParcelLockerSection({ onSelect, selectedLockerId }: Props) {
   const t = useTranslations('checkout');
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +65,7 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
     }
   }, [t]);
 
-  const openMap = () => {
+  const openMap = (carrierIds: string[] = ALL_CARRIER_IDS) => {
     // @ts-ignore
     if (!window.Furgonetka || !window.Furgonetka.Map) {
       setError(t('loadingMap'));
@@ -64,14 +76,16 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
       // @ts-ignore
       const mapWidget = new window.Furgonetka.Map({
         apiKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJGdXJnb25ldGthLnBsIiwiaWF0IjoxNzg0ODUzOTQwLjIxOTU3Mywic3ViIjoiMzI3N2JmYjMtNGEyZi00ODY4LTlkMzctNzI0MzRlOTQ1NWZhIn0.decVno3WQFqsgy3kL6sVmyNH95C35B_GVeci15t5YFk',
-        env: 'sandbox', 
-        courierServices: ['inpost', 'orlen', 'dpd', 'poczta'], 
+        env: 'sandbox',
+        courierServices: carrierIds,
+        courierServicesFilter: carrierIds,
+        locale,
         callback: (params: any) => {
           onSelect({
             id: params.point.code,
-            network: params.service || params.provider || params.point.operator || 'inpost', 
+            network: params.point.type || 'unknown',
             address: {
-              street: params.point.street || params.point.name, 
+              street: params.point.name,
               city: params.point.city,
               zip: params.point.postcode
             }
@@ -105,25 +119,45 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
           </div>
           <button 
             type="button"
-            onClick={openMap}
+            onClick={() => openMap()}
             className="text-sm bg-white border border-blue-200 px-4 py-2 rounded-md text-blue-700 hover:bg-blue-100 transition-colors font-medium"
           >
             {t('change')}
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={openMap}
-          disabled={isLoading}
-          className="w-full py-6 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50/50 transition-all flex flex-col items-center justify-center gap-2 font-medium"
-        >
-          {isLoading ? (
-            <span className="flex items-center gap-2">{t('loadingMap')}</span>
-          ) : (
-            <span className="flex items-center gap-2">{t('openMap')}</span>
-          )}
-        </button>
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {CARRIERS.map(({ id, labelKey, Icon }) => (
+              <Card
+                key={id}
+                role="button"
+                tabIndex={0}
+                aria-disabled={isLoading}
+                onClick={() => !isLoading && openMap([id])}
+                onKeyDown={(e) => {
+                  if (!isLoading && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    openMap([id]);
+                  }
+                }}
+                className="cursor-pointer items-center justify-center gap-2 py-6 text-center transition-all duration-150 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 aria-disabled:pointer-events-none aria-disabled:opacity-50"
+              >
+                <Icon size={24} className="text-gray-400" />
+                <span className="text-sm font-medium text-gray-900">{t(labelKey)}</span>
+              </Card>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => openMap()}
+            disabled={isLoading}
+            className="self-center text-sm text-gray-500 underline underline-offset-4 hover:text-blue-600 transition-colors"
+          >
+            {isLoading ? t('loadingMap') : t('showAllCarriers')}
+          </button>
+        </div>
       )}
     </div>
   );

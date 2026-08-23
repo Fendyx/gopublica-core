@@ -1,10 +1,43 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+
+export type ToastType = 'info' | 'success' | 'error';
 
 export type ToastMessage = {
-  id: string
-  text: string
-  type: 'info' | 'success' | 'error'
+  id: string;
+  text: string;
+  type: ToastType;
+};
+
+interface ToastContextType {
+  showToast: (text: string, type?: ToastType) => void;
+}
+
+const ToastContext = createContext<ToastContextType>({
+  showToast: () => {},
+});
+
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const showToast = useCallback((text: string, type: ToastType = 'info') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, text, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  }, []);
+
+  return (
+    <ToastContext.Provider value={{ showToast }}>
+      {children}
+      <ToastContainer toasts={toasts} />
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast() {
+  return useContext(ToastContext);
 }
 
 export default function ToastContainer({ toasts }: { toasts: ToastMessage[] }) {
@@ -21,5 +54,5 @@ export default function ToastContainer({ toasts }: { toasts: ToastMessage[] }) {
         </div>
       ))}
     </div>
-  )
+  );
 }

@@ -6,6 +6,7 @@ import { fetchPublicArticleBySlug } from '@/entities/article/api';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/shared/ui/Button';
+import { TicketCard } from '@/widgets/Article/TicketCard';
 
 export default async function ArticlePage({
   params,
@@ -40,36 +41,47 @@ export default async function ArticlePage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <Link href={`/${resolvedParams.locale}/${resolvedParams.branchSlug}/catalog`}>
+        <Link href={`/${resolvedParams.branchSlug}`}>
           <Button variant="outline">← Back to Home</Button>
         </Link>
       </div>
-      {article.coverImage && (
-        <div className="relative w-full h-96 rounded-xl mb-8 overflow-hidden">
-          <Image
-            src={article.coverImage}
-            alt={article.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="object-cover"
+
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Left column - Article content */}
+        <div className="lg:col-span-2">
+          {article.coverImage && (
+            <div className="relative w-full h-96 rounded-xl mb-8 overflow-hidden">
+              <Image
+                src={article.coverImage}
+                alt={article.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover"
+              />
+            </div>
+          )}
+          <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+          <div className="flex items-center text-gray-500 mb-8 space-x-4">
+            {article.author && <span>By {article.author}</span>}
+            {article.publishedAt && (
+              <span>
+                {new Date(article.publishedAt).toLocaleDateString(resolvedParams.locale)}
+              </span>
+            )}
+          </div>
+          <div
+            className="prose dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: article.body }}
           />
         </div>
-      )}
-      <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
-      <div className="flex items-center text-gray-500 mb-8 space-x-4">
-        {article.author && <span>By {article.author}</span>}
-        {article.publishedAt && (
-          <span>
-            {new Date(article.publishedAt).toLocaleDateString(resolvedParams.locale)}
-          </span>
-        )}
+
+        {/* Right column - Ticket Card */}
+        <div className="lg:col-span-1">
+          <TicketCard article={article} />
+        </div>
       </div>
-      <div
-        className="prose prose-lg max-w-none"
-        dangerouslySetInnerHTML={{ __html: article.body }}
-      />
     </div>
   );
 }

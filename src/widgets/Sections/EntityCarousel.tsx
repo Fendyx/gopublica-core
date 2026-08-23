@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRef, useCallback, useEffect, useState } from 'react';
 import { BranchSection, BranchSectionItem, EntityCarouselSettings } from '@/entities/branch-section/types';
 import type { MenuItem } from '@/entities/menu-item/types';
+import { DESKTOP_SIZES, DESKTOP_WIDTH_CLASSES, DEFAULT_ITEMS_PER_ROW } from '@/widgets/Sections/CarouselWidths';
 import ProductCard from '@/widgets/Catalog/ProductCard';
 import MenuItemCard from '@/entities/menu-item/MenuItemCard';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -22,6 +23,9 @@ interface EntityCarouselProps {
 export default function EntityCarousel({ section, locale, tenantDomain, branchSlug, dynamicItems = [], currencySymbol = 'zł' }: EntityCarouselProps) {
   const effectiveBranchSlug = branchSlug || tenantDomain;
   const settings = (section.settings || {}) as EntityCarouselSettings;
+  const itemsPerRow = settings.desktopItemsPerRow ?? DEFAULT_ITEMS_PER_ROW.entity;
+  const widthClass = DESKTOP_WIDTH_CLASSES[itemsPerRow];
+  const imageSizes = DESKTOP_SIZES[itemsPerRow];
   const mode = settings.mode || 'manual';
   const selectionMode = settings.selectionMode || 'items';
   const selectedProductIds = settings.selectedProductIds || [];
@@ -107,7 +111,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
                 <Link
                   key={item._id}
                   href={`/${locale || 'en'}/${effectiveBranchSlug}/entity/${item.slug}`}
-                  className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[30%] block group"
+                  className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block group`}
                 >
                   <div className="relative aspect-[4/5] overflow-hidden rounded-xl">
                     {item.media.type === 'video' ? (
@@ -125,7 +129,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
                         src={item.media.url}
                         alt={itemTranslations.title ?? ''}
                         fill
-                        sizes="(max-width: 640px) 80vw, (max-width: 1024px) 60vw, 30vw"
+                        sizes={imageSizes}
                         className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                       />
                     )}
@@ -212,7 +216,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
           {dynamicItems.map((item) => (
             <div
               key={item._id || item.id}
-              className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[30%] block"
+              className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block`}
             >
               {mode === 'ecommerce' ? (
                 <ProductCard
@@ -236,7 +240,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
           {settings.showViewAll && (
             <Link
               href={viewAllHref}
-              className="snap-start flex-none w-[80%] sm:w-[60%] md:w-[30%] block"
+              className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block`}
             >
               <div className="h-full flex flex-col items-center justify-center bg-muted/30 border border-border rounded-xl p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors">
                 <ArrowRight className="w-8 h-8 text-muted-foreground mb-2" />

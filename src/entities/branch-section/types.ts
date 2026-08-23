@@ -16,6 +16,7 @@ export type Translations = Record<string, LocalizedText>;
 
 export type HeroMediaType = 'video' | 'image' | 'slider';
 export type HeroLayout = 'fullscreen' | 'compact';
+export type HeroTextAlign = 'left' | 'center' | 'right';
 
 export type CtaTargetMode = 'section' | 'custom';
 
@@ -32,7 +33,10 @@ export interface HeroCta {
 }
 
 export interface HeroSlide {
-  imageUrl: string;
+  /** Image slide source (Cloudinary URL). Canonical field for image slides. */
+  imageUrl?: string;
+  /** Video slide source (Cloudinary URL). When set (and no imageUrl), renders as video. */
+  videoUrl?: string;
 }
 
 export interface HeroSettings {
@@ -43,11 +47,17 @@ export interface HeroSettings {
   slides?: HeroSlide[];
   primaryCta?: HeroCta;
   secondaryCta?: HeroCta;
+  /** Content alignment: 'left' | 'center' | 'right'. Defaults to 'center'. */
+  textAlign?: HeroTextAlign;
+  /** Autoplay interval for the slider in ms. 0 or undefined = default (5000ms). */
+  sliderAutoplayMs?: number;
 }
 
 export interface BaseCarouselSettings {
   /** Display mode: manual (custom cards), ecommerce (products), or menu (menu items) */
   mode?: CarouselMode;
+  /** Number of cards shown per row on desktop (md breakpoint). 3/4/5. */
+  desktopItemsPerRow?: 3 | 4 | 5;
   /** Number of items to show per page/viewport (optional, for pagination) */
   limit?: number;
   /** Card variant for ecommerce mode — reuses existing ProductCardVariant */
