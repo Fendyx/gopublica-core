@@ -53,7 +53,7 @@ export default function ProfilePage() {
         setFormData({ name: data.name, phone: data.phone });
       } else if (res.status === 401) {
         localStorage.removeItem('customer_token');
-        router.push(`/${locale}/${branchSlug}/catalog`); // Используем router.push
+        router.push(`/${locale}/login`); // Используем router.push
       }
     } catch (e) {
       console.error(e);
@@ -151,7 +151,7 @@ export default function ProfilePage() {
       if (res.ok) {
         localStorage.removeItem('customer_token');
         alert(t('accountDeleted'));
-        router.push(`/${locale}/${branchSlug}/catalog`); // Используем router.push
+        router.push(`/${locale}`); // Используем router.push
       } else {
         alert(t('deleteError'));
       }
@@ -164,7 +164,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem('customer_token');
-    router.push(`/${locale}/${branchSlug}/catalog`); // Используем router.push
+    router.push(`/${locale}`); // Используем router.push
   };
 
   const getInitials = (name: string) => {
@@ -216,7 +216,7 @@ export default function ProfilePage() {
         <div className="flex flex-wrap gap-3">
           {/* Используем Link вместо window.location */}
           <Button asChild variant="outline" className="shadow-sm">
-            <Link href={`/${locale}/${branchSlug}/profile/orders`}>
+            <Link href={`/${locale}/profile/orders`}>
               <Package className="w-4 h-4 mr-2" /> {t('myOrders')}
             </Link>
           </Button>

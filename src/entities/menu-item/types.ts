@@ -12,6 +12,11 @@ export interface ProductVariant {
   attributes?: Record<string, string>; // { Size: "S", Color: "Red" }
 }
 
+export interface ProductAttribute {
+  key: string;   // e.g. "Author", "ISBN"
+  value: string; // e.g. "John Doe", "12345"
+}
+
 export type MenuItem = {
   _id?: string
   id?: string
@@ -47,6 +52,7 @@ export type MenuItem = {
   tags?: string[];
   variants?: ProductVariant[];
   isFeatured?: boolean;   // 👈 добавь это поле
+  attributes?: ProductAttribute[]; // dynamic specifications, e.g. Author / ISBN
 }
 
 export type MenuCategory = {

@@ -1,9 +1,12 @@
 export interface OrderItem {
   menuItemId: string;
   name: string;
+  basePrice?: number;
   price: number;
   quantity: number;
   notes: string;
+  itemType?: 'menu_item' | 'ticket';
+  modifiers?: unknown[];
 }
 
 export interface OrderCustomer {
@@ -12,14 +15,31 @@ export interface OrderCustomer {
   email?: string;
 }
 
+/** Parcel locker chosen at checkout (Furgonetka map widget). */
+export interface ParcelLockerInfo {
+  id: string;
+  network?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    zip?: string;
+  };
+  /** Legacy shape from older checkouts — treated as "locker present". */
+  enabled?: boolean;
+}
+
+export interface ShippingAddress {
+  street: string;
+  city: string;
+  zip: string;
+}
+
 export interface OrderFulfillment {
   type: 'pickup' | 'delivery' | 'digital';
   scheduledFor: string | null;
-  address?: {
-    street: string;
-    city: string;
-    zip: string;
-  };
+  address?: ShippingAddress | null;
+  parcelLocker?: ParcelLockerInfo | null;
+  deliveryInstructions?: string;
   deliveryFee: number;
 }
 
@@ -35,6 +55,13 @@ export interface OrderPayment {
   checkoutSessionId?: string;
   paymentIntentId?: string;
   refundId?: string;
+}
+
+/** Carrier label data created via Furgonetka (present only after label generation). */
+export interface ShippingInfo {
+  carrier?: string;
+  trackingNumber?: string;
+  labelUrl?: string;
 }
 
 export type OrderConfirmationStatus = 'pending' | 'accepted' | 'declined';
@@ -68,7 +95,8 @@ export interface Order {
 
   status: OrderStatus;
   payment: OrderPayment;
-  
+  shipping?: ShippingInfo | null;
+
   locale: string;
   createdAt: string;
   updatedAt: string;

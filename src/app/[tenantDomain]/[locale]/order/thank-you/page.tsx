@@ -1,4 +1,4 @@
-// src/app/[tenantDomain]/[locale]/[branchSlug]/order/thank-you/page.tsx
+// src/app/[tenantDomain]/[locale]/order/thank-you/page.tsx
 'use client';
 
 import { useSearchParams, useParams } from 'next/navigation';
@@ -51,7 +51,7 @@ export default function ThankYouPage() {
 
         {/* Кнопка возврата в меню/каталог */}
         <Link 
-          href={`/${locale}/${branchSlug}/catalog`} 
+          href={`/${locale}/menu`} 
           className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
         >
           Continue Shopping

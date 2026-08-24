@@ -59,6 +59,35 @@ function CheckoutForm() {
 
   const isDeliveryValid = deliveryService === 'furgonetka' ? selectedParcelLocker !== null : true;
 
+  // Проверяем авторизацию и предзаполняем контактные данные залогиненного пользователя
+  useEffect(() => {
+    const token = localStorage.getItem('customer_token');
+    if (!token) return;
+
+    setIsLoggedIn(true);
+
+    const prefillCustomer = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const profile = await res.json();
+          setCustomer((prev) => ({
+            ...prev,
+            name: prev.name || profile.name || '',
+            email: prev.email || profile.email || '',
+            phone: prev.phone || profile.phone || '',
+          }));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    prefillCustomer();
+  }, []);
+
   useEffect(() => {
     if (subtotal <= 0) return setFees(null);
     setEstimating(true);
@@ -106,11 +135,14 @@ function CheckoutForm() {
       }
 
       const tenantId = tenant?.tenantId || window.location.hostname;
+      // Передаём токен, чтобы заказ связался с аккаунтом (если пользователь залогинен)
+      const customerToken = localStorage.getItem('customer_token');
       const orderRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/public`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-tenant-id': tenantId,
+          ...(customerToken && { Authorization: `Bearer ${customerToken}` }),
         },
         body: JSON.stringify({
           branchId: selectedBranch?._id || null,

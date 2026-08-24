@@ -186,7 +186,7 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center">
               {isLoggedIn ? (
                 <Link
-                  href={`/${locale}/${branchSlug}/profile`}
+                  href={`/${locale}/profile`}
                   className="flex items-center gap-1.5 p-2 xl:px-3 xl:py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
                   aria-label="Профиль"
                 >
@@ -195,7 +195,7 @@ export default function Navbar() {
                 </Link>
               ) : (
                 <Link
-                  href={`/${locale}/${branchSlug}/login`}
+                  href={`/${locale}/login`}
                   className="flex items-center gap-1.5 p-2 xl:px-3 xl:py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
                   aria-label="Логин"
                 >
@@ -208,7 +208,7 @@ export default function Navbar() {
             {/* Иконка корзины */}
             {hasOnlineOrdering && (
               <Link
-                href={`/${locale}/${branchSlug}/order/checkout`}
+                href={`/${locale}/order/checkout`}
                 className="relative p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
                 aria-label="Корзина"
               >
@@ -308,7 +308,7 @@ export default function Navbar() {
             {/* Профиль / Логин (Mobile) */}
             {isLoggedIn ? (
               <Link 
-                href={`/${locale}/${branchSlug}/profile`} 
+                href={`/${locale}/profile`} 
                 onClick={() => setIsOpen(false)} 
                 className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium border border-border text-text-primary hover:bg-surface-hover transition-colors"
               >
@@ -317,7 +317,7 @@ export default function Navbar() {
               </Link>
             ) : (
               <Link 
-                href={`/${locale}/${branchSlug}/login`} 
+                href={`/${locale}/login`} 
                 onClick={() => setIsOpen(false)} 
                 className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium border border-border text-text-primary hover:bg-surface-hover transition-colors"
               >

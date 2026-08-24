@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useBranch } from '@/entities/branch/BranchContext';
 import { Card } from '@/components/ui/card';
@@ -17,6 +18,7 @@ const FEATURED_ID = 'featured';
 const STORAGE_KEY = (tenantId: string) => `${tenantId}_categories_order`;
 
 export default function ProductManager({ token }: { token: string }) {
+  const t = useTranslations('admin.productManager');
   const tenant = useTenant();
   const { selectedBranch } = useBranch();
   const [products, setProducts] = useState<MenuItem[]>([]);
@@ -65,7 +67,7 @@ export default function ProductManager({ token }: { token: string }) {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm('Delete this product?')) return;
+    if (!confirm(t('deleteProductConfirm'))) return;
     await fetch(`${apiUrl}/api/saas/menu/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     fetchData();
   };
@@ -83,7 +85,7 @@ export default function ProductManager({ token }: { token: string }) {
 
   const handleDeleteCategory = async (id: string) => {
     if (id === FEATURED_ID) return;
-    if (!confirm('Delete this category?')) return;
+    if (!confirm(t('deleteCategoryConfirm'))) return;
     await fetch(`${apiUrl}/api/saas/categories/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     fetchData();
   };
@@ -148,21 +150,21 @@ export default function ProductManager({ token }: { token: string }) {
     });
   }, [products]);
 
-  if (loading) return <div className="text-center py-10 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Loading...</div>;
+  if (loading) return <div className="text-center py-10 flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> {t('loading')}</div>;
 
   return (
     <div className="max-w-7xl mx-auto pb-12 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Catalog Management</h2>
-          <p className="text-muted-foreground text-sm mt-1">E-commerce / Products</p>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
+          <p className="text-muted-foreground text-sm mt-1">{t('subtitle')}</p>
         </div>
       </div>
 
       <Tabs defaultValue="products" className="w-full">
         <TabsList className="bg-muted/50 border border-border">
-          <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
-          <TabsTrigger value="categories">Categories ({categories.length})</TabsTrigger>
+          <TabsTrigger value="products">{`${t('productsTab')} (${products.length})`}</TabsTrigger>
+          <TabsTrigger value="categories">{`${t('categoriesTab')} (${categories.length})`}</TabsTrigger>
         </TabsList>
 
         {/* Products Tab */}
@@ -171,10 +173,10 @@ export default function ProductManager({ token }: { token: string }) {
             <div className="flex justify-between items-center mb-6">
               <div className="relative w-full max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input placeholder="Search products..." className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background" />
+                <input placeholder={t('searchPlaceholder')} className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background" />
               </div>
               <Button className="gap-2" onClick={handleAddNewProduct}>
-                <Plus className="w-4 h-4" /> Add Product
+                <Plus className="w-4 h-4" /> {t('addProduct')}
               </Button>
             </div>
 
@@ -183,12 +185,12 @@ export default function ProductManager({ token }: { token: string }) {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="w-[80px]">Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[80px]">{t('image')}</TableHead>
+                    <TableHead>{t('name')}</TableHead>
+                    <TableHead>{t('category')}</TableHead>
+                    <TableHead>{t('price')}</TableHead>
+                    <TableHead>{t('status')}</TableHead>
+                    <TableHead className="text-right">{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -204,7 +206,7 @@ export default function ProductManager({ token }: { token: string }) {
                             className="rounded-md object-cover"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">No img</div>
+                          <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">{t('noImage')}</div>
                         )}
                       </TableCell>
                       <TableCell className="font-medium">
@@ -212,12 +214,12 @@ export default function ProductManager({ token }: { token: string }) {
                         {product.isFeatured && <Star className="inline ml-2 w-4 h-4 text-yellow-500" />}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {product.category || categories.find(c => c.key === product.categoryKey)?.name || 'Uncategorized'}
+                        {product.category || categories.find(c => c.key === product.categoryKey)?.name || t('uncategorized')}
                       </TableCell>
                       <TableCell className="font-medium">${product.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-muted text-muted-foreground' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
-                          {(product as any).status === 'draft' ? 'Draft' : 'Active'}
+                          {(product as any).status === 'draft' ? t('draft') : t('active')}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -248,7 +250,7 @@ export default function ProductManager({ token }: { token: string }) {
                         className="rounded-md object-cover"
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">No img</div>
+                      <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">{t('noImage')}</div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -257,20 +259,20 @@ export default function ProductManager({ token }: { token: string }) {
                       {product.isFeatured && <Star className="w-4 h-4 text-yellow-500 shrink-0" />}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {product.category || categories.find(c => c.key === product.categoryKey)?.name || 'Uncategorized'}
+                      {product.category || categories.find(c => c.key === product.categoryKey)?.name || t('uncategorized')}
                     </p>
                     <div className="flex items-center justify-between mt-2">
                       <span className="font-bold text-sm">${product.price.toFixed(2)}</span>
                       <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-muted text-muted-foreground' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
-                        {(product as any).status === 'draft' ? 'Draft' : 'Active'}
+                        {(product as any).status === 'draft' ? t('draft') : t('active')}
                       </span>
                     </div>
                     <div className="flex gap-2 mt-3">
                       <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
-                        <Pencil className="w-3 h-3 mr-1" /> Edit
+                        <Pencil className="w-3 h-3 mr-1" /> {t('edit')}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product._id!)}>
-                        <Trash2 className="w-3 h-3 mr-1 text-destructive" /> Delete
+                        <Trash2 className="w-3 h-3 mr-1 text-destructive" /> {t('delete')}
                       </Button>
                     </div>
                   </div>
@@ -284,9 +286,9 @@ export default function ProductManager({ token }: { token: string }) {
         <TabsContent value="categories" className="mt-6">
           <Card className="p-4 lg:p-6">
             <div className="flex justify-between items-center mb-4">
-              <p className="text-sm text-muted-foreground">Drag to reorder</p>
+              <p className="text-sm text-muted-foreground">{t('dragToReorder')}</p>
               <Button className="gap-2" onClick={handleAddNewCategory}>
-                <Plus className="w-4 h-4" /> Add Category
+                <Plus className="w-4 h-4" /> {t('addCategory')}
               </Button>
             </div>
 

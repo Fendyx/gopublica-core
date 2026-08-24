@@ -1,4 +1,4 @@
-// src/app/[tenantDomain]/[locale]/[branchSlug]/profile/orders/page.tsx
+// src/app/[tenantDomain]/[locale]/profile/orders/page.tsx
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -86,7 +86,7 @@ export default function MyOrdersPage() {
         <h2 className="text-xl font-bold mb-2 text-foreground">{t('loginToAccount')}</h2>
         <p className="text-muted-foreground mb-6">{t('loginToSeeOrders')}</p>
         <Button asChild>
-          <Link href={`/${locale}/${branchSlug}/catalog`}>{t('goToMenu')}</Link>
+          <Link href={`/${locale}/login`}>{t('goToMenu')}</Link>
         </Button>
       </div>
     );
@@ -105,7 +105,7 @@ export default function MyOrdersPage() {
           {t('myOrders')}
         </h1>
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${locale}/${branchSlug}/profile`}>
+          <Link href={`/${locale}/profile`}>
             <ArrowLeft className="w-4 h-4 mr-2" /> {t('back')}
           </Link>
         </Button>
@@ -120,7 +120,7 @@ export default function MyOrdersPage() {
             <p className="text-lg font-medium text-foreground">{t('noOrders')}</p>
             <p className="text-sm text-muted-foreground mt-1 mb-6">{t('timeToCheckMenu')}</p>
             <Button asChild>
-              <Link href={`/${locale}/${branchSlug}/catalog`}>{t('goToMenuBtn')}</Link>
+              <Link href={`/${locale}/menu`}>{t('goToMenuBtn')}</Link>
             </Button>
           </CardContent>
         </Card>

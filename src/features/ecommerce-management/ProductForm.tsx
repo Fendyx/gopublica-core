@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -8,9 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, X, Plus, ImagePlus } from 'lucide-react';
-import type { MenuItem, ProductVariant } from '@/entities/menu-item/types';
+import { Loader2, X, Plus, ImagePlus, Trash2, ChevronDown } from 'lucide-react';
+import type { MenuItem, ProductVariant, ProductAttribute } from '@/entities/menu-item/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
+import { useToast } from '@/shared/ui/Toast';
 
 interface ProductFormProps {
   isOpen: boolean;
@@ -22,31 +24,35 @@ interface ProductFormProps {
   onSave: () => void;
 }
 
+const EMPTY_FORM = {
+  name: '',
+  description: '',
+  price: 0,
+  image: '',
+  categoryKey: '__none__',
+  category: '',
+  status: 'active',
+  sku: '',
+  stock: 0,
+  compareAtPrice: 0,
+  images: [] as string[],
+  weight: 0,
+  weightUnit: 'kg' as 'g' | 'kg' | 'lb',
+  dimensions: { length: 0, width: 0, height: 0, unit: 'cm' },
+  tags: [] as string[],
+  variants: [] as ProductVariant[],
+  attributes: [] as ProductAttribute[],
+  isFeatured: false,
+};
+
 export default function ProductForm({
   isOpen, onClose, editingProduct, categories, token, branchId, onSave,
 }: ProductFormProps) {
+  const t = useTranslations('admin.productForm');
+  const { showToast } = useToast();
+
   const [loading, setLoading] = useState(false);
-
-  const [form, setForm] = useState({
-    name: '',
-    description: '',
-    price: 0,
-    image: '',
-    categoryKey: '__none__',   // по умолчанию None
-    category: '',
-    status: 'active',
-    sku: '',
-    stock: 0,
-    compareAtPrice: 0,
-    images: [] as string[],
-    weight: 0,
-    weightUnit: 'kg' as 'g' | 'kg' | 'lb',
-    dimensions: { length: 0, width: 0, height: 0, unit: 'cm' },
-    tags: [] as string[],
-    variants: [] as ProductVariant[],
-    isFeatured: false,
-  });
-
+  const [form, setForm] = useState({ ...EMPTY_FORM });
   const [hasVariants, setHasVariants] = useState(false);
   const [tagInput, setTagInput] = useState('');
 
@@ -64,6 +70,7 @@ export default function ProductForm({
     if (editingProduct) {
       const catKey = editingProduct.categoryKey || editingProduct.category || '';
       setForm({
+        ...EMPTY_FORM,
         name: editingProduct.name,
         description: editingProduct.description,
         price: editingProduct.price,
@@ -85,33 +92,29 @@ export default function ProductForm({
         },
         tags: editingProduct.tags || [],
         variants: editingProduct.variants || [],
+        attributes: editingProduct.attributes || [],
         isFeatured: editingProduct.isFeatured || false,
       });
       setHasVariants(!!(editingProduct.variants && editingProduct.variants.length > 0));
     } else {
-      setForm({
-        name: '', description: '', price: 0, image: '',
-        categoryKey: '__none__', category: '', status: 'active',
-        sku: '', stock: 0, compareAtPrice: 0, images: [],
-        weight: 0, weightUnit: 'kg', dimensions: { length: 0, width: 0, height: 0, unit: 'cm' },
-        tags: [], variants: [],
-        isFeatured: false,
-      });
+      setForm({ ...EMPTY_FORM });
       setHasVariants(false);
     }
   }, [editingProduct, isOpen]);
 
+  /* ---------- tags ---------- */
   const addTag = () => {
     if (tagInput.trim() && !form.tags.includes(tagInput.trim())) {
-      setForm({ ...form, tags: [...form.tags, tagInput.trim()] });
+      setForm((prev) => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
       setTagInput('');
     }
   };
 
   const removeTag = (tag: string) => {
-    setForm({ ...form, tags: form.tags.filter((t) => t !== tag) });
+    setForm((prev) => ({ ...prev, tags: prev.tags.filter((tg) => tg !== tag) }));
   };
 
+  /* ---------- variants ---------- */
   const addVariant = () => {
     const newVariant: ProductVariant = {
       id: Math.random().toString(36).substring(2, 11),
@@ -122,28 +125,48 @@ export default function ProductForm({
       stock: 0,
       attributes: {},
     };
-    setForm({ ...form, variants: [...form.variants, newVariant] });
+    setForm((prev) => ({ ...prev, variants: [...prev.variants, newVariant] }));
   };
 
   const updateVariant = (index: number, field: string, value: any) => {
-    const updated = [...form.variants];
-    (updated[index] as any)[field] = value;
-    setForm({ ...form, variants: updated });
+    setForm((prev) => {
+      const updated = [...prev.variants];
+      (updated[index] as any)[field] = value;
+      return { ...prev, variants: updated };
+    });
   };
 
   const removeVariant = (index: number) => {
-    setForm({ ...form, variants: form.variants.filter((_, i) => i !== index) });
+    setForm((prev) => ({ ...prev, variants: prev.variants.filter((_, i) => i !== index) }));
   };
 
+  /* ---------- dynamic specifications (key-value attributes) ---------- */
+  const addAttribute = () => {
+    setForm((prev) => ({ ...prev, attributes: [...prev.attributes, { key: '', value: '' }] }));
+  };
+
+  const updateAttribute = (index: number, field: 'key' | 'value', value: string) => {
+    setForm((prev) => {
+      const updated = [...prev.attributes];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, attributes: updated };
+    });
+  };
+
+  const removeAttribute = (index: number) => {
+    setForm((prev) => ({ ...prev, attributes: prev.attributes.filter((_, i) => i !== index) }));
+  };
+
+  /* ---------- submit ---------- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
     if (!hasVariants && form.price <= 0) {
-      alert('Укажите цену товара');
+      showToast(t('errorPriceRequired'), 'error');
       return;
     }
     if (hasVariants && form.variants.length === 0) {
-      alert('Добавьте хотя бы один вариант');
+      showToast(t('errorVariantRequired'), 'error');
       return;
     }
     setLoading(true);
@@ -154,6 +177,8 @@ export default function ProductForm({
 
     const payload = {
       ...form,
+      // Drop half-filled specification rows before persisting
+      attributes: form.attributes.filter((a) => a.key.trim() && a.value.trim()),
       categoryKey: form.categoryKey === '__none__' ? '' : form.categoryKey,
       category: form.categoryKey === '__none__' ? '' : form.category,
       price: priceToSend,
@@ -189,7 +214,7 @@ export default function ProductForm({
   };
 
   const removeImage = (url: string) => {
-    setForm({ ...form, images: form.images.filter((img) => img !== url) });
+    setForm((prev) => ({ ...prev, images: prev.images.filter((img) => img !== url) }));
   };
 
   return (
@@ -204,31 +229,30 @@ export default function ProductForm({
       <SheetContent side="right" className="w-full sm:max-w-[550px] p-0 flex flex-col">
         <SheetHeader className="p-6 border-b border-border">
           <SheetTitle className="text-xl">
-            {editingProduct ? 'Edit Product' : 'Add New Product'}
+            {editingProduct ? t('editTitle') : t('addTitle')}
           </SheetTitle>
           <SheetDescription>
-            {editingProduct
-              ? 'Update the product details.'
-              : 'Create a new product for your catalog.'}
+            {editingProduct ? t('editDescription') : t('addDescription')}
           </SheetDescription>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 space-y-8">
-            {/* General */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+
+            {/* ===== General ===== */}
             <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">General</h3>
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('generalSection')}</h3>
               <div className="space-y-2">
-                <Label htmlFor="name">Product Name</Label>
+                <Label htmlFor="name">{t('productName')}</Label>
                 <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('description')}</Label>
                 <Textarea id="description" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Category</Label>
+                  <Label>{t('category')}</Label>
                   <Select
                     value={form.categoryKey}
                     onValueChange={(val) => {
@@ -240,9 +264,9 @@ export default function ProductForm({
                       }
                     }}
                   >
-                    <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t('selectCategory')} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">None (no category)</SelectItem>
+                      <SelectItem value="__none__">{t('noCategory')}</SelectItem>
                       {categories.map((c) => (
                         <SelectItem key={c.key} value={c.key}>{c.icon} {c.name}</SelectItem>
                       ))}
@@ -250,12 +274,12 @@ export default function ProductForm({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Status</Label>
+                  <Label>{t('status')}</Label>
                   <Select value={form.status} onValueChange={(val) => setForm({ ...form, status: val })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">{t('statusActive')}</SelectItem>
+                      <SelectItem value="draft">{t('statusDraft')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -267,89 +291,80 @@ export default function ProductForm({
                   checked={form.isFeatured}
                   onCheckedChange={(checked) => setForm({ ...form, isFeatured: checked })}
                 />
-                <Label htmlFor="isFeatured">Featured Product</Label>
+                <Label htmlFor="isFeatured">{t('featured')}</Label>
               </div>
             </div>
 
-            {/* Product type toggle */}
+            {/* ===== Variants toggle ===== */}
             <div className="flex items-center justify-between border rounded-xl p-4 bg-muted/20">
               <div>
-                <p className="text-sm font-semibold">Товар с вариантами</p>
-                <p className="text-xs text-muted-foreground">Включите, если у товара есть размеры, цвета и разные цены</p>
+                <p className="text-sm font-semibold">{t('hasVariants')}</p>
+                <p className="text-xs text-muted-foreground">{t('hasVariantsHint')}</p>
               </div>
               <Switch checked={hasVariants} onCheckedChange={setHasVariants} />
             </div>
 
-            {/* Simple product pricing */}
+            {/* ===== Pricing (simple product) ===== */}
             {!hasVariants && (
               <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
-                <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Pricing & Inventory</h3>
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('pricingSection')}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="sku">SKU</Label>
-                    <Input id="sku" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="stock">Stock</Label>
-                    <Input id="stock" type="number" value={form.stock || ''} onChange={(e) => setForm({ ...form, stock: +e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price *</Label>
+                    <Label htmlFor="price">{t('price')} *</Label>
                     <Input id="price" type="number" step="0.01" value={form.price || ''} onChange={(e) => setForm({ ...form, price: +e.target.value })} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="compareAtPrice">Compare At Price</Label>
+                    <Label htmlFor="compareAtPrice">{t('compareAtPrice')}</Label>
                     <Input id="compareAtPrice" type="number" step="0.01" value={form.compareAtPrice || ''} onChange={(e) => setForm({ ...form, compareAtPrice: +e.target.value })} />
+                    <p className="text-[11px] text-muted-foreground">{t('compareAtPriceHint')}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Variants management */}
+            {/* ===== Variants management ===== */}
             {hasVariants && (
               <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Variants</h3>
-                  <Button type="button" variant="outline" size="sm" onClick={addVariant}><Plus size={14} /> Add Variant</Button>
+                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('variantsSection')}</h3>
+                  <Button type="button" variant="outline" size="sm" onClick={addVariant}><Plus size={14} /> {t('addVariant')}</Button>
                 </div>
-                {form.variants.length === 0 && <p className="text-sm text-muted-foreground">Нет вариантов. Добавьте первый вариант.</p>}
+                {form.variants.length === 0 && <p className="text-sm text-muted-foreground">{t('noVariants')}</p>}
                 {form.variants.map((variant, idx) => (
                   <div key={variant.id} className="border rounded-lg p-3 space-y-2 bg-background">
                     <div className="flex justify-between">
-                      <span className="text-xs font-semibold">Variant #{idx + 1}</span>
+                      <span className="text-xs font-semibold">#{idx + 1}</span>
                       <button type="button" onClick={() => removeVariant(idx)}><X size={14} /></button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <Input placeholder="Name (e.g. S, Red)" value={variant.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} />
-                      <Input placeholder="SKU" value={variant.sku} onChange={(e) => updateVariant(idx, 'sku', e.target.value)} />
+                      <Input placeholder={t('variantNamePlaceholder')} value={variant.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} />
+                      <Input placeholder={t('variantSku')} value={variant.sku} onChange={(e) => updateVariant(idx, 'sku', e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      <Input type="number" placeholder="Price" value={variant.price || ''} onChange={(e) => updateVariant(idx, 'price', +e.target.value)} />
-                      <Input type="number" placeholder="Compare At" value={variant.compareAtPrice || ''} onChange={(e) => updateVariant(idx, 'compareAtPrice', +e.target.value)} />
-                      <Input type="number" placeholder="Stock" value={variant.stock || ''} onChange={(e) => updateVariant(idx, 'stock', +e.target.value)} />
+                      <Input type="number" placeholder={t('variantPrice')} value={variant.price || ''} onChange={(e) => updateVariant(idx, 'price', +e.target.value)} />
+                      <Input type="number" placeholder={t('variantCompareAt')} value={variant.compareAtPrice || ''} onChange={(e) => updateVariant(idx, 'compareAtPrice', +e.target.value)} />
+                      <Input type="number" placeholder={t('variantStock')} value={variant.stock || ''} onChange={(e) => updateVariant(idx, 'stock', +e.target.value)} />
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Media */}
+            {/* ===== Media ===== */}
             <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Media</h3>
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('mediaSection')}</h3>
               <div className="space-y-2">
-                <Label htmlFor="image">Main Image</Label>
+                <Label htmlFor="image">{t('mainImage')}</Label>
                 <div className="flex gap-2">
                   <Input id="image" placeholder="https://..." value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
                   <Button type="button" variant="outline" onClick={openMainWidget} disabled={!mainReady} className="gap-2 shrink-0">
-                    <ImagePlus className="w-4 h-4" /> Upload
+                    <ImagePlus className="w-4 h-4" /> {t('upload')}
                   </Button>
                 </div>
                 {form.image && <Image src={form.image} alt="Preview" width={384} height={128} className="object-cover rounded-lg border" />}
               </div>
               <div className="space-y-2">
-                <Label>Additional Images</Label>
+                <Label>{t('additionalImages')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {form.images.map((url, idx) => (
                     <div key={idx} className="relative w-16 h-16 rounded overflow-hidden border">
@@ -364,39 +379,40 @@ export default function ProductForm({
               </div>
             </div>
 
-            {/* Shipping */}
+            {/* ===== Specifications (dynamic key-value attributes) ===== */}
             <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Shipping</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Weight</Label>
-                  <Input type="number" value={form.weight || ''} onChange={(e) => setForm({ ...form, weight: +e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Unit</Label>
-                  <Select value={form.weightUnit} onValueChange={(val) => setForm({ ...form, weightUnit: val as 'g' | 'kg' | 'lb' })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="g">g</SelectItem>
-                      <SelectItem value="kg">kg</SelectItem>
-                      <SelectItem value="lb">lb</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('detailsSection')}</h3>
+                <Button type="button" variant="outline" size="sm" onClick={addAttribute} className="gap-2">
+                  <Plus size={14} /> {t('addAttribute')}
+                </Button>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div><Label>Length</Label><Input type="number" value={form.dimensions.length || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, length: +e.target.value } })} /></div>
-                <div><Label>Width</Label><Input type="number" value={form.dimensions.width || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, width: +e.target.value } })} /></div>
-                <div><Label>Height</Label><Input type="number" value={form.dimensions.height || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, height: +e.target.value } })} /></div>
-              </div>
+              {form.attributes.length === 0 && <p className="text-sm text-muted-foreground">{t('noAttributes')}</p>}
+              {form.attributes.map((attr, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <Input
+                    value={attr.key}
+                    onChange={(e) => updateAttribute(idx, 'key', e.target.value)}
+                    placeholder={t('attributeKeyPlaceholder')}
+                  />
+                  <Input
+                    value={attr.value}
+                    onChange={(e) => updateAttribute(idx, 'value', e.target.value)}
+                    placeholder={t('attributeValuePlaceholder')}
+                  />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeAttribute(idx)}>
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
             </div>
 
-            {/* Tags */}
+            {/* ===== Tags ===== */}
             <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Tags</h3>
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('tagsSection')}</h3>
               <div className="flex gap-2">
-                <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder="Add tag..." onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())} />
-                <Button type="button" variant="outline" onClick={addTag}>Add</Button>
+                <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder={t('addTagPlaceholder')} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())} />
+                <Button type="button" variant="outline" onClick={addTag}>{t('add')}</Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
                 {form.tags.map(tag => (
@@ -407,13 +423,57 @@ export default function ProductForm({
                 ))}
               </div>
             </div>
+
+            {/* ===== Inventory & Logistics (collapsed by default) ===== */}
+            {!hasVariants && (
+              <details className="group border border-border rounded-xl bg-muted/20">
+                <summary className="flex items-center justify-between cursor-pointer select-none p-4 text-sm font-semibold uppercase text-muted-foreground tracking-wider">
+                  {t('advancedSection')}
+                  <ChevronDown size={16} className="transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="px-4 pb-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="sku">{t('sku')}</Label>
+                      <Input id="sku" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="stock">{t('stock')}</Label>
+                      <Input id="stock" type="number" value={form.stock || ''} onChange={(e) => setForm({ ...form, stock: +e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t('weight')}</Label>
+                      <Input type="number" value={form.weight || ''} onChange={(e) => setForm({ ...form, weight: +e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t('unit')}</Label>
+                      <Select value={form.weightUnit} onValueChange={(val) => setForm({ ...form, weightUnit: val as 'g' | 'kg' | 'lb' })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="g">g</SelectItem>
+                          <SelectItem value="kg">kg</SelectItem>
+                          <SelectItem value="lb">lb</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div><Label>{t('length')}</Label><Input type="number" value={form.dimensions.length || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, length: +e.target.value } })} /></div>
+                    <div><Label>{t('width')}</Label><Input type="number" value={form.dimensions.width || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, width: +e.target.value } })} /></div>
+                    <div><Label>{t('height')}</Label><Input type="number" value={form.dimensions.height || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, height: +e.target.value } })} /></div>
+                  </div>
+                </div>
+              </details>
+            )}
           </div>
 
           <SheetFooter className="p-6 border-t border-border">
             <div className="flex justify-end gap-3 w-full">
-              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={onClose}>{t('cancel')}</Button>
               <Button type="submit" disabled={loading}>
-                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : 'Save Product'}
+                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('saving')}</> : t('save')}
               </Button>
             </div>
           </SheetFooter>

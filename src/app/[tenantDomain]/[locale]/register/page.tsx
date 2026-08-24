@@ -46,12 +46,11 @@ export default function RegisterPage() {
         // Если бекенд сразу возвращает токен при регистрации - сохраняем и редиректим
         if (data.token) {
           localStorage.setItem('customer_token', data.token);
-          const branchSlug = selectedBranch?.slug || '';
-          router.push(`/${locale}/${branchSlug}/profile`);
+          // Профиль теперь тенант-уровня — ведём всегда туда
+          router.push(`/${locale}/profile`);
         } else {
           // Если нужно сначала залогиниться - кидаем на страницу логина
-          const branchSlug = selectedBranch?.slug || '';
-          router.push(`/${locale}/${branchSlug}/login`);
+          router.push(`/${locale}/login`);
         }
       } else {
         setError(data.error || 'Registration failed');
@@ -72,7 +71,7 @@ export default function RegisterPage() {
         className="w-full max-w-md"
       >
         <div className="mb-6 text-center">
-          <Link href={`/${locale}/${selectedBranch?.slug || ''}/catalog`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <Link href={`/${locale}/menu`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to menu
           </Link>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('createAccount')}</h1>
@@ -165,7 +164,7 @@ export default function RegisterPage() {
             </form>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              {t('haveAccount')} <Link href={`/${locale}/${selectedBranch?.slug || ''}/login`} className="text-primary font-medium hover:underline">{t('login')}</Link>
+              {t('haveAccount')} <Link href={`/${locale}/login`} className="text-primary font-medium hover:underline">{t('login')}</Link>
             </div>
           </CardContent>
         </Card>

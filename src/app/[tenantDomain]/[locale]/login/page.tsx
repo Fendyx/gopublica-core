@@ -44,9 +44,8 @@ export default function LoginPage() {
 
       if (res.ok) {
         localStorage.setItem('customer_token', data.token);
-        // Redirect to the selected branch's profile page
-        const branchSlug = selectedBranch?.slug || '';
-        router.push(`/${locale}/${branchSlug}/profile`);
+        // Профиль теперь тенант-уровня — ведём всегда туда
+        router.push(`/${locale}/profile`);
       } else {
         setError(data.error || 'Invalid credentials');
       }
@@ -66,7 +65,7 @@ export default function LoginPage() {
         className="w-full max-w-md"
       >
         <div className="mb-6 text-center">
-          <Link href={`/${locale}/${selectedBranch?.slug || ''}/catalog`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <Link href={`/${locale}/menu`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to menu
           </Link>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('welcomeBack')}</h1>
@@ -130,7 +129,7 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              {t('noAccount')} <Link href={`/${locale}/${selectedBranch?.slug || ''}/register`} className="text-primary font-medium hover:underline">{t('register')}</Link>
+              {t('noAccount')} <Link href={`/${locale}/register`} className="text-primary font-medium hover:underline">{t('register')}</Link>
             </div>
           </CardContent>
         </Card>

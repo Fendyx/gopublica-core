@@ -331,19 +331,29 @@ function DeliveryRow({ inStock }: { inStock: boolean }) {
 
 function SpecsTable({ product }: { product: MenuItem }) {
   const t = useTranslations('productDetail');
+
+  const attrs = (product.attributes ?? []).filter((a) => a.key?.trim() && a.value?.trim());
   const hasWeight = product.weight && product.weight > 0;
   const hasDims =
     product.dimensions &&
     (product.dimensions.length || product.dimensions.width || product.dimensions.height);
   const hasTags = product.tags && product.tags.length > 0;
 
-  if (!hasWeight && !hasDims && !hasTags) return null;
+  if (!hasWeight && !hasDims && !hasTags && attrs.length === 0) return null;
 
   return (
     <div className="mt-6 pt-6 border-t border-border-light space-y-3">
       <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-4">
         {t('specifications')}
       </p>
+
+      {/* Dynamic key-value specifications (Author, ISBN, ...) */}
+      {attrs.map((attr, idx) => (
+        <div key={`${attr.key}-${idx}`} className="flex justify-between gap-4 text-xs">
+          <span className="text-muted-foreground tracking-wide">{attr.key}</span>
+          <span className="text-foreground text-right">{attr.value}</span>
+        </div>
+      ))}
 
       {hasWeight && (
         <div className="flex justify-between text-xs">
