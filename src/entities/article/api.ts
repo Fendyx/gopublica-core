@@ -1,4 +1,4 @@
-import type { Article, Event } from './types';
+import type { Article, ArticlePayload, Event, EventPayload } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -35,7 +35,7 @@ export async function fetchArticleById(
 }
 
 export async function createArticle(
-  data: Partial<Article>,
+  data: ArticlePayload,
   token: string
 ): Promise<Article> {
   const res = await fetch(`${API_URL}/api/saas/articles`, {
@@ -53,7 +53,7 @@ export async function createArticle(
 
 export async function updateArticle(
   id: string,
-  data: Partial<Article>,
+  data: ArticlePayload,
   token: string
 ): Promise<Article> {
   const res = await fetch(`${API_URL}/api/saas/articles/${id}`, {
@@ -114,7 +114,7 @@ export async function fetchEventById(
 }
 
 export async function createEvent(
-  data: Partial<Event>,
+  data: EventPayload,
   token: string
 ): Promise<Event> {
   const res = await fetch(`${API_URL}/api/saas/events`, {
@@ -132,7 +132,7 @@ export async function createEvent(
 
 export async function updateEvent(
   id: string,
-  data: Partial<Event>,
+  data: EventPayload,
   token: string
 ): Promise<Event> {
   const res = await fetch(`${API_URL}/api/saas/events/${id}`, {

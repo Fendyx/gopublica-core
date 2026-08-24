@@ -26,7 +26,10 @@ export function TicketCard({ article }: TicketCardProps) {
 
   // Quantity state — must live before the early return below (Rules of Hooks).
   const [quantity, setQuantity] = useState(1);
-  const maxQty = Math.max(1, article.totalTickets - (article.ticketsSold || 0));
+  const maxQty = Math.max(
+    1,
+    (article.totalTickets || 0) - (article.ticketsSold || 0)
+  );
 
   if (!article.isEvent) return null;
 
@@ -54,12 +57,13 @@ export function TicketCard({ article }: TicketCardProps) {
       uid,
       itemType: 'ticket',
       articleId: article._id,
+      menuItemId: article._id, // required by CartItem; for tickets it's the event/article id
       name: article.title,
       price: article.ticketPrice || 0,
       basePrice: article.ticketPrice || 0,
       quantity, // selected quantity instead of hardcoded 1
       ticketMeta: {
-        eventDate: article.eventDate,
+        eventDate: article.eventDate ?? undefined,
       },
     });
     showToast(t('addedToCart'), 'success');

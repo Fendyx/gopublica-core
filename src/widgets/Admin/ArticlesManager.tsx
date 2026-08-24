@@ -205,7 +205,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
 
       if (editingArticle) {
         if (isEvent) {
-          await updateEvent(editingArticle._id, payload, token);
+          await updateEvent(editingArticle._id, { ...payload, isEvent: true }, token);
         } else {
           await updateArticle(editingArticle._id, payload, token);
         }
@@ -217,7 +217,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
       } else {
         let created;
         if (isEvent) {
-          created = await createEvent(payload, token);
+          created = await createEvent({ ...payload, isEvent: true }, token);
         } else {
           created = await createArticle(payload, token);
         }
