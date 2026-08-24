@@ -2,6 +2,19 @@
   "about": {
     "title": "O nas"
   },
+  "article": {
+      "ticketCard": {
+        "eventTicket": "Bilet na wydarzenie",
+        "eventDate": "Data wydarzenia",
+        "venue": "Miejsce",
+        "price": "Cena",
+        "buyTicket": "Kup bilet",
+        "addedToCart": "Bilet dodany do koszyka!",
+        "ticketsLeft": "Pozostało {left} biletów",
+        "decreaseQuantity": "Zmniejsz liczbę",
+        "increaseQuantity": "Zwiększ liczbę"
+      }
+    },
   "admin": {
     "dashboard": "Panel główny",
     "menu": "Menu",
@@ -208,19 +221,6 @@
       "saveError": "Nie udało się zapisać artykułu",
       "deleteSuccess": "Artykuł usunięty pomyślnie!",
       "deleteError": "Nie udało się usunąć artykułu"
-    },
-    "article": {
-      "ticketCard": {
-        "eventTicket": "Bilet na wydarzenie",
-        "eventDate": "Data wydarzenia",
-        "venue": "Miejsce",
-        "price": "Cena",
-        "buyTicket": "Kup bilet",
-        "addedToCart": "Bilet dodany do koszyka!",
-        "ticketsLeft": "Pozostało {left} biletów",
-        "decreaseQuantity": "Zmniejsz liczbę",
-        "increaseQuantity": "Zwiększ liczbę"
-      }
     },
     "productManager": {
       "loading": "Ładowanie...",

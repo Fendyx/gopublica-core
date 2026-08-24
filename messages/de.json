@@ -2,6 +2,19 @@
   "about": {
     "title": "Über uns"
   },
+  "article": {
+      "ticketCard": {
+        "eventTicket": "Event-Ticket",
+        "eventDate": "Event-Datum",
+        "venue": "Veranstaltungsort",
+        "price": "Preis",
+        "buyTicket": "Ticket kaufen",
+        "addedToCart": "Ticket in den Warenkorb gelegt!",
+        "ticketsLeft": "{left} Tickets verfügbar",
+        "decreaseQuantity": "Anzahl verringern",
+        "increaseQuantity": "Anzahl erhöhen"
+      }
+    },
   "admin": {
     "dashboard": "Dashboard",
     "menu": "Menü",
@@ -208,19 +221,6 @@
       "saveError": "Fehler beim Speichern des Artikels",
       "deleteSuccess": "Artikel erfolgreich gelöscht!",
       "deleteError": "Fehler beim Löschen des Artikels"
-    },
-    "article": {
-      "ticketCard": {
-        "eventTicket": "Event-Ticket",
-        "eventDate": "Event-Datum",
-        "venue": "Veranstaltungsort",
-        "price": "Preis",
-        "buyTicket": "Ticket kaufen",
-        "addedToCart": "Ticket in den Warenkorb gelegt!",
-        "ticketsLeft": "{left} Tickets verfügbar",
-        "decreaseQuantity": "Anzahl verringern",
-        "increaseQuantity": "Anzahl erhöhen"
-      }
     },
     "productManager": {
       "loading": "Wird geladen...",

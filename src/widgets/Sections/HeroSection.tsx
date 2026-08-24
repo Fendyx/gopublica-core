@@ -198,7 +198,7 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
           и items-start/items-end/text-left/text-right из alignMap не имеют пространства,
           чтобы визуально сдвинуть текст. Заголовок и подзаголовок наследуют выравнивание
           отсюда (никаких хардкодных text-center/mx-auto на них нет). */}
-      <div className={`relative z-10 flex w-full max-w-4xl flex-col px-4 sm:px-6 lg:px-8 ${align.box}`}>
+      <div className={`relative z-10 flex w-full max-w-4xl flex-col px-4 sm:px-6 lg:px-8 text-white ${align.box}`}>
         {translations.title && (
           <h1 className={styles.title}>{translations.title}</h1>
         )}

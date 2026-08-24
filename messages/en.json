@@ -2,6 +2,19 @@
   "about": {
     "title": "About Us"
   },
+  "article": {
+      "ticketCard": {
+        "eventTicket": "Event Ticket",
+        "eventDate": "Event Date",
+        "venue": "Venue",
+        "price": "Price",
+        "buyTicket": "Buy Ticket",
+        "addedToCart": "Ticket added to cart!",
+        "ticketsLeft": "{left} tickets left",
+        "decreaseQuantity": "Decrease quantity",
+        "increaseQuantity": "Increase quantity"
+      }
+    },
   "admin": {
     "dashboard": "Dashboard",
     "menu": "Menu",
@@ -208,19 +221,6 @@
       "saveError": "Failed to save article",
       "deleteSuccess": "Article deleted successfully!",
       "deleteError": "Failed to delete article"
-    },
-    "article": {
-      "ticketCard": {
-        "eventTicket": "Event Ticket",
-        "eventDate": "Event Date",
-        "venue": "Venue",
-        "price": "Price",
-        "buyTicket": "Buy Ticket",
-        "addedToCart": "Ticket added to cart!",
-        "ticketsLeft": "{left} tickets left",
-        "decreaseQuantity": "Decrease quantity",
-        "increaseQuantity": "Increase quantity"
-      }
     },
     "productManager": {
       "loading": "Loading...",
