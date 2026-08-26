@@ -28,18 +28,18 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
   return (
     <section className="py-12 bg-surface-page">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-8 items-stretch">
           {/* Left: Booking Form — fills its grid column */}
-          <div className="flex">
+          <div className="w-full">
             <BookingForm title={title} subtitle={subtitle} variant="split" />
           </div>
 
           {/* Right: Map or Custom Text */}
-          <div className="flex">
+          <div className="w-full lg:order-none">
             {sideContentType === 'map' ? (
-              <MapEmbed address={address} className="w-full" />
+              <MapEmbed address={address} className="w-full h-[400px] lg:h-full" />
             ) : sideContentType === 'text' ? (
-              <div className="w-full bg-surface-card border border-border rounded-2xl p-8 flex flex-col">
+              <div className="w-full bg-surface-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col">
                 <div className="flex items-center gap-2.5 mb-5">
                   <div className="w-1 h-5 rounded-full bg-primary" />
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-text-secondary">
