@@ -29,6 +29,7 @@
     "siteManagement": "Site management",
     "loginRequired": "Authorization required",
     "analytics": "Analytics",
+    "pageBuilder": "Page Builder",
     "analyticsPage": {
       "loading": "Loading analytics...",
       "error": "Failed to load analytics data",

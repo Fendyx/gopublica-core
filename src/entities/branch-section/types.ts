@@ -112,10 +112,18 @@ export interface FeaturedGridSettings {
   items: string[];
 }
 
+export type ArticleGridLayoutMode = 'grid' | 'carousel';
+export type ArticleGridAspectRatio = '16:9' | '4:3' | '1:1' | '9:16';
+export type ArticleGridCardVariant = 'default' | 'overlay';
+
 export interface ArticleGridSettings {
   mode?: 'latest' | 'manual';
   limit?: number;
   selectedSlugs?: string[];
+  layoutMode?: ArticleGridLayoutMode;
+  aspectRatio?: ArticleGridAspectRatio;
+  cardVariant?: ArticleGridCardVariant;
+  itemsPerRow?: number;
 }
 
 export type SectionSettings =

@@ -68,6 +68,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
     title: '',
     slug: '',
     coverImage: '',
+    videoUrl: '',
     body: '',
     author: '',
     publishedAt: '',
@@ -82,11 +83,29 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
     venueName: '',
   });
 
-  const { openWidget, widgetReady } = useCloudinaryUpload({
+  const { openWidget: openImageUpload, widgetReady: imageWidgetReady } = useCloudinaryUpload({
+    resourceType: 'image',
     onSuccess: (url: string) => {
-      setForm((prev) => ({ ...prev, coverImage: url }));
+      setForm((prev) => ({ ...prev, coverImage: url, videoUrl: '' }));
     },
   });
+
+  const { openWidget: openVideoUpload, widgetReady: videoWidgetReady } = useCloudinaryUpload({
+    resourceType: 'video',
+    onSuccess: (url: string) => {
+      setForm((prev) => ({ ...prev, videoUrl: url, coverImage: '' }));
+    },
+  });
+
+  /** Auto-detect media type from URL and set the correct field */
+  const handleMediaUrlChange = (url: string) => {
+    const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
+    if (isVideo) {
+      setForm((prev) => ({ ...prev, videoUrl: url, coverImage: '' }));
+    } else {
+      setForm((prev) => ({ ...prev, coverImage: url, videoUrl: '' }));
+    }
+  };
 
   const tenantId = tenant?.tenantId || '';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -114,6 +133,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
       title: '',
       slug: '',
       coverImage: '',
+      videoUrl: '',
       body: '',
       author: '',
       publishedAt: '',
@@ -135,6 +155,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
       title: article.title,
       slug: article.slug,
       coverImage: article.coverImage || '',
+      videoUrl: article.videoUrl || '',
       body: article.body,
       author: article.author || '',
       publishedAt: article.publishedAt
@@ -321,29 +342,35 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                 </div>
               </div>
 
-              {/* Cover Image */}
+              {/* Cover Media — unified image/video field */}
               <div className="space-y-2">
-                <Label htmlFor="coverImage">{t('coverImage')}</Label>
+                <Label htmlFor="coverMedia">Cover Media</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="coverImage"
-                    placeholder="https://..."
-                    value={form.coverImage}
-                    onChange={(e) =>
-                      setForm({ ...form, coverImage: e.target.value })
-                    }
+                    id="coverMedia"
+                    placeholder="https://... (auto-detects image or video)"
+                    value={form.coverImage || form.videoUrl || ''}
+                    onChange={(e) => handleMediaUrlChange(e.target.value)}
                   />
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={openWidget}
-                    disabled={!widgetReady}
+                    onClick={() => {
+                      // If current media is video, open video upload; otherwise image
+                      if (form.videoUrl) {
+                        openVideoUpload();
+                      } else {
+                        openImageUpload();
+                      }
+                    }}
+                    disabled={!imageWidgetReady && !videoWidgetReady}
                     className="gap-2 shrink-0"
                   >
                     <ImagePlus className="w-4 h-4" />
                     {t('upload')}
                   </Button>
                 </div>
+                {/* Dynamic preview — shows either image or video */}
                 {form.coverImage && (
                   <Image
                     src={form.coverImage}
@@ -352,6 +379,17 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                     height={128}
                     className="object-cover rounded-lg border shadow-sm mt-2"
                   />
+                )}
+                {form.videoUrl && (
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full max-w-md rounded-lg border shadow-sm mt-2"
+                  >
+                    <source src={form.videoUrl} type="video/mp4" />
+                  </video>
                 )}
               </div>
 

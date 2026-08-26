@@ -5,6 +5,7 @@ export interface Article {
   title: string;
   slug: string;
   coverImage?: string;
+  videoUrl?: string;
   body: string;
   author?: string;
   publishedAt?: string | null;

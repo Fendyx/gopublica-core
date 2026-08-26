@@ -29,6 +29,7 @@
     "siteManagement": "Website-Verwaltung",
     "loginRequired": "Anmeldung erforderlich",
     "analytics": "Analytik",
+    "pageBuilder": "Seiten-Builder",
     "analyticsPage": {
       "loading": "Analysedaten werden geladen...",
       "error": "Analysedaten konnten nicht geladen werden",

@@ -29,6 +29,7 @@
     "siteManagement": "Zarządzanie stroną",
     "loginRequired": "Wymagana autoryzacja",
     "analytics": "Analityka",
+    "pageBuilder": "Budowniczy stron",
     "analyticsPage": {
       "loading": "Ładowanie analityki...",
       "error": "Nie udało się załadować danych analitycznych",

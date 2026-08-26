@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { BranchSection, SectionType, ArticleGridSettings, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, CarouselMode, HeroCta, CtaTargetMode, HeroSlide } from '@/entities/branch-section/types';
+import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, CarouselMode, HeroCta, CtaTargetMode, HeroSlide } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { saveBranchSectionItem, deleteBranchSectionItem } from '@/entities/branch-section/api';
 import { fetchArticles } from '@/entities/article/api';
@@ -848,6 +848,91 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
           )}
         </div>
       )}
+
+      {/* Appearance Settings */}
+      <div className="space-y-4 pt-4 border-t">
+        <Label className="text-sm font-semibold">Appearance</Label>
+
+        {/* Layout Mode */}
+        <div className="space-y-2">
+          <Label htmlFor="layoutMode">Layout Mode</Label>
+          <Select
+            value={settings.layoutMode || 'grid'}
+            onValueChange={(val) =>
+              onChange({ ...settings, layoutMode: val as ArticleGridLayoutMode })
+            }
+          >
+            <SelectTrigger id="layoutMode">
+              <SelectValue placeholder="Select layout mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="grid">Grid</SelectItem>
+              <SelectItem value="carousel">Carousel</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Aspect Ratio */}
+        <div className="space-y-2">
+          <Label htmlFor="aspectRatio">Image Aspect Ratio</Label>
+          <Select
+            value={settings.aspectRatio || '16:9'}
+            onValueChange={(val) =>
+              onChange({ ...settings, aspectRatio: val as ArticleGridAspectRatio })
+            }
+          >
+            <SelectTrigger id="aspectRatio">
+              <SelectValue placeholder="Select aspect ratio" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="16:9">16:9 (Widescreen)</SelectItem>
+              <SelectItem value="4:3">4:3 (Standard)</SelectItem>
+              <SelectItem value="1:1">1:1 (Square)</SelectItem>
+              <SelectItem value="9:16">9:16 (Vertical)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Card Variant */}
+        <div className="space-y-2">
+          <Label htmlFor="cardVariant">Card Style</Label>
+          <Select
+            value={settings.cardVariant || 'default'}
+            onValueChange={(val) =>
+              onChange({ ...settings, cardVariant: val as ArticleGridCardVariant })
+            }
+          >
+            <SelectTrigger id="cardVariant">
+              <SelectValue placeholder="Select card style" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default (text below image)</SelectItem>
+              <SelectItem value="overlay">Overlay (text over image)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Items Per Row */}
+        <div className="space-y-2">
+          <Label htmlFor="itemsPerRow">Items per Row (Desktop)</Label>
+          <Select
+            value={settings.itemsPerRow?.toString() || '3'}
+            onValueChange={(val) =>
+              onChange({ ...settings, itemsPerRow: parseInt(val, 10) || 3 })
+            }
+          >
+            <SelectTrigger id="itemsPerRow">
+              <SelectValue placeholder="Select items per row" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2">2</SelectItem>
+              <SelectItem value="3">3</SelectItem>
+              <SelectItem value="4">4</SelectItem>
+              <SelectItem value="5">5</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </div>
   );
 }

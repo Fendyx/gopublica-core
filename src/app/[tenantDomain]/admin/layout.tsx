@@ -28,6 +28,7 @@ import {
   Sparkles,
   Users,
   Users2,
+  Layout,
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { Separator } from '@/components/ui/separator';
@@ -107,6 +108,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const navItems = [
     { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
     { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
+    { href: '/admin/page-builder', label: t('pageBuilder'), icon: Layout },
     ...(!isBeauty && hasMenu && canManageMenu
       ? [{ href: '/admin/menu', label: t('menu'), icon: UtensilsCrossed }]
       : []),
