@@ -437,6 +437,7 @@
       }
     },
     "orders": "Orders",
+    "customers": "Customers",
     "ordersPage": {
       "loading": "Loading...",
       "selectBranch": "Select a branch",
@@ -501,6 +502,34 @@
         "declinePrompt": "Specify the reason for cancellation (for the client and refund):",
         "declineError": "Error canceling order",
         "updateError": "Error updating status"
+      }
+    },
+    "customersPage": {
+      "loading": "Loading customers...",
+      "unavailable": "Customers section is not available.",
+      "title": "Customers",
+      "subtitle": "Registered customers: {count}",
+      "searchPlaceholder": "Search by name, phone or email...",
+      "empty": "No customers yet",
+      "noResults": "No customers match your search",
+      "table": {
+        "customer": "Customer",
+        "orders": "Orders",
+        "totalSpent": "Total spent",
+        "lastOrder": "Last order",
+        "registered": "Registered"
+      },
+      "stats": {
+        "totalSpent": "Total spent",
+        "orders": "Orders",
+        "avgOrderValue": "Avg. order"
+      },
+      "details": {
+        "contactInfo": "Contact",
+        "registeredOn": "Registered on {date}",
+        "stats": "Statistics",
+        "orderHistory": "Order history",
+        "noOrders": "No orders yet"
       }
     }
   },

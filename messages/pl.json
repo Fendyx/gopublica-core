@@ -437,6 +437,7 @@
       }
     },
     "orders": "Zamówienia",
+    "customers": "Klienci",
     "ordersPage": {
       "loading": "Ładowanie...",
       "selectBranch": "Wybierz filię",
@@ -501,6 +502,34 @@
         "declinePrompt": "Podaj powód anulowania (dla klienta i zwrotu środków):",
         "declineError": "Błąd podczas anulowania zamówienia",
         "updateError": "Błąd podczas aktualizacji statusu"
+      }
+    },
+    "customersPage": {
+      "loading": "Ładowanie klientów...",
+      "unavailable": "Sekcja Klienci jest niedostępna.",
+      "title": "Klienci",
+      "subtitle": "Zarejestrowani klienci: {count}",
+      "searchPlaceholder": "Szukaj po nazwisku, telefonie lub e-mailu...",
+      "empty": "Brak klientów",
+      "noResults": "Brak klientów spełniających kryteria wyszukiwania",
+      "table": {
+        "customer": "Klient",
+        "orders": "Zamówienia",
+        "totalSpent": "Wydane łącznie",
+        "lastOrder": "Ostatnie zamówienie",
+        "registered": "Data rejestracji"
+      },
+      "stats": {
+        "totalSpent": "Wydane łącznie",
+        "orders": "Zamówienia",
+        "avgOrderValue": "Śr. wartość zamówienia"
+      },
+      "details": {
+        "contactInfo": "Kontakt",
+        "registeredOn": "Zarejestrowano: {date}",
+        "stats": "Statystyki",
+        "orderHistory": "Historia zamówień",
+        "noOrders": "Brak zamówień"
       }
     }
   },

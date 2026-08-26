@@ -437,6 +437,7 @@
       }
     },
     "orders": "Bestellungen",
+    "customers": "Kunden",
     "ordersPage": {
       "loading": "Wird geladen...",
       "selectBranch": "Filiale auswählen",
@@ -501,6 +502,34 @@
         "declinePrompt": "Geben Sie den Grund für die Stornierung an (für Kunde und Rückerstattung):",
         "declineError": "Fehler beim Stornieren der Bestellung",
         "updateError": "Fehler beim Aktualisieren des Status"
+      }
+    },
+    "customersPage": {
+      "loading": "Kunden werden geladen...",
+      "unavailable": "Der Bereich Kunden ist nicht verfügbar.",
+      "title": "Kunden",
+      "subtitle": "Registrierte Kunden: {count}",
+      "searchPlaceholder": "Nach Name, Telefon oder E-Mail suchen...",
+      "empty": "Noch keine Kunden",
+      "noResults": "Keine Kunden entsprechen Ihrer Suche",
+      "table": {
+        "customer": "Kunde",
+        "orders": "Bestellungen",
+        "totalSpent": "Gesamt ausgegeben",
+        "lastOrder": "Letzte Bestellung",
+        "registered": "Registriert am"
+      },
+      "stats": {
+        "totalSpent": "Gesamt ausgegeben",
+        "orders": "Bestellungen",
+        "avgOrderValue": "Ø Bestellwert"
+      },
+      "details": {
+        "contactInfo": "Kontakt",
+        "registeredOn": "Registriert am {date}",
+        "stats": "Statistiken",
+        "orderHistory": "Bestellverlauf",
+        "noOrders": "Keine Bestellungen"
       }
     }
   },

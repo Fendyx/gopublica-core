@@ -26,6 +26,7 @@ import {
   Menu,
   X,
   Sparkles,
+  Users,
   Users2,
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
@@ -113,6 +114,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
       ? [{ href: '/admin/ecommerce', label: 'Catalog', icon: Package }]
       : []),
     ...(canManageOrders ? [{ href: '/admin/orders', label: t('orders'), icon: FileText }] : []),
+    ...(canManageOrders ? [{ href: '/admin/customers', label: t('customers'), icon: Users }] : []),
     ...(isBeauty ? [
       { href: '/admin/beauty-services', label: 'Beauty Services', icon: Sparkles },
       { href: '/admin/beauty-masters', label: 'Beauty Masters', icon: Users2 },
