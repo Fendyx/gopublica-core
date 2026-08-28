@@ -18,13 +18,15 @@ export default function SectionEditPage() {
   const [initialData, setInitialData] = useState<BranchSection | undefined>(undefined);
   const [allSections, setAllSections] = useState<BranchSection[]>([]);
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const pageSlug = searchParams.get('page') || initialData?.page || 'home';
 
   useEffect(() => {
     const loadSections = async () => {
       if (!selectedBranch?._id || !tenant?.tenantId) return;
 
       setLoading(true);
-      const sections = await fetchBranchSections(tenant.tenantId, selectedBranch._id);
+      const sections = await fetchBranchSections(tenant.tenantId, selectedBranch._id, pageSlug);
       setAllSections(sections);
 
       if (params.sectionId !== 'new') {
@@ -34,16 +36,16 @@ export default function SectionEditPage() {
       setLoading(false);
     };
     loadSections();
-  }, [params.sectionId, selectedBranch?._id, tenant?.tenantId]);
+  }, [params.sectionId, selectedBranch?._id, tenant?.tenantId, pageSlug]);
 
   const onSave = async (data: Partial<BranchSection>) => {
     await saveBranchSection({
       ...data,
       branchId: selectedBranch?._id,
       tenantId: tenant?.tenantId,
-      page: 'home',
+      page: pageSlug,
     });
-    router.push(`/admin/page-builder`);
+    router.push(`/admin/page-builder?page=${pageSlug}`);
   };
 
   if (loading) {
@@ -60,7 +62,7 @@ export default function SectionEditPage() {
         initialData={initialData}
         defaultType={type}
         onSave={onSave}
-        onCancel={() => router.push(`/admin/page-builder`)}
+        onCancel={() => router.push(`/admin/page-builder?page=${pageSlug}`)}
         sections={allSections}
       />
     </div>

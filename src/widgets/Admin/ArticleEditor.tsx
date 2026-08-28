@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Bold,
@@ -61,6 +61,13 @@ export function ArticleEditor({
       },
     },
   });
+
+  // Синхронизация внешнего текста с внутренним стейтом Tiptap при переключении языков
+  useEffect(() => {
+    if (editor && body !== editor.getHTML()) {
+      editor.commands.setContent(body || '');
+    }
+  }, [editor, body]);
 
   const addImage = useCallback(() => {
     const url = window.prompt('Image URL:');

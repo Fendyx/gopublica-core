@@ -1,7 +1,7 @@
 'use client';
 import { SectionType } from '@/entities/branch-section/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Calendar } from 'lucide-react';
+import { FileText, Calendar, ClipboardList } from 'lucide-react';
 
 interface SectionTypePickerProps {
   isOpen: boolean;
@@ -46,6 +46,12 @@ const availableTypes: { type: SectionType; label: string; description: string; i
     label: 'Booking Form',
     description: 'Embed the standard reservation form.',
     icon: Calendar,
+  },
+  {
+    type: 'dynamic_form',
+    label: 'Dynamic Form',
+    description: 'Custom form (partner requests, contact, etc.)',
+    icon: ClipboardList,
   },
 ];
 

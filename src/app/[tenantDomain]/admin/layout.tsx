@@ -29,6 +29,7 @@ import {
   Users,
   Users2,
   Layout,
+  ClipboardList,
 } from 'lucide-react';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { Separator } from '@/components/ui/separator';
@@ -117,6 +118,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
       : []),
     ...(canManageOrders ? [{ href: '/admin/orders', label: t('orders'), icon: FileText }] : []),
     ...(canManageOrders ? [{ href: '/admin/customers', label: t('customers'), icon: Users }] : []),
+    ...(canManageOrders ? [{ href: '/admin/submissions', label: t('submissions'), icon: ClipboardList }] : []),
     ...(isBeauty ? [
       { href: '/admin/beauty-services', label: 'Beauty Services', icon: Sparkles },
       { href: '/admin/beauty-masters', label: 'Beauty Masters', icon: Users2 },

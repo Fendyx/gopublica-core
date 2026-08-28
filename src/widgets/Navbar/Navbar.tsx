@@ -22,7 +22,6 @@ export default function Navbar() {
   const burgerRef = useRef<HTMLButtonElement>(null)
   const locationDropdownRef = useRef<HTMLDivElement>(null)
 
-  // Состояние авторизации
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   const {
@@ -35,23 +34,18 @@ export default function Navbar() {
     loading: branchLoading,
   } = useBranch()
 
-  // Единое состояние для нового объединенного дропдауна локаций (Десктоп)
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false)
 
-  // Корзина: Считаем сумму quantity, а не длину массива
   const cartItemsCount = useCartStore((s) => s.items.reduce((acc, item) => acc + item.quantity, 0))
   const hasOnlineOrdering = tenant?.features?.hasOnlineOrdering ?? false
 
-  // Проверяем токен при загрузке
   useEffect(() => {
     const token = localStorage.getItem('customer_token')
     setIsLoggedIn(!!token)
   }, [])
 
-  // Обработка клика вне меню и дропдауна локаций
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Закрываем мобильное меню
       if (
         isOpen &&
         menuRef.current &&
@@ -62,7 +56,6 @@ export default function Navbar() {
         setIsOpen(false)
       }
 
-      // Закрываем дропдаун локаций
       if (
         locationDropdownOpen &&
         locationDropdownRef.current &&
@@ -88,6 +81,7 @@ export default function Navbar() {
     ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/${branchSlug}/menu`, label: t('menu') }] : []),
     ...(tenant?.features?.hasOnlineOrdering ? [{ href: `/${locale}/${branchSlug}/catalog`, label: t('catalog') }] : []),
     ...(tenant?.features?.hasGallery ? [{ href: `/${locale}/${branchSlug}/#gallery`, label: t('gallery') }] : []),
+    { href: `/${locale}/${branchSlug}/partners`, label: t('partners') },
     { href: `/${locale}/${branchSlug}/#contact`, label: t('contact') },
   ]
 
@@ -97,12 +91,10 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background backdrop-blur-md border-b border-border-light transition-colors">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <IntlLink href={branchSlug ? `/${branchSlug}` : '/'} className="font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors shrink-0">
             {(tenant?.businessName || tenant?.clientName) || ''}
           </IntlLink>
 
-          {/* Desktop Navigation (скрываем до lg, чтобы не теснилось) */}
           <div className="hidden lg:flex items-center gap-4 xl:gap-8 flex-1 justify-center">
             <nav className="flex items-center gap-4 xl:gap-6">
               {links.map((link) => (
@@ -112,8 +104,7 @@ export default function Navbar() {
               ))}
             </nav>
 
-            {/* ЕДИНЫЙ Селектор Города и Филиала (Desktop) */}
-            {!branchLoading && cities.length > 0 && (
+            {!branchLoading && branches.length > 1 && (
               <div className="relative border-l border-border-light pl-4 xl:pl-6" ref={locationDropdownRef}>
                 <button
                   onClick={() => setLocationDropdownOpen(!locationDropdownOpen)}
@@ -144,7 +135,6 @@ export default function Navbar() {
                                 setCity(city)
                                 setBranch(branch)
                                 setLocationDropdownOpen(false)
-                                // Navigate to the new branch's root page
                                 router.push(`/${locale}/${branch.slug}`)
                               }}
                               className="flex flex-col w-full text-left px-4 py-2 text-sm hover:bg-surface-hover transition-colors group"
@@ -171,18 +161,15 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="hidden sm:block">
               <LanguageSwitcher />
             </div>
 
-            {/* Переключатель темы (Desktop) */}
             <div className="hidden lg:flex items-center">
               <ThemeToggle />
             </div>
 
-            {/* Профиль / Логин (Desktop) */}
             <div className="hidden lg:flex items-center">
               {isLoggedIn ? (
                 <Link
@@ -205,7 +192,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Иконка корзины */}
             {hasOnlineOrdering && (
               <Link
                 href={`/${locale}/order/checkout`}
@@ -221,7 +207,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Кнопка бронирования */}
             {hasBooking && (
               <Link href={`/${locale}/${branchSlug}/reservations`} className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 shadow-sm whitespace-nowrap" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <CalendarDays size={16} />
@@ -229,7 +214,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Бургер (показываем до lg) */}
             <button ref={burgerRef} onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors" aria-label="Открыть меню">
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -237,7 +221,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div ref={menuRef} className="lg:hidden border-t border-border-light bg-surface-page px-4 py-6 flex flex-col gap-4 shadow-dropdown max-h-[calc(100vh-64px)] overflow-y-auto">
           <nav className="flex flex-col gap-1">
@@ -248,8 +231,7 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Локации в мобильном меню */}
-          {!branchLoading && cities.length > 0 && (
+          {!branchLoading && branches.length > 1 && (
             <div className="mt-2 pt-4 border-t border-border-light flex flex-col gap-4">
               <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider px-2">Локация</span>
               
@@ -268,7 +250,6 @@ export default function Navbar() {
                             setCity(city)
                             setBranch(branch)
                             setIsOpen(false)
-                            // Navigate to the new branch's root page
                             router.push(`/${locale}/${branch.slug}`)
                           }}
                           className={`flex flex-col text-left px-4 py-3 rounded-xl text-sm transition-all border ${
@@ -300,12 +281,10 @@ export default function Navbar() {
               <LanguageSwitcher />
             </div>
 
-            {/* Переключатель темы (Mobile) */}
             <div className="flex justify-center mb-2">
               <ThemeToggle />
             </div>
 
-            {/* Профиль / Логин (Mobile) */}
             {isLoggedIn ? (
               <Link 
                 href={`/${locale}/profile`} 

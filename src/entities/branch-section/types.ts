@@ -1,6 +1,6 @@
 import type { ProductCardVariant } from '@/entities/menu-item/types';
 
-export type SectionType = 'hero' | 'hero_video' | 'entity_carousel' | 'feature_carousel' | 'booking' | 'map' | 'menu_categories' | 'article_grid';
+export type SectionType = 'hero' | 'hero_video' | 'entity_carousel' | 'feature_carousel' | 'booking' | 'map' | 'menu_categories' | 'article_grid' | 'dynamic_form';
 
 export type CarouselMode = 'manual' | 'ecommerce' | 'menu';
 export type CarouselSelectionMode = 'items' | 'categories';
@@ -126,6 +126,37 @@ export interface ArticleGridSettings {
   itemsPerRow?: number;
 }
 
+export type FormFieldType = 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'file' | 'checkbox' | 'radio' | 'date';
+
+export interface FormField {
+  id: string;
+  label: string;
+  labelI18n?: Record<string, string>;
+  type: FormFieldType;
+  required: boolean;
+  options?: string[];
+  optionsI18n?: Record<string, string[]>;
+  placeholder?: string;
+  placeholderI18n?: Record<string, string>;
+  validation?: {
+    pattern?: string;
+    minLength?: number;
+    maxLength?: number;
+  };
+  order: number;
+}
+
+export interface DynamicFormSettings {
+  fields: FormField[];
+  submitLabel?: string;
+  submitLabelI18n?: Record<string, string>;
+  successMessage?: string;
+  successMessageI18n?: Record<string, string>;
+  notificationEmail?: string;
+  sideText?: string;
+  sideTextI18n?: Record<string, string>;
+}
+
 export type SectionSettings =
   | HeroSettings
   | EntityCarouselSettings
@@ -133,7 +164,8 @@ export type SectionSettings =
   | BookingSettings
   | MapSettings
   | FeaturedGridSettings
-  | ArticleGridSettings;
+  | ArticleGridSettings
+  | DynamicFormSettings;
 
 export interface BranchSectionItem {
   _id: string;

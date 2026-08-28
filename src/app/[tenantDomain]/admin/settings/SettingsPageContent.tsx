@@ -47,6 +47,8 @@ import {
   Plus,
   Trash2,
   Store,
+  Building2,
+  FileText,
 } from 'lucide-react';
 
 const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
@@ -92,6 +94,14 @@ export default function SettingsPageContent() {
 
   // 👈 НОВОЕ: фича "тизер скоро открытие" для ТЕКУЩЕГО выбранного филиала
   const [hasVeganTeaser, setHasVeganTeaser] = useState(false);
+
+  // 👈 НОВОЕ: юридические реквизиты (Regulamin / Polityka prywatności)
+  const [legal, setLegal] = useState({
+    legalCompanyName: '',
+    nip: '',
+    regon: '',
+    krs: '',
+  });
 
   // 👈 НОВОЕ: подфилии (sub-venues) — только для основных филиалов (без parentBranchId)
   const isMainBranch = !!selectedBranch && !selectedBranch.parentBranchId;
@@ -142,6 +152,14 @@ export default function SettingsPageContent() {
         // 👈 НОВОЕ: подтягиваем features.hasVeganTeaser текущего филиала
         setHasVeganTeaser(Boolean(data.features?.hasVeganTeaser));
 
+        // 👈 НОВОЕ: подтягиваем юридические реквизиты
+        setLegal({
+          legalCompanyName: data.legal?.legalCompanyName || data.businessName || '',
+          nip: data.legal?.nip || '',
+          regon: data.legal?.regon || '',
+          krs: data.legal?.krs || '',
+        });
+
         if (data.notifications) {
           setNotifications(prev => ({
             ...prev,
@@ -173,6 +191,8 @@ export default function SettingsPageContent() {
         features: {
           hasVeganTeaser,
         },
+        // 👈 НОВОЕ: юридические реквизиты (уходит в tenant.legal)
+        legal,
         theme: {
           radius,
           productCardVariant: cardVariant,
@@ -270,11 +290,12 @@ export default function SettingsPageContent() {
         <Card>
           <CardContent className="p-6">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className={`grid w-full mb-8 ${isMainBranch ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'}`}>
+              <TabsList className={`grid w-full mb-8 ${isMainBranch ? 'grid-cols-2 sm:grid-cols-6' : 'grid-cols-2 sm:grid-cols-5'}`}>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="appearance">Appearance</TabsTrigger>
                 <TabsTrigger value="localization">Localization</TabsTrigger>
                 <TabsTrigger value="seo">SEO & Alerts</TabsTrigger>
+                <TabsTrigger value="legal">Prawne</TabsTrigger>
                 {isMainBranch && <TabsTrigger value="subvenues">Sub-venues</TabsTrigger>}
               </TabsList>
 
@@ -538,7 +559,73 @@ export default function SettingsPageContent() {
                 </div>
               </TabsContent>
 
-              {/* --- ВКЛАДКА 5 (НОВАЯ): SUB-VENUES --- */}
+              {/* --- ВКЛАДКА 5: PRAWNE (ЮРИДИЧЕСКИЕ РЕКВИЗИТЫ) --- */}
+              <TabsContent value="legal" className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">
+                    Dane rejestrowe
+                  </h3>
+                  <p className="text-xs text-muted-foreground max-w-lg">
+                    Pola te są wstawiane automatycznie do strony Regulaminu i Polityki prywatności.
+                    Pozostaw puste, jeśli nie dotyczy.
+                  </p>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="legalCompanyName" className="flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+                      Nazwa firmy (wymagana w regulaminie)
+                    </Label>
+                    <Input
+                      id="legalCompanyName"
+                      value={legal.legalCompanyName}
+                      onChange={e => setLegal(prev => ({ ...prev, legalCompanyName: e.target.value }))}
+                      placeholder="np. Kawiarnia Kocia"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="nip" className="flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                        NIP
+                      </Label>
+                      <Input
+                        id="nip"
+                        value={legal.nip}
+                        onChange={e => setLegal(prev => ({ ...prev, nip: e.target.value }))}
+                        placeholder="np. 1234567890"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="regon" className="flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                        REGON
+                      </Label>
+                      <Input
+                        id="regon"
+                        value={legal.regon}
+                        onChange={e => setLegal(prev => ({ ...prev, regon: e.target.value }))}
+                        placeholder="np. 12345678901234"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="krs" className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                      KRS
+                    </Label>
+                    <Input
+                      id="krs"
+                      value={legal.krs}
+                      onChange={e => setLegal(prev => ({ ...prev, krs: e.target.value }))}
+                      placeholder="np. 0000123456"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* --- ВКЛАДКА 6 (НОВАЯ): SUB-VENUES --- */}
               {isMainBranch && (
                 <TabsContent value="subvenues" className="space-y-6">
                   <div className="space-y-2">

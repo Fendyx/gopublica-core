@@ -9,6 +9,7 @@ import MapSection from './MapSection';
 import BookingSection from './BookingSection';
 import FeaturedGridSection from './FeaturedGridSection';
 import ArticleGridSection from './ArticleGridSection';
+import DynamicFormSection from './DynamicFormSection';
 
 interface SectionProps {
   section: BranchSection;
@@ -34,4 +35,5 @@ export const sectionRegistry: Record<SectionType, ComponentType<SectionProps>> =
   map: MapSection,
   menu_categories: FeaturedGridSection,
   article_grid: ArticleGridSection,
+  dynamic_form: DynamicFormSection,
 };

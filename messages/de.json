@@ -24,6 +24,7 @@
     "gopublica": "Gopublica",
     "settings": "Einstellungen",
     "jobs": "Bewerbungen",
+    "submissions": "Anfragen",
     "logout": "Abmelden",
     "loading": "Wird geladen...",
     "siteManagement": "Website-Verwaltung",
@@ -400,6 +401,41 @@
         "placeholderOptions": "Option 1, Option 2"
       }
     },
+    "sectionForm": {
+      "dynamicForm": {
+        "title": "Dynamische Formular-Einstellungen",
+        "subtitle": "Formularfelder, Senden-Button und Erfolgsmeldung konfigurieren",
+        "submitLabel": "Beschriftung des Senden-Buttons",
+        "successMessage": "Erfolgsmeldung",
+        "notificationEmail": "Benachrichtigungs-E-Mail",
+        "fieldBuilder": "Feld-Konstruktor",
+        "fieldBuilderDesc": "Struktur verwalten und per Drag-and-Drop sortieren",
+        "selectFieldType": "Feldtyp auswählen",
+        "addField": "Neues Feld hinzufügen",
+        "fieldLabel": "Feldbezeichnung",
+        "fieldType": "Typ",
+        "fieldPlaceholder": "Platzhalter",
+        "requiredField": "Pflichtfeld",
+        "optionsComma": "Optionen (kommagetrennt)",
+        "fieldTypes": {
+          "text": "Text",
+          "email": "E-Mail",
+          "tel": "Telefon",
+          "textarea": "Textbereich",
+          "select": "Dropdown",
+          "radio": "Optionsfelder",
+          "checkbox": "Kontrollkästchen",
+          "file": "Datei-Upload"
+        },
+        "defaults": {
+          "newField": "Neues Feld",
+          "option1": "Option 1",
+          "placeholderText": "Übersetzung für Bezeichnung",
+          "placeholderInput": "Übersetzung für Platzhalter",
+          "placeholderOptions": "Option 1, Option 2"
+        }
+      }
+    },
     "jobsPage": {
       "title": "Bewerbungen",
       "settingsBtn": "Formulareinstellungen",
@@ -709,7 +745,8 @@
     "contact": "Kontakt",
     "booking": "Tisch reservieren",
     "login": "Anmelden",
-    "profile": "Profil"
+    "profile": "Profil",
+    "partners": "Partner"
   },
   "notifications": {
     "new_booking": "🍽️ Neue Reservierung",

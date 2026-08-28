@@ -24,6 +24,7 @@
     "gopublica": "Gopublica",
     "settings": "Settings",
     "jobs": "Job applications",
+    "submissions": "Submissions",
     "logout": "Log out",
     "loading": "Loading...",
     "siteManagement": "Site management",
@@ -400,6 +401,41 @@
         "placeholderOptions": "Option 1, Option 2"
       }
     },
+    "sectionForm": {
+      "dynamicForm": {
+        "title": "Dynamic Form Settings",
+        "subtitle": "Configure form fields, submit button, and success message",
+        "submitLabel": "Submit Button Label",
+        "successMessage": "Success Message",
+        "notificationEmail": "Notification Email",
+        "fieldBuilder": "Field Builder",
+        "fieldBuilderDesc": "Manage structure and drag to sort fields",
+        "selectFieldType": "Select field type",
+        "addField": "Add new field",
+        "fieldLabel": "Field Label",
+        "fieldType": "Type",
+        "fieldPlaceholder": "Placeholder",
+        "requiredField": "Required field",
+        "optionsComma": "Options (comma-separated)",
+        "fieldTypes": {
+          "text": "Text",
+          "email": "Email",
+          "tel": "Phone",
+          "textarea": "Textarea",
+          "select": "Dropdown",
+          "radio": "Radio buttons",
+          "checkbox": "Checkbox",
+          "file": "File upload"
+        },
+        "defaults": {
+          "newField": "New Field",
+          "option1": "Option 1",
+          "placeholderText": "Translation for Label",
+          "placeholderInput": "Translation for Placeholder",
+          "placeholderOptions": "Option 1, Option 2"
+        }
+      }
+    },
     "jobsPage": {
       "title": "Job Applications",
       "settingsBtn": "Form Settings",
@@ -435,6 +471,41 @@
         "comment": "Comment:",
         "noComment": "No comment",
         "submittedAt": "Submitted at:"
+      }
+    },
+    "submissionsPage": {
+      "title": "Form Submissions",
+      "subtitle": "View and manage submissions from dynamic forms",
+      "loading": "Loading...",
+      "empty": "No submissions yet",
+      "allStatuses": "All statuses",
+      "pageInfo": "Page {current} of {total}",
+      "back": "Back",
+      "next": "Next",
+      "table": {
+        "date": "Date",
+        "form": "Form",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "statusLabels": {
+        "new": "New",
+        "viewed": "Viewed",
+        "processed": "Processed",
+        "archived": "Archived"
+      },
+      "detail": {
+        "loading": "Loading...",
+        "notFound": "Submission not found",
+        "title": "Submission #{id}",
+        "back": "Back",
+        "formData": "Form Data",
+        "resume": "Attachment:",
+        "download": "Download",
+        "comment": "Comment:",
+        "noComment": "No comment",
+        "submittedAt": "Submitted at:",
+        "sourceForm": "Source Form"
       }
     },
     "orders": "Orders",
@@ -587,6 +658,12 @@
     "back": "Go back",
     "submitting": "Sending..."
   },
+  "dynamicForm": {
+    "successDefault": "Form submitted successfully!",
+    "submitDefault": "Submit",
+    "submitting": "Sending...",
+    "back": "Go back"
+  },
   "catalog": {
     "shopByCategory": "SHOP BY CATEGORY",
     "addedToCart": "«{name}» added to cart",
@@ -709,7 +786,8 @@
     "contact": "Contact",
     "booking": "Book a table",
     "login": "Login",
-    "profile": "Profile"
+    "profile": "Profile",
+    "partners": "Partners"
   },
   "notifications": {
     "new_booking": "🍽️ New booking",

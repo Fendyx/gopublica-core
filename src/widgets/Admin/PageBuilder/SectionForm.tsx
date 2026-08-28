@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, CarouselMode, HeroCta, CtaTargetMode, HeroSlide } from '@/entities/branch-section/types';
+import { useTranslations } from 'next-intl';
+import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, CarouselMode, HeroCta, CtaTargetMode, HeroSlide, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { saveBranchSectionItem, deleteBranchSectionItem } from '@/entities/branch-section/api';
 import { fetchArticles } from '@/entities/article/api';
@@ -22,6 +23,8 @@ import {
 } from '@/components/ui/select';
 import SectionItemList from './SectionItemList';
 import CarouselEntitySelector from './CarouselEntitySelector';
+import FormFieldsEditor from '@/features/dynamic-form/FormFieldsEditor';
+import { ArticleEditor } from '../ArticleEditor';
 
 interface SectionFormProps {
   initialData?: BranchSection;
@@ -670,6 +673,110 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 />
               </div>
             )}
+          </div>
+        );
+      }
+      case 'dynamic_form': {
+        const dfSettings = settings as DynamicFormSettings;
+        const [currentLang, setCurrentLang] = useState<'base' | 'pl' | 'de'>('base');
+        const t = useTranslations('admin.sectionForm.dynamicForm');
+
+        const handleFieldsChange = (fields: FormField[]) => {
+          setSettings({ ...settings, fields });
+        };
+
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <span className="text-sm font-medium text-gray-700">Language:</span>
+              {['base', 'pl', 'de'].map((lang) => (
+                <Button
+                  key={lang}
+                  variant={currentLang === lang ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCurrentLang(lang as 'base' | 'pl' | 'de')}
+                  className="rounded-lg text-xs font-medium"
+                >
+                  {lang === 'base' ? 'Base (EN)' : lang.toUpperCase()}
+                </Button>
+              ))}
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Submit Button Label {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
+                <Input
+                  value={currentLang === 'base' ? (dfSettings.submitLabel || '') : (dfSettings.submitLabelI18n?.[currentLang] || '')}
+                  onChange={(e) => {
+                    if (currentLang === 'base') {
+                      setSettings({ ...settings, submitLabel: e.target.value });
+                    } else {
+                      setSettings({
+                        ...settings,
+                        submitLabelI18n: { ...(dfSettings.submitLabelI18n || {}), [currentLang]: e.target.value },
+                      });
+                    }
+                  }}
+                  placeholder="Submit"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Success Message {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
+                <Input
+                  value={currentLang === 'base' ? (dfSettings.successMessage || '') : (dfSettings.successMessageI18n?.[currentLang] || '')}
+                  onChange={(e) => {
+                    if (currentLang === 'base') {
+                      setSettings({ ...settings, successMessage: e.target.value });
+                    } else {
+                      setSettings({
+                        ...settings,
+                        successMessageI18n: { ...(dfSettings.successMessageI18n || {}), [currentLang]: e.target.value },
+                      });
+                    }
+                  }}
+                  placeholder="Form submitted successfully!"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Notification Email</Label>
+                <Input
+                  type="email"
+                  value={dfSettings.notificationEmail || ''}
+                  onChange={(e) => setSettings({ ...settings, notificationEmail: e.target.value })}
+                  placeholder="notifications@example.com"
+                />
+              </div>
+
+              {/* NEW SECTION: Side Panel Rich Text */}
+              <div className="space-y-2 pt-4 border-t">
+                <Label>Side Panel Text {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
+                <p className="text-xs text-muted-foreground mb-2">Optional rich text to display next to the form.</p>
+                <div className="border rounded-xl bg-white overflow-hidden min-h-[150px]">
+                <ArticleEditor
+                    body={currentLang === 'base' ? (dfSettings.sideText || '') : (dfSettings.sideTextI18n?.[currentLang] || '')}
+                    onChange={(val: string) => {
+                      if (currentLang === 'base') {
+                        setSettings({ ...settings, sideText: val });
+                      } else {
+                        setSettings({
+                          ...settings,
+                          sideTextI18n: { ...(dfSettings.sideTextI18n || {}), [currentLang]: val },
+                        });
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <FormFieldsEditor
+              fields={dfSettings.fields || []}
+              onChange={handleFieldsChange}
+              currentLang={currentLang}
+              t={t}
+            />
           </div>
         );
       }

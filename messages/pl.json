@@ -24,6 +24,7 @@
     "gopublica": "Gopublica",
     "settings": "Ustawienia",
     "jobs": "Aplikacje o pracę",
+    "submissions": "Zgłoszenia",
     "logout": "Wyloguj się",
     "loading": "Ładowanie...",
     "siteManagement": "Zarządzanie stroną",
@@ -400,6 +401,41 @@
         "placeholderOptions": "Opcja 1, Opcja 2"
       }
     },
+    "sectionForm": {
+      "dynamicForm": {
+        "title": "Ustawienia formularza dynamicznego",
+        "subtitle": "Konfiguruj pola formularza, przycisk wysyłania i komunikat sukcesu",
+        "submitLabel": "Etykieta przycisku wysyłania",
+        "successMessage": "Komunikat sukcesu",
+        "notificationEmail": "E-mail powiadomień",
+        "fieldBuilder": "Konstruktor pól",
+        "fieldBuilderDesc": "Zarządzaj strukturą i przeciągaj, aby sortować pola",
+        "selectFieldType": "Wybierz typ pola",
+        "addField": "Dodaj nowe pole",
+        "fieldLabel": "Etykieta pola",
+        "fieldType": "Typ",
+        "fieldPlaceholder": "Tekst zastępczy",
+        "requiredField": "Pole wymagane",
+        "optionsComma": "Opcje (oddzielone przecinkami)",
+        "fieldTypes": {
+          "text": "Tekst",
+          "email": "E-mail",
+          "tel": "Telefon",
+          "textarea": "Pole tekstowe",
+          "select": "Lista rozwijana",
+          "radio": "Przyciski radiowe",
+          "checkbox": "Pole wyboru",
+          "file": "Przesyłanie pliku"
+        },
+        "defaults": {
+          "newField": "Nowe pole",
+          "option1": "Opcja 1",
+          "placeholderText": "Tłumaczenie etykiety",
+          "placeholderInput": "Tłumaczenie tekstu zastępczego",
+          "placeholderOptions": "Opcja 1, Opcja 2"
+        }
+      }
+    },
     "jobsPage": {
       "title": "Aplikacje o pracę",
       "settingsBtn": "Ustawienia formularza",
@@ -587,6 +623,12 @@
     "back": "Wróć",
     "submitting": "Wysyłanie..."
   },
+  "dynamicForm": {
+    "successDefault": "Formularz został pomyślnie wysłany!",
+    "submitDefault": "Wyślij",
+    "submitting": "Wysyłanie...",
+    "back": "Wróć"
+  },
   "catalog": {
     "shopByCategory": "KUPUJ WEDŁUG KATEGORII",
     "addedToCart": "«{name}» dodano do koszyka",
@@ -709,7 +751,8 @@
     "contact": "Kontakt",
     "booking": "Zarezerwuj stolik",
     "login": "Zaloguj się",
-    "profile": "Profil"
+    "profile": "Profil",
+    "partners": "Partnerzy"
   },
   "notifications": {
     "new_booking": "🍽️ Nowa rezerwacja",

@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useBranch } from '@/entities/branch/BranchContext';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { BranchSection } from '@/entities/branch-section/types';
 import { fetchBranchSections, deleteBranchSection, reorderBranchSectionsBulk } from '@/entities/branch-section/api';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Plus, Edit, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import SectionTypePicker from '@/widgets/Admin/PageBuilder/SectionTypePicker';
 
@@ -76,6 +77,10 @@ export default function PageBuilderPage() {
   const [sections, setSections] = useState<BranchSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const [activePage, setActivePage] = useState<'home' | 'partners'>(
+    (searchParams.get('page') as 'home' | 'partners') || 'home'
+  );
 
   const moveSection = async (index: number, direction: 'up' | 'down') => {
     const newSections = [...sections];
@@ -105,13 +110,13 @@ export default function PageBuilderPage() {
   useEffect(() => {
     const loadSections = async () => {
       if (selectedBranch?._id && tenant?.tenantId) {
-        const data = await fetchBranchSections(tenant.tenantId, selectedBranch._id);
+        const data = await fetchBranchSections(tenant.tenantId, selectedBranch._id, activePage);
         setSections(data);
       }
       setLoading(false);
     };
     loadSections();
-  }, [selectedBranch?._id, tenant?.tenantId]);
+  }, [selectedBranch?._id, tenant?.tenantId, activePage]);
 
   if (loading) {
     return (
@@ -123,6 +128,17 @@ export default function PageBuilderPage() {
 
   return (
     <div className="container mx-auto py-8">
+      <Tabs value={activePage} onValueChange={(v) => {
+        const page = v as 'home' | 'partners';
+        setActivePage(page);
+        router.replace(`/admin/page-builder?page=${page}`);
+      }} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="home">Home</TabsTrigger>
+          <TabsTrigger value="partners">Partners</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Page Builder</h1>
         <Button
@@ -136,7 +152,7 @@ export default function PageBuilderPage() {
       <SectionList
         sections={sections}
         onEdit={(id) =>
-          router.push(`/admin/page-builder/${id}`)
+          router.push(`/admin/page-builder/${id}?page=${activePage}`)
         }
         onDelete={async (id) => {
           await deleteBranchSection(id);
@@ -150,7 +166,7 @@ export default function PageBuilderPage() {
         onClose={() => setIsPickerOpen(false)}
         onSelect={(type) => {
           setIsPickerOpen(false);
-          router.push(`/admin/page-builder/new?type=${type}`);
+          router.push(`/admin/page-builder/new?type=${type}&page=${activePage}`);
         }}
       />
     </div>

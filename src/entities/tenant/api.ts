@@ -40,6 +40,12 @@ export interface TenantSettings {
   seoTitle: string;
   seoDescription: string;
   primaryLanguage: string;
+  legal?: {
+    legalCompanyName?: string;
+    nip?: string;
+    regon?: string;
+    krs?: string;
+  };
 }
 
 export async function getTenantByDomain(domain: string): Promise<TenantSettings | null> {

@@ -22,8 +22,8 @@ export default function Footer() {
   ]
 
   const legalLinks = [
-    { href: '#', label: t('privacyPolicy') },
-    { href: '#', label: t('terms') },
+    { href: `/${locale}/regulamin`, label: t('privacyPolicy') },
+    { href: `/${locale}/polityka-prywatnosci`, label: t('terms') },
   ]
 
   if (settings.loading) {
