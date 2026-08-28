@@ -6,7 +6,9 @@ import { fetchBranchBySlug } from '@/entities/branch/api';
 import BranchProviderWithInitial from '@/entities/branch/BranchProviderWithInitial';
 import type { Branch } from '@/entities/branch/types';
 
-export const revalidate = 3600;
+// Dynamic: uses headers() for multi-tenant domain detection.
+// Data Cache (cache: 'force-cache' on fetch) still caches API responses.
+export const dynamic = 'force-dynamic';
 
 export default async function BranchSlugLayout({
   children,

@@ -8,7 +8,9 @@ import type { Branch } from '@/entities/branch/types';
 import ProductDetail from '@/widgets/Catalog/ProductDetail';
 import type { MenuItem } from '@/entities/menu-item/types';
 
-export const revalidate = 3600;
+// Dynamic: uses headers() for multi-tenant domain detection.
+// Data Cache (cache: 'force-cache' on fetch) still caches API responses.
+export const dynamic = 'force-dynamic';
 
 const isObjectId = (str: string) => /^[a-f\d]{24}$/i.test(str);
 

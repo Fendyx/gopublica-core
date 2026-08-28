@@ -7,6 +7,9 @@ import { fetchMenu } from '@/entities/menu-item/api';
 import { fetchBranchBySlug } from '@/entities/branch/api';
 import type { Branch } from '@/entities/branch/types';
 
+// Dynamic: uses headers() for multi-tenant domain detection.
+export const dynamic = 'force-dynamic';
+
 export default async function CatalogPage({
   params,
 }: {

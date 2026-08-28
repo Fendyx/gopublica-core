@@ -9,6 +9,9 @@ import type { Branch } from '@/entities/branch/types';
 import type { BranchSection, EntityCarouselSettings, FeatureCarouselSettings } from '@/entities/branch-section/types';
 import type { MenuItem } from '@/entities/menu-item/types';
 
+// Dynamic: uses headers() for multi-tenant domain detection.
+export const dynamic = 'force-dynamic';
+
 /**
  * Resolves dynamic items for carousel sections that use 'ecommerce' or 'menu' mode.
  * Fetches the full menu once per branch and filters according to section settings.

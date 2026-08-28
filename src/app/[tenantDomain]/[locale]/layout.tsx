@@ -3,7 +3,9 @@ import { headers } from 'next/headers';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { TenantProvider, normalizeTenantData } from '@/entities/tenant/TenantContext';
 
-export const revalidate = 3600;
+// Dynamic: uses headers() for multi-tenant domain detection.
+// Data Cache (cache: 'force-cache' on fetch) still caches API responses.
+export const dynamic = 'force-dynamic';
 
 export default async function TenantLocaleLayout({
   children,

@@ -8,6 +8,9 @@ import { Link } from '@/i18n/routing';
 import { Button } from '@/shared/ui/Button';
 import { TicketCard } from '@/widgets/Article/TicketCard';
 
+// Dynamic: uses headers() for multi-tenant domain detection.
+export const dynamic = 'force-dynamic';
+
 export default async function ArticlePage({
   params,
 }: {

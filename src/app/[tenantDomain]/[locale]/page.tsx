@@ -3,6 +3,9 @@ import { headers } from 'next/headers';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { fetchBranches } from '@/entities/branch/api';
 
+// Dynamic: uses headers() for multi-tenant domain detection.
+export const dynamic = 'force-dynamic';
+
 export default async function TenantHomePage(props: {
   params: Promise<{ tenantDomain: string; locale: string }>;
 }) {
