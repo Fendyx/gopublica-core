@@ -420,7 +420,7 @@ function CheckoutForm() {
             <button
               type="submit"
               disabled={loading || !isDeliveryValid}
-              className="hidden lg:flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {loading ? processingContent : fees ? <><Lock size={16} />{payButtonText}</> : t('placeOrder')}
             </button>
