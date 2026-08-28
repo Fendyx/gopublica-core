@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import { getTenantByDomain } from '@/entities/tenant/api';
-import { TenantProvider } from '@/entities/tenant/TenantContext';
+import { TenantProvider, normalizeTenantData } from '@/entities/tenant/TenantContext';
 
 export const revalidate = 3600;
 
@@ -16,11 +16,13 @@ export default async function TenantLocaleLayout({
 
   const headersList = await headers();
   const host = headersList.get('host') ?? tenantDomain;
-  const tenant = await getTenantByDomain(host);
+  const rawTenant = await getTenantByDomain(host);
 
-  if (!tenant) {
+  if (!rawTenant) {
     notFound();
   }
+
+  const tenant = normalizeTenantData(rawTenant, tenantDomain);
 
   return (
     <TenantProvider tenantId={tenant.tenantId} initialTenant={tenant}>
