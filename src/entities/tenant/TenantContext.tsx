@@ -43,15 +43,22 @@ function normalizeModuleAccess(data: any): ModuleAccess {
 export function TenantProvider({
   children,
   tenantId,
+  initialTenant,
 }: {
   children: React.ReactNode
   tenantId: string
+  initialTenant?: SiteConfig | null
 }) {
-  const [tenant, setTenant] = useState<SiteConfig | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [tenant, setTenant] = useState<SiteConfig | null>(initialTenant ?? null)
+  const [loading, setLoading] = useState(!initialTenant)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Skip client-side fetch when the server already provided tenant data
+    if (initialTenant) {
+      return
+    }
+
     if (!tenantId) {
       setLoading(false)
       return
@@ -156,7 +163,7 @@ export function TenantProvider({
     }
 
     fetchTenant()
-  }, [tenantId])
+  }, [tenantId, initialTenant])
 
   return (
     <TenantContext.Provider value={{ tenant, loading, error }}>

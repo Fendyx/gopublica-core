@@ -139,6 +139,7 @@ export async function fetchPublicBranchSections(
   try {
     const res = await fetch(url, {
       next: { tags: [`sections:${tenantDomain}:${branchId}`] },
+      cache: 'force-cache',
       headers: {
         'Host': tenantDomain,
         'x-tenant-host': tenantDomain // Fallback custom header for backend resolution

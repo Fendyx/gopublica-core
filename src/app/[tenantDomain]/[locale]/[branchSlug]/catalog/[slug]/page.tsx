@@ -8,7 +8,7 @@ import type { Branch } from '@/entities/branch/types';
 import ProductDetail from '@/widgets/Catalog/ProductDetail';
 import type { MenuItem } from '@/entities/menu-item/types';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 const isObjectId = (str: string) => /^[a-f\d]{24}$/i.test(str);
 

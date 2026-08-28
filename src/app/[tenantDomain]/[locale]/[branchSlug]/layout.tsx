@@ -6,7 +6,7 @@ import { fetchBranchBySlug } from '@/entities/branch/api';
 import BranchProviderWithInitial from '@/entities/branch/BranchProviderWithInitial';
 import type { Branch } from '@/entities/branch/types';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function BranchSlugLayout({
   children,

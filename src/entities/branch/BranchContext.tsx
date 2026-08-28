@@ -2,6 +2,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import type { Branch, BranchGroup } from '@/entities/branch/types'
 
+// Session-level cache: geolocation only needs to fire once per browser session,
+// not on every component mount or route navigation.
+let geoResolved = false
+
 interface BranchContextType {
   branches: Branch[]
   cities: string[]
@@ -78,6 +82,11 @@ export function BranchProvider({ children, tenantId, initialBranch }: Props) {
       fetchBranches()
       return
     }
+    // Skip IP detection entirely if already resolved this session
+    if (geoResolved) {
+      setLoading(false)
+      return
+    }
     fetchBranches().then(data => {
       detectCityByIp(data)
       setLoading(false)
@@ -87,6 +96,10 @@ export function BranchProvider({ children, tenantId, initialBranch }: Props) {
   const mainOf = (data: Branch[]) => data.filter(b => !b.parentBranchId)
 
   const detectCityByIp = async (branchesData?: Branch[]) => {
+    // Skip if geolocation was already resolved during this browser session
+    if (geoResolved) return
+    geoResolved = true
+
     const mains = branchesData ? mainOf(branchesData) : []
     try {
       const res = await fetch('/api/geolocation')

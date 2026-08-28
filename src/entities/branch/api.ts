@@ -26,7 +26,7 @@ export async function fetchBranchBySlug(
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/public/branches/slug?tenantId=${tenantId}&slug=${slug}`,
-      { next: { tags: [`branches:${tenantId}`] } }
+      { next: { tags: [`branches:${tenantId}`] }, cache: 'force-cache' }
     )
     if (!res.ok) return null
     return res.json()

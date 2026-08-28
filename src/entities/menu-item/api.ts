@@ -4,7 +4,7 @@ export async function fetchMenu(tenantId: string, branchId?: string | null) {
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/saas/menu?${params.toString()}`,
-    { next: { tags: [`menu:${tenantId}:${branchId ?? 'all'}`] } }
+    { next: { tags: [`menu:${tenantId}:${branchId ?? 'all'}`] }, cache: 'force-cache' }
   )
   if (!res.ok) throw new Error('Failed to fetch menu')
   return res.json()

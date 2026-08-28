@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { TenantProvider } from '@/entities/tenant/TenantContext';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function TenantLocaleLayout({
   children,
@@ -23,7 +23,7 @@ export default async function TenantLocaleLayout({
   }
 
   return (
-    <TenantProvider tenantId={tenant.tenantId}>
+    <TenantProvider tenantId={tenant.tenantId} initialTenant={tenant}>
       {children}
     </TenantProvider>
   );
