@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import { getTenantByDomain } from '@/entities/tenant/api';
-import { TenantProvider, normalizeTenantData } from '@/entities/tenant/TenantContext';
+import { TenantProvider } from '@/entities/tenant/TenantContext';
+import { normalizeTenantData } from '@/entities/tenant/utils';
 
 // Dynamic: uses headers() for multi-tenant domain detection.
 // Data Cache (cache: 'force-cache' on fetch) still caches API responses.
