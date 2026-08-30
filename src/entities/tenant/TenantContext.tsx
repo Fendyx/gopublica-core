@@ -43,7 +43,8 @@ export function TenantProvider({
       try {
         setLoading(true)
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings?tenantId=${tenantId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings?tenantId=${tenantId}`,
+          { cache: 'no-store' }
         )
         if (!res.ok) throw new Error('Failed to load tenant')
         const data = await res.json()

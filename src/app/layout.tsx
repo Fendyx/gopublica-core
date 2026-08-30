@@ -27,7 +27,7 @@ const playfair = Playfair_Display({
 async function getTenantByDomain(domain: string) {
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings/by-domain?domain=${domain}`;
   try {
-    const res = await fetch(url, { next: { revalidate: 10 } });
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return null;
     return await res.json();
   } catch {

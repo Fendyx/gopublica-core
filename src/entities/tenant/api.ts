@@ -58,7 +58,7 @@ export async function getTenantByDomain(domain: string): Promise<TenantSettings 
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings/by-domain?domain=${domain}`,
-      { next: { tags: [`tenant:domain:${domain}`] }, cache: 'force-cache' }
+      { next: { tags: [`tenant:domain:${domain}`] }, cache: 'no-store' }
     );
     if (!res.ok) return null;
     return res.json();
