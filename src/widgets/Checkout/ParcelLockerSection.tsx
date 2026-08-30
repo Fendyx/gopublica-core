@@ -36,12 +36,21 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
   const tenant = useTenant();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [scriptFailed, setScriptFailed] = useState(false);
 
   // Derive Furgonetka config from tenant logistics settings
   const logistics = tenant?.logistics;
   const isFurgonetkaActive = logistics?.enabled === true && logistics?.provider === 'furgonetka';
   const mapApiKey = logistics?.mapApiKey || '';
   const mapEnv = logistics?.env || 'sandbox';
+
+  // Debug: verify logistics data reaches the component
+  console.log('DEBUG Tenant Logistics:', {
+    raw: tenant?.logistics,
+    isFurgonetkaActive,
+    mapApiKey: mapApiKey ? `${mapApiKey.substring(0, 20)}...` : '(empty)',
+    mapEnv,
+  });
 
   useEffect(() => {
     const scriptId = 'furgonetka-map-script';
@@ -61,12 +70,19 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
       
       script.onload = () => {
         script.setAttribute('data-loaded', 'true');
+        setScriptFailed(false);
         setIsLoading(false);
       };
       
       script.onerror = () => {
-        setError(t('alerts.mapError'));
+        console.warn(
+          '⚠️ Furgonetka map script failed to load. ' +
+          'This is expected on localhost / non-production domains. ' +
+          'The map will not work in this environment.'
+        );
+        setScriptFailed(true);
         setIsLoading(false);
+        // Don't set error here — show it only when the user tries to open the map
       };
 
       document.head.appendChild(script);
@@ -74,14 +90,27 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
   }, [t]);
 
   const openMap = (carrierIds: string[] = ALL_CARRIER_IDS) => {
-    // @ts-ignore
-    if (!window.Furgonetka || !window.Furgonetka.Map) {
-      setError(t('loadingMap'));
+    // Clear any previous error
+    setError(null);
+
+    // Check if Furgonetka is configured at all
+    if (!isFurgonetkaActive || !mapApiKey) {
+      setError('Parcel locker selection is not available for this store.');
       return;
     }
 
-    if (!isFurgonetkaActive || !mapApiKey) {
-      setError('Parcel locker selection is not available for this store.');
+    // Check if the script failed to load (e.g. on localhost)
+    // @ts-ignore – Furgonetka is injected by their map script at runtime
+    if (scriptFailed || !window.Furgonetka || !window.Furgonetka.Map) {
+      const isDev = typeof window !== 'undefined' && (
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1'
+      );
+      setError(
+        isDev
+          ? 'Parcel locker map is unavailable in development (localhost). Furgonetka restricts map access to production domains. Deploy to your production domain to test this feature.'
+          : t('alerts.mapError')
+      );
       return;
     }
 
