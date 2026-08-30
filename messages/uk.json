@@ -337,7 +337,47 @@
       "exampleBusinessName": "Наприклад: ТОВ «Ромашка»",
       "workingHoursByDay": "Години роботи по днях",
       "leaveEmptyPageColor": "Залиште порожнім, щоб використати колір сторінки за замовчуванням.",
-      "leaveEmptyDefaultColor": "Залиште порожнім, щоб використати колір за замовчуванням."
+      "leaveEmptyDefaultColor": "Залиште порожнім, щоб використати колір за замовчуванням.",
+      "telegram": {
+        "tabLabel": "Telegram",
+        "title": "Сповіщення в Telegram",
+        "description": "Отримуйте сповіщення в реальному часі в Telegram про замовлення, бронювання та інше.",
+        "status": {
+          "connected": "Підключено",
+          "disconnected": "Не підключено",
+          "connecting": "Підключення...",
+          "connectedAs": "Підключено як @{username}",
+          "connectedOn": "Підключено {date}"
+        },
+        "connectButton": "Підключити Telegram",
+        "disconnectButton": "Відключити",
+        "disconnecting": "Відключення...",
+        "disconnectConfirm": "Відключити Telegram?",
+        "disconnectConfirmDesc": "Ви перестанете отримувати сповіщення в Telegram. Ви можете підключитися знову в будь-який момент.",
+        "preferences": "Налаштування сповіщень",
+        "preferencesDesc": "Оберіть, які події мають надсилати сповіщення в Telegram",
+        "notifications": {
+          "orders": "Нові замовлення",
+          "ordersDesc": "Отримувати сповіщення про нові замовлення",
+          "reservations": "Нові бронювання",
+          "reservationsDesc": "Отримувати сповіщення про нові бронювання столиків",
+          "jobApplications": "Заявки на роботу",
+          "jobApplicationsDesc": "Сповіщати про нові заявки на роботу",
+          "partnerRequests": "Запити на співпрацю",
+          "partnerRequestsDesc": "Сповіщати про нові форми співпраці"
+        },
+        "instructions": {
+          "title": "Як підключити",
+          "step1": "Натисніть кнопку \"Підключити Telegram\"",
+          "step2": "Відкриється Telegram — натисніть \"Start\" у чаті",
+          "step3": "Поверніться сюди — підключення підтвердиться автоматично"
+        },
+        "errors": {
+          "connectFailed": "Не вдалося ініціювати підключення до Telegram",
+          "disconnectFailed": "Не вдалося відключити Telegram",
+          "settingsSaveFailed": "Не вдалося зберегти налаштування сповіщень"
+        }
+      }
     },
     "days": {
       "monday": "Понеділок",

@@ -338,7 +338,47 @@
       "exampleBusinessName": "Na przykład: Sp. z o.o. „Romashka”",
       "workingHoursByDay": "Godziny pracy według dni",
       "leaveEmptyPageColor": "Pozostaw puste, aby użyć domyślnego koloru strony.",
-      "leaveEmptyDefaultColor": "Pozostaw puste, aby użyć domyślnego koloru strony."
+      "leaveEmptyDefaultColor": "Pozostaw puste, aby użyć domyślnego koloru strony.",
+      "telegram": {
+        "tabLabel": "Telegram",
+        "title": "Powiadomienia w Telegram",
+        "description": "Otrzymuj powiadomienia w czasie rzeczywistym w Telegram o zamówieniach, rezerwacjach i nie tylko.",
+        "status": {
+          "connected": "Połączono",
+          "disconnected": "Nie połączono",
+          "connecting": "Łączenie...",
+          "connectedAs": "Połączono jako @{username}",
+          "connectedOn": "Połączono {date}"
+        },
+        "connectButton": "Połącz z Telegram",
+        "disconnectButton": "Rozłącz",
+        "disconnecting": "Rozłączanie...",
+        "disconnectConfirm": "Rozłączyć Telegram?",
+        "disconnectConfirmDesc": "Przestaniesz otrzymywać powiadomienia w Telegram. Możesz połączyć ponownie w dowolnym momencie.",
+        "preferences": "Preferencje powiadomień",
+        "preferencesDesc": "Wybierz, które zdarzenia mają wysyłać powiadomienia w Telegram",
+        "notifications": {
+          "orders": "Nowe zamówienia",
+          "ordersDesc": "Otrzymuj powiadomienia o nowych zamówieniach",
+          "reservations": "Nowe rezerwacje",
+          "reservationsDesc": "Otrzymuj powiadomienia o nowych rezerwacjach stolików",
+          "jobApplications": "Aplikacje na pracę",
+          "jobApplicationsDesc": "Powiadom o nowych aplikacjach na pracę",
+          "partnerRequests": "Prośby o współpracę",
+          "partnerRequestsDesc": "Powiadom o nowych formularzach współpracy"
+        },
+        "instructions": {
+          "title": "Jak połączyć",
+          "step1": "Kliknij przycisk \"Połącz z Telegram\"",
+          "step2": "Otworzy się Telegram — kliknij \"Start\" w czacie",
+          "step3": "Wróć tutaj — połączenie zostanie potwierdzone automatycznie"
+        },
+        "errors": {
+          "connectFailed": "Nie udało się zainicjować połączenia z Telegram",
+          "disconnectFailed": "Nie udało się rozłączyć Telegram",
+          "settingsSaveFailed": "Nie udało się zapisać preferencji powiadomień"
+        }
+      }
     },
     "days": {
       "monday": "Poniedziałek",

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
@@ -26,6 +26,14 @@ import {
 } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
   Phone,
   Mail,
   MapPin,
@@ -49,7 +57,28 @@ import {
   Store,
   Building2,
   FileText,
+  MessageCircle,
+  Send,
+  Link2,
+  Unlink,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  Users,
+  CalendarCheck,
 } from 'lucide-react';
+import {
+  TelegramConnectionStatus,
+  TelegramNotificationSettings,
+  TelegramLinkTokenResponse,
+} from '@/entities/telegram/types';
+import {
+  getTelegramStatus,
+  getTelegramLinkToken,
+  unlinkTelegram,
+  getTelegramPreferences,
+  updateTelegramPreferences,
+} from '@/entities/telegram/api';
 
 const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
@@ -102,6 +131,25 @@ export default function SettingsPageContent() {
     regon: '',
     krs: '',
   });
+
+  // 👈 НОВОЕ: Telegram Notifications — connection status and preferences
+  const [telegramStatus, setTelegramStatus] = useState<TelegramConnectionStatus>({ linked: false });
+  const [telegramLoading, setTelegramLoading] = useState(false);
+  const [telegramSettings, setTelegramSettings] = useState<TelegramNotificationSettings>({
+    newOrder: true,
+    newReservation: true,
+    newJobApplication: true,
+    newPartnerRequest: true,
+  });
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
+
+  // 👈 НОВОЕ: polling state for Telegram connection confirmation
+  const [pollingActive, setPollingActive] = useState(false);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // 👈 НОВОЕ: подфилии (sub-venues) — только для основных филиалов (без parentBranchId)
   const isMainBranch = !!selectedBranch && !selectedBranch.parentBranchId;
@@ -167,9 +215,31 @@ export default function SettingsPageContent() {
             booking: { ...prev.booking, ...(data.notifications.booking || {}) },
           }));
         }
+
+        // 👈 НОВОЕ: подтягиваем Telegram notification preferences
+        if (data.notifications?.telegram) {
+          const tg = data.notifications.telegram;
+          setTelegramSettings({
+            newOrder: tg.events?.newOrder ?? true,
+            newReservation: tg.events?.newReservation ?? true,
+            newJobApplication: tg.events?.newJobApplication ?? true,
+            newPartnerRequest: tg.events?.newPartnerRequest ?? true,
+          });
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    // 👈 НОВОЕ: отдельный запрос статуса Telegram-соединения
+    setTelegramLoading(true);
+    getTelegramStatus({
+      tenantId: tenant?.tenantId || '',
+      branchId: selectedBranch._id,
+      token,
+    })
+      .then(setTelegramStatus)
+      .catch(err => console.error('Failed to fetch Telegram status:', err))
+      .finally(() => setTelegramLoading(false));
   }, [token, selectedBranch, tenant]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -213,6 +283,104 @@ export default function SettingsPageContent() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // 👈 НОВОЕ: Telegram handlers
+  const handleTelegramConnect = async () => {
+    if (!selectedBranch || !token) return;
+    setConnecting(true);
+    setConnectError(null);
+    try {
+      const response = await getTelegramLinkToken({
+        tenantId: tenant?.tenantId || '',
+        branchId: selectedBranch._id,
+        token,
+      });
+      // Open Telegram deep link in new tab
+      window.open(response.deepLink, '_blank', 'noopener,noreferrer');
+      // Start polling for connection confirmation
+      startTelegramPolling();
+    } catch (err: any) {
+      setConnectError(err?.message || t('telegram.errors.connectFailed'));
+      console.error('Telegram connect failed:', err);
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const startTelegramPolling = () => {
+    if (!selectedBranch || !token) return;
+    setPollingActive(true);
+    const poll = async () => {
+      try {
+        const status = await getTelegramStatus({
+          tenantId: tenant?.tenantId || '',
+          branchId: selectedBranch._id,
+          token,
+        });
+        setTelegramStatus(status);
+        if (status.linked) {
+          stopTelegramPolling();
+        }
+      } catch (err) {
+        console.error('Telegram polling error:', err);
+      }
+    };
+    // Initial check
+    poll();
+    // Poll every 3 seconds
+    pollingRef.current = setInterval(poll, 3000);
+    // Auto-stop after 2 minutes
+    setTimeout(stopTelegramPolling, 120000);
+  };
+
+  const stopTelegramPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    setPollingActive(false);
+  };
+
+  const handleTelegramDisconnect = async () => {
+    if (!selectedBranch || !token) return;
+    setDisconnecting(true);
+    try {
+      await unlinkTelegram({
+        tenantId: tenant?.tenantId || '',
+        branchId: selectedBranch._id,
+        token,
+      });
+      setTelegramStatus({ linked: false });
+      setShowDisconnectConfirm(false);
+    } catch (err: any) {
+      console.error('Telegram disconnect failed:', err);
+      alert(t('telegram.errors.disconnectFailed'));
+    } finally {
+      setDisconnecting(false);
+    }
+  };
+
+  const handleTelegramSettingChange = async (key: keyof TelegramNotificationSettings, value: boolean) => {
+    if (!selectedBranch || !token) return;
+    const newSettings = { ...telegramSettings, [key]: value };
+    setTelegramSettings(newSettings);
+    setSettingsSaving(true);
+    try {
+      await updateTelegramPreferences({
+        tenantId: tenant?.tenantId || '',
+        branchId: selectedBranch._id,
+        token,
+        settings: newSettings,
+      });
+    } catch (err: any) {
+      console.error('Failed to save Telegram settings:', err);
+      // Revert on error
+      setTelegramSettings(telegramSettings);
+      alert(t('telegram.errors.settingsSaveFailed'));
+    } finally {
+      setSettingsSaving(false);
     }
   };
 
@@ -290,11 +458,12 @@ export default function SettingsPageContent() {
         <Card>
           <CardContent className="p-6">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className={`grid w-full mb-8 ${isMainBranch ? 'grid-cols-2 sm:grid-cols-6' : 'grid-cols-2 sm:grid-cols-5'}`}>
+              <TabsList className={`grid w-full mb-8 ${isMainBranch ? 'grid-cols-2 sm:grid-cols-7' : 'grid-cols-2 sm:grid-cols-6'}`}>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="appearance">Appearance</TabsTrigger>
                 <TabsTrigger value="localization">Localization</TabsTrigger>
                 <TabsTrigger value="seo">SEO & Alerts</TabsTrigger>
+                <TabsTrigger value="telegram">{t('telegram.tabLabel')}</TabsTrigger>
                 <TabsTrigger value="legal">Prawne</TabsTrigger>
                 {isMainBranch && <TabsTrigger value="subvenues">Sub-venues</TabsTrigger>}
               </TabsList>
@@ -559,6 +728,220 @@ export default function SettingsPageContent() {
                 </div>
               </TabsContent>
 
+              {/* --- ВКЛАДКА: TELEGRAM --- */}
+              <TabsContent value="telegram" className="space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    {t('telegram.title')}
+                  </h3>
+                  <p className="text-xs text-muted-foreground max-w-lg">{t('telegram.description')}</p>
+                </div>
+
+                {/* Connection Status */}
+                <Card className="border-border">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-xl bg-muted/50">
+                          {telegramStatus.linked ? (
+                            <CheckCircle className="w-6 h-6 text-emerald-500" />
+                          ) : (
+                            <MessageCircle className="w-6 h-6 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {telegramStatus.linked
+                              ? t('telegram.status.connected')
+                              : t('telegram.status.disconnected')}
+                          </p>
+                          {telegramStatus.linked && telegramStatus.chatId && (
+                            <p className="text-sm text-muted-foreground">
+                              {t('telegram.status.connectedAs', { username: telegramStatus.chatId })}
+                            </p>
+                          )}
+                          {telegramStatus.linked && telegramStatus.linkedAt && (
+                            <p className="text-sm text-muted-foreground">
+                              {t('telegram.status.connectedOn', {
+                                date: new Date(telegramStatus.linkedAt).toLocaleDateString(),
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {telegramStatus.linked ? (
+                          <>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowDisconnectConfirm(true)}
+                              disabled={disconnecting}
+                              className="gap-2"
+                            >
+                              <Unlink className="w-4 h-4" />
+                              {t('telegram.disconnectButton')}
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={handleTelegramConnect}
+                            disabled={connecting || !token}
+                            className="gap-2"
+                          >
+                            {connecting ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                {t('telegram.status.connecting')}
+                              </>
+                            ) : (
+                              <>
+                                <Send className="w-4 h-4" />
+                                {t('telegram.connectButton')}
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    {connectError && (
+                      <div className="mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-destructive" />
+                        <p className="text-sm text-destructive">{connectError}</p>
+                      </div>
+                    )}
+
+                    {pollingActive && !telegramStatus.linked && (
+                      <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4 animate-spin text-primary" />
+                        <p className="text-sm text-primary">
+                          {t('telegram.status.connecting')} — {t('telegram.instructions.step2')}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Instructions */}
+                <Card className="border-border">
+                  <CardContent className="p-6">
+                    <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
+                      <Link2 className="w-4 h-4 text-muted-foreground" />
+                      {t('telegram.instructions.title')}
+                    </h4>
+                    <ol className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">1</span>
+                        {t('telegram.instructions.step1')}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">2</span>
+                        {t('telegram.instructions.step2')}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">3</span>
+                        {t('telegram.instructions.step3')}
+                      </li>
+                    </ol>
+                  </CardContent>
+                </Card>
+
+                {/* Notification Preferences */}
+                <Card className="border-border">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-muted-foreground" />
+                        {t('telegram.preferences')}
+                      </h4>
+                      {settingsSaving && (
+                        <RefreshCw className="w-4 h-4 animate-spin text-primary" />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-4">{t('telegram.preferencesDesc')}</p>
+
+                    <div className="space-y-4">
+                      {/* Orders */}
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <ShoppingBag className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{t('telegram.notifications.orders')}</p>
+                            <p className="text-xs text-muted-foreground">{t('telegram.notifications.ordersDesc')}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={telegramSettings.newOrder}
+                          onCheckedChange={(checked) => handleTelegramSettingChange('newOrder', checked)}
+                          disabled={settingsSaving}
+                        />
+                      </div>
+
+                      {/* Reservations */}
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <CalendarCheck className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{t('telegram.notifications.reservations')}</p>
+                            <p className="text-xs text-muted-foreground">{t('telegram.notifications.reservationsDesc')}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={telegramSettings.newReservation}
+                          onCheckedChange={(checked) => handleTelegramSettingChange('newReservation', checked)}
+                          disabled={settingsSaving}
+                        />
+                      </div>
+
+                      {/* Job Applications */}
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <FileText className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{t('telegram.notifications.jobApplications')}</p>
+                            <p className="text-xs text-muted-foreground">{t('telegram.notifications.jobApplicationsDesc')}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={telegramSettings.newJobApplication}
+                          onCheckedChange={(checked) => handleTelegramSettingChange('newJobApplication', checked)}
+                          disabled={settingsSaving}
+                        />
+                      </div>
+
+                      {/* Partner Requests */}
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Users className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{t('telegram.notifications.partnerRequests')}</p>
+                            <p className="text-xs text-muted-foreground">{t('telegram.notifications.partnerRequestsDesc')}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={telegramSettings.newPartnerRequest}
+                          onCheckedChange={(checked) => handleTelegramSettingChange('newPartnerRequest', checked)}
+                          disabled={settingsSaving}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
               {/* --- ВКЛАДКА 5: PRAWNE (ЮРИДИЧЕСКИЕ РЕКВИЗИТЫ) --- */}
               <TabsContent value="legal" className="space-y-6">
                 <div className="space-y-4">
@@ -705,6 +1088,41 @@ export default function SettingsPageContent() {
           </div>
         </Card>
       </form>
+
+      {/* Disconnect Telegram Confirmation Dialog */}
+      <Dialog open={showDisconnectConfirm} onOpenChange={setShowDisconnectConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('telegram.disconnectConfirm')}</DialogTitle>
+            <DialogDescription>
+              {t('telegram.disconnectConfirmDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDisconnectConfirm(false)}>
+              {t('cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleTelegramDisconnect}
+              disabled={disconnecting}
+              className="gap-2"
+            >
+              {disconnecting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  {t('telegram.disconnecting')}
+                </>
+              ) : (
+                <>
+                  <Unlink className="w-4 h-4" />
+                  {t('telegram.disconnectButton')}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

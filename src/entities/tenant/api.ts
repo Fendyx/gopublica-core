@@ -46,6 +46,12 @@ export interface TenantSettings {
     regon?: string;
     krs?: string;
   };
+  logistics?: {
+    enabled: boolean;
+    provider: 'furgonetka' | 'none';
+    mapApiKey?: string;
+    env?: 'sandbox' | 'production';
+  };
 }
 
 export async function getTenantByDomain(domain: string): Promise<TenantSettings | null> {

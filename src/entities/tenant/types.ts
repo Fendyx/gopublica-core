@@ -65,6 +65,15 @@ export type Seo = {
 // НОВАЯ ТИПИЗАЦИЯ ДЛЯ НИШ
 export type Niche = 'food' | 'beauty' | 'ecommerce' | 'auto';
 
+// Logistics / Furgonetka integration config exposed to the frontend
+// NOTE: clientId, clientSecret, and tokens are server-only — never sent to the client.
+export type LogisticsConfig = {
+  enabled: boolean
+  provider: 'furgonetka' | 'none'
+  mapApiKey?: string       // JWT for the Furgonetka map widget (separate from OAuth credentials)
+  env?: 'sandbox' | 'production'
+}
+
 // Главный тип конфига (то, что придёт с бэка)
 export type SiteConfig = {
   clientName: string
@@ -86,4 +95,5 @@ export type SiteConfig = {
   features: Features
   contact: Contact
   seo: Seo
+  logistics?: LogisticsConfig
 }

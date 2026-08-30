@@ -12,13 +12,15 @@ export default function BranchProviderWithInitial({
   children,
   tenantId,
   initialBranch,
+  token, // Optional token for authenticated requests (admin panel)
 }: {
   children: React.ReactNode
   tenantId: string
   initialBranch: Branch | null
+  token?: string
 }) {
   return (
-    <BranchProvider tenantId={tenantId} initialBranch={initialBranch}>
+    <BranchProvider tenantId={tenantId} initialBranch={initialBranch} token={token}>
       {children}
     </BranchProvider>
   )

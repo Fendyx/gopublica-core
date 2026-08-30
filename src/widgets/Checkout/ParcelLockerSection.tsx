@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useTenant } from '@/entities/tenant/TenantContext';
 import { Box, Fuel, Truck, type LucideIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
@@ -32,8 +33,15 @@ const ALL_CARRIER_IDS = CARRIERS.map((c) => c.id);
 export default function ParcelLockerSection({ onSelect, selectedLockerId }: Props) {
   const t = useTranslations('checkout');
   const locale = useLocale();
+  const tenant = useTenant();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Derive Furgonetka config from tenant logistics settings
+  const logistics = tenant?.logistics;
+  const isFurgonetkaActive = logistics?.enabled === true && logistics?.provider === 'furgonetka';
+  const mapApiKey = logistics?.mapApiKey || '';
+  const mapEnv = logistics?.env || 'sandbox';
 
   useEffect(() => {
     const scriptId = 'furgonetka-map-script';
@@ -72,11 +80,16 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
       return;
     }
 
+    if (!isFurgonetkaActive || !mapApiKey) {
+      setError('Parcel locker selection is not available for this store.');
+      return;
+    }
+
     try {
       // @ts-ignore
       const mapWidget = new window.Furgonetka.Map({
-        apiKey: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJGdXJnb25ldGthLnBsIiwiaWF0IjoxNzg0ODUzOTQwLjIxOTU3Mywic3ViIjoiMzI3N2JmYjMtNGEyZi00ODY4LTlkMzctNzI0MzRlOTQ1NWZhIn0.decVno3WQFqsgy3kL6sVmyNH95C35B_GVeci15t5YFk',
-        env: 'sandbox',
+        apiKey: mapApiKey,
+        env: mapEnv,
         courierServices: carrierIds,
         courierServicesFilter: carrierIds,
         locale,
@@ -96,7 +109,7 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
       mapWidget.show();
 
     } catch (err) {
-      console.error("Ошибка при открытии карты:", err);
+      console.error("Error opening parcel locker map:", err);
       setError(t('alerts.mapError'));
     }
   };

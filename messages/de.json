@@ -338,7 +338,47 @@
       "exampleBusinessName": "Zum Beispiel: „Romashka GmbH“",
       "workingHoursByDay": "Öffnungszeiten nach Tagen",
       "leaveEmptyPageColor": "Leer lassen, um die Standardseitenfarbe zu verwenden.",
-      "leaveEmptyDefaultColor": "Leer lassen, um die Standardseitenfarbe zu verwenden."
+      "leaveEmptyDefaultColor": "Leer lassen, um die Standardseitenfarbe zu verwenden.",
+      "telegram": {
+        "tabLabel": "Telegram",
+        "title": "Telegram-Benachrichtigungen",
+        "description": "Erhalten Sie Echtzeit-Benachrichtigungen in Telegram für Bestellungen, Reservierungen und mehr.",
+        "status": {
+          "connected": "Verbunden",
+          "disconnected": "Nicht verbunden",
+          "connecting": "Verbinde...",
+          "connectedAs": "Verbunden als @{username}",
+          "connectedOn": "Verbunden am {date}"
+        },
+        "connectButton": "Mit Telegram verbinden",
+        "disconnectButton": "Trennen",
+        "disconnecting": "Trennen...",
+        "disconnectConfirm": "Telegram trennen?",
+        "disconnectConfirmDesc": "Sie erhalten keine Telegram-Benachrichtigungen mehr. Sie können jederzeit wieder verbinden.",
+        "preferences": "Benachrichtigungseinstellungen",
+        "preferencesDesc": "Wählen Sie, welche Ereignisse Telegram-Benachrichtigungen auslösen sollen",
+        "notifications": {
+          "orders": "Neue Bestellungen",
+          "ordersDesc": "Benachrichtigungen bei neuen Bestellungen erhalten",
+          "reservations": "Neue Reservierungen",
+          "reservationsDesc": "Benachrichtigungen für neue Tischreservierungen erhalten",
+          "jobApplications": "Stellenbewerbungen",
+          "jobApplicationsDesc": "Benachrichtigung bei neuen Stellenbewerbungen",
+          "partnerRequests": "Partnerschaftsanfragen",
+          "partnerRequestsDesc": "Benachrichtigung bei neuen Partnerschaftsformularen"
+        },
+        "instructions": {
+          "title": "Wie verbinden",
+          "step1": "Klicken Sie auf \"Mit Telegram verbinden\"",
+          "step2": "Telegram öffnet sich — klicken Sie im Chat auf \"Start\"",
+          "step3": "Kehren Sie hierher zurück — die Verbindung wird automatisch bestätigt"
+        },
+        "errors": {
+          "connectFailed": "Telegram-Verbindung konnte nicht initiiert werden",
+          "disconnectFailed": "Telegram konnte nicht getrennt werden",
+          "settingsSaveFailed": "Benachrichtigungseinstellungen konnten nicht gespeichert werden"
+        }
+      }
     },
     "days": {
       "monday": "Montag",

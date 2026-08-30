@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { NextIntlClientProvider, useTranslations } from 'next-intl';
-import { useTenant } from '@/entities/tenant/TenantContext';
+import { useTenant, TenantProvider } from '@/entities/tenant/TenantContext';
 import { NotificationProvider } from '@/shared/lib/useNotifications';
 import AdminNotifications from '@/widgets/Admin/AdminNotifications';
 import AdminLanguageSwitcher from '@/widgets/Admin/AdminLanguageSwitcher';
@@ -37,60 +37,7 @@ import { Button } from '@/components/ui/button';
 
 const DEFAULT_LOCALE = 'pl';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
-  const [locale, setLocale] = useState(DEFAULT_LOCALE);
-  const [messages, setMessages] = useState<Record<string, any> | null>(null);
-  const tenant = useTenant();
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem('saas_token');
-    if (!savedToken) {
-      router.push('/admin/login');
-    } else {
-      setToken(savedToken);
-    }
-  }, []);
-
-  useEffect(() => {
-    const storedLocale = localStorage.getItem('admin_locale') || DEFAULT_LOCALE;
-    setLocale(storedLocale);
-    loadMessages(storedLocale).then(setMessages);
-  }, []);
-
-  const handleLocaleChange = (newLocale: string) => {
-    localStorage.setItem('admin_locale', newLocale);
-    setLocale(newLocale);
-    loadMessages(newLocale).then(setMessages);
-  };
-
-  if (!messages || !token) {
-    if (pathname === '/admin/login') return <>{children}</>;
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-
-  if (pathname === '/admin/login') return <>{children}</>;
-
-  const tenantId = tenant?.tenantId || '';
-
-  return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <NotificationProvider token={token} tenantId={tenantId}>
-        <BranchProvider tenantId={tenantId}>
-          <ToastProvider>
-            <AdminLayoutInner token={token} locale={locale} onLocaleChange={handleLocaleChange}>
-              {children}
-            </AdminLayoutInner>
-          </ToastProvider>
-        </BranchProvider>
-        <AdminNotifications />
-      </NotificationProvider>
-    </NextIntlClientProvider>
-  );
-}
-
+// Inner component that has access to TenantContext
 function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const t = useTranslations('admin');
   const pathname = usePathname();
@@ -152,7 +99,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
 
       {/* Сайдбар */}
       <aside
-        className={`
+        className={` 
           fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-in-out
           lg:relative lg:translate-x-0
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -233,5 +180,81 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
         {children}
       </main>
     </div>
+  );
+}
+
+// Helper to decode JWT payload (base64url) without external dependencies
+function decodeJwtPayload(token: string): Record<string, any> | null {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    // base64url -> base64
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    // Add padding if needed
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const json = atob(padded);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [token, setToken] = useState<string | null>(null);
+  const [locale, setLocale] = useState(DEFAULT_LOCALE);
+  const [messages, setMessages] = useState<Record<string, any> | null>(null);
+  const [tenantId, setTenantId] = useState<string>('');
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem('saas_token');
+    if (!savedToken) {
+      router.push('/admin/login');
+    } else {
+      setToken(savedToken);
+      // Extract tenantId from JWT payload
+      const payload = decodeJwtPayload(savedToken);
+      console.log('JWT Payload:', payload); // DEBUG: check what's in the token
+      if (payload?.tenantId) {
+        setTenantId(payload.tenantId);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedLocale = localStorage.getItem('admin_locale') || DEFAULT_LOCALE;
+    setLocale(storedLocale);
+    loadMessages(storedLocale).then(setMessages);
+  }, []);
+
+  const handleLocaleChange = (newLocale: string) => {
+    localStorage.setItem('admin_locale', newLocale);
+    setLocale(newLocale);
+    loadMessages(newLocale).then(setMessages);
+  };
+
+  if (!messages || !token) {
+    if (pathname === '/admin/login') return <>{children}</>;
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (pathname === '/admin/login') return <>{children}</>;
+
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <TenantProvider tenantId={tenantId}>
+        <NotificationProvider token={token} tenantId={tenantId}>
+          <BranchProvider tenantId={tenantId} token={token}>
+            <ToastProvider>
+              <AdminLayoutInner token={token} locale={locale} onLocaleChange={handleLocaleChange}>
+                {children}
+              </AdminLayoutInner>
+            </ToastProvider>
+          </BranchProvider>
+          <AdminNotifications />
+        </NotificationProvider>
+      </TenantProvider>
+    </NextIntlClientProvider>
   );
 }

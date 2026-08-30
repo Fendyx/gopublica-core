@@ -33,9 +33,10 @@ interface Props {
   children: React.ReactNode
   tenantId: string
   initialBranch?: Branch | null
+  token?: string // JWT token for authenticated requests
 }
 
-export function BranchProvider({ children, tenantId, initialBranch }: Props) {
+export function BranchProvider({ children, tenantId, initialBranch, token }: Props) {
   const [branches, setBranches] = useState<Branch[]>([])
   const [selectedCity, setSelectedCity] = useState<string | null>(
     initialBranch ? initialBranch.city : null
@@ -54,7 +55,18 @@ export function BranchProvider({ children, tenantId, initialBranch }: Props) {
   const fetchBranches = async () => {
     if (!tenantId) return []
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/public/${tenantId}`)
+      // Use authenticated endpoint when token is available (admin panel)
+      // Fall back to public endpoint for public site
+      const url = token
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/public/${tenantId}`
+      
+      const headers: Record<string, string> = {}
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
+      const res = await fetch(url, { headers })
       const data: Branch[] = await res.json()
       setBranches(data)
       // If we have an initialBranch, ensure it's in the branches list

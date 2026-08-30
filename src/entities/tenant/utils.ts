@@ -110,5 +110,11 @@ export function normalizeTenantData(data: any, fallbackTenantId: string): SiteCo
       title: data.seoTitle ?? '',
       description: data.seoDescription ?? '',
     },
+    logistics: {
+      enabled: Boolean(data.logistics?.enabled),
+      provider: data.logistics?.provider === 'furgonetka' ? 'furgonetka' : 'none',
+      mapApiKey: data.logistics?.mapApiKey ?? '',
+      env: data.logistics?.env === 'production' ? 'production' : 'sandbox',
+    },
   }
 }

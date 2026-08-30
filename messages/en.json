@@ -338,7 +338,47 @@
       "exampleBusinessName": "For example: LLC 'Romashka'",
       "workingHoursByDay": "Working hours by day",
       "leaveEmptyPageColor": "Leave empty to use the default page color.",
-      "leaveEmptyDefaultColor": "Leave empty to use the default page color."
+      "leaveEmptyDefaultColor": "Leave empty to use the default page color.",
+      "telegram": {
+        "tabLabel": "Telegram",
+        "title": "Telegram Notifications",
+        "description": "Receive real-time notifications in Telegram for orders, reservations, and more.",
+        "status": {
+          "connected": "Connected",
+          "disconnected": "Not connected",
+          "connecting": "Connecting...",
+          "connectedAs": "Connected as @{username}",
+          "connectedOn": "Connected on {date}"
+        },
+        "connectButton": "Connect Telegram",
+        "disconnectButton": "Disconnect",
+        "disconnecting": "Disconnecting...",
+        "disconnectConfirm": "Disconnect Telegram?",
+        "disconnectConfirmDesc": "You will stop receiving Telegram notifications. You can reconnect at any time.",
+        "preferences": "Notification Preferences",
+        "preferencesDesc": "Choose which events should send Telegram notifications",
+        "notifications": {
+          "orders": "New Orders",
+          "ordersDesc": "Receive notifications when new orders are placed",
+          "reservations": "New Reservations",
+          "reservationsDesc": "Receive notifications for new table reservations",
+          "jobApplications": "Job Applications",
+          "jobApplicationsDesc": "Notify when new job applications are received",
+          "partnerRequests": "Partner Requests",
+          "partnerRequestsDesc": "Notify when new partner/dynamic form submissions arrive"
+        },
+        "instructions": {
+          "title": "How to connect",
+          "step1": "Click \"Connect Telegram\" button",
+          "step2": "Telegram will open — click \"Start\" in the chat",
+          "step3": "Return here — connection will be confirmed automatically"
+        },
+        "errors": {
+          "connectFailed": "Failed to initiate Telegram connection",
+          "disconnectFailed": "Failed to disconnect Telegram",
+          "settingsSaveFailed": "Failed to save notification preferences"
+        }
+      }
     },
     "days": {
       "monday": "Monday",
