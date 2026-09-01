@@ -50,6 +50,7 @@ export interface PublicBeautyAppointmentPayload {
   startTime: string
   endTime: string
   guestInfo: GuestInfo
+  consents?: { terms: boolean; privacy: boolean; marketing: boolean }
 }
 
 export const EMPTY_GUEST_INFO: GuestInfo = {
