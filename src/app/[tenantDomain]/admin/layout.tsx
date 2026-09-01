@@ -23,6 +23,7 @@ import {
   ChartLine,
   FileText,
   Package,
+  ShoppingCart,
   Menu,
   X,
   Sparkles,
@@ -56,6 +57,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
   const navItems = [
     { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
     { href: '/admin/gopublica', label: t('gopublica'), icon: Megaphone },
+    { href: '/admin/gopublica/orders', label: t('myOrders'), icon: ShoppingCart },
     { href: '/admin/page-builder', label: t('pageBuilder'), icon: Layout },
     ...(!isBeauty && hasMenu && canManageMenu
       ? [{ href: '/admin/menu', label: t('menu'), icon: UtensilsCrossed }]

@@ -7,6 +7,7 @@ import { useTenant } from '@/entities/tenant/TenantContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, AlertCircle, UploadCloud } from 'lucide-react';
+import ConsentCheckboxes, { type ConsentState, INITIAL_CONSENT } from '@/shared/ui/ConsentCheckboxes';
 
 interface Field {
   id: string;
@@ -49,6 +50,7 @@ export default function PublicCareersPage() {
   const [error, setError] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [files, setFiles] = useState<Record<string, File>>({});
+  const [consent, setConsent] = useState<ConsentState>(INITIAL_CONSENT);
 
   useEffect(() => {
     async function fetchSettings() {
@@ -98,6 +100,10 @@ export default function PublicCareersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tenant?.tenantId) return;
+    if (!consent.terms || !consent.privacy) {
+      setError(t('consent.requiredError') || 'You must accept the Terms of Service and Privacy Policy to continue');
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
@@ -119,6 +125,7 @@ export default function PublicCareersPage() {
       });
 
       formDataToSend.append('fields', JSON.stringify(textFields));
+      formDataToSend.append('consents', JSON.stringify(consent));
 
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${API_BASE}/api/public/jobs/apply`, {
@@ -265,7 +272,9 @@ export default function PublicCareersPage() {
                 );
               })}
 
-            <Button type="submit" disabled={submitting} className="w-full py-6 text-base font-semibold rounded-xl mt-4">
+            <ConsentCheckboxes onChange={setConsent} />
+
+            <Button type="submit" disabled={submitting || !consent.terms || !consent.privacy} className="w-full py-6 text-base font-semibold rounded-xl mt-4">
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useBranch } from '@/entities/branch/BranchContext'
+import ConsentCheckboxes, { type ConsentState, INITIAL_CONSENT } from '@/shared/ui/ConsentCheckboxes'
 
 const TIME_SLOTS = Array.from({ length: 21 }, (_, i) => {
   const total = 12 * 60 + i * 30
@@ -38,6 +39,7 @@ export default function BookingForm({ title, subtitle, variant = 'centered' }: B
     date: '', time: '', guests: 2, comment: '',
   })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [consent, setConsent] = useState<ConsentState>(INITIAL_CONSENT)
 
   const set = (key: keyof typeof form, value: string | number) =>
     setForm(prev => ({ ...prev, [key]: value }))
@@ -60,6 +62,7 @@ export default function BookingForm({ title, subtitle, variant = 'centered' }: B
         time: form.time,
         guests: form.guests,
         comment: form.comment,
+        consents: consent,
       }
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/saas/reservations?tenantId=${tenant?.tenantId}`,
@@ -257,9 +260,11 @@ export default function BookingForm({ title, subtitle, variant = 'centered' }: B
                 </p>
               )}
 
+              <ConsentCheckboxes onChange={setConsent} hideMarketing />
+
               <button
                 type="button"
-                disabled={!form.name || !form.phone || status === 'loading'}
+                disabled={!form.name || !form.phone || status === 'loading' || !consent.terms || !consent.privacy}
                 onClick={handleSubmit}
                 className="w-full py-3.5 rounded-xl bg-primary text-white text-sm font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.99] transition-all duration-150 shadow-sm flex items-center justify-center gap-2"
               >
@@ -267,10 +272,6 @@ export default function BookingForm({ title, subtitle, variant = 'centered' }: B
                   ? <><Spinner /> {t('sending')}</>
                   : t('submit')}
               </button>
-
-              <p className="text-[11px] text-text-tertiary text-center leading-relaxed">
-                {t('privacyNote')}
-              </p>
             </div>
           )}
         </div>

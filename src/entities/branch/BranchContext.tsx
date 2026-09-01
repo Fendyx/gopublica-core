@@ -94,14 +94,23 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
       fetchBranches()
       return
     }
-    // Skip IP detection entirely if already resolved this session
-    if (geoResolved) {
-      setLoading(false)
-      return
-    }
+    // Always fetch branches — even if geolocation was already resolved this session.
+    // The geoResolved flag only controls IP detection, not branch fetching.
     fetchBranches().then(data => {
-      detectCityByIp(data)
-      setLoading(false)
+      if (!geoResolved) {
+        // First time: run IP-based city detection, then finalize loading
+        detectCityByIp(data).then(() => setLoading(false))
+      } else {
+        // Geolocation already resolved — auto-select first branch if none selected
+        if (!selectedBranch && data.length > 0) {
+          const first = data.find(b => !b.parentBranchId) || data[0]
+          if (first) {
+            setSelectedBranch(first)
+            setSelectedCity(first.city)
+          }
+        }
+        setLoading(false)
+      }
     })
   }, [tenantId, initialBranch])
 
@@ -113,38 +122,46 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
     geoResolved = true
 
     const mains = branchesData ? mainOf(branchesData) : []
+    // Prefer main branches, but fall back to any branch if none exist
+    const candidates = mains.length > 0 ? mains : (branchesData || [])
+
+    const selectFirstBranchInCity = (cityName: string) => {
+      const found = candidates.find(
+        b => b.city?.toLowerCase() === cityName.toLowerCase()
+      )
+      if (found) {
+        setSelectedCity(cityName)
+        setSelectedBranch(found)
+        return true
+      }
+      return false
+    }
+
+    const selectFirstAvailable = () => {
+      if (candidates.length === 0) return
+      const uniqueCities = [
+        ...new Set(candidates.map(b => b.city).filter(Boolean) as string[]),
+      ]
+      const firstCity = uniqueCities[0] || candidates[0].city
+      if (firstCity) setSelectedCity(firstCity)
+      const firstBranch = candidates.find(b => b.city === firstCity)
+      if (firstBranch) setSelectedBranch(firstBranch)
+    }
+
     try {
       const res = await fetch('/api/geolocation')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { city } = await res.json()
 
-      if (city && mains.length) {
-        const foundCity = mains.some(b => b.city?.toLowerCase() === city.toLowerCase())
-        if (foundCity) {
-          setSelectedCity(city)
-          const firstBranchInCity = mains.find(b => b.city?.toLowerCase() === city.toLowerCase())
-          if (firstBranchInCity) setSelectedBranch(firstBranchInCity)
-          return
-        }
+      if (city) {
+        if (selectFirstBranchInCity(city)) return
       }
-      // fallback
-      if (mains.length) {
-        const uniqueCities = [...new Set(mains.map(b => b.city).filter(Boolean) as string[])]
-        const firstCity = uniqueCities[0] || mains[0].city
-        if (firstCity) setSelectedCity(firstCity)
-        const firstBranch = mains.find(b => b.city === firstCity)
-        if (firstBranch) setSelectedBranch(firstBranch)
-      }
+      // City not found among branches — pick first available
+      selectFirstAvailable()
     } catch (err) {
       console.error('IP detection failed', err)
-      // fallback
-      if (mains.length) {
-        const uniqueCities = [...new Set(mains.map(b => b.city).filter(Boolean) as string[])]
-        const firstCity = uniqueCities[0] || mains[0].city
-        if (firstCity) setSelectedCity(firstCity)
-        const firstBranch = mains.find(b => b.city === firstCity)
-        if (firstBranch) setSelectedBranch(firstBranch)
-      }
+      // Fallback: select first available branch
+      selectFirstAvailable()
     }
   }
 

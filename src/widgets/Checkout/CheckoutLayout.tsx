@@ -20,6 +20,9 @@ import DeliveryTimeSection from './DeliveryTimeSection';
 import ConfirmLocationSection from './ConfirmLocationSection';
 import ParcelLockerSection from './ParcelLockerSection';
 
+// Consent
+import ConsentCheckboxes, { type ConsentState, INITIAL_CONSENT } from '@/shared/ui/ConsentCheckboxes';
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 function CheckoutForm() {
@@ -56,6 +59,7 @@ function CheckoutForm() {
   const [error, setError] = useState<string | null>(null);
   const [fees, setFees] = useState<any>(null);
   const [estimating, setEstimating] = useState(false);
+  const [consent, setConsent] = useState<ConsentState>(INITIAL_CONSENT);
 
   const isDeliveryValid = deliveryService === 'furgonetka' ? selectedParcelLocker !== null : true;
 
@@ -169,6 +173,7 @@ function CheckoutForm() {
           })),
           customer,
           locale,
+          consents: consent,
         }),
       });
 
@@ -417,9 +422,11 @@ function CheckoutForm() {
               <PaymentElement id="payment-element" options={{ layout: 'tabs' }} />
             </div>
             
+            <ConsentCheckboxes onChange={setConsent} />
+            
             <button
               type="submit"
-              disabled={loading || !isDeliveryValid}
+              disabled={loading || !isDeliveryValid || !consent.terms || !consent.privacy}
               className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {loading ? processingContent : fees ? <><Lock size={16} />{payButtonText}</> : t('placeOrder')}

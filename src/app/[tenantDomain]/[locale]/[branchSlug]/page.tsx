@@ -118,7 +118,7 @@ export default async function BranchRootPage({
   // Fetch home page sections for this branch
   let sections: BranchSection[] = [];
   try {
-    sections = await fetchPublicBranchSections(host, branchId, 'home');
+    sections = await fetchPublicBranchSections(tenant.tenantId, branchId, 'home');
   } catch (err) {
     console.error('[branchSlug] page: fetchPublicBranchSections failed:', err);
   }

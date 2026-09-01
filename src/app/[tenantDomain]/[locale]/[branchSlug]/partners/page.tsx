@@ -117,7 +117,7 @@ export default async function PartnersPage({
   // Fetch partners page sections for this branch
   let sections: BranchSection[] = [];
   try {
-    sections = await fetchPublicBranchSections(host, branchId, 'partners');
+    sections = await fetchPublicBranchSections(tenant.tenantId, branchId, 'partners');
   } catch (err) {
     console.error('[partners] page: fetchPublicBranchSections failed:', err);
   }

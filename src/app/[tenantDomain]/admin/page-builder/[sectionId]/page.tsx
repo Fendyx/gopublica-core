@@ -45,6 +45,7 @@ export default function SectionEditPage() {
       tenantId: tenant?.tenantId,
       page: pageSlug,
     });
+    router.refresh();
     router.push(`/admin/page-builder?page=${pageSlug}`);
   };
 

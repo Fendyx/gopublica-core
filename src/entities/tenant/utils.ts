@@ -57,6 +57,8 @@ export function normalizeTenantData(data: any, fallbackTenantId: string): SiteCo
   return {
     clientName: data.restaurantName ?? data.name ?? '',
     businessName: data.businessName || '',
+    logoUrl: data.logoUrl || '',
+    faviconUrl: data.faviconUrl || '',
     tenantId: data.tenantId ?? fallbackTenantId,
     niche,
     businessType: data.businessType ?? niche,

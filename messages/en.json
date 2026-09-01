@@ -390,11 +390,14 @@
       "sunday": "Sunday"
     },
     "gopublicaPage": {
-      "loading": "Loading news...",
-      "title": "News from Gopublica",
-      "empty": "No news yet",
-      "emptyDesc": "News and notifications from your service provider will appear here.",
-      "expires": "Valid until:"
+      "title": "GoPublica Marketplace",
+      "subtitle": "Browse and order products for your business",
+      "whatsNew": "What's New",
+      "myOrders": "My Orders",
+      "checkout": "Checkout",
+      "noOrders": "No orders yet",
+      "noOrdersDesc": "Your order history will appear here.",
+      "loading": "Loading..."
     },
     "jobsSettings": {
       "title": "Application Form Settings",
@@ -549,6 +552,7 @@
       }
     },
     "orders": "Orders",
+    "myOrders": "My Orders",
     "customers": "Customers",
     "ordersPage": {
       "loading": "Loading...",
@@ -1063,5 +1067,13 @@
     "errors": {
       "bookingSubmission": "An error occurred during booking."
     }
+  },
+  "consent": {
+    "acceptTerms": "I accept the <termsLink>Terms of Service</termsLink>",
+    "acceptPrivacy": "I have read and accept the <privacyLink>Privacy Policy</privacyLink>",
+    "acceptMarketing": "I agree to receive marketing communications (optional)",
+    "requiredError": "You must accept the Terms of Service and Privacy Policy to continue",
+    "termsLabel": "Terms of Service",
+    "privacyLabel": "Privacy Policy"
   }
 }

@@ -2,6 +2,8 @@
 export interface TenantSettings {
   tenantId: string;
   businessName?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
   niche: 'food' | 'beauty' | 'auto' | 'ecommerce';
   domain?: string;
   aliases?: string[];

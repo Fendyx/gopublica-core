@@ -130,7 +130,7 @@ export async function deleteBranchSectionItem(sectionId: string, itemId: string)
 }
 
 export async function fetchPublicBranchSections(
-  tenantDomain: string,
+  tenantId: string,
   branchId: string,
   page = 'home'
 ): Promise<BranchSection[]> {
@@ -138,12 +138,8 @@ export async function fetchPublicBranchSections(
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api/public/branch-sections?${params.toString()}`;
   try {
     const res = await fetch(url, {
-      next: { tags: [`sections:${tenantDomain}:${branchId}`] },
+      next: { tags: [`sections:${tenantId}:${branchId}`] },
       cache: 'force-cache',
-      headers: {
-        'Host': tenantDomain,
-        'x-tenant-host': tenantDomain // Fallback custom header for backend resolution
-      }
     });
     if (!res.ok) {
       const text = await res.text();

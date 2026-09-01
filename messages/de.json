@@ -390,11 +390,14 @@
       "sunday": "Sonntag"
     },
     "gopublicaPage": {
-      "loading": "Nachrichten werden geladen...",
-      "title": "Neuigkeiten von Gopublica",
-      "empty": "Noch keine Neuigkeiten",
-      "emptyDesc": "Hier erscheinen Neuigkeiten und Benachrichtigungen Ihres Dienstanbieters.",
-      "expires": "Gültig bis:"
+      "title": "GoPublica Marktplatz",
+      "subtitle": "Produkte für Ihr Unternehmen durchstöbern und bestellen",
+      "whatsNew": "Neuigkeiten",
+      "myOrders": "Meine Bestellungen",
+      "checkout": "Kasse",
+      "noOrders": "Noch keine Bestellungen",
+      "noOrdersDesc": "Ihre Bestellhistorie wird hier angezeigt.",
+      "loading": "Laden..."
     },
     "jobsSettings": {
       "title": "Einstellungen des Bewerbungsformulars",
@@ -514,6 +517,7 @@
       }
     },
     "orders": "Bestellungen",
+    "myOrders": "Meine Bestellungen",
     "customers": "Kunden",
     "ordersPage": {
       "loading": "Wird geladen...",
@@ -1022,5 +1026,13 @@
     "errors": {
       "bookingSubmission": "Bei der Reservierung ist ein Fehler aufgetreten."
     }
+  },
+  "consent": {
+    "acceptTerms": "Ich akzeptiere die <termsLink>Nutzungsbedingungen</termsLink>",
+    "acceptPrivacy": "Ich habe die <privacyLink>Datenschutzerklärung</privacyLink> gelesen und akzeptiere sie",
+    "acceptMarketing": "Ich möchte Marketingmitteilungen erhalten (optional)",
+    "requiredError": "Sie müssen die Nutzungsbedingungen und die Datenschutzerklärung akzeptieren, um fortzufahren",
+    "termsLabel": "Nutzungsbedingungen",
+    "privacyLabel": "Datenschutzerklärung"
   }
 }

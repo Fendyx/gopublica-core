@@ -102,6 +102,7 @@ export default function PageBuilderPage() {
     // Persist to the database
     try {
       await reorderBranchSectionsBulk(updates);
+      router.refresh();
     } catch (err) {
       console.error('Failed to reorder sections:', err);
     }
@@ -157,6 +158,7 @@ export default function PageBuilderPage() {
         onDelete={async (id) => {
           await deleteBranchSection(id);
           setSections((s) => s.filter((x) => x._id !== id));
+          router.refresh();
         }}
         onMove={moveSection}
       />

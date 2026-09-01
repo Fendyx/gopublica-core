@@ -13,6 +13,7 @@ import { StepServices } from './StepServices'
 import { StepDateTime } from './StepDateTime'
 import { StepDetails } from './StepDetails'
 import { EMPTY_GUEST_INFO, type BeautyService, type BookingWizardState, type GuestInfo } from './types'
+import ConsentCheckboxes, { type ConsentState, INITIAL_CONSENT } from '@/shared/ui/ConsentCheckboxes'
 
 const STEPS = [
   { id: 1, labelKey: 'steps.labels.services', icon: Sparkles },
@@ -45,6 +46,7 @@ export default function ServiceBookingWizard() {
   })
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [consent, setConsent] = useState<ConsentState>(INITIAL_CONSENT)
 
   useEffect(() => {
     const loadServices = async () => {
@@ -77,7 +79,7 @@ export default function ServiceBookingWizard() {
     if (step === 1) return Boolean(wizardState.serviceId)
     if (step === 2) return Boolean(wizardState.date && wizardState.startTime && wizardState.endTime)
     if (step === 3) {
-      return Boolean(wizardState.guestInfo.name.trim() && wizardState.guestInfo.phone.trim())
+      return Boolean(wizardState.guestInfo.name.trim() && wizardState.guestInfo.phone.trim() && consent.terms && consent.privacy)
     }
     return false
   }
@@ -111,6 +113,7 @@ export default function ServiceBookingWizard() {
         startTime: wizardState.startTime,
         endTime: wizardState.endTime,
         guestInfo: wizardState.guestInfo,
+        consents: consent,
       })
       setSubmitted(true)
     } catch (error) {
@@ -221,7 +224,12 @@ export default function ServiceBookingWizard() {
                 />
               )}
               {step === 3 && (
-                <StepDetails guestInfo={wizardState.guestInfo} onGuestInfoChange={(guestInfo) => setWizardState((prev) => ({ ...prev, guestInfo }))} />
+                <>
+                  <StepDetails guestInfo={wizardState.guestInfo} onGuestInfoChange={(guestInfo) => setWizardState((prev) => ({ ...prev, guestInfo }))} />
+                  <div className="mt-4">
+                    <ConsentCheckboxes onChange={setConsent} hideMarketing />
+                  </div>
+                </>
               )}
             </motion.div>
           </AnimatePresence>

@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, CheckCircle2, AlertCircle, UploadCloud } from 'lucide-react';
+import ConsentCheckboxes, { type ConsentState, INITIAL_CONSENT } from '@/shared/ui/ConsentCheckboxes';
 
 interface DynamicFormSectionProps {
   section: BranchSection;
@@ -44,6 +45,7 @@ export default function DynamicFormSection({ section, locale, tenantDomain }: Dy
   const [files, setFiles] = useState<Record<string, File>>({});
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState<ConsentState>(INITIAL_CONSENT);
 
   const handleInputChange = (fieldId: string, value: any) => {
     setFormValues(prev => ({ ...prev, [fieldId]: value }));
@@ -58,6 +60,10 @@ export default function DynamicFormSection({ section, locale, tenantDomain }: Dy
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tenant?.tenantId) return;
+    if (!consent.terms || !consent.privacy) {
+      setError(t('consent.requiredError') || 'You must accept the Terms of Service and Privacy Policy to continue');
+      return;
+    }
 
     setStatus('loading');
     setError(null);
@@ -80,6 +86,7 @@ export default function DynamicFormSection({ section, locale, tenantDomain }: Dy
       });
 
       formDataToSend.append('fields', JSON.stringify(textFields));
+      formDataToSend.append('consents', JSON.stringify(consent));
 
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${API_BASE}/api/public/forms/${section._id}/submit`, {
@@ -257,7 +264,9 @@ export default function DynamicFormSection({ section, locale, tenantDomain }: Dy
                   );
                 })}
 
-              <Button type="submit" disabled={status === 'loading'} className="w-full py-6 text-base font-semibold rounded-xl mt-6">
+              <ConsentCheckboxes onChange={setConsent} />
+
+              <Button type="submit" disabled={status === 'loading' || !consent.terms || !consent.privacy} className="w-full py-6 text-base font-semibold rounded-xl mt-6">
                 {status === 'loading' ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />

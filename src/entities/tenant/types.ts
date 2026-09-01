@@ -78,6 +78,8 @@ export type LogisticsConfig = {
 export type SiteConfig = {
   clientName: string
   businessName?: string
+  logoUrl?: string
+  faviconUrl?: string
   tenantId: string
   domain?: string
   aliases?: string[]

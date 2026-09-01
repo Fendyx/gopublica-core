@@ -268,8 +268,6 @@ export default function ArticleGridSection({ section, locale, tenantDomain }: Ar
       if (!tenant?.tenantId) return;
       try {
         const data = await fetchPublicArticles(tenant.tenantId);
-        console.log('[ArticleGridSection] fetched articles:', data);
-        console.log('[ArticleGridSection] settings.mode:', settings.mode);
         setArticles(data);
       } catch (err) {
         console.error(err);
@@ -287,8 +285,6 @@ export default function ArticleGridSection({ section, locale, tenantDomain }: Ar
   const filteredArticles = mode === 'latest'
     ? articles.slice(0, limit)
     : articles.filter((a) => selectedSlugs.includes(a.slug));
-
-  console.log('[ArticleGridSection] filtered articles:', filteredArticles);
 
   if (loading) {
     return (

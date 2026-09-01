@@ -66,7 +66,9 @@ import {
   CheckCircle,
   Users,
   CalendarCheck,
+  Upload,
 } from 'lucide-react';
+import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import {
   TelegramConnectionStatus,
   TelegramNotificationSettings,
@@ -120,6 +122,19 @@ export default function SettingsPageContent() {
 
   const [categoryBgColor, setCategoryBgColor] = useState('');
   const [pageBgColor, setPageBgColor] = useState('');
+
+  // ─── Branding: логотип и фавикон ────────────────────────────────────────────
+  const [logoUrl, setLogoUrl] = useState('');
+  const [faviconUrl, setFaviconUrl] = useState('');
+
+  const { openWidget: openLogoWidget } = useCloudinaryUpload({
+    resourceType: 'image',
+    onSuccess: (url) => setLogoUrl(url),
+  });
+  const { openWidget: openFaviconWidget } = useCloudinaryUpload({
+    resourceType: 'image',
+    onSuccess: (url) => setFaviconUrl(url),
+  });
 
   // 👈 НОВОЕ: фича "тизер скоро открытие" для ТЕКУЩЕГО выбранного филиала
   const [hasVeganTeaser, setHasVeganTeaser] = useState(false);
@@ -197,6 +212,10 @@ export default function SettingsPageContent() {
         setCategoryBgColor(data.theme?.categoryBgColor || tenant?.theme?.categoryBgColor || '');
         setPageBgColor(data.theme?.pageBgColor || '');
 
+        // ─── Branding: подтягиваем логотип и фавикон ───────────────────────────
+        setLogoUrl(data.logoUrl || '');
+        setFaviconUrl(data.faviconUrl || '');
+
         // 👈 НОВОЕ: подтягиваем features.hasVeganTeaser текущего филиала
         setHasVeganTeaser(Boolean(data.features?.hasVeganTeaser));
 
@@ -263,6 +282,8 @@ export default function SettingsPageContent() {
         },
         // 👈 НОВОЕ: юридические реквизиты (уходит в tenant.legal)
         legal,
+        logoUrl,
+        faviconUrl,
         theme: {
           radius,
           productCardVariant: cardVariant,
@@ -544,6 +565,49 @@ export default function SettingsPageContent() {
 
               {/* --- ВКЛАДКА 2: APPEARANCE --- */}
               <TabsContent value="appearance" className="space-y-6">
+                {/* ─── Branding: логотип и фавикон ─────────────────────────────────── */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Branding</h3>
+
+                  {/* Company Logo */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5"><Image className="w-3.5 h-3.5 text-muted-foreground" />Company Logo</Label>
+                    <p className="text-xs text-muted-foreground">Rectangular logo with text, used in the Navbar and Footer. Recommended: 200×60px.</p>
+                    {logoUrl ? (
+                      <div className="flex items-center gap-4">
+                        <img src={logoUrl} alt="Logo preview" className="h-12 w-auto max-w-[200px] object-contain rounded border border-border bg-white p-1" />
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setLogoUrl('')}>
+                          <Trash2 className="w-4 h-4 mr-1" /> Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button type="button" variant="outline" size="sm" onClick={() => openLogoWidget()}>
+                        <Upload className="w-4 h-4 mr-2" /> Upload Logo
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Favicon */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5"><Image className="w-3.5 h-3.5 text-muted-foreground" />Favicon</Label>
+                    <p className="text-xs text-muted-foreground">Square icon for the browser tab. Recommended: 192×192px or 32×32px.</p>
+                    {faviconUrl ? (
+                      <div className="flex items-center gap-4">
+                        <img src={faviconUrl} alt="Favicon preview" className="h-8 w-8 object-contain rounded border border-border bg-white p-0.5" />
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setFaviconUrl('')}>
+                          <Trash2 className="w-4 h-4 mr-1" /> Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button type="button" variant="outline" size="sm" onClick={() => openFaviconWidget()}>
+                        <Upload className="w-4 h-4 mr-2" /> Upload Favicon
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">UI Style</h3>
 

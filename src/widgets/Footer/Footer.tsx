@@ -39,9 +39,18 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-8 border-b border-text-inverse/20">
           <div className="lg:col-span-2">
-            <p className="font-heading text-2xl font-semibold text-text-inverse mb-3">
-              {(tenant?.businessName || tenant?.clientName) || ''}
-            </p>
+            <div className="flex items-center gap-3 mb-3">
+              {tenant?.logoUrl && (
+                <img
+                  src={tenant.logoUrl}
+                  alt={tenant.businessName || tenant.clientName || ''}
+                  className="h-10 w-auto max-w-[200px] object-contain"
+                />
+              )}
+              <p className="font-heading text-2xl font-semibold text-text-inverse">
+                {(tenant?.businessName || tenant?.clientName) || ''}
+              </p>
+            </div>
             {settings.address && <p className="text-sm">{settings.address}</p>}
             {settings.phone && (
               <p className="text-sm">

@@ -11,6 +11,7 @@ import { User, Mail, Lock, Phone, UserPlus, Loader2, AlertCircle, ArrowLeft, Che
 import { useTranslations } from 'next-intl';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useBranch } from '@/entities/branch/BranchContext';
+import ConsentCheckboxes, { type ConsentState, INITIAL_CONSENT } from '@/shared/ui/ConsentCheckboxes';
 
 export default function RegisterPage() {
   const { locale } = useParams();
@@ -21,11 +22,16 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState<ConsentState>(INITIAL_CONSENT);
   const tenant = useTenant();
   const { selectedBranch } = useBranch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!consent.terms || !consent.privacy) {
+      setError(t('consent.requiredError') || 'You must accept the Terms of Service and Privacy Policy to continue');
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -36,7 +42,8 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             ...formData,
-            tenantId: tenant?.tenantId // <--- Добавляем tenantId
+            tenantId: tenant?.tenantId,
+            consents: consent, // <--- Добавляем tenantId
         })
         });
 
@@ -158,7 +165,9 @@ export default function RegisterPage() {
                 <p className="text-xs text-muted-foreground pt-1">Minimum 8 characters.</p>
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full rounded-xl h-11 text-base shadow-sm mt-2">
+              <ConsentCheckboxes onChange={setConsent} hideMarketing className="pt-2" />
+
+              <Button type="submit" disabled={loading || !consent.terms || !consent.privacy} className="w-full rounded-xl h-11 text-base shadow-sm mt-2">
                 {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('registering')}</> : t('register')}
               </Button>
             </form>

@@ -91,8 +91,15 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background backdrop-blur-md border-b border-border-light transition-colors">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <IntlLink href={branchSlug ? `/${branchSlug}` : '/'} className="font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors shrink-0">
-            {(tenant?.businessName || tenant?.clientName) || ''}
+          <IntlLink href={branchSlug ? `/${branchSlug}` : '/'} className="flex items-center gap-2 font-heading text-xl font-semibold text-text-primary hover:text-primary transition-colors shrink-0">
+            {tenant?.logoUrl && (
+              <img
+                src={tenant.logoUrl}
+                alt={tenant.businessName || tenant.clientName || ''}
+                className="h-8 w-auto max-w-[160px] object-contain"
+              />
+            )}
+            <span>{(tenant?.businessName || tenant?.clientName) || ''}</span>
           </IntlLink>
 
           <div className="hidden lg:flex items-center gap-4 xl:gap-8 flex-1 justify-center">
