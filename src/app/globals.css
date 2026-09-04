@@ -291,6 +291,17 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
   box-shadow: var(--glass-shadow), var(--glass-inner-glow);
 }
 
+/* Mobile sidebar override — make fully opaque so content behind the
+   sliding panel does not bleed through (backdrop-filter is also
+   unreliable on many mobile browsers). */
+@media (max-width: 1023px) {
+  aside.glass-panel {
+    background: var(--surface-elevated) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 /* Glass card — dashboard cards, content panels (opaque, no blur) */
 .glass-card {
   background: var(--surface-elevated);
