@@ -63,7 +63,7 @@ export default function SystemCatalogSection({ section, locale, branchSlug }: Sy
         <h2 className="text-3xl font-bold mb-8 text-foreground">{t('ourProducts')}</h2>
         {categories.length > 0 && (
           <div className="mb-10">
-            <CategoryGrid categories={categories} locale={locale} branchSlug={branchSlug} />
+            <CategoryGrid categories={categories} />
           </div>
         )}
         <EcommerceGridLayout

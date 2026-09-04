@@ -122,4 +122,6 @@ export type SiteConfig = {
   seo: Seo
   logistics?: LogisticsConfig
   navigation?: NavigationConfig
+  /** ISO 4217 currency code used for price display (e.g. 'PLN', 'EUR'). */
+  primaryCurrency?: string
 }

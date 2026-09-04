@@ -252,10 +252,14 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
                   />
                   <Tooltip
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                    formatter={(value: number, name: string) => [
-                      name === 'quantity' ? `${value} pcs` : `${value.toLocaleString()}`,
-                      name === 'quantity' ? t('quantity') : t('itemRevenue'),
-                    ]}
+                    formatter={(value, name) => {
+                      const num = Number(value);
+                      const label = typeof name === 'string' ? name : String(name ?? '');
+                      return [
+                        label === 'quantity' ? `${num} pcs` : `${num.toLocaleString()}`,
+                        label === 'quantity' ? t('quantity') : t('itemRevenue'),
+                      ];
+                    }}
                   />
                   <Bar dataKey="quantity" fill="#22c55e" radius={[0, 4, 4, 0]} barSize={14} />
                 </BarChart>
