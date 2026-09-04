@@ -1,5 +1,12 @@
 export type Niche = 'food' | 'beauty' | 'ecommerce' | 'auto';
-export type ProductType = 'food' | 'service' | 'physical_product';
+export type ProductType = 'food' | 'service' | 'physical_product' | 'digital';
+export type ProductStatus = 'published' | 'draft' | 'hidden';
+export type AttributeType = 'author' | 'publisher' | 'genre' | 'language' | 'series' | 'custom';
+
+export interface AttributeRef {
+  type: AttributeType;
+  attributeId: string;
+}
 export type ProductCardVariant = 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay' | 'clean';
 
 export interface ProductVariant {
@@ -51,8 +58,10 @@ export type MenuItem = {
   };
   tags?: string[];
   variants?: ProductVariant[];
-  isFeatured?: boolean;   // 👈 добавь это поле
+  isFeatured?: boolean;
   attributes?: ProductAttribute[]; // dynamic specifications, e.g. Author / ISBN
+  attributeRefs?: AttributeRef[]; // managed attribute references
+  status?: ProductStatus;
 }
 
 export type MenuCategory = {

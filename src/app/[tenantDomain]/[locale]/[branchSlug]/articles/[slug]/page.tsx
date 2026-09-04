@@ -7,6 +7,7 @@ import { getTenantByDomain } from '@/entities/tenant/api';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/shared/ui/Button';
 import { TicketCard } from '@/widgets/Article/TicketCard';
+import { DirectionCard } from '@/widgets/Article/DirectionCard';
 
 // Dynamic: uses headers() for multi-tenant domain detection.
 export const dynamic = 'force-dynamic';
@@ -80,9 +81,10 @@ export default async function ArticlePage({
           />
         </div>
 
-        {/* Right column - Ticket Card */}
+        {/* Right column - Sidebar Card (tickets or direction) */}
         <div className="lg:col-span-1">
-          <TicketCard article={article} />
+          {article.sidebarType === 'tickets' && <TicketCard article={article} />}
+          {article.sidebarType === 'direction' && <DirectionCard />}
         </div>
       </div>
     </div>

@@ -13,13 +13,13 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
   const title = section.translations?.[locale]?.title;
   const subtitle = section.translations?.[locale]?.subtitle;
   const settings = (section.settings || {}) as BookingSettings;
-  const { sideContentType = 'none', address, customText } = settings;
+  const { sideContentType = 'none', checkoutFlow = 'inline', address, customText } = settings;
 
   // ── Single-column layout (default) ──
   if (sideContentType === 'none') {
     return (
       <section className="py-12 bg-surface-page">
-        <BookingForm title={title} subtitle={subtitle} variant="centered" />
+        <BookingForm title={title} subtitle={subtitle} variant="centered" checkoutFlow={checkoutFlow} />
       </section>
     );
   }
@@ -31,7 +31,7 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-8 items-stretch">
           {/* Left: Booking Form — fills its grid column */}
           <div className="w-full">
-            <BookingForm title={title} subtitle={subtitle} variant="split" />
+            <BookingForm title={title} subtitle={subtitle} variant="split" checkoutFlow={checkoutFlow} />
           </div>
 
           {/* Right: Map or Custom Text */}

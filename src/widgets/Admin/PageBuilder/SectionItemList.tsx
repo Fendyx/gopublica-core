@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { BranchSectionItem } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { fetchBranchSectionItems } from '@/entities/branch-section/api';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Plus, Edit, X } from 'lucide-react';
+import { useTenant } from '@/entities/tenant/TenantContext';
 
 interface SectionItemListProps {
   sectionId: string;
@@ -17,14 +19,15 @@ interface SectionItemListProps {
   onDeleteItem: (id: string) => Promise<void>;
 }
 
-const LOCALES = ['pl', 'en', 'de'] as const;
-
 export default function SectionItemList({
   sectionId,
   initialItems = [],
   onSaveItem,
   onDeleteItem,
 }: SectionItemListProps) {
+  const t = useTranslations('admin.sectionItems');
+  const tenant = useTenant();
+  const activeLocales = tenant?.activeLocales || ['pl', 'en'];
   const [items, setItems] = useState<BranchSectionItem[]>(initialItems);
   const [loading, setLoading] = useState(false);
   const [editingItem, setEditingItem] = useState<Partial<BranchSectionItem> | null>(null);
@@ -78,7 +81,7 @@ export default function SectionItemList({
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     await onDeleteItem(id);
     fetchItems();
   };
@@ -117,19 +120,19 @@ export default function SectionItemList({
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Section Items</h3>
+          <h3 className="text-lg font-semibold">{t('title')}</h3>
           <Button onClick={handleAddNew} className="gap-2">
             <Plus className="w-4 h-4" />
-            Add Item
+            {t('addItem')}
           </Button>
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading items...</p>
+          <p className="text-sm text-muted-foreground">{t('loading')}</p>
         ) : items.length === 0 ? (
           <Card className="border-dashed border-2 bg-muted/20">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-muted-foreground">No items yet. Add one to get started.</p>
+              <p className="text-muted-foreground">{t('empty')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -156,7 +159,7 @@ export default function SectionItemList({
                       )
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        No media
+                        {t('noMedia')}
                       </div>
                     )}
                     <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -178,7 +181,7 @@ export default function SectionItemList({
                       </Button>
                     </div>
                   </div>
-                  <p className="text-sm font-medium truncate">{item.slug || 'No slug'}</p>
+                  <p className="text-sm font-medium truncate">{item.slug || t('noSlug')}</p>
                 </CardContent>
               </Card>
             ))}
@@ -193,16 +196,16 @@ export default function SectionItemList({
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">
-          {editingItem._id ? 'Edit Item' : 'Add New Item'}
+          {editingItem._id ? t('editItem') : t('addNewItem')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Slug */}
         <div className="space-y-1">
-          <Label htmlFor="slug">Slug</Label>
+          <Label htmlFor="slug">{t('slug')}</Label>
           <Input
             id="slug"
-            placeholder="Enter slug"
+            placeholder={t('slugPlaceholder')}
             value={editingItem.slug || ''}
             onChange={(e) =>
               setEditingItem({ ...editingItem, slug: e.target.value })
@@ -212,7 +215,7 @@ export default function SectionItemList({
 
         {/* Media Upload */}
         <div className="space-y-2">
-          <Label>Media</Label>
+          <Label>{t('media')}</Label>
           <Button
             variant="outline"
             onClick={openWidget}
@@ -220,7 +223,7 @@ export default function SectionItemList({
             className="gap-2"
           >
             <Plus className="w-4 h-4" />
-            Upload Media
+            {t('uploadMedia')}
           </Button>
           {editingItem.media?.url && (
             <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
@@ -250,15 +253,15 @@ export default function SectionItemList({
 
         {/* Translations */}
         <div className="space-y-3">
-          <Label>Translations</Label>
-          {LOCALES.map((locale) => (
+          <Label>{t('translations')}</Label>
+          {activeLocales.map((locale: string) => (
             <div key={locale} className="space-y-2 p-3 border rounded-lg">
               <p className="text-sm font-medium uppercase">{locale}</p>
               <div className="space-y-1">
-                <Label htmlFor={`title-${locale}`}>Title</Label>
+                <Label htmlFor={`title-${locale}`}>{t('titleField')}</Label>
                 <Input
                   id={`title-${locale}`}
-                  placeholder={`Title in ${locale}`}
+                  placeholder={t('titlePlaceholder', { locale })}
                   value={editingItem.translations?.[locale]?.title || ''}
                   onChange={(e) =>
                     updateTranslation(locale, 'title', e.target.value)
@@ -266,10 +269,10 @@ export default function SectionItemList({
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor={`subtitle-${locale}`}>Subtitle</Label>
+                <Label htmlFor={`subtitle-${locale}`}>{t('subtitle')}</Label>
                 <Input
                   id={`subtitle-${locale}`}
-                  placeholder={`Subtitle in ${locale}`}
+                  placeholder={t('subtitlePlaceholder', { locale })}
                   value={editingItem.translations?.[locale]?.subtitle || ''}
                   onChange={(e) =>
                     updateTranslation(locale, 'subtitle', e.target.value)
@@ -282,10 +285,10 @@ export default function SectionItemList({
 
         {/* Body */}
         <div className="space-y-1">
-          <Label htmlFor="body">Body</Label>
+          <Label htmlFor="body">{t('body')}</Label>
           <textarea
             id="body"
-            placeholder="Enter body text..."
+            placeholder={t('bodyPlaceholder')}
             value={editingItem.body || ''}
             onChange={(e) =>
               setEditingItem({ ...editingItem, body: e.target.value })
@@ -296,7 +299,7 @@ export default function SectionItemList({
 
         {/* Gallery Manager */}
         <div className="space-y-2">
-          <Label>Gallery</Label>
+          <Label>{t('gallery')}</Label>
           {editingItem.gallery && editingItem.gallery.length > 0 ? (
             <div className="space-y-2">
               {editingItem.gallery.map((item, idx) => (
@@ -308,7 +311,7 @@ export default function SectionItemList({
                       newGallery[idx] = { ...newGallery[idx], url: e.target.value };
                       setEditingItem({ ...editingItem, gallery: newGallery });
                     }}
-                    placeholder="Media URL"
+                    placeholder={t('mediaUrl')}
                   />
                   <select
                     value={item.type}
@@ -319,8 +322,8 @@ export default function SectionItemList({
                     }}
                     className="px-2 py-1 border rounded text-sm"
                   >
-                    <option value="image">Image</option>
-                    <option value="video">Video</option>
+                    <option value="image">{t('image')}</option>
+                    <option value="video">{t('video')}</option>
                   </select>
                   <Button
                     variant="destructive"
@@ -337,7 +340,7 @@ export default function SectionItemList({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No gallery items yet.</p>
+            <p className="text-sm text-muted-foreground">{t('noGalleryItems')}</p>
           )}
           <Button
             variant="outline"
@@ -349,13 +352,13 @@ export default function SectionItemList({
             className="gap-2"
           >
             <Plus className="w-4 h-4" />
-            Add Gallery Item
+            {t('addGalleryItem')}
           </Button>
         </div>
 
         {/* Attributes Manager */}
         <div className="space-y-2">
-          <Label>Attributes</Label>
+          <Label>{t('attributes')}</Label>
           {editingItem.attributes && editingItem.attributes.length > 0 ? (
             <div className="space-y-2">
               {editingItem.attributes.map((item, idx) => (
@@ -367,7 +370,7 @@ export default function SectionItemList({
                       newAttrs[idx] = { ...newAttrs[idx], key: e.target.value };
                       setEditingItem({ ...editingItem, attributes: newAttrs });
                     }}
-                    placeholder="Key"
+                    placeholder={t('keyPlaceholder')}
                   />
                   <Input
                     value={item.value}
@@ -376,7 +379,7 @@ export default function SectionItemList({
                       newAttrs[idx] = { ...newAttrs[idx], value: e.target.value };
                       setEditingItem({ ...editingItem, attributes: newAttrs });
                     }}
-                    placeholder="Value"
+                    placeholder={t('valuePlaceholder')}
                   />
                   <Button
                     variant="destructive"
@@ -393,7 +396,7 @@ export default function SectionItemList({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No attributes yet.</p>
+            <p className="text-sm text-muted-foreground">{t('noAttributes')}</p>
           )}
           <Button
             variant="outline"
@@ -405,7 +408,7 @@ export default function SectionItemList({
             className="gap-2"
           >
             <Plus className="w-4 h-4" />
-            Add Attribute
+            {t('addAttribute')}
           </Button>
         </div>
 
@@ -413,11 +416,11 @@ export default function SectionItemList({
         <div className="flex gap-2 pt-2">
           <Button onClick={handleSave} className="gap-2">
             <Plus className="w-4 h-4" />
-            Save
+            {t('save')}
           </Button>
           <Button variant="outline" onClick={handleCancel} className="gap-2">
             <X className="w-4 h-4" />
-            Cancel
+            {t('cancel')}
           </Button>
         </div>
       </CardContent>

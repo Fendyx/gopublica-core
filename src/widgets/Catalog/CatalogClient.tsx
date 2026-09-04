@@ -1,17 +1,20 @@
 'use client'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useLocale } from 'next-intl'
-import { usePathname } from 'next/navigation'
+import { usePathname, useParams } from 'next/navigation'
 import Menu from '@/widgets/Menu'
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout'
 import EcommerceCarouselLayout from '@/widgets/Catalog/EcommerceCarouselLayout'
 import EcommerceDynamicGrid from '@/widgets/Catalog/EcommerceDynamicGrid'
 import CategoryGrid, { CategoryCardData } from '@/widgets/Catalog/CategoryGrid'
 import FeaturedProductBanner from '@/widgets/Catalog/FeaturedProductBanner'
+import SearchBar from '@/widgets/Catalog/SearchBar'
+import FilterSidebar, { applyFilters, EMPTY_FILTERS, type FilterState } from '@/widgets/Catalog/FilterSidebar'
 import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types'
+import type { ProductAttribute } from '@/entities/product-attribute/types'
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   PLN: 'zł', EUR: '€', USD: '$', UAH: '₴', GBP: '£', CZK: 'Kč', CHF: 'CHF',
@@ -30,6 +33,8 @@ export default function CatalogClient() {
   const locale = useLocale();
   const [items, setItems] = useState<MenuItem[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [attributes, setAttributes] = useState<ProductAttribute[]>([])
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS)
   const [loading, setLoading] = useState(true)
 
   const tenantId = selectedBranch?.tenantId ?? tenant?.tenantId
@@ -41,6 +46,8 @@ export default function CatalogClient() {
   const currencySymbol = getCurrencySymbol(primaryCurrency);
 
   const pathname = usePathname()
+  const { branchSlug } = useParams()
+  const branchSlugStr = Array.isArray(branchSlug) ? branchSlug[0] : branchSlug
 
   useEffect(() => {
     const fetchCatalog = async () => {
@@ -55,6 +62,9 @@ export default function CatalogClient() {
         const catRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenantId}&niche=ecommerce`)
         const catData = await catRes.json()
         setCategories(catData)
+
+        const attrRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/product-attributes?tenantId=${tenantId}`, { cache: 'no-store' })
+        if (attrRes.ok) setAttributes(await attrRes.json())
       } catch (err) {
         console.error(err)
       } finally {
@@ -90,9 +100,10 @@ export default function CatalogClient() {
           description: cat.description,
           imageAspectRatio: cat.imageAspectRatio,
           productImageAspectRatio: cat.productImageAspectRatio,
+          parentCategoryKey: cat.parentCategoryKey,
         };
       })
-      .filter(cat => cat.productCount > 0);
+      .filter(cat => cat.productCount > 0 || categories.some(c => c.parentCategoryKey === cat.key));
 
     // Группировка всех товаров по категориям
     const groupedItems = allItems.reduce((acc, item) => {
@@ -120,51 +131,130 @@ export default function CatalogClient() {
       <div className="bg-transparent">
         <CategoryGrid categories={categoryCardsData} bgColor={tenant?.theme?.categoryBgColor} />
 
+        {/* Search bar */}
+        {tenantId && branchSlugStr && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <SearchBar tenantId={tenantId} branchSlug={branchSlugStr} />
+          </div>
+        )}
+
         <div className="py-16 bg-transparent space-y-12">
-          {orderedCats.map(cat => {
-            if (cat.key === FEATURED_KEY) {
-              return featuredItems.length > 0 ? (
-                <div key={FEATURED_KEY} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                  {featuredItems.map(product => (
-                    <FeaturedProductBanner
-                      key={product._id}
-                      product={product}
-                      locale={locale}
-                      currencySymbol={currencySymbol}
-                    />
-                  ))}
-                </div>
-              ) : null;
-            }
-            const products = groupedItems[cat.key] || [];
-            if (products.length === 0) return null;
+          {/* Filter sidebar + products */}
+          {attributes.length > 0 ? (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-8">
+              <aside className="hidden lg:block w-64 shrink-0">
+                <FilterSidebar
+                  products={allItems}
+                  attributes={attributes}
+                  categories={categories}
+                  activeFilters={filters}
+                  onFilterChange={setFilters}
+                />
+              </aside>
+              <div className="flex-1 min-w-0">
+                {(() => {
+                  const filteredItems = applyFilters(allItems, filters, attributes);
+                  const filteredFeatured = filteredItems.filter(item => item.isFeatured === true);
+                  const filteredGrouped = filteredItems.reduce((acc, item) => {
+                    const key = item.categoryKey || item.category || 'uncategorized';
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(item);
+                    return acc;
+                  }, {} as Record<string, MenuItem[]>);
 
-            const layout = cat.layout || 'grid-3';
-            const bgColor = cat.cardBgColor;
-            const variant = (cat.productCardVariant || globalVariant) as ProductCardVariant;
+                  return (
+                    <>
+                      {filteredFeatured.length > 0 && (
+                        <div className="space-y-8 mb-12">
+                          {filteredFeatured.map(product => (
+                            <FeaturedProductBanner
+                              key={product._id}
+                              product={product}
+                              locale={locale}
+                              currencySymbol={currencySymbol}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {orderedCats.map(cat => {
+                        if (cat.key === FEATURED_KEY) return null;
+                        const products = filteredGrouped[cat.key] || [];
+                        if (products.length === 0) return null;
+                        const layout = cat.layout || 'grid-3';
+                        const bgColor = cat.cardBgColor;
+                        const variant = (cat.productCardVariant || globalVariant) as ProductCardVariant;
+                        return (
+                          <section
+                            key={cat.key}
+                            style={bgColor ? { backgroundColor: bgColor } : undefined}
+                            className={!bgColor ? '' : 'py-12 shadow-sm border-y border-border'}
+                          >
+                            <div className="mb-6">
+                              <h2 className="text-2xl font-bold text-foreground mb-1">{cat.name}</h2>
+                              {cat.description && <p className="text-muted-foreground mb-6">{cat.description}</p>}
+                            </div>
+                            {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} productCardWidth={cat.productCardWidth || 'default'} />}
+                            {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'} />}
+                            {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'} />}
+                            {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'} />}
+                          </section>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+                {orderedCats.map(cat => {
+                  if (cat.key === FEATURED_KEY) {
+                    return featuredItems.length > 0 ? (
+                      <div key={FEATURED_KEY} className="space-y-8">
+                        {featuredItems.map(product => (
+                          <FeaturedProductBanner
+                            key={product._id}
+                            product={product}
+                            locale={locale}
+                            currencySymbol={currencySymbol}
+                          />
+                        ))}
+                      </div>
+                    ) : null;
+                  }
+                  const products = groupedItems[cat.key] || [];
+                  if (products.length === 0) return null;
 
-            return (
-              <section 
-                key={cat.key} 
-                style={bgColor ? { backgroundColor: bgColor } : undefined}
-                className={!bgColor ? '' : 'py-12 shadow-sm border-y border-border'}
-              >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-1">
-                    {cat.name}
-                  </h2>
-                  {cat.description && (
-                    <p className="text-muted-foreground mb-6">{cat.description}</p>
-                  )}
+                  const layout = cat.layout || 'grid-3';
+                  const bgColor = cat.cardBgColor;
+                  const variant = (cat.productCardVariant || globalVariant) as ProductCardVariant;
 
-                  {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} productCardWidth={cat.productCardWidth || 'default'}/>}
-                  {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/> }
-                  {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/>}
-                  {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/>}
-                </div>
-              </section>
-            );
-          })}
+                  return (
+                    <section 
+                      key={cat.key} 
+                      style={bgColor ? { backgroundColor: bgColor } : undefined}
+                      className={!bgColor ? '' : 'py-12 shadow-sm border-y border-border'}
+                    >
+                      <div>
+                        <h2 className="text-2xl font-bold text-foreground mb-1">
+                          {cat.name}
+                        </h2>
+                        {cat.description && (
+                          <p className="text-muted-foreground mb-6">{cat.description}</p>
+                        )}
+
+                        {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} productCardWidth={cat.productCardWidth || 'default'}/>}
+                        {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/> }
+                        {layout === 'grid-4' && <EcommerceGridLayout items={products} locale={locale} columns={4} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/>}
+                        {(layout === 'grid-3' || !layout) && <EcommerceGridLayout items={products} locale={locale} columns={3} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'}/>}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     )

@@ -28,13 +28,6 @@ import {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-// ─── Furgonetka carriers ──────────────────────────────────────────────────
-const CARRIERS = [
-  { id: 'inpost', label: 'InPost Paczkomaty', Icon: Box },
-  { id: 'orlen', label: 'Orlen Paczka', Icon: Fuel },
-  { id: 'dpd', label: 'DPD Pickup', Icon: Truck },
-];
-
 // ─── Furgonetka map widget ────────────────────────────────────────────────
 interface ParcelLocker {
   id: string;
@@ -53,6 +46,12 @@ function LockerPicker({
   onSelect: (locker: ParcelLocker) => void;
   selectedLocker: ParcelLocker | null;
 }) {
+  const tCheckout = useTranslations('admin.checkout');
+  const CARRIERS = [
+    { id: 'inpost', label: tCheckout('carrierInpost'), Icon: Box },
+    { id: 'orlen', label: tCheckout('carrierOrlen'), Icon: Fuel },
+    { id: 'dpd', label: tCheckout('carrierDpd'), Icon: Truck },
+  ];
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scriptFailed, setScriptFailed] = useState(false);
@@ -158,7 +157,7 @@ function LockerPicker({
         size="sm"
       >
         <MapPin className="w-4 h-4 mr-2" />
-        {selectedLocker ? 'Change locker' : loading ? 'Loading map…' : 'Show all carriers'}
+        {selectedLocker ? tCheckout('changeLocker') : loading ? tCheckout('loadingMap') : tCheckout('showAllCarriers')}
       </Button>
 
       {error && <p className="text-xs text-destructive">{error}</p>}
@@ -166,7 +165,7 @@ function LockerPicker({
       {selectedLocker && (
         <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs">
           <p className="font-medium text-primary">{selectedLocker.id}</p>
-          {selectedLocker.network && <p className="text-muted-foreground">Carrier: {selectedLocker.network}</p>}
+          {selectedLocker.network && <p className="text-muted-foreground">{tCheckout('carrier')} {selectedLocker.network}</p>}
           {selectedLocker.address?.city && (
             <p className="text-muted-foreground">{selectedLocker.address.city} {selectedLocker.address.zip}</p>
           )}
@@ -180,6 +179,7 @@ function LockerPicker({
 function StripePaymentForm({ clientSecret }: { clientSecret: string }) {
   const stripe = useStripe();
   const elements = useElements();
+  const tCheckout = useTranslations('admin.checkout');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
@@ -194,7 +194,7 @@ function StripePaymentForm({ clientSecret }: { clientSecret: string }) {
       },
     });
     if (stripeError) {
-      setError(stripeError.message || 'Payment failed');
+      setError(stripeError.message || tCheckout('paymentFailed'));
       setProcessing(false);
     }
   };
@@ -205,7 +205,7 @@ function StripePaymentForm({ clientSecret }: { clientSecret: string }) {
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button onClick={handlePay} disabled={!stripe || processing} className="w-full" size="lg">
         {processing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
-        {processing ? 'Processing…' : 'Pay now'}
+        {processing ? tCheckout('processing') : tCheckout('payNow')}
       </Button>
     </div>
   );
@@ -215,6 +215,7 @@ function StripePaymentForm({ clientSecret }: { clientSecret: string }) {
 export default function PlatformCheckout() {
   const router = useRouter();
   const t = useTranslations('admin.gopublicaPage');
+  const tCheckout = useTranslations('admin.checkout');
   const tenant = useTenant();
   const { items, getSubtotal, clear } = usePlatformCartStore();
 
@@ -341,9 +342,9 @@ export default function PlatformCheckout() {
       <Card className="border-dashed border-2">
         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
           <ShoppingCart className="w-8 h-8 text-muted-foreground/40 mb-2" />
-          <p className="text-sm font-medium text-muted-foreground">Your cart is empty</p>
+          <p className="text-sm font-medium text-muted-foreground">{tCheckout('emptyCart')}</p>
           <Button variant="outline" onClick={() => router.back()} className="mt-3" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-1" /> Go back
+            <ArrowLeft className="w-4 h-4 mr-1" /> {tCheckout('goBack')}
           </Button>
         </CardContent>
       </Card>
@@ -358,27 +359,27 @@ export default function PlatformCheckout() {
         {/* ── Buyer Type ── */}
         <Card>
           <CardContent className="p-6">
-            <CardTitle className="text-base font-semibold mb-3">Who is buying?</CardTitle>
+            <CardTitle className="text-base font-semibold mb-3">{tCheckout('whoIsBuying')}</CardTitle>
             <RadioGroup value={buyerType} onValueChange={(v) => setBuyerType(v as any)} className="flex gap-3">
               <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border cursor-pointer hover:border-primary/40 transition-colors data-[state=checked]:border-primary data-[state=checked]:bg-primary/5 flex-1">
                 <RadioGroupItem value="private" />
                 <User className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Private person</span>
+                <span className="text-sm font-medium">{tCheckout('privatePerson')}</span>
               </label>
               <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border cursor-pointer hover:border-primary/40 transition-colors data-[state=checked]:border-primary data-[state=checked]:bg-primary/5 flex-1">
                 <RadioGroupItem value="business" />
                 <Building2 className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Business (invoice)</span>
+                <span className="text-sm font-medium">{tCheckout('businessInvoice')}</span>
               </label>
             </RadioGroup>
             {buyerType === 'business' && (
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs">Business name *</Label>
+                  <Label className="text-xs">{tCheckout('businessNameLabel')}</Label>
                   <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} className="mt-1" />
                 </div>
                 <div>
-                  <Label className="text-xs">NIP *</Label>
+                  <Label className="text-xs">{tCheckout('nip')}</Label>
                   <Input value={nip} onChange={(e) => setNip(e.target.value)} placeholder="1234567890" className="mt-1" />
                 </div>
               </div>
@@ -389,22 +390,22 @@ export default function PlatformCheckout() {
         {/* ── Payment Method ── */}
         <Card>
           <CardContent className="p-6">
-            <CardTitle className="text-base font-semibold mb-3">Payment method</CardTitle>
+            <CardTitle className="text-base font-semibold mb-3">{tCheckout('paymentMethod')}</CardTitle>
             <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="flex gap-3">
               <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border cursor-pointer hover:border-primary/40 transition-colors data-[state=checked]:border-primary data-[state=checked]:bg-primary/5 flex-1">
                 <RadioGroupItem value="stripe" />
                 <CreditCard className="w-4 h-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Pay online</p>
-                  <p className="text-[10px] text-muted-foreground">Card, BLIK & more</p>
+                  <p className="text-sm font-medium">{tCheckout('payOnline')}</p>
+                  <p className="text-[10px] text-muted-foreground">{tCheckout('cardBlik')}</p>
                 </div>
               </label>
               <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border cursor-pointer hover:border-primary/40 transition-colors data-[state=checked]:border-primary data-[state=checked]:bg-primary/5 flex-1">
                 <RadioGroupItem value="cash_on_delivery" />
                 <Truck className="w-4 h-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Cash on delivery</p>
-                  <p className="text-[10px] text-muted-foreground">Kraków only · 30 PLN</p>
+                  <p className="text-sm font-medium">{tCheckout('cashOnDelivery')}</p>
+                  <p className="text-[10px] text-muted-foreground">{tCheckout('codHint')}</p>
                 </div>
               </label>
             </RadioGroup>
@@ -415,22 +416,22 @@ export default function PlatformCheckout() {
         {paymentMethod === 'stripe' && (
           <Card>
             <CardContent className="p-6">
-              <CardTitle className="text-base font-semibold mb-3">Delivery method</CardTitle>
+              <CardTitle className="text-base font-semibold mb-3">{tCheckout('deliveryMethod')}</CardTitle>
               <RadioGroup value={deliveryMethod} onValueChange={(v) => { setDeliveryMethod(v as any); setSelectedLocker(null); }} className="flex gap-3 mb-4">
                 <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border cursor-pointer hover:border-primary/40 transition-colors data-[state=checked]:border-primary data-[state=checked]:bg-primary/5 flex-1">
                   <RadioGroupItem value="parcel_locker" />
                   <Box className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">Parcel locker</p>
-                    <p className="text-[10px] text-muted-foreground">+14.99 PLN</p>
+                    <p className="text-sm font-medium">{tCheckout('parcelLocker')}</p>
+                    <p className="text-[10px] text-muted-foreground">{tCheckout('parcelLockerFee')}</p>
                   </div>
                 </label>
                 <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border cursor-pointer hover:border-primary/40 transition-colors data-[state=checked]:border-primary data-[state=checked]:bg-primary/5 flex-1">
                   <RadioGroupItem value="courier" />
                   <Truck className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">Courier</p>
-                    <p className="text-[10px] text-muted-foreground">+19.99 PLN</p>
+                    <p className="text-sm font-medium">{tCheckout('courier')}</p>
+                    <p className="text-[10px] text-muted-foreground">{tCheckout('courierFee')}</p>
                   </div>
                 </label>
               </RadioGroup>
@@ -447,23 +448,23 @@ export default function PlatformCheckout() {
               {deliveryMethod === 'courier' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs">Name *</Label>
+                    <Label className="text-xs">{tCheckout('name')}</Label>
                     <Input value={address.name} onChange={(e) => setAddr('name', e.target.value)} className="mt-1" />
                   </div>
                   <div>
-                    <Label className="text-xs">Phone *</Label>
+                    <Label className="text-xs">{tCheckout('phone')}</Label>
                     <Input value={address.phone} onChange={(e) => setAddr('phone', e.target.value)} className="mt-1" />
                   </div>
                   <div className="col-span-2">
-                    <Label className="text-xs">Street *</Label>
+                    <Label className="text-xs">{tCheckout('street')}</Label>
                     <Input value={address.street} onChange={(e) => setAddr('street', e.target.value)} className="mt-1" />
                   </div>
                   <div>
-                    <Label className="text-xs">City *</Label>
+                    <Label className="text-xs">{tCheckout('city')}</Label>
                     <Input value={address.city} onChange={(e) => setAddr('city', e.target.value)} className="mt-1" />
                   </div>
                   <div>
-                    <Label className="text-xs">ZIP *</Label>
+                    <Label className="text-xs">{tCheckout('zip')}</Label>
                     <Input value={address.zip} onChange={(e) => setAddr('zip', e.target.value)} className="mt-1" />
                   </div>
                 </div>
@@ -476,9 +477,9 @@ export default function PlatformCheckout() {
         {paymentMethod === 'cash_on_delivery' && (
           <Card>
             <CardContent className="p-6">
-              <CardTitle className="text-base font-semibold mb-3">Cash on delivery</CardTitle>
+              <CardTitle className="text-base font-semibold mb-3">{tCheckout('cashOnDelivery')}</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Your order will be delivered to your business address. Payment of <strong>{total.toFixed(2)} PLN</strong> will be collected upon delivery.
+                {tCheckout('codNotice', { amount: total.toFixed(2) })}
               </p>
             </CardContent>
           </Card>
@@ -487,18 +488,18 @@ export default function PlatformCheckout() {
         {/* ── Contact details ── */}
         <Card>
           <CardContent className="p-6">
-            <CardTitle className="text-base font-semibold mb-3">Contact details</CardTitle>
+            <CardTitle className="text-base font-semibold mb-3">{tCheckout('contactDetails')}</CardTitle>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Name *</Label>
+                <Label className="text-xs">{tCheckout('name')}</Label>
                 <Input value={address.name} onChange={(e) => setAddr('name', e.target.value)} className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Phone *</Label>
+                <Label className="text-xs">{tCheckout('phone')}</Label>
                 <Input value={address.phone} onChange={(e) => setAddr('phone', e.target.value)} className="mt-1" />
               </div>
               <div className="col-span-2">
-                <Label className="text-xs">Email *</Label>
+                <Label className="text-xs">{tCheckout('email')}</Label>
                 <Input type="email" value={address.email} onChange={(e) => setAddr('email', e.target.value)} className="mt-1" placeholder="your@email.com" />
               </div>
             </div>
@@ -509,7 +510,7 @@ export default function PlatformCheckout() {
         {clientSecret && paymentMethod === 'stripe' && (
           <Card>
             <CardContent className="p-6">
-              <CardTitle className="text-base font-semibold mb-3">Payment</CardTitle>
+              <CardTitle className="text-base font-semibold mb-3">{tCheckout('payment')}</CardTitle>
               <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
                 <StripePaymentForm clientSecret={clientSecret} />
               </Elements>
@@ -534,12 +535,12 @@ export default function PlatformCheckout() {
             ) : (
               <CheckCircle className="w-4 h-4 mr-2" />
             )}
-            {saving ? 'Placing order…' : paymentMethod === 'stripe' ? `Pay ${total.toFixed(2)} PLN` : 'Place order'}
+            {saving ? tCheckout('placingOrder') : paymentMethod === 'stripe' ? tCheckout('payAmount', { amount: total.toFixed(2) }) : tCheckout('placeOrder')}
           </Button>
         )}
 
         <Button variant="outline" onClick={() => router.back()} className="w-full" size="sm">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Marketplace
+          <ArrowLeft className="w-4 h-4 mr-1" /> {tCheckout('backToMarketplace')}
         </Button>
       </div>
 
@@ -547,7 +548,7 @@ export default function PlatformCheckout() {
       <div>
         <Card className="sticky top-4">
           <CardContent className="p-6">
-            <CardTitle className="text-base font-semibold mb-4">Order Summary</CardTitle>
+            <CardTitle className="text-base font-semibold mb-4">{tCheckout('orderSummary')}</CardTitle>
 
             <div className="space-y-3 mb-4">
               {items.map((item) => (
@@ -572,16 +573,16 @@ export default function PlatformCheckout() {
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-muted-foreground">{tCheckout('subtotal')}</span>
                 <span>{currency} {subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Delivery</span>
+                <span className="text-muted-foreground">{tCheckout('delivery')}</span>
                 <span>{currency} {deliveryFee.toFixed(2)}</span>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between text-base font-bold">
-                <span>Total</span>
+                <span>{tCheckout('total')}</span>
                 <span>{currency} {total.toFixed(2)}</span>
               </div>
             </div>

@@ -9,6 +9,8 @@ import { Inter, Playfair_Display, Geist } from 'next/font/google';
 import './globals.css';
 import { cn } from "@/lib/utils";
 import { TrackVisit } from '@/shared/ui/TrackVisit';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -83,6 +85,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </TenantProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

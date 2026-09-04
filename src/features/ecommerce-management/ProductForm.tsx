@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
@@ -9,10 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, X, Plus, ImagePlus, Trash2, ChevronDown } from 'lucide-react';
-import type { MenuItem, ProductVariant, ProductAttribute } from '@/entities/menu-item/types';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Loader2, X, Plus, ImagePlus, Trash2, Search } from 'lucide-react';
+import type { MenuItem, ProductVariant, ProductAttribute as ProductAttr, AttributeRef, AttributeType } from '@/entities/menu-item/types';
+import type { ProductAttribute } from '@/entities/product-attribute/types';
+import { suggestAttributes, createAttribute } from '@/entities/product-attribute/api';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { useToast } from '@/shared/ui/Toast';
+import { useTenant } from '@/entities/tenant/TenantContext';
 
 interface ProductFormProps {
   isOpen: boolean;
@@ -31,7 +35,7 @@ const EMPTY_FORM = {
   image: '',
   categoryKey: '__none__',
   category: '',
-  status: 'active',
+  status: 'published' as string,
   sku: '',
   stock: 0,
   compareAtPrice: 0,
@@ -41,7 +45,9 @@ const EMPTY_FORM = {
   dimensions: { length: 0, width: 0, height: 0, unit: 'cm' },
   tags: [] as string[],
   variants: [] as ProductVariant[],
-  attributes: [] as ProductAttribute[],
+  attributes: [] as ProductAttr[],
+  attributeRefs: [] as AttributeRef[],
+  translations: {} as Record<string, { name?: string; description?: string }>,
   isFeatured: false,
 };
 
@@ -50,11 +56,20 @@ export default function ProductForm({
 }: ProductFormProps) {
   const t = useTranslations('admin.productForm');
   const { showToast } = useToast();
+  const tenant = useTenant();
+  const activeLocales = tenant?.activeLocales || ['pl', 'en'];
+  const defaultLocale = tenant?.defaultLocale || 'pl';
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [hasVariants, setHasVariants] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [translationTab, setTranslationTab] = useState(defaultLocale);
+
+  // Managed attribute picker state
+  const [attrSearch, setAttrSearch] = useState<Record<string, string>>({});
+  const [attrResults, setAttrResults] = useState<Record<string, ProductAttribute[]>>({});
+  const [attrLoading, setAttrLoading] = useState<Record<string, boolean>>({});
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -68,16 +83,22 @@ export default function ProductForm({
 
   useEffect(() => {
     if (editingProduct) {
-      const catKey = editingProduct.categoryKey || editingProduct.category || '';
+      // Resolve categoryKey: prefer stored key, fallback to name→key lookup via categories
+      let resolvedKey = editingProduct.categoryKey || '';
+      if (!resolvedKey && editingProduct.category && categories.length > 0) {
+        const match = categories.find((c: any) => c.name === editingProduct.category);
+        if (match) resolvedKey = match.key;
+      }
+
       setForm({
         ...EMPTY_FORM,
         name: editingProduct.name,
         description: editingProduct.description,
         price: editingProduct.price,
         image: editingProduct.image || '',
-        categoryKey: catKey === '' ? '__none__' : catKey,
+        categoryKey: resolvedKey === '' ? '__none__' : resolvedKey,
         category: editingProduct.category || '',
-        status: (editingProduct as any).status || 'active',
+        status: editingProduct.status || 'published',
         sku: editingProduct.sku || '',
         stock: editingProduct.stock || 0,
         compareAtPrice: editingProduct.compareAtPrice || 0,
@@ -93,6 +114,8 @@ export default function ProductForm({
         tags: editingProduct.tags || [],
         variants: editingProduct.variants || [],
         attributes: editingProduct.attributes || [],
+        attributeRefs: editingProduct.attributeRefs || [],
+        translations: (editingProduct as any).translations || {},
         isFeatured: editingProduct.isFeatured || false,
       });
       setHasVariants(!!(editingProduct.variants && editingProduct.variants.length > 0));
@@ -100,7 +123,63 @@ export default function ProductForm({
       setForm({ ...EMPTY_FORM });
       setHasVariants(false);
     }
-  }, [editingProduct, isOpen]);
+  }, [editingProduct, isOpen, categories]);
+
+  /* ---------- translations ---------- */
+  const updateTranslation = (locale: string, field: 'name' | 'description', value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [locale]: { ...prev.translations[locale], [field]: value },
+      },
+    }));
+  };
+
+  /* ---------- managed attribute pickers ---------- */
+  const searchAttributes = useCallback(async (type: AttributeType, query: string) => {
+    if (!tenant?.tenantId || !query.trim()) {
+      setAttrResults((prev) => ({ ...prev, [type]: [] }));
+      return;
+    }
+    setAttrLoading((prev) => ({ ...prev, [type]: true }));
+    try {
+      const results = await suggestAttributes(tenant.tenantId, type, query);
+      setAttrResults((prev) => ({ ...prev, [type]: results }));
+    } catch {
+      setAttrResults((prev) => ({ ...prev, [type]: [] }));
+    } finally {
+      setAttrLoading((prev) => ({ ...prev, [type]: false }));
+    }
+  }, [tenant?.tenantId]);
+
+  const addAttributeRef = (type: AttributeType, attr: ProductAttribute) => {
+    setForm((prev) => {
+      if (prev.attributeRefs.some((r) => r.attributeId === attr._id)) return prev;
+      return { ...prev, attributeRefs: [...prev.attributeRefs, { type, attributeId: attr._id }] };
+    });
+    setAttrSearch((prev) => ({ ...prev, [type]: '' }));
+    setAttrResults((prev) => ({ ...prev, [type]: [] }));
+  };
+
+  const removeAttributeRef = (type: AttributeType, attributeId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      attributeRefs: prev.attributeRefs.filter((r) => !(r.type === type && r.attributeId === attributeId)),
+    }));
+  };
+
+  const createAndAddAttribute = async (type: AttributeType) => {
+    const query = attrSearch[type]?.trim();
+    if (!query || !token) return;
+    try {
+      const newAttr = await createAttribute({ type, name: query }, token);
+      addAttributeRef(type, newAttr);
+      showToast(`Created ${type}: ${query}`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to create', 'error');
+    }
+  };
 
   /* ---------- tags ---------- */
   const addTag = () => {
@@ -177,13 +256,15 @@ export default function ProductForm({
 
     const payload = {
       ...form,
-      // Drop half-filled specification rows before persisting
       attributes: form.attributes.filter((a) => a.key.trim() && a.value.trim()),
+      attributeRefs: form.attributeRefs,
+      translations: form.translations,
       categoryKey: form.categoryKey === '__none__' ? '' : form.categoryKey,
       category: form.categoryKey === '__none__' ? '' : form.category,
       price: priceToSend,
       branchId,
       productType: 'physical_product',
+      status: form.status || 'published',
     };
 
     const url = editingProduct
@@ -242,14 +323,65 @@ export default function ProductForm({
             {/* ===== General ===== */}
             <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
               <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('generalSection')}</h3>
-              <div className="space-y-2">
-                <Label htmlFor="name">{t('productName')}</Label>
-                <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">{t('description')}</Label>
-                <Textarea id="description" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              </div>
+
+              {/* Translation tabs for name/description */}
+              {activeLocales.length > 1 && (
+                <Tabs value={translationTab} onValueChange={setTranslationTab}>
+                  <TabsList className="bg-muted/50">
+                    {activeLocales.map((locale) => (
+                      <TabsTrigger key={locale} value={locale} className="text-xs uppercase">
+                        {locale}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  {activeLocales.map((locale) => (
+                    <TabsContent key={locale} value={locale} className="space-y-2 mt-3">
+                      <div className="space-y-2">
+                        <Label>{t('productName')} ({locale.toUpperCase()})</Label>
+                        <Input
+                          value={locale === defaultLocale ? form.name : (form.translations[locale]?.name || '')}
+                          onChange={(e) => {
+                            if (locale === defaultLocale) {
+                              setForm({ ...form, name: e.target.value });
+                            } else {
+                              updateTranslation(locale, 'name', e.target.value);
+                            }
+                          }}
+                          placeholder={locale === defaultLocale ? undefined : `Translation for ${locale.toUpperCase()}`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t('description')} ({locale.toUpperCase()})</Label>
+                        <Textarea
+                          rows={2}
+                          value={locale === defaultLocale ? form.description : (form.translations[locale]?.description || '')}
+                          onChange={(e) => {
+                            if (locale === defaultLocale) {
+                              setForm({ ...form, description: e.target.value });
+                            } else {
+                              updateTranslation(locale, 'description', e.target.value);
+                            }
+                          }}
+                          placeholder={locale === defaultLocale ? undefined : `Translation for ${locale.toUpperCase()}`}
+                        />
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              )}
+              {activeLocales.length <= 1 && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">{t('productName')}</Label>
+                    <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">{t('description')}</Label>
+                    <Textarea id="description" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                  </div>
+                </>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t('category')}</Label>
@@ -259,7 +391,7 @@ export default function ProductForm({
                       if (val === '__none__') {
                         setForm({ ...form, categoryKey: val, category: '' });
                       } else {
-                        const selectedCat = categories.find((c) => c.key === val);
+                        const selectedCat = categories.find((c: any) => c.key === val);
                         setForm({ ...form, categoryKey: val, category: selectedCat?.name || val });
                       }
                     }}
@@ -267,8 +399,10 @@ export default function ProductForm({
                     <SelectTrigger><SelectValue placeholder={t('selectCategory')} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">{t('noCategory')}</SelectItem>
-                      {categories.map((c) => (
-                        <SelectItem key={c.key} value={c.key}>{c.icon} {c.name}</SelectItem>
+                      {categories.map((c: any) => (
+                        <SelectItem key={c.key} value={c.key}>
+                          {c.parentCategoryKey ? '  └ ' : ''}{c.icon} {c.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -278,8 +412,9 @@ export default function ProductForm({
                   <Select value={form.status} onValueChange={(val) => setForm({ ...form, status: val })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">{t('statusActive')}</SelectItem>
+                      <SelectItem value="published">{t('statusActive')}</SelectItem>
                       <SelectItem value="draft">{t('statusDraft')}</SelectItem>
+                      <SelectItem value="hidden">Hidden</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -407,6 +542,69 @@ export default function ProductForm({
               ))}
             </div>
 
+            {/* ===== Managed Attributes (Authors, Publishers, Genres, etc.) ===== */}
+            <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Product Attributes</h3>
+              {([['author', 'Authors'], ['publisher', 'Publishers'], ['genre', 'Genres'], ['language', 'Languages'], ['series', 'Series']] as [AttributeType, string][]).map(([type, label]) => {
+                const selected = form.attributeRefs.filter((r) => r.type === type);
+                const results = attrResults[type] || [];
+                const loading = attrLoading[type] || false;
+                return (
+                  <div key={type} className="space-y-2">
+                    <Label>{label}</Label>
+                    {selected.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {selected.map((ref) => (
+                          <span key={ref.attributeId} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-xs">
+                            {ref.attributeId.slice(0, 8)}...
+                            <button type="button" onClick={() => removeAttributeRef(type, ref.attributeId)}><X size={10} /></button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="relative">
+                      <Input
+                        value={attrSearch[type] || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setAttrSearch((prev) => ({ ...prev, [type]: val }));
+                          if (val.trim().length >= 1) searchAttributes(type, val);
+                          else setAttrResults((prev) => ({ ...prev, [type]: [] }));
+                        }}
+                        placeholder={`Search ${label.toLowerCase()}...`}
+                        className="pr-8"
+                      />
+                      {loading && <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />}
+                    </div>
+                    {results.length > 0 && (
+                      <div className="border rounded-lg bg-background max-h-40 overflow-y-auto">
+                        {results.map((attr) => (
+                          <button
+                            key={attr._id}
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 flex items-center justify-between"
+                            onClick={() => addAttributeRef(type, attr)}
+                          >
+                            <span>{attr.name}</span>
+                            <span className="text-xs text-muted-foreground">{attr.productCount || 0} products</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {attrSearch[type]?.trim() && results.length === 0 && !loading && (
+                      <button
+                        type="button"
+                        onClick={() => createAndAddAttribute(type)}
+                        className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-muted/50 border border-dashed rounded-lg"
+                      >
+                        <Plus size={12} className="inline mr-1" /> Create "{attrSearch[type]}" as {type}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
             {/* ===== Tags ===== */}
             <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
               <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('tagsSection')}</h3>
@@ -424,49 +622,45 @@ export default function ProductForm({
               </div>
             </div>
 
-            {/* ===== Inventory & Logistics (collapsed by default) ===== */}
-            {!hasVariants && (
-              <details className="group border border-border rounded-xl bg-muted/20">
-                <summary className="flex items-center justify-between cursor-pointer select-none p-4 text-sm font-semibold uppercase text-muted-foreground tracking-wider">
-                  {t('advancedSection')}
-                  <ChevronDown size={16} className="transition-transform group-open:rotate-180" />
-                </summary>
-                <div className="px-4 pb-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="sku">{t('sku')}</Label>
-                      <Input id="sku" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="stock">{t('stock')}</Label>
-                      <Input id="stock" type="number" value={form.stock || ''} onChange={(e) => setForm({ ...form, stock: +e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>{t('weight')}</Label>
-                      <Input type="number" value={form.weight || ''} onChange={(e) => setForm({ ...form, weight: +e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t('unit')}</Label>
-                      <Select value={form.weightUnit} onValueChange={(val) => setForm({ ...form, weightUnit: val as 'g' | 'kg' | 'lb' })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="g">g</SelectItem>
-                          <SelectItem value="kg">kg</SelectItem>
-                          <SelectItem value="lb">lb</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div><Label>{t('length')}</Label><Input type="number" value={form.dimensions.length || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, length: +e.target.value } })} /></div>
-                    <div><Label>{t('width')}</Label><Input type="number" value={form.dimensions.width || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, width: +e.target.value } })} /></div>
-                    <div><Label>{t('height')}</Label><Input type="number" value={form.dimensions.height || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, height: +e.target.value } })} /></div>
-                  </div>
+            {/* ===== Inventory & Logistics ===== */}
+            <div className="space-y-4 border border-border rounded-xl p-4 bg-muted/20">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('advancedSection')}</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sku">{t('sku')}</Label>
+                  <Input id="sku" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="e.g. PROD-001" />
                 </div>
-              </details>
-            )}
+                <div className="space-y-2">
+                  <Label htmlFor="stock">{t('stock')}</Label>
+                  <Input id="stock" type="number" min="0" value={form.stock || ''} onChange={(e) => setForm({ ...form, stock: +e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('weight')}</Label>
+                  <Input type="number" min="0" step="0.01" value={form.weight || ''} onChange={(e) => setForm({ ...form, weight: +e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('unit')}</Label>
+                  <Select value={form.weightUnit} onValueChange={(val) => setForm({ ...form, weightUnit: val as 'g' | 'kg' | 'lb' })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="g">g</SelectItem>
+                      <SelectItem value="kg">kg</SelectItem>
+                      <SelectItem value="lb">lb</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('length')} × {t('width')} × {t('height')}</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Input type="number" min="0" step="0.1" placeholder={t('length')} value={form.dimensions.length || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, length: +e.target.value } })} />
+                  <Input type="number" min="0" step="0.1" placeholder={t('width')} value={form.dimensions.width || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, width: +e.target.value } })} />
+                  <Input type="number" min="0" step="0.1" placeholder={t('height')} value={form.dimensions.height || ''} onChange={(e) => setForm({ ...form, dimensions: { ...form.dimensions, height: +e.target.value } })} />
+                </div>
+              </div>
+            </div>
           </div>
 
           <SheetFooter className="p-6 border-t border-border">

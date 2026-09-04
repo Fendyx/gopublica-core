@@ -139,7 +139,7 @@ export async function fetchPublicBranchSections(
   try {
     const res = await fetch(url, {
       next: { tags: [`sections:${tenantId}:${branchId}`] },
-      cache: 'force-cache',
+      cache: 'no-store',
     });
     if (!res.ok) {
       const text = await res.text();

@@ -34,6 +34,7 @@ import {
   Loader2,
   Calendar,
   Ticket,
+  Navigation,
 } from 'lucide-react';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import {
@@ -45,7 +46,8 @@ import {
   updateEvent,
   deleteEvent,
 } from '@/entities/article/api';
-import type { Article, Event } from '@/entities/article/types';
+import type { Article, Event, SidebarType, ContentType } from '@/entities/article/types';
+import { slugify } from '@/shared/lib/slugify';
 import { ArticleEditor } from './ArticleEditor';
 import { useToast } from '@/shared/ui/Toast';
 
@@ -63,6 +65,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -75,25 +78,25 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
     isActive: true,
     seoTitle: '',
     seoDescription: '',
+    // Content type
+    contentType: 'article' as ContentType,
+    // Sidebar type
+    sidebarType: 'none' as SidebarType,
     // Event fields
-    isEvent: false,
     ticketPrice: 0,
     totalTickets: 0,
     eventDate: '',
     venueName: '',
   });
 
-  const { openWidget: openImageUpload, widgetReady: imageWidgetReady } = useCloudinaryUpload({
-    resourceType: 'image',
-    onSuccess: (url: string) => {
-      setForm((prev) => ({ ...prev, coverImage: url, videoUrl: '' }));
-    },
-  });
-
-  const { openWidget: openVideoUpload, widgetReady: videoWidgetReady } = useCloudinaryUpload({
-    resourceType: 'video',
-    onSuccess: (url: string) => {
-      setForm((prev) => ({ ...prev, videoUrl: url, coverImage: '' }));
+  const { openWidget: openCoverUpload, widgetReady: coverWidgetReady } = useCloudinaryUpload({
+    resourceType: 'auto',
+    onSuccess: (url: string, resourceType?: string) => {
+      if (resourceType === 'video') {
+        setForm((prev) => ({ ...prev, videoUrl: url, coverImage: '' }));
+      } else {
+        setForm((prev) => ({ ...prev, coverImage: url, videoUrl: '' }));
+      }
     },
   });
 
@@ -129,6 +132,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
   }, [tenantId, selectedBranch?._id]);
 
   const resetForm = () => {
+    setSlugManuallyEdited(false);
     setForm({
       title: '',
       slug: '',
@@ -140,7 +144,8 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
       isActive: true,
       seoTitle: '',
       seoDescription: '',
-      isEvent: false,
+      contentType: 'article',
+      sidebarType: 'none',
       ticketPrice: 0,
       totalTickets: 0,
       eventDate: '',
@@ -151,6 +156,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
 
   const handleEdit = (article: Article) => {
     setEditingArticle(article);
+    setSlugManuallyEdited(true);
     setForm({
       title: article.title,
       slug: article.slug,
@@ -164,7 +170,8 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
       isActive: article.isActive,
       seoTitle: article.seoTitle || '',
       seoDescription: article.seoDescription || '',
-      isEvent: article.isEvent || false,
+      contentType: article.contentType || 'article',
+      sidebarType: article.sidebarType || (article.isEvent ? 'tickets' : 'none'),
       ticketPrice: article.ticketPrice || 0,
       totalTickets: article.totalTickets || 0,
       eventDate: article.eventDate
@@ -180,10 +187,10 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string, isEvent?: boolean) => {
+  const handleDelete = async (id: string, sidebarType?: string) => {
     if (!confirm(t('confirmDelete'))) return;
     try {
-      if (isEvent) {
+      if (sidebarType === 'tickets') {
         await deleteEvent(id, token);
       } else {
         await deleteArticle(id, token);
@@ -211,21 +218,26 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
     e.preventDefault();
     setSaving(true);
     try {
-      const isEvent = form.isEvent;
+      const isTickets = form.sidebarType === 'tickets';
+      const isInfoPage = form.contentType === 'infoPage';
       const payload = {
         ...form,
         tenantId,
         branchId: selectedBranch?._id,
-        publishedAt: form.publishedAt
-          ? new Date(form.publishedAt).toISOString()
-          : null,
+        // Clear author/date for info pages
+        author: isInfoPage ? undefined : form.author,
+        publishedAt: isInfoPage
+          ? null
+          : form.publishedAt
+            ? new Date(form.publishedAt).toISOString()
+            : null,
         eventDate: form.eventDate
           ? new Date(form.eventDate).toISOString()
           : null,
       };
 
       if (editingArticle) {
-        if (isEvent) {
+        if (isTickets) {
           await updateEvent(editingArticle._id, { ...payload, isEvent: true }, token);
         } else {
           await updateArticle(editingArticle._id, payload, token);
@@ -237,7 +249,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
         );
       } else {
         let created;
-        if (isEvent) {
+        if (isTickets) {
           created = await createEvent({ ...payload, isEvent: true }, token);
         } else {
           created = await createArticle(payload, token);
@@ -314,6 +326,45 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-6">
+              {/* Content Type Toggle */}
+              <div className="space-y-2">
+                <Label className="font-medium">{t('contentType')}</Label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="contentType"
+                      value="article"
+                      checked={form.contentType === 'article'}
+                      onChange={() =>
+                        setForm((prev) => ({ ...prev, contentType: 'article' }))
+                      }
+                      className="accent-primary"
+                    />
+                    <span className="text-sm">{t('contentTypeArticle')}</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="contentType"
+                      value="infoPage"
+                      checked={form.contentType === 'infoPage'}
+                      onChange={() =>
+                        setForm((prev) => ({
+                          ...prev,
+                          contentType: 'infoPage',
+                          // Clear metadata fields when switching to info page
+                          author: '',
+                          publishedAt: '',
+                        }))
+                      }
+                      className="accent-primary"
+                    />
+                    <span className="text-sm">{t('contentTypeInfoPage')}</span>
+                  </label>
+                </div>
+              </div>
+
               {/* Title & Slug */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -322,9 +373,14 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                     id="title"
                     placeholder={t('titlePlaceholder')}
                     value={form.title}
-                    onChange={(e) =>
-                      setForm({ ...form, title: e.target.value })
-                    }
+                    onChange={(e) => {
+                      const title = e.target.value;
+                      setForm((prev) => ({
+                        ...prev,
+                        title,
+                        slug: slugManuallyEdited ? prev.slug : slugify(title),
+                      }));
+                    }}
                     required
                   />
                 </div>
@@ -334,9 +390,10 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                     id="slug"
                     placeholder={t('slugPlaceholder')}
                     value={form.slug}
-                    onChange={(e) =>
-                      setForm({ ...form, slug: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setSlugManuallyEdited(true);
+                      setForm((prev) => ({ ...prev, slug: e.target.value }));
+                    }}
                     required
                   />
                 </div>
@@ -355,15 +412,8 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => {
-                      // If current media is video, open video upload; otherwise image
-                      if (form.videoUrl) {
-                        openVideoUpload();
-                      } else {
-                        openImageUpload();
-                      }
-                    }}
-                    disabled={!imageWidgetReady && !videoWidgetReady}
+                    onClick={() => openCoverUpload()}
+                    disabled={!coverWidgetReady}
                     className="gap-2 shrink-0"
                   >
                     <ImagePlus className="w-4 h-4" />
@@ -393,31 +443,33 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                 )}
               </div>
 
-              {/* Author & Published At */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="author">{t('author')}</Label>
-                  <Input
-                    id="author"
-                    placeholder={t('authorPlaceholder')}
-                    value={form.author}
-                    onChange={(e) =>
-                      setForm({ ...form, author: e.target.value })
-                    }
-                  />
+              {/* Author & Published At — hidden for info pages */}
+              {form.contentType === 'article' && (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="author">{t('author')}</Label>
+                    <Input
+                      id="author"
+                      placeholder={t('authorPlaceholder')}
+                      value={form.author}
+                      onChange={(e) =>
+                        setForm({ ...form, author: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="publishedAt">{t('publishedAt')}</Label>
+                    <Input
+                      id="publishedAt"
+                      type="datetime-local"
+                      value={form.publishedAt}
+                      onChange={(e) =>
+                        setForm({ ...form, publishedAt: e.target.value })
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="publishedAt">{t('publishedAt')}</Label>
-                  <Input
-                    id="publishedAt"
-                    type="datetime-local"
-                    value={form.publishedAt}
-                    onChange={(e) =>
-                      setForm({ ...form, publishedAt: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
+              )}
 
               {/* Body */}
               <div className="space-y-2">
@@ -429,21 +481,48 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                 />
               </div>
 
-              {/* Sell Tickets / Event Toggle */}
+              {/* Sidebar Type: None / Tickets / Direction */}
               <div className="space-y-4 border-t pt-4">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="isEvent"
-                    checked={form.isEvent}
-                    onCheckedChange={(checked) => setForm({ ...form, isEvent: checked })}
-                  />
-                  <Label htmlFor="isEvent" className="cursor-pointer font-medium">
-                    <Ticket className="w-4 h-4 inline mr-2" />
-                    {t('sellTickets')}
-                  </Label>
+                <Label className="font-medium">{t('sidebarType')}</Label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sidebarType"
+                      value="none"
+                      checked={form.sidebarType === 'none'}
+                      onChange={() => setForm({ ...form, sidebarType: 'none' })}
+                      className="accent-primary"
+                    />
+                    <span className="text-sm">{t('sidebarNone')}</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sidebarType"
+                      value="tickets"
+                      checked={form.sidebarType === 'tickets'}
+                      onChange={() => setForm({ ...form, sidebarType: 'tickets' })}
+                      className="accent-primary"
+                    />
+                    <Ticket className="w-4 h-4 text-primary" />
+                    <span className="text-sm">{t('sellTickets')}</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sidebarType"
+                      value="direction"
+                      checked={form.sidebarType === 'direction'}
+                      onChange={() => setForm({ ...form, sidebarType: 'direction' })}
+                      className="accent-primary"
+                    />
+                    <Navigation className="w-4 h-4 text-primary" />
+                    <span className="text-sm">{t('showDirection')}</span>
+                  </label>
                 </div>
 
-                {form.isEvent && (
+                {form.sidebarType === 'tickets' && (
                   <div className="space-y-4 pl-10 border-l-2 border-primary/20 ml-2">
                     <h3 className="text-sm font-medium text-primary">{t('eventDetails')}</h3>
                     <div className="grid sm:grid-cols-2 gap-4">
@@ -606,10 +685,16 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                       <TableRow key={article._id}>
                         <TableCell className="font-medium">
                           {article.title}
-                          {article.isEvent && (
+                          {article.sidebarType === 'tickets' && (
                             <span className="ml-2 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                               <Ticket className="w-3 h-3" />
                               {t('event')}
+                            </span>
+                          )}
+                          {article.sidebarType === 'direction' && (
+                            <span className="ml-2 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                              <Navigation className="w-3 h-3" />
+                              {t('direction')}
                             </span>
                           )}
                         </TableCell>
@@ -626,10 +711,15 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                           )}
                         </TableCell>
                         <TableCell>
-                          {article.isEvent ? (
+                          {article.sidebarType === 'tickets' ? (
                             <span className="text-primary text-xs font-medium">
                               <Ticket className="w-3 h-3 inline mr-1" />
                               {t('event')}
+                            </span>
+                          ) : article.sidebarType === 'direction' ? (
+                            <span className="text-blue-600 text-xs font-medium">
+                              <Navigation className="w-3 h-3 inline mr-1" />
+                              {t('direction')}
                             </span>
                           ) : (
                             <span className="text-muted-foreground text-xs">
@@ -660,7 +750,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleDelete(article._id, article.isEvent)}
+                              onClick={() => handleDelete(article._id, article.sidebarType)}
                             >
                               <Trash2 className="w-4 h-4 text-red-500" />
                             </Button>

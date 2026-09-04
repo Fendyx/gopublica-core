@@ -10,6 +10,15 @@ import BookingSection from './BookingSection';
 import FeaturedGridSection from './FeaturedGridSection';
 import ArticleGridSection from './ArticleGridSection';
 import DynamicFormSection from './DynamicFormSection';
+import ContactBlockSection from './ContactBlockSection';
+import CategoryListSection from './CategoryListSection';
+import RichTextSection from './RichTextSection';
+import SystemCatalogSection from './SystemCatalogSection';
+import SystemMenuSection from './SystemMenuSection';
+import SystemArticlesSection from './SystemArticlesSection';
+import SystemGallerySection from './SystemGallerySection';
+import SystemContactsSection from './SystemContactsSection';
+import SystemBookingCheckoutSection from './SystemBookingCheckoutSection';
 
 interface SectionProps {
   section: BranchSection;
@@ -22,10 +31,6 @@ interface SectionProps {
   currencySymbol?: string;
 }
 
-const MenuCategories: ComponentType<SectionProps> = ({ section }) => (
-  <div>TODO: {section.type}</div>
-);
-
 export const sectionRegistry: Record<SectionType, ComponentType<SectionProps>> = {
   hero: HeroSection,
   hero_video: HeroSection, // Legacy fallback
@@ -36,4 +41,14 @@ export const sectionRegistry: Record<SectionType, ComponentType<SectionProps>> =
   menu_categories: FeaturedGridSection,
   article_grid: ArticleGridSection,
   dynamic_form: DynamicFormSection,
+  contact_block: ContactBlockSection,
+  category_list: CategoryListSection,
+  rich_text: RichTextSection,
+  // System section types
+  system_catalog: SystemCatalogSection,
+  system_menu: SystemMenuSection,
+  system_articles: SystemArticlesSection,
+  system_gallery: SystemGallerySection,
+  system_contacts: SystemContactsSection,
+  system_booking_checkout: SystemBookingCheckoutSection,
 };

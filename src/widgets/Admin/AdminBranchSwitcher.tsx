@@ -1,11 +1,13 @@
 'use client'
 import { useBranch } from '@/entities/branch/BranchContext'
+import { useTranslations } from 'next-intl'
 import { ChevronDown, Store, Check, Loader2 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export function AdminBranchSwitcher() {
   const { branches, selectedBranch, setBranch, loading } = useBranch()
+  const t = useTranslations('admin.branchSwitcher')
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -25,14 +27,14 @@ export function AdminBranchSwitcher() {
     return (
       <div className="flex items-center gap-2 px-3 py-2 text-sm text-text-tertiary">
         <Loader2 size={16} className="animate-spin" />
-        <span>Loading...</span>
+        <span>{t('loading')}</span>
       </div>
     )
   }
 
   if (branches.length === 0) return null
 
-  const currentName = selectedBranch?.name || branches[0]?.name || 'Нет филиала'
+  const currentName = selectedBranch?.name || branches[0]?.name || t('noBranch')
 
   return (
     <div className="relative" ref={dropdownRef}>

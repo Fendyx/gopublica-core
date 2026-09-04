@@ -31,7 +31,7 @@ export function TicketCard({ article }: TicketCardProps) {
     (article.totalTickets || 0) - (article.ticketsSold || 0)
   );
 
-  if (!article.isEvent) return null;
+  if (!article.isEvent && article.sidebarType !== 'tickets') return null;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pl-PL', {

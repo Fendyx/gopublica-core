@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useBranch } from '@/entities/branch/BranchContext'
@@ -25,13 +26,20 @@ interface BookingFormProps {
    * - 'split': fills its grid column (no max-width, no centering)
    */
   variant?: 'centered' | 'split'
+  /**
+   * Checkout flow:
+   * - 'inline' (default): step 2 renders in the same component
+   * - 'redirect': step 1 redirects to /reservations page with search params
+   */
+  checkoutFlow?: 'inline' | 'redirect'
 }
 
-export default function BookingForm({ title, subtitle, variant = 'centered' }: BookingFormProps) {
+export default function BookingForm({ title, subtitle, variant = 'centered', checkoutFlow = 'inline' }: BookingFormProps) {
   const t = useTranslations('booking')
   const locale = useLocale()
   const tenant = useTenant()
   const { selectedBranch, loading: branchLoading } = useBranch()
+  const router = useRouter()
 
   const [step, setStep] = useState<Step>(1)
   const [form, setForm] = useState({
@@ -205,7 +213,20 @@ export default function BookingForm({ title, subtitle, variant = 'centered' }: B
               <button
                 type="button"
                 disabled={!step1Valid}
-                onClick={() => setStep(2)}
+                onClick={() => {
+                  if (checkoutFlow === 'redirect') {
+                    // Redirect to /{locale}/{branchSlug}/reservations with booking data in search params
+                    const params = new URLSearchParams({
+                      date: form.date,
+                      time: form.time,
+                      guests: String(form.guests),
+                    });
+                    const slug = selectedBranch?.slug || '';
+                    router.push(`/${locale}/${slug}/reservations?${params.toString()}`);
+                  } else {
+                    setStep(2);
+                  }
+                }}
                 className="w-full py-3.5 rounded-xl bg-primary text-white text-sm font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.99] transition-all duration-150 shadow-sm"
               >
                 {t('next')} →

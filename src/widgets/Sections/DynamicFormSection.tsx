@@ -35,6 +35,7 @@ function getLocOptions(baseOptions: string[] = [], i18nMap?: Record<string, stri
 export default function DynamicFormSection({ section, locale, tenantDomain }: DynamicFormSectionProps) {
   const t = useTranslations('dynamicForm');
   const tenant = useTenant();
+  const defaultLocale = tenant?.defaultLocale || 'en';
   const settings = (section.settings || {}) as DynamicFormSettings;
   const fields = settings.fields || [];
 

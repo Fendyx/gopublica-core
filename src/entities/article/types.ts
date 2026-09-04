@@ -1,3 +1,6 @@
+export type SidebarType = 'none' | 'tickets' | 'direction';
+export type ContentType = 'article' | 'infoPage';
+
 export interface Article {
   _id: string;
   id?: string;
@@ -14,6 +17,10 @@ export interface Article {
   seoDescription?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Content type
+  contentType?: ContentType;
+  // Sidebar
+  sidebarType?: SidebarType;
   // Event fields
   isEvent?: boolean;
   ticketPrice?: number;

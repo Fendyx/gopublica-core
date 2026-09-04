@@ -3,23 +3,28 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
+import { useBranch } from '@/entities/branch/BranchContext'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
+import { getAllVisibleNavLinks } from '@/shared/lib/navigation'
 
 export default function Footer() {
   const t = useTranslations('footer')
+  const navT = useTranslations('nav')
   const tenant = useTenant()
   const settings = useBranchSettings()
+  const { selectedBranch } = useBranch()
   const locale = useLocale()
   const { branchSlug } = useParams()
   const currentYear = new Date().getFullYear()
 
-  const navLinks = [
-    { href: `/${locale}/${branchSlug}`, label: t('home') },
-    ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/${branchSlug}/menu`, label: t('menu') }] : []),
-    ...(tenant?.features?.hasOnlineOrdering ? [{ href: `/${locale}/${branchSlug}/catalog`, label: t('catalog') }] : []),
-    ...(tenant?.features?.hasBooking ? [{ href: `/${locale}/${branchSlug}/reservations`, label: t('reservations') }] : []),
-    { href: `/${locale}/${branchSlug}/#contact`, label: t('contact') },
-  ]
+  const navLinks = getAllVisibleNavLinks({
+    navigation: tenant?.navigation,
+    tenant,
+    customPages: selectedBranch?.customPages,
+    locale,
+    branchSlug: branchSlug as string,
+    t: (key: string) => navT(key as any),
+  })
 
   const legalLinks = [
     { href: `/${locale}/regulamin`, label: t('privacyPolicy') },

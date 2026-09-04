@@ -29,6 +29,8 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { GripVertical, Trash2, Plus, Save, Languages } from 'lucide-react';
+import { useTenant } from '@/entities/tenant/TenantContext';
+import { getLabelForLocale } from '@/shared/lib/locales';
 
 interface FormField {
   id: string;
@@ -61,12 +63,6 @@ interface JobSettings {
   notificationEmail: string;
   isActive: boolean;
 }
-
-const SUPPORTED_LOCALES = [
-  { code: 'base', label: 'Основной (EN)' },
-  { code: 'pl', label: 'Polski (PL)' },
-  { code: 'de', label: 'Deutsch (DE)' }
-];
 
 // Компонент для одного поля (сортировка)
 function SortableFieldItem({
@@ -216,6 +212,13 @@ export default function JobSettingsPage() {
   const router = useRouter();
   const tAdmin = useTranslations('admin');
   const t = useTranslations('admin.jobsSettings');
+  const tenant = useTenant();
+  const activeLocales = tenant?.activeLocales || ['pl', 'en'];
+  const defaultLocale = tenant?.defaultLocale || 'pl';
+  const SUPPORTED_LOCALES = [
+    { code: 'base', label: `Base (${defaultLocale.toUpperCase()})` },
+    ...activeLocales.map((code: string) => ({ code, label: getLabelForLocale(code) })),
+  ];
   
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

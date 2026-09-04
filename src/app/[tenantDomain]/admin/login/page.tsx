@@ -14,6 +14,7 @@ import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const tAuth = useTranslations('auth')
+  const tAdmin = useTranslations('admin')
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -51,7 +52,7 @@ export default function LoginPage() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Ошибка входа')
+      if (!res.ok) throw new Error(data.error || tAdmin('loginError'))
 
       localStorage.setItem('saas_token', data.token)
       setToken(data.token)

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePlatformCartStore } from '@/shared/store/platformCartStore';
 import type { MarketplaceProduct } from '@/entities/platformProduct/types';
 import {
@@ -28,6 +28,7 @@ export default function ProductDetailSheet({
   onOpenChange,
 }: ProductDetailSheetProps) {
   const locale = useLocale();
+  const t = useTranslations('admin.productDetailSheet');
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const addItem = usePlatformCartStore((s) => s.addItem);
@@ -94,7 +95,7 @@ export default function ProductDetailSheet({
             </div>
             <SheetTitle className="text-xl font-semibold">{title}</SheetTitle>
             <SheetDescription className="text-sm leading-relaxed">
-              {description || 'No description available.'}
+              {description || t('noDescription')}
             </SheetDescription>
           </SheetHeader>
 
@@ -106,7 +107,7 @@ export default function ProductDetailSheet({
           {/* Specs */}
           {product.specs && product.specs.length > 0 && (
             <div>
-              <h4 className="text-sm font-semibold mb-2">Specifications</h4>
+              <h4 className="text-sm font-semibold mb-2">{t('specifications')}</h4>
               <div className="rounded-lg border border-border overflow-hidden">
                 {product.specs.map((spec, idx) => (
                   <div
@@ -156,11 +157,11 @@ export default function ProductDetailSheet({
             >
               {added ? (
                 <>
-                  <CheckCircle className="w-4 h-4 mr-2" /> Added!
+                  <CheckCircle className="w-4 h-4 mr-2" /> {t('added')}
                 </>
               ) : (
                 <>
-                  <ShoppingCart className="w-4 h-4 mr-2" /> Add to Cart
+                  <ShoppingCart className="w-4 h-4 mr-2" /> {t('addToCart')}
                 </>
               )}
             </Button>

@@ -76,6 +76,16 @@
   --color-sidebar-accent-foreground: var(--color-text-primary);
   --color-sidebar-border: var(--theme-border);
   --color-sidebar-ring: var(--theme-primary);
+
+  /* === Liquid Glass System === */
+  --glass-blur: 20px;
+  --glass-blur-heavy: 40px;
+
+  /* === Admin Accent (Stripe-inspired) === */
+  --admin-accent: #635bff;
+  --admin-accent-hover: #5851e8;
+  --admin-accent-soft: rgba(99, 91, 255, 0.08);
+  --admin-accent-glow: rgba(99, 91, 255, 0.15);
 }
 
 /* =============================================
@@ -146,50 +156,88 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
 
 /* =============================================
    THEME 3: ADMIN PANEL — LIGHT (fixed, no tenant)
+   Liquid glass design — Apple/Stripe aesthetic
    ============================================= */
 [data-theme="admin-light"] {
-  --color-surface-page:    #f4f4f5;
+  /* Surfaces — solid, opaque for readability */
+  --color-surface-page:    #f5f5f7;
   --color-surface-card:    #ffffff;
-  --color-surface-hover:   #e4e4e7;
+  --color-surface-hover:   rgba(0, 0, 0, 0.03);
   --color-surface-inverse: #18181b;
 
-  --color-text-primary:   #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-tertiary:  #94a3b8;
+  /* Text */
+  --color-text-primary:   #1d1d1f;
+  --color-text-secondary: #6e6e73;
+  --color-text-tertiary:  #aeaeb2;
   --color-text-inverse:   #ffffff;
 
-  --color-border-light: #f1f5f9;
+  /* Borders — hairline glass edges */
+  --color-border-light: rgba(0, 0, 0, 0.04);
 
-  --shadow-card:     0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-dropdown: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  /* Shadows — multi-layered depth */
+  --shadow-card:     0 0 0 1px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04);
+  --shadow-dropdown: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06), 0 20px 40px rgba(0, 0, 0, 0.06);
 
-  --theme-border:  #e2e8f0;
-  --theme-primary: #0f172a;
-  --theme-accent:  #0f172a;
+  /* Theme core */
+  --theme-border:  rgba(0, 0, 0, 0.08);
+  --theme-primary: #1d1d1f;
+  --theme-accent:  var(--admin-accent);
+
+  /* Glass system — sidebar only uses blur, content is opaque */
+  --glass-bg:       rgba(255, 255, 255, 0.85);
+  --glass-border:   rgba(0, 0, 0, 0.06);
+  --glass-shadow:   0 0 0 1px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.02), 0 12px 28px rgba(0, 0, 0, 0.05);
+  --glass-shadow-hover: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.04), 0 16px 32px rgba(0, 0, 0, 0.07);
+  --glass-border-hover: rgba(0, 0, 0, 0.10);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  /* Surface variants — all opaque */
+  --surface-elevated: #ffffff;
+  --surface-sunken:   rgba(0, 0, 0, 0.03);
+  --surface-glass:    rgba(255, 255, 255, 0.90);
 }
 
 /* =============================================
    THEME 4: ADMIN PANEL — DARK (fixed, no tenant)
+   Liquid glass design — Apple/Stripe aesthetic
    ============================================= */
 [data-theme="admin-dark"] {
-  --color-surface-page:    #0a0f1a;
-  --color-surface-card:    #111827;
-  --color-surface-hover:   #1e293b;
-  --color-surface-inverse: #f8fafc;
+  /* Surfaces — solid dark for readability */
+  --color-surface-page:    #0d1117;
+  --color-surface-card:    #161b22;
+  --color-surface-hover:   rgba(255, 255, 255, 0.06);
+  --color-surface-inverse: #f5f5f7;
 
-  --color-text-primary:   #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-text-tertiary:  #64748b;
-  --color-text-inverse:   #0f172a;
+  /* Text */
+  --color-text-primary:   #f5f5f7;
+  --color-text-secondary: #a1a1a6;
+  --color-text-tertiary:  #636366;
+  --color-text-inverse:   #1d1d1f;
 
-  --color-border-light: #0f172a;
+  /* Borders — subtle glass edges */
+  --color-border-light: rgba(255, 255, 255, 0.04);
 
-  --shadow-card:     0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  /* Shadows — deep layered */
+  --shadow-card:     0 0 0 1px rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(0, 0, 0, 0.3);
+  --shadow-dropdown: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 4px 12px rgba(0, 0, 0, 0.4), 0 20px 40px rgba(0, 0, 0, 0.4);
 
-  --theme-border:  #1e293b;
-  --theme-primary: #f8fafc;
-  --theme-accent:  #f8fafc;
+  /* Theme core */
+  --theme-border:  rgba(255, 255, 255, 0.08);
+  --theme-primary: #f5f5f7;
+  --theme-accent:  var(--admin-accent);
+
+  /* Glass system — sidebar only uses blur, content is opaque */
+  --glass-bg:       rgba(255, 255, 255, 0.04);
+  --glass-border:   rgba(255, 255, 255, 0.08);
+  --glass-shadow:   0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 4px rgba(0, 0, 0, 0.2), 0 12px 28px rgba(0, 0, 0, 0.3);
+  --glass-shadow-hover: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 8px rgba(0, 0, 0, 0.3), 0 16px 32px rgba(0, 0, 0, 0.4);
+  --glass-border-hover: rgba(255, 255, 255, 0.12);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* Surface variants — all opaque */
+  --surface-elevated: #161b22;
+  --surface-sunken:   rgba(0, 0, 0, 0.20);
+  --surface-glass:    rgba(255, 255, 255, 0.03);
 }
 
 /* =============================================
@@ -227,6 +275,192 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
   --font-heading: var(--font-sans), system-ui, sans-serif;
   --font-body:    var(--font-sans), system-ui, sans-serif;
   --font-sans:    var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* =============================================
+   LIQUID GLASS UTILITY CLASSES (Admin)
+   ============================================= */
+
+/* Glass panel — sidebar, topbar, modals */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-inner-glow);
+}
+
+/* Glass card — dashboard cards, content panels (opaque, no blur) */
+.glass-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.glass-card:hover {
+  box-shadow: var(--glass-shadow-hover);
+  border-color: var(--glass-border-hover);
+}
+
+/* Sunken/inset surface — stat backgrounds, input wells */
+.surface-inset {
+  background: var(--surface-sunken);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+/* Glass nav item — sidebar navigation links */
+.glass-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  transition: all 0.15s ease;
+}
+.glass-nav-item:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+.glass-nav-item.active {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+  font-weight: 500;
+  box-shadow: 0 0 0 1px var(--admin-accent-glow);
+}
+
+/* Glass stat card accent stripe */
+.glass-stat-accent {
+  position: relative;
+}
+.glass-stat-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+  background: var(--admin-accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.glass-stat-accent:hover::before {
+  opacity: 1;
+}
+
+/* Status dot — Stripe-style status indicator */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot--pending   { background: #f59e0b; }
+.status-dot--confirmed { background: #10b981; }
+.status-dot--cancelled { background: #ef4444; }
+.status-dot--active    { background: #635bff; }
+
+/* =============================================
+   ADMIN COMPONENT OVERRIDES
+   Scoped to .platform-ui — glass/liquid aesthetic
+   ============================================= */
+
+/* Card: solid opaque in admin context */
+.platform-ui [data-slot="card"] {
+  background: var(--surface-elevated);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.platform-ui [data-slot="card"]:hover {
+  box-shadow: var(--glass-shadow-hover);
+  border-color: var(--glass-border-hover);
+}
+
+/* Card footer: subtle glass bottom bar */
+.platform-ui [data-slot="card-footer"] {
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Button default: Stripe-style solid accent */
+.platform-ui [data-slot="button"][data-variant="default"] {
+  background: var(--admin-accent);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.platform-ui [data-slot="button"][data-variant="default"]:hover {
+  background: var(--admin-accent-hover);
+  box-shadow: 0 2px 6px rgba(99, 91, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Button outline: solid with glass border */
+.platform-ui [data-slot="button"][data-variant="outline"] {
+  background: var(--surface-elevated);
+  border-color: var(--glass-border);
+}
+.platform-ui [data-slot="button"][data-variant="outline"]:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--glass-border-hover);
+}
+
+/* Button ghost: transparent with glass hover */
+.platform-ui [data-slot="button"][data-variant="ghost"] {
+  background: transparent;
+}
+.platform-ui [data-slot="button"][data-variant="ghost"]:hover {
+  background: var(--color-surface-hover);
+}
+
+/* Table: clean solid styling */
+.platform-ui table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.platform-ui [data-slot="table-header"] {
+  background: var(--surface-sunken);
+}
+.platform-ui [data-slot="table-row"]:hover {
+  background: var(--color-surface-hover);
+}
+.platform-ui [data-slot="table-cell"],
+.platform-ui [data-slot="table-head"] {
+  border-bottom: 1px solid var(--theme-border);
+}
+
+/* Badge: solid pill style */
+.platform-ui [data-slot="badge"] {
+  /* no transparency — keep opaque for readability */
+}
+
+/* Input: solid opaque with clean focus ring */
+.platform-ui [data-slot="input"],
+.platform-ui [data-slot="textarea"],
+.platform-ui [data-slot="select-trigger"] {
+  background: var(--color-surface-card);
+  border-color: var(--glass-border);
+}
+.platform-ui [data-slot="input"]:focus,
+.platform-ui [data-slot="textarea"]:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-soft);
+}
+
+/* Dialog/Sheet overlay: dark scrim, no blur on content */
+.platform-ui [data-slot="dialog-overlay"],
+.platform-ui [data-slot="sheet-overlay"] {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Skeleton loading: subtle shimmer */
+.platform-ui [data-slot="skeleton"] {
+  background: var(--surface-sunken);
 }
 
 .checkout-page {

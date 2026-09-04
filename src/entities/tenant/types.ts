@@ -74,6 +74,25 @@ export type LogisticsConfig = {
   env?: 'sandbox' | 'production'
 }
 
+// ─── Navigation Config (tenant-wide Navbar customization) ─────────────────────
+export type NavItemType = 'home' | 'system' | 'custom' | 'external'
+export type NavItemPlacement = 'primary' | 'dropdown'
+
+export interface NavItem {
+  id: string
+  type: NavItemType
+  slug: string
+  label: string
+  isVisible: boolean
+  placement: NavItemPlacement
+  order: number
+}
+
+export interface NavigationConfig {
+  items: NavItem[]
+  dropdownLabel: string
+}
+
 // Главный тип конфига (то, что придёт с бэка)
 export type SiteConfig = {
   clientName: string
@@ -87,6 +106,10 @@ export type SiteConfig = {
   businessType?: string
   moduleAccess?: ModuleAccess
   availableModules?: string[]
+  /** Locales this tenant has enabled for content translation (e.g. ['pl','en','de']). */
+  activeLocales: string[]
+  /** The primary / fallback locale (e.g. 'pl'). Must be one of `activeLocales`. */
+  defaultLocale: string
   canManageOrders?: boolean
   canManageMenu?: boolean
   canManageReservations?: boolean
@@ -98,4 +121,5 @@ export type SiteConfig = {
   contact: Contact
   seo: Seo
   logistics?: LogisticsConfig
+  navigation?: NavigationConfig
 }

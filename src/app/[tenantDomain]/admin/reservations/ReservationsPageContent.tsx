@@ -40,6 +40,7 @@ type Reservation = {
 
 export default function ReservationsPageContent() {
   const t = useTranslations('admin.reservationsPage');
+  const tAdmin = useTranslations('admin');
   const { selectedBranch, loading: branchLoading } = useBranch();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,13 +101,13 @@ export default function ReservationsPageContent() {
   };
 
   if (branchLoading || loading) return <div className="text-center py-16 text-muted-foreground">{t('loading')}</div>;
-  if (!selectedBranch) return <div className="text-center py-16 text-muted-foreground">Выберите филиал в переключателе справа вверху</div>;
+  if (!selectedBranch) return <div className="text-center py-16 text-muted-foreground">{tAdmin('selectBranchHint')}</div>;
 
   return (
     <div className="max-w-6xl mx-auto pb-12 space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <MapPin className="w-4 h-4" />
-        Бронирования для филиала: <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
+        {tAdmin('reservationsForBranch', { name: '' })} <strong>{selectedBranch.name}</strong> {selectedBranch.city && `(${selectedBranch.city})`}
       </div>
 
       <h2 className="text-2xl font-bold flex items-center gap-2">

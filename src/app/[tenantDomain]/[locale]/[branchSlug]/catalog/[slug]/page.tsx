@@ -67,6 +67,7 @@ export default async function CatalogSlugPage({
   return (
     <CategoryViewClient
       category={categoryData}
+      categories={categories}
       products={products}
       locale={locale}
       tenant={tenant}

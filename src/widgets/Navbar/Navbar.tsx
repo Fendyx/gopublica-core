@@ -10,6 +10,8 @@ import ThemeToggle from '@/shared/ui/ThemeToggle'
 import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart, User, LogIn } from 'lucide-react'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useCartStore } from '@/shared/store/cartStore'
+import { getNavLinks } from '@/shared/lib/navigation'
+import NavMoreDropdown from '@/widgets/Navbar/NavMoreDropdown'
 
 export default function Navbar() {
   const t = useTranslations('nav')
@@ -76,16 +78,20 @@ export default function Navbar() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [isOpen])
 
-  const links = [
-    { href: `/${locale}/${branchSlug}`, label: t('home') },
-    ...(tenant?.features?.hasMenu ? [{ href: `/${locale}/${branchSlug}/menu`, label: t('menu') }] : []),
-    ...(tenant?.features?.hasOnlineOrdering ? [{ href: `/${locale}/${branchSlug}/catalog`, label: t('catalog') }] : []),
-    ...(tenant?.features?.hasGallery ? [{ href: `/${locale}/${branchSlug}/#gallery`, label: t('gallery') }] : []),
-    { href: `/${locale}/${branchSlug}/partners`, label: t('partners') },
-    { href: `/${locale}/${branchSlug}/#contact`, label: t('contact') },
-  ]
+  const { primary: primaryLinks, dropdown: dropdownLinks } = getNavLinks({
+    navigation: tenant?.navigation,
+    tenant,
+    customPages: selectedBranch?.customPages,
+    locale,
+    branchSlug: branchSlug as string,
+    t: (key: string) => t(key as any),
+  })
+
+  // All links combined for mobile burger menu (primary + dropdown)
+  const allLinks = [...primaryLinks, ...dropdownLinks]
 
   const hasBooking = tenant?.features?.hasBooking ?? false
+  const dropdownLabel = tenant?.navigation?.dropdownLabel || t('more')
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background backdrop-blur-md border-b border-border-light transition-colors">
@@ -103,12 +109,15 @@ export default function Navbar() {
           </IntlLink>
 
           <div className="hidden lg:flex items-center gap-4 xl:gap-8 flex-1 justify-center">
-            <nav className="flex items-center gap-4 xl:gap-6">
-              {links.map((link) => (
+            <nav className="flex items-center gap-4 xl:gap-6 items-center">
+              {primaryLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors whitespace-nowrap">
                   {link.label}
                 </Link>
               ))}
+              {dropdownLinks.length > 0 && (
+                <NavMoreDropdown links={dropdownLinks} label={dropdownLabel} />
+              )}
             </nav>
 
             {!branchLoading && branches.length > 1 && (
@@ -214,12 +223,12 @@ export default function Navbar() {
               </Link>
             )}
 
-            {hasBooking && (
+            {/* {hasBooking && (
               <Link href={`/${locale}/${branchSlug}/reservations`} className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 shadow-sm whitespace-nowrap" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <CalendarDays size={16} />
                 <span className="hidden xl:inline-block">{t('booking')}</span>
               </Link>
-            )}
+            )} */}
 
             <button ref={burgerRef} onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors" aria-label="Открыть меню">
               {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -231,7 +240,7 @@ export default function Navbar() {
       {isOpen && (
         <div ref={menuRef} className="lg:hidden border-t border-border-light bg-surface-page px-4 py-6 flex flex-col gap-4 shadow-dropdown max-h-[calc(100vh-64px)] overflow-y-auto">
           <nav className="flex flex-col gap-1">
-            {links.map((link) => (
+            {allLinks.map((link) => (
               <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className="text-base font-medium text-text-secondary hover:text-primary transition-colors px-2 py-2 rounded-lg hover:bg-surface-hover">
                 {link.label}
               </Link>

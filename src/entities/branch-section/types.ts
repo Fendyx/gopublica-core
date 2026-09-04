@@ -1,6 +1,16 @@
 import type { ProductCardVariant } from '@/entities/menu-item/types';
 
-export type SectionType = 'hero' | 'hero_video' | 'entity_carousel' | 'feature_carousel' | 'booking' | 'map' | 'menu_categories' | 'article_grid' | 'dynamic_form';
+export type SectionType =
+  | 'hero' | 'hero_video'
+  | 'entity_carousel' | 'feature_carousel'
+  | 'booking' | 'map'
+  | 'menu_categories' | 'article_grid' | 'dynamic_form'
+  | 'contact_block' | 'category_list' | 'rich_text'
+  // System section types
+  | 'system_catalog' | 'system_menu' | 'system_articles' | 'system_gallery' | 'system_contacts'
+  | 'system_booking_checkout';
+
+export type SystemSectionType = 'system_catalog' | 'system_menu' | 'system_articles' | 'system_gallery' | 'system_contacts' | 'system_booking_checkout';
 
 export type CarouselMode = 'manual' | 'ecommerce' | 'menu';
 export type CarouselSelectionMode = 'items' | 'categories';
@@ -17,6 +27,12 @@ export type Translations = Record<string, LocalizedText>;
 export type HeroMediaType = 'video' | 'image' | 'slider';
 export type HeroLayout = 'fullscreen' | 'compact';
 export type HeroTextAlign = 'left' | 'center' | 'right';
+
+/** Пресеты Hero-секции — предустановленные конфигурации для быстрого старта */
+export type HeroPreset =
+  | 'classic_with_buttons'   /* Классический Hero с заголовком, подзаголовком и CTA-кнопками */
+  | 'banner_link'            /* Простой баннер-ссылка без кнопок (изображение кликабельно) */
+  | 'gallery_slider';        /* Слайдер-галерея с автопроигрыванием и стрелками навигации */
 
 export type CtaTargetMode = 'section' | 'custom';
 
@@ -37,6 +53,8 @@ export interface HeroSlide {
   imageUrl?: string;
   /** Video slide source (Cloudinary URL). When set (and no imageUrl), renders as video. */
   videoUrl?: string;
+  /** Ссылка на которую ведёт слайд при клике (опционально) */
+  clickableUrl?: string;
 }
 
 export interface HeroSettings {
@@ -51,6 +69,14 @@ export interface HeroSettings {
   textAlign?: HeroTextAlign;
   /** Autoplay interval for the slider in ms. 0 or undefined = default (5000ms). */
   sliderAutoplayMs?: number;
+  /** Пресет/шаблон Hero-секции — определяет какие поля отображаются */
+  preset?: HeroPreset;
+  /** Ссылка для кликабельного фона (для image/video режимов) */
+  clickableUrl?: string;
+  /** Показывать стрелки навигации в слайдере */
+  sliderShowArrows?: boolean;
+  /** Ставить autoplay на паузу при ручном взаимодействии (свайп/стрелка) */
+  sliderPauseOnInteraction?: boolean;
 }
 
 export interface BaseCarouselSettings {
@@ -95,6 +121,8 @@ export interface FeatureCarouselSettings extends BaseCarouselSettings {
 export interface BookingSettings {
   /** Layout mode for the right side of the booking section */
   sideContentType?: 'none' | 'map' | 'text';
+  /** Checkout flow: 'inline' (default) shows step 2 in same component, 'redirect' navigates to /reservations page */
+  checkoutFlow?: 'inline' | 'redirect';
   /** Address used when sideContentType === 'map' */
   address?: string;
   /** Custom text shown when sideContentType === 'text' */
@@ -157,6 +185,47 @@ export interface DynamicFormSettings {
   sideTextI18n?: Record<string, string>;
 }
 
+// ─── Contact Block Section ──────────────────────────────────
+
+export type ContactBlockPreset = 'map_and_form' | 'simple_info' | 'split_layout';
+
+export interface ContactBlockSettings {
+  /** Layout preset */
+  preset: ContactBlockPreset;
+  /** Show embedded Google Map */
+  showMap?: boolean;
+  /** Show contact form */
+  showForm?: boolean;
+  /** Which form fields to display */
+  formFields?: string[];
+  /** Custom text/description above or beside the form */
+  customText?: string;
+  /** Map address override (falls back to branch settings) */
+  mapAddress?: string;
+}
+
+// ─── Category List Section ──────────────────────────────────
+
+export type CategoryListLayout = 'grid' | 'carousel';
+
+export interface CategoryListSettings {
+  /** Ordered array of category keys for display order */
+  categoryOrder?: string[];
+  /** Layout mode */
+  layout?: CategoryListLayout;
+  /** Number of columns (grid mode) */
+  columns?: 2 | 3 | 4;
+  /** Show product count on category cards */
+  showProductCount?: boolean;
+}
+
+export interface RichTextSettings {
+  /** Base-language HTML content from TipTap editor */
+  content?: string;
+  /** Localized HTML content per locale */
+  contentI18n?: Record<string, string>;
+}
+
 export type SectionSettings =
   | HeroSettings
   | EntityCarouselSettings
@@ -165,7 +234,10 @@ export type SectionSettings =
   | MapSettings
   | FeaturedGridSettings
   | ArticleGridSettings
-  | DynamicFormSettings;
+  | DynamicFormSettings
+  | ContactBlockSettings
+  | CategoryListSettings
+  | RichTextSettings;
 
 export interface BranchSectionItem {
   _id: string;
@@ -193,4 +265,8 @@ export interface BranchSection {
   settings: SectionSettings;
   translations: Translations;
   items?: BranchSectionItem[];
+  /** True for auto-created system sections (non-deletable) */
+  isSystem?: boolean;
+  /** Identifies which system section this is (only when isSystem=true) */
+  systemType?: SystemSectionType;
 }

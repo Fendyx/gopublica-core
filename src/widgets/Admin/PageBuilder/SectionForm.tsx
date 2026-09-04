@@ -1,13 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, CarouselMode, HeroCta, CtaTargetMode, HeroSlide, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
+import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, HeroPreset, CarouselMode, HeroCta, CtaTargetMode, HeroSlide, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { saveBranchSectionItem, deleteBranchSectionItem } from '@/entities/branch-section/api';
 import { fetchArticles } from '@/entities/article/api';
 import type { Article } from '@/entities/article/types';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useBranch } from '@/entities/branch/BranchContext';
+import { TranslatableGroup } from '@/shared/ui/TranslatableGroup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -51,6 +52,8 @@ function CtaLinkManager({
   sections: BranchSection[];
   onChange: (cta: HeroCta) => void;
 }) {
+  const t = useTranslations('admin.sectionForm');
+  const tenant = useTenant();
   const targetMode: CtaTargetMode = cta?.targetMode || 'section';
   const selectedSectionId = cta?.targetSectionId || '';
   const customUrl = cta?.customUrl || '';
@@ -60,7 +63,7 @@ function CtaLinkManager({
 
   return (
     <div className="space-y-3">
-      <Label>{label} Target</Label>
+      <Label>{t('ctaTarget', { label })}</Label>
 
       {/* Переключатель режима */}
       <Select
@@ -68,11 +71,11 @@ function CtaLinkManager({
         onValueChange={(val) => onChange({ ...cta, targetMode: val as CtaTargetMode })}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Select target mode" />
+          <SelectValue placeholder={t('targetMode')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="section">Section on page</SelectItem>
-          <SelectItem value="custom">Custom URL</SelectItem>
+          <SelectItem value="section">{t('sectionOnPage')}</SelectItem>
+          <SelectItem value="custom">{t('customUrl')}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -83,17 +86,17 @@ function CtaLinkManager({
           onValueChange={(val) => onChange({ ...cta, targetMode: 'section', targetSectionId: val })}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select a section to scroll to" />
+            <SelectValue placeholder={t('selectSectionScroll')} />
           </SelectTrigger>
           <SelectContent>
             {availableSections.length === 0 ? (
-              <SelectItem value="" disabled>
-                No sections available
+              <SelectItem value="__none__" disabled>
+                {t('noSectionsAvailable')}
               </SelectItem>
             ) : (
               availableSections.map((s) => (
                 <SelectItem key={s._id} value={s._id}>
-                  {s.type} — {s.translations?.pl?.title || s.translations?.en?.title || s._id}
+                  {s.type} — {s.translations?.[tenant?.defaultLocale || 'en']?.title || s.translations?.en?.title || s._id}
                 </SelectItem>
               ))
             )}
@@ -104,7 +107,7 @@ function CtaLinkManager({
       {/* Режим: произвольный URL */}
       {targetMode === 'custom' && (
         <Input
-          placeholder="Enter URL (e.g. /contacts, https://google.com, #anchor)"
+          placeholder={t('urlPlaceholder')}
           value={customUrl}
           onChange={(e) => onChange({ ...cta, targetMode: 'custom', customUrl: e.target.value })}
         />
@@ -114,16 +117,22 @@ function CtaLinkManager({
 }
 
 export default function SectionForm({ initialData, defaultType, onSave, onCancel, sections }: SectionFormProps) {
+  // Hooks must be declared BEFORE any usage (React Rules of Hooks + const TDZ)
+  const t = useTranslations('admin.sectionForm');
+  const tenant = useTenant();
+  const branch = useBranch();
+
   const type = initialData?.type || defaultType;
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
   const [settings, setSettings] = useState<any>(initialData?.settings ?? {});
-  const [translations, setTranslations] = useState<any>(
-    initialData?.translations ?? { pl: {}, en: {}, de: {} }
-  );
+  const activeLocales = tenant?.activeLocales || ['pl', 'en'];
+  const defaultLocale = tenant?.defaultLocale || 'pl';
 
-  // FIX: хуки вызываем ТОЛЬКО на верхнем уровне (раньше useTenant/useBranch были внутри switch-case)
-  const tenant = useTenant();
-  const branch = useBranch();
+  // Build initial translations from active locales (avoid hardcoded keys)
+  const buildEmptyTranslations = () => Object.fromEntries(activeLocales.map((l: string) => [l, {}]));
+  const [translations, setTranslations] = useState<any>(
+    initialData?.translations ?? buildEmptyTranslations()
+  );
 
   // Ensure hero sections have default mediaType and layout on initial load
   useEffect(() => {
@@ -217,10 +226,114 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
   const renderSettings = () => {
     switch (type) {
       case 'hero':
+        // ─── Пресеты / Шаблоны Hero-секции ───
+        const presetOptions: { value: HeroPreset; label: string; description: string; previewEmoji: string }[] = [
+          {
+            value: 'classic_with_buttons',
+            label: 'Classic with Buttons',
+            description: t('presetClassic'),
+            previewEmoji: '🎯',
+          },
+          {
+            value: 'banner_link',
+            label: 'Banner Link',
+            description: t('presetBanner'),
+            previewEmoji: '🔗',
+          },
+          {
+            value: 'gallery_slider',
+            label: 'Gallery Slider',
+            description: t('presetGallery'),
+            previewEmoji: '🖼️',
+          },
+        ];
+
+        const currentPreset: HeroPreset | undefined = settings.preset;
+
+        /** Применить пресет — автоматически настроить mediaType, layout и прочее */
+        const applyPreset = (preset: HeroPreset) => {
+          switch (preset) {
+            case 'classic_with_buttons':
+              setSettings({
+                ...settings,
+                preset,
+                mediaType: settings.mediaType || 'image',
+                layout: settings.layout || 'fullscreen',
+                textAlign: settings.textAlign || 'center',
+                primaryCta: settings.primaryCta || { label: '', targetMode: 'section' },
+                sliderShowArrows: false,
+                sliderPauseOnInteraction: true,
+              });
+              break;
+            case 'banner_link':
+              setSettings({
+                ...settings,
+                preset,
+                mediaType: settings.mediaType || 'image',
+                layout: settings.layout || 'fullscreen',
+                textAlign: settings.textAlign || 'center',
+                primaryCta: undefined,
+                secondaryCta: undefined,
+                clickableUrl: settings.clickableUrl || '',
+                sliderShowArrows: false,
+                sliderPauseOnInteraction: true,
+              });
+              break;
+            case 'gallery_slider':
+              setSettings({
+                ...settings,
+                preset,
+                mediaType: 'slider',
+                layout: settings.layout || 'fullscreen',
+                textAlign: settings.textAlign || 'center',
+                sliderAutoplayMs: settings.sliderAutoplayMs || 5000,
+                sliderShowArrows: true,
+                sliderPauseOnInteraction: true,
+                primaryCta: settings.primaryCta || { label: '', targetMode: 'section' },
+                secondaryCta: settings.secondaryCta || { label: '', targetMode: 'section' },
+              });
+              break;
+          }
+        };
+
+        /** Видимость полей зависит от пресета */
+        const showCtaFields = currentPreset !== 'banner_link';
+        const showClickableUrl = currentPreset === 'banner_link';
+        const showSliderSettings = currentPreset === 'gallery_slider';
+
         return (
           <div className="space-y-4">
+            {/* ─── Пресет / Шаблон ─── */}
             <div className="space-y-2">
-              <Label>Media Type</Label>
+              <Label>{t('templatePreset')}</Label>
+              <Select
+                value={currentPreset || ''}
+                onValueChange={(val) => {
+                  if (val) applyPreset(val as HeroPreset);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('choosePreset')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {presetOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      <span className="mr-1.5">{opt.previewEmoji}</span>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {currentPreset && (
+                <p className="text-xs text-muted-foreground">
+                  {presetOptions.find((o) => o.value === currentPreset)?.description}
+                </p>
+              )}
+            </div>
+
+            {/* ─── Media Type ─── */}
+            <div className="space-y-2">
+              <Label>{t('mediaType')}</Label>
               <Select
                 value={settings.mediaType || 'video'}
                 onValueChange={(val) =>
@@ -228,18 +341,19 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select media type" />
+                  <SelectValue placeholder={t('selectMediaType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="video">Video</SelectItem>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="slider">Slider</SelectItem>
+                  <SelectItem value="video">{t('video')}</SelectItem>
+                  <SelectItem value="image">{t('image')}</SelectItem>
+                  <SelectItem value="slider">{t('slider')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+            {/* ─── Layout ─── */}
             <div className="space-y-2">
-              <Label>Layout</Label>
+              <Label>{t('layout')}</Label>
               <Select
                 value={settings.layout || 'fullscreen'}
                 onValueChange={(val) =>
@@ -247,17 +361,18 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select layout" />
+                  <SelectValue placeholder={t('selectLayout')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fullscreen">Fullscreen</SelectItem>
-                  <SelectItem value="compact">Compact</SelectItem>
+                  <SelectItem value="fullscreen">{t('fullscreen')}</SelectItem>
+                  <SelectItem value="compact">{t('compact')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+            {/* ─── Text Alignment ─── */}
             <div className="space-y-2">
-              <Label>Text Alignment</Label>
+              <Label>{t('textAlign')}</Label>
               <Select
                 value={settings.textAlign || 'center'}
                 onValueChange={(val) =>
@@ -265,176 +380,253 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select text alignment" />
+                  <SelectValue placeholder={t('selectTextAlign')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="left">Left</SelectItem>
-                  <SelectItem value="center">Center</SelectItem>
-                  <SelectItem value="right">Right</SelectItem>
+                  <SelectItem value="left">{t('left')}</SelectItem>
+                  <SelectItem value="center">{t('center')}</SelectItem>
+                  <SelectItem value="right">{t('right')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+            {/* ─── Video URL ─── */}
             {settings.mediaType === 'video' && (
               <div>
-                <Label>Video URL</Label>
+                <Label>{t('videoUrl')}</Label>
                 <div className="flex gap-2 mt-1">
                   <Input
                     value={settings.videoUrl || ''}
                     onChange={(e) => setSettings({ ...settings, videoUrl: e.target.value })}
                   />
                   <Button type="button" onClick={() => openVideoUpload()}>
-                    Upload
+                    {t('upload')}
                   </Button>
                 </div>
               </div>
             )}
 
+            {/* ─── Image URL ─── */}
             {settings.mediaType === 'image' && (
               <div>
-                <Label>Image URL</Label>
+                <Label>{t('imageUrl')}</Label>
                 <div className="flex gap-2 mt-1">
                   <Input
                     value={settings.imageUrl || ''}
                     onChange={(e) => setSettings({ ...settings, imageUrl: e.target.value })}
                   />
                   <Button type="button" onClick={() => openImageUpload()}>
-                    Upload
+                    {t('upload')}
                   </Button>
                 </div>
               </div>
             )}
 
+            {/* ─── Кликабельный фон (Banner Link) ─── */}
+            {showClickableUrl && settings.mediaType !== 'slider' && (
+              <div className="space-y-2">
+                <Label>{t('linkUrl')}</Label>
+                <Input
+                  placeholder={t('linkUrlPlaceholder')}
+                  value={settings.clickableUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, clickableUrl: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('linkUrlHint')}
+                </p>
+              </div>
+            )}
+
+            {/* ─── Slider: стрелки, пауза, интервал ─── */}
+            {settings.mediaType === 'slider' && (
+              <>
+                {showSliderSettings && (
+                  <div className="space-y-2">
+                    <Label>{t('autoplayInterval')}</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={500}
+                      value={settings.sliderAutoplayMs ?? 5000}
+                      onChange={(e) =>
+                        setSettings({ ...settings, sliderAutoplayMs: Number(e.target.value) || 5000 })
+                      }
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={settings.sliderShowArrows ?? false}
+                      onCheckedChange={(checked) =>
+                        setSettings({ ...settings, sliderShowArrows: checked })
+                      }
+                    />
+                    <Label className="cursor-pointer">{t('showArrows')}</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={settings.sliderPauseOnInteraction ?? true}
+                      onCheckedChange={(checked) =>
+                        setSettings({ ...settings, sliderPauseOnInteraction: checked })
+                      }
+                    />
+                    <Label className="cursor-pointer">{t('pauseOnInteraction')}</Label>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ─── Slides editor ─── */}
             {settings.mediaType === 'slider' && (
               <div className="space-y-2">
-                <Label>Slides (images & videos)</Label>
+                <Label>{t('slides')}</Label>
 
                 {(settings.slides || []).map((slide: HeroSlide, idx: number) => {
                   const isVideo = Boolean(slide.videoUrl) && !slide.imageUrl;
                   return (
-                    <div key={idx} className="flex items-center gap-2 p-2 border rounded-md bg-muted/40">
-                      {/* Превью */}
-                      <div className="w-14 h-10 shrink-0 rounded overflow-hidden bg-muted flex items-center justify-center text-[10px] uppercase font-bold text-muted-foreground">
-                        {isVideo ? (
-                          <span>▶ vid</span>
-                        ) : slide.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={slide.imageUrl} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
-                        ) : (
-                          <span>?</span>
-                        )}
+                    <div key={idx} className="space-y-2 p-2 border rounded-md bg-muted/40">
+                      <div className="flex items-center gap-2">
+                        {/* Превью */}
+                        <div className="w-14 h-10 shrink-0 rounded overflow-hidden bg-muted flex items-center justify-center text-[10px] uppercase font-bold text-muted-foreground">
+                          {isVideo ? (
+                            <span>▶ vid</span>
+                          ) : slide.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={slide.imageUrl} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <span>?</span>
+                          )}
+                        </div>
+
+                        {/* URL слайда */}
+                        <Input
+                          className="flex-1"
+                          placeholder="https://res.cloudinary.com/..."
+                          value={slide.imageUrl || slide.videoUrl || ''}
+                          onChange={(e) => {
+                            const newSlides = [...(settings.slides || [])];
+                            newSlides[idx] = isVideo
+                              ? { videoUrl: e.target.value, clickableUrl: slide.clickableUrl }
+                              : { imageUrl: e.target.value, clickableUrl: slide.clickableUrl };
+                            setSettings({ ...settings, slides: newSlides });
+                          }}
+                        />
+
+                        {/* Замена через Cloudinary */}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          title={t('replaceCloudinary')}
+                          onClick={() => handleReplaceSlide(idx)}
+                        >
+                          Upload
+                        </Button>
+
+                        {/* Перестановка */}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={idx === 0}
+                          title={t('moveUp')}
+                          onClick={() => handleMoveSlide(idx, -1)}
+                        >
+                          ↑
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={idx === (settings.slides?.length || 0) - 1}
+                          title={t('moveDown')}
+                          onClick={() => handleMoveSlide(idx, 1)}
+                        >
+                          ↓
+                        </Button>
+
+                        {/* Удаление */}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          title={t('removeSlide')}
+                          onClick={() => handleRemoveSlide(idx)}
+                        >
+                          ✕
+                        </Button>
                       </div>
 
-                      {/* URL слайда */}
+                      {/* Кликабельный URL слайда */}
                       <Input
-                        className="flex-1"
-                        placeholder="https://res.cloudinary.com/..."
-                        value={slide.imageUrl || slide.videoUrl || ''}
+                        className="ml-[4.25rem]"
+                        placeholder={t('slideLinkPlaceholder')}
+                        value={slide.clickableUrl || ''}
                         onChange={(e) => {
                           const newSlides = [...(settings.slides || [])];
-                          newSlides[idx] = isVideo
-                            ? { videoUrl: e.target.value }
-                            : { imageUrl: e.target.value };
+                          newSlides[idx] = { ...slide, clickableUrl: e.target.value || undefined };
                           setSettings({ ...settings, slides: newSlides });
                         }}
                       />
-
-                      {/* Замена через Cloudinary */}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        title="Replace via Cloudinary"
-                        onClick={() => handleReplaceSlide(idx)}
-                      >
-                        Upload
-                      </Button>
-
-                      {/* Перестановка */}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={idx === 0}
-                        title="Move up"
-                        onClick={() => handleMoveSlide(idx, -1)}
-                      >
-                        ↑
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={idx === (settings.slides?.length || 0) - 1}
-                        title="Move down"
-                        onClick={() => handleMoveSlide(idx, 1)}
-                      >
-                        ↓
-                      </Button>
-
-                      {/* Удаление */}
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        title="Remove slide"
-                        onClick={() => handleRemoveSlide(idx)}
-                      >
-                        ✕
-                      </Button>
                     </div>
                   );
                 })}
 
                 <Button type="button" variant="outline" size="sm" onClick={handleAddSlides}>
-                  + Add Slides (multi-upload)
+                  {t('addSlides')}
                 </Button>
               </div>
             )}
 
-            <div>
-              <Label>Primary CTA Label</Label>
-              <Input
-                value={settings.primaryCta?.label || ''}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    primaryCta: { ...settings.primaryCta, label: e.target.value },
-                  })
-                }
-              />
-            </div>
-            <CtaLinkManager
-              label="Primary"
-              cta={settings.primaryCta}
-              sections={sections || []}
-              onChange={(cta) => setSettings({ ...settings, primaryCta: cta })}
-            />
-            <div>
-              <Label>Secondary CTA Label</Label>
-              <Input
-                value={settings.secondaryCta?.label || ''}
-                onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    secondaryCta: { ...settings.secondaryCta, label: e.target.value },
-                  })
-                }
-              />
-            </div>
-            <CtaLinkManager
-              label="Secondary"
-              cta={settings.secondaryCta}
-              sections={sections || []}
-              onChange={(cta) => setSettings({ ...settings, secondaryCta: cta })}
-            />
+            {/* ─── CTA Buttons (hidden for banner_link preset) ─── */}
+            {showCtaFields && (
+              <>
+                <div>
+                  <Label>{t('primaryCtaLabel')}</Label>
+                  <Input
+                    value={settings.primaryCta?.label || ''}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        primaryCta: { ...settings.primaryCta, label: e.target.value },
+                      })
+                    }
+                  />
+                </div>
+                <CtaLinkManager
+                  label="Primary"
+                  cta={settings.primaryCta}
+                  sections={sections || []}
+                  onChange={(cta) => setSettings({ ...settings, primaryCta: cta })}
+                />
+                <div>
+                  <Label>{t('secondaryCtaLabel')}</Label>
+                  <Input
+                    value={settings.secondaryCta?.label || ''}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        secondaryCta: { ...settings.secondaryCta, label: e.target.value },
+                      })
+                    }
+                  />
+                </div>
+                <CtaLinkManager
+                  label="Secondary"
+                  cta={settings.secondaryCta}
+                  sections={sections || []}
+                  onChange={(cta) => setSettings({ ...settings, secondaryCta: cta })}
+                />
+              </>
+            )}
           </div>
         );
       case 'map':
         return (
           <div className="space-y-4">
             <div>
-              <Label>Address</Label>
+              <Label>{t('address')}</Label>
               <Input
                 value={settings.address || ''}
                 onChange={(e) => setSettings({ ...settings, address: e.target.value })}
@@ -442,7 +634,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Latitude</Label>
+                <Label>{t('latitude')}</Label>
                 <Input
                   type="number"
                   value={settings.latitude || ''}
@@ -450,7 +642,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 />
               </div>
               <div>
-                <Label>Longitude</Label>
+                <Label>{t('longitude')}</Label>
                 <Input
                   type="number"
                   value={settings.longitude || ''}
@@ -464,21 +656,21 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
         return (
           <div className="space-y-4">
             <div>
-              <Label>Items (comma-separated keys)</Label>
+              <Label>{t('itemsComma')}</Label>
               <Input
                 value={typeof settings.items === 'string' ? settings.items : settings.items?.join(', ') || ''}
                 onChange={(e) => setSettings({ ...settings, items: e.target.value })}
               />
             </div>
             <div>
-              <Label>Display Type</Label>
+              <Label>{t('displayType')}</Label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                 value={settings.displayType || 'categories'}
                 onChange={(e) => setSettings({ ...settings, displayType: e.target.value })}
               >
-                <option value="categories">Categories</option>
-                <option value="products">Products</option>
+                <option value="categories">{t('categories')}</option>
+                <option value="products">{t('products')}</option>
               </select>
             </div>
           </div>
@@ -491,7 +683,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Display Mode</Label>
+              <Label>{t('displayMode')}</Label>
               <Select
                 value={carouselMode}
                 onValueChange={(val) => {
@@ -513,18 +705,18 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select display mode" />
+                  <SelectValue placeholder={t('displayMode')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="manual">Manual (Custom Cards)</SelectItem>
-                  <SelectItem value="ecommerce">E-commerce Products</SelectItem>
-                  <SelectItem value="menu">Menu Items</SelectItem>
+                  <SelectItem value="manual">{t('manualCustom')}</SelectItem>
+                  <SelectItem value="ecommerce">{t('ecommerceProducts')}</SelectItem>
+                  <SelectItem value="menu">{t('menuItems')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Items per row (desktop)</Label>
+              <Label>{t('itemsPerRow')}</Label>
               <Select
                 value={String(settings.desktopItemsPerRow ?? (initialData?.type === 'feature_carousel' ? 4 : 3))}
                 onValueChange={(val) =>
@@ -546,7 +738,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
               <>
                 {!initialData?._id ? (
                   <div className="p-4 bg-amber-50 text-amber-600 rounded-md">
-                    Please save this section first before adding items to it.
+                    {t('saveSectionFirst')}
                   </div>
                 ) : (
                   <SectionItemList
@@ -620,10 +812,33 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
         );
       case 'booking': {
         const sideContentType = settings.sideContentType || 'none';
+        const checkoutFlow = settings.checkoutFlow || 'inline';
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Side Content Type</Label>
+              <Label>{t('checkoutFlow')}</Label>
+              <Select
+                value={checkoutFlow}
+                onValueChange={(val) =>
+                  setSettings({
+                    ...settings,
+                    checkoutFlow: val as 'inline' | 'redirect',
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('selectCheckoutFlow')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inline">{t('inlineStandard')}</SelectItem>
+                  <SelectItem value="redirect">{t('redirectToPage')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{t('checkoutFlowHint')}</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('sideContentType')}</Label>
               <Select
                 value={sideContentType}
                 onValueChange={(val) =>
@@ -637,12 +852,12 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select side content type" />
+                  <SelectValue placeholder={t('selectSideContent')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None (single column)</SelectItem>
-                  <SelectItem value="map">Google Map</SelectItem>
-                  <SelectItem value="text">Custom Text</SelectItem>
+                  <SelectItem value="none">{t('noneSingleColumn')}</SelectItem>
+                  <SelectItem value="map">{t('googleMap')}</SelectItem>
+                  <SelectItem value="text">{t('customText')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -662,9 +877,9 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
 
             {sideContentType === 'text' && (
               <div className="space-y-2">
-                <Label>Custom Text</Label>
+                <Label>{t('customText')}</Label>
                 <Textarea
-                  placeholder="Enter custom text to display on the right side..."
+                  placeholder={t('customTextPlaceholder')}
                   value={settings.customText || ''}
                   onChange={(e) =>
                     setSettings({ ...settings, customText: e.target.value })
@@ -678,8 +893,8 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
       }
       case 'dynamic_form': {
         const dfSettings = settings as DynamicFormSettings;
-        const [currentLang, setCurrentLang] = useState<'base' | 'pl' | 'de'>('base');
-        const t = useTranslations('admin.sectionForm.dynamicForm');
+        const [currentLang, setCurrentLang] = useState<string>('base');
+        const tDf = useTranslations('admin.sectionForm.dynamicForm');
 
         const handleFieldsChange = (fields: FormField[]) => {
           setSettings({ ...settings, fields });
@@ -688,23 +903,31 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
         return (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100">
-              <span className="text-sm font-medium text-gray-700">Language:</span>
-              {['base', 'pl', 'de'].map((lang) => (
+              <span className="text-sm font-medium text-gray-700">{t('language')}</span>
+              <Button
+                variant={currentLang === 'base' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCurrentLang('base')}
+                className="rounded-lg text-xs font-medium"
+              >
+                Base ({defaultLocale.toUpperCase()})
+              </Button>
+              {activeLocales.map((lang: string) => (
                 <Button
                   key={lang}
                   variant={currentLang === lang ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setCurrentLang(lang as 'base' | 'pl' | 'de')}
+                  onClick={() => setCurrentLang(lang)}
                   className="rounded-lg text-xs font-medium"
                 >
-                  {lang === 'base' ? 'Base (EN)' : lang.toUpperCase()}
+                  {lang.toUpperCase()}
                 </Button>
               ))}
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Submit Button Label {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
+                <Label>{t('submitButtonLabel')} {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
                 <Input
                   value={currentLang === 'base' ? (dfSettings.submitLabel || '') : (dfSettings.submitLabelI18n?.[currentLang] || '')}
                   onChange={(e) => {
@@ -722,7 +945,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
               </div>
 
               <div className="space-y-2">
-                <Label>Success Message {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
+                <Label>{t('successMessage')} {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
                 <Input
                   value={currentLang === 'base' ? (dfSettings.successMessage || '') : (dfSettings.successMessageI18n?.[currentLang] || '')}
                   onChange={(e) => {
@@ -740,7 +963,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
               </div>
 
               <div className="space-y-2">
-                <Label>Notification Email</Label>
+                <Label>{t('notificationEmail')}</Label>
                 <Input
                   type="email"
                   value={dfSettings.notificationEmail || ''}
@@ -751,8 +974,8 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
 
               {/* NEW SECTION: Side Panel Rich Text */}
               <div className="space-y-2 pt-4 border-t">
-                <Label>Side Panel Text {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
-                <p className="text-xs text-muted-foreground mb-2">Optional rich text to display next to the form.</p>
+                <Label>{t('sidePanelText')} {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
+                <p className="text-xs text-muted-foreground mb-2">{t('sidePanelHint')}</p>
                 <div className="border rounded-xl bg-white overflow-hidden min-h-[150px]">
                 <ArticleEditor
                     body={currentLang === 'base' ? (dfSettings.sideText || '') : (dfSettings.sideTextI18n?.[currentLang] || '')}
@@ -775,71 +998,101 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
               fields={dfSettings.fields || []}
               onChange={handleFieldsChange}
               currentLang={currentLang}
-              t={t}
+              t={tDf}
             />
           </div>
         );
       }
+      case 'rich_text': {
+        const rtSettings = settings as any;
+        const [currentLang, setCurrentLang] = useState<string>('base');
+
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <span className="text-sm font-medium text-gray-700">{t('language')}</span>
+              <Button
+                variant={currentLang === 'base' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCurrentLang('base')}
+                className="rounded-lg text-xs font-medium"
+              >
+                Base ({defaultLocale.toUpperCase()})
+              </Button>
+              {activeLocales.map((lang: string) => (
+                <Button
+                  key={lang}
+                  variant={currentLang === lang ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCurrentLang(lang)}
+                  className="rounded-lg text-xs font-medium"
+                >
+                  {lang.toUpperCase()}
+                </Button>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('content')} {currentLang !== 'base' && `(${currentLang.toUpperCase()})`}</Label>
+              <p className="text-xs text-muted-foreground">{t('richTextHint')}</p>
+              <div className="border rounded-xl bg-white overflow-hidden min-h-[250px]">
+                <ArticleEditor
+                  body={currentLang === 'base' ? (rtSettings.content || '') : (rtSettings.contentI18n?.[currentLang] || '')}
+                  onChange={(val: string) => {
+                    if (currentLang === 'base') {
+                      setSettings({ ...settings, content: val });
+                    } else {
+                      setSettings({
+                        ...settings,
+                        contentI18n: { ...(rtSettings.contentI18n || {}), [currentLang]: val },
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      }
       default:
-        return <p className="text-sm text-gray-500">Additional items/settings are managed elsewhere.</p>;
+        return <p className="text-sm text-gray-500">{t('additionalItems')}</p>;
     }
   };
 
   return (
     <div className="p-6 bg-card text-card-foreground rounded-xl border border-border shadow-sm space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Edit Section: {type}</h2>
+        <h2 className="text-xl font-bold">{t('editSection', { type: type || '' })}</h2>
         <div className="flex items-center gap-2">
-          <Label htmlFor="active-toggle">Active</Label>
+          <Label htmlFor="active-toggle">{t('active')}</Label>
           <Switch id="active-toggle" checked={isActive} onCheckedChange={setIsActive} />
         </div>
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold border-b pb-2">Settings</h3>
+        <h3 className="text-lg font-semibold border-b pb-2">{t('settings')}</h3>
         {renderSettings()}
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold border-b pb-2">Translations</h3>
-        <div className="grid md:grid-cols-3 gap-6">
-          {['pl', 'en', 'de'].map((locale) => (
-            <div key={locale} className="space-y-3 bg-muted p-4 rounded-lg">
-              <h4 className="font-bold uppercase text-sm">{locale}</h4>
-              <div>
-                <Label>Title</Label>
-                <Input
-                  value={translations[locale]?.title || ''}
-                  onChange={(e) =>
-                    setTranslations({
-                      ...translations,
-                      [locale]: { ...translations[locale], title: e.target.value },
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label>Subtitle</Label>
-                <Input
-                  value={translations[locale]?.subtitle || ''}
-                  onChange={(e) =>
-                    setTranslations({
-                      ...translations,
-                      [locale]: { ...translations[locale], subtitle: e.target.value },
-                    })
-                  }
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+        <h3 className="text-lg font-semibold border-b pb-2">{t('translationsHeading')}</h3>
+        <TranslatableGroup
+          value={translations}
+          onChange={setTranslations}
+          activeLocales={activeLocales}
+          defaultLocale={defaultLocale}
+          fields={[
+            { key: 'title', label: 'Title' },
+            { key: 'subtitle', label: 'Subtitle' },
+          ]}
+        />
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button variant="outline" onClick={onCancel}>
-          Cancel
+          {t('cancel')}
         </Button>
-        <Button onClick={handleSave}>Save Section</Button>
+        <Button onClick={handleSave}>{t('saveSection')}</Button>
       </div>
     </div>
   );
@@ -851,6 +1104,7 @@ interface ArticleGridSettingsFormProps {
 }
 
 function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsFormProps) {
+  const t = useTranslations('admin.sectionForm');
   const tenant = useTenant();
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(false);
@@ -885,7 +1139,7 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Mode</Label>
+        <Label>{t('mode')}</Label>
         <Select
           value={mode}
           onValueChange={(val) =>
@@ -893,11 +1147,11 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
           }
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select mode" />
+            <SelectValue placeholder={t('selectMode')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="latest">Latest Articles</SelectItem>
-            <SelectItem value="manual">Manually Selected</SelectItem>
+            <SelectItem value="latest">{t('latestArticles')}</SelectItem>
+            <SelectItem value="manual">{t('manuallySelected')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -923,9 +1177,9 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
 
       {mode === 'manual' && (
         <div className="space-y-2">
-          <Label>Selected Articles</Label>
+          <Label>{t('selectedArticles')}</Label>
           {articlesLoading ? (
-            <p className="text-sm text-muted-foreground">Loading articles...</p>
+            <p className="text-sm text-muted-foreground">{t('loadingArticles')}</p>
           ) : (
             <div className="space-y-2 max-h-60 overflow-y-auto border rounded-md p-2">
               {articles.map((article) => (
@@ -958,11 +1212,11 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
 
       {/* Appearance Settings */}
       <div className="space-y-4 pt-4 border-t">
-        <Label className="text-sm font-semibold">Appearance</Label>
+        <Label className="text-sm font-semibold">{t('appearance')}</Label>
 
         {/* Layout Mode */}
         <div className="space-y-2">
-          <Label htmlFor="layoutMode">Layout Mode</Label>
+          <Label htmlFor="layoutMode">{t('layoutMode')}</Label>
           <Select
             value={settings.layoutMode || 'grid'}
             onValueChange={(val) =>
@@ -970,18 +1224,18 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
             }
           >
             <SelectTrigger id="layoutMode">
-              <SelectValue placeholder="Select layout mode" />
+              <SelectValue placeholder={t('selectLayoutMode')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="grid">Grid</SelectItem>
-              <SelectItem value="carousel">Carousel</SelectItem>
+              <SelectItem value="grid">{t('grid')}</SelectItem>
+              <SelectItem value="carousel">{t('carousel')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Aspect Ratio */}
         <div className="space-y-2">
-          <Label htmlFor="aspectRatio">Image Aspect Ratio</Label>
+          <Label htmlFor="aspectRatio">{t('imageAspectRatio')}</Label>
           <Select
             value={settings.aspectRatio || '16:9'}
             onValueChange={(val) =>
@@ -989,20 +1243,20 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
             }
           >
             <SelectTrigger id="aspectRatio">
-              <SelectValue placeholder="Select aspect ratio" />
+              <SelectValue placeholder={t('selectAspectRatio')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="16:9">16:9 (Widescreen)</SelectItem>
-              <SelectItem value="4:3">4:3 (Standard)</SelectItem>
-              <SelectItem value="1:1">1:1 (Square)</SelectItem>
-              <SelectItem value="9:16">9:16 (Vertical)</SelectItem>
+              <SelectItem value="16:9">{t('widescreen')}</SelectItem>
+              <SelectItem value="4:3">{t('standard')}</SelectItem>
+              <SelectItem value="1:1">{t('square')}</SelectItem>
+              <SelectItem value="9:16">{t('vertical')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Card Variant */}
         <div className="space-y-2">
-          <Label htmlFor="cardVariant">Card Style</Label>
+          <Label htmlFor="cardVariant">{t('cardStyle')}</Label>
           <Select
             value={settings.cardVariant || 'default'}
             onValueChange={(val) =>
@@ -1010,18 +1264,18 @@ function ArticleGridSettingsForm({ settings, onChange }: ArticleGridSettingsForm
             }
           >
             <SelectTrigger id="cardVariant">
-              <SelectValue placeholder="Select card style" />
+              <SelectValue placeholder={t('selectCardStyle')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="default">Default (text below image)</SelectItem>
-              <SelectItem value="overlay">Overlay (text over image)</SelectItem>
+              <SelectItem value="default">{t('defaultBelow')}</SelectItem>
+              <SelectItem value="overlay">{t('overlay')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Items Per Row */}
         <div className="space-y-2">
-          <Label htmlFor="itemsPerRow">Items per Row (Desktop)</Label>
+          <Label htmlFor="itemsPerRow">{t('itemsPerRowDesktop')}</Label>
           <Select
             value={settings.itemsPerRow?.toString() || '3'}
             onValueChange={(val) =>

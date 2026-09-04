@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -19,6 +20,7 @@ const emptyService: Omit<BeautyService, 'id'> = {
 }
 
 export default function BeautyServicesManager() {
+  const t = useTranslations('admin.beautyServices')
   const [services, setServices] = useState<BeautyService[]>([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(emptyService)
@@ -88,56 +90,56 @@ export default function BeautyServicesManager() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div>
-          <CardTitle>Beauty Services</CardTitle>
-          <p className="text-sm text-muted-foreground">Manage services available in the beauty niche.</p>
+          <CardTitle>{t('title')}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate}>Add service</Button>
+            <Button onClick={openCreate}>{t('addService')}</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editingId ? 'Edit service' : 'Create service'}</DialogTitle>
-              <DialogDescription>Fill in service details and publish it in the admin panel.</DialogDescription>
+              <DialogTitle>{editingId ? t('editService') : t('createService')}</DialogTitle>
+              <DialogDescription>{t('formDescription')}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-2">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t('name')}</Label>
                 <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">Price</Label>
+                <Label htmlFor="price">{t('price')}</Label>
                 <Input id="price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Label htmlFor="duration">{t('durationMinutes')}</Label>
                 <Input id="duration" type="number" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="category">Category key</Label>
+                <Label htmlFor="category">{t('categoryKey')}</Label>
                 <Input id="category" value={form.categoryKey} onChange={(e) => setForm({ ...form, categoryKey: e.target.value })} />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={submit}>{editingId ? 'Save' : 'Create'}</Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>{t('cancel')}</Button>
+              <Button onClick={submit}>{editingId ? t('save') : t('create')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="text-sm text-muted-foreground">Total services: {services.length} • Total duration: {totalDuration} min</div>
+        <div className="text-sm text-muted-foreground">{t('totalServices', { count: services.length })} • {t('totalDuration', { duration: totalDuration })}</div>
         {loading ? (
-          <div className="text-sm text-muted-foreground">Loading…</div>
+          <div className="text-sm text-muted-foreground">{t('loading')}</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('tableName')}</TableHead>
+                <TableHead>{t('tablePrice')}</TableHead>
+                <TableHead>{t('tableDuration')}</TableHead>
+                <TableHead>{t('tableStatus')}</TableHead>
+                <TableHead className="text-right">{t('tableActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -146,10 +148,10 @@ export default function BeautyServicesManager() {
                   <TableCell>{service.name}</TableCell>
                   <TableCell>{service.price}</TableCell>
                   <TableCell>{service.durationMinutes} min</TableCell>
-                  <TableCell>{service.isActive ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell>{service.isActive ? t('active') : t('inactive')}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(service)}>Edit</Button>
-                    <Button variant="destructive" size="sm" onClick={() => void remove(service.id)}>Delete</Button>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(service)}>{t('edit')}</Button>
+                    <Button variant="destructive" size="sm" onClick={() => void remove(service.id)}>{t('delete')}</Button>
                   </TableCell>
                 </TableRow>
               ))}

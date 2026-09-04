@@ -14,10 +14,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
 type DashboardData = {
   menuCount: number;
@@ -81,14 +78,6 @@ export default function DashboardPage() {
     { label: t('settings'), href: '/admin/settings', icon: Settings },
   ];
 
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'default';   // обычно зелёный
-      case 'cancelled': return 'destructive';
-      default: return 'secondary';          // pending
-    }
-  };
-
   const statusLabel = (status: string) => {
     if (status === 'pending') return t('status.pending');
     if (status === 'confirmed') return t('status.confirmed');
@@ -98,98 +87,125 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Приветствие */}
+      {/* Welcome header */}
       <div>
-        <h1 className="text-2xl font-bold">{t('welcome', { clientName: tenant?.clientName ?? '' })}</h1>
-        <p className="text-muted-foreground">{t('summary')}</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t('welcome', { clientName: tenant?.clientName ?? '' })}</h1>
+        <p className="text-muted-foreground mt-1">{t('summary')}</p>
       </div>
 
-      {/* Статистика */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Stat cards — glass with accent stripe */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map(({ label, value, icon: Icon }) => (
-          <Card key={label} className="shadow-sm">
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                <Icon size={24} />
+          <div key={label} className="glass-card glass-stat-accent p-5">
+            <div className="flex items-center gap-4">
+              <div className="surface-inset p-3 flex items-center justify-center">
+                <Icon size={20} className="text-[var(--admin-accent)]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{label}</p>
-                <p className="text-3xl font-bold">{value}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
+                <p className="text-3xl font-bold tracking-tight mt-0.5">{value}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
 
-      <Separator />
-
-      {/* Быстрые действия */}
+      {/* Quick actions — glass pill buttons */}
       <div>
-        <h2 className="text-lg font-semibold mb-3">{t('quickActions')}</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t('quickActions')}</h2>
         <div className="flex flex-wrap gap-2">
           {quickLinks.map(({ label, href, icon: Icon }) => (
             <Button
               key={href}
-              variant="default"
+              variant="outline"
               size="sm"
               onClick={() => router.push(href)}
               className="gap-2"
             >
               <Icon size={14} />
               {label}
-              <ArrowRight size={14} />
+              <ArrowRight size={14} className="opacity-50" />
             </Button>
           ))}
         </div>
       </div>
 
-      <Separator />
-
-      {/* Бронирования на сегодня */}
+      {/* Today's reservations */}
       <div>
-        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-          <Clock size={18} className="text-muted-foreground" />
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Clock size={14} />
           {t('todayBookings')}
         </h2>
         {data?.lastReservations && data.lastReservations.length > 0 ? (
-          <Card>
-            <CardContent className="p-0 overflow-x-auto">
+          <>
+            {/* Desktop table */}
+            <div className="glass-card overflow-hidden hidden md:block">
               <table className="w-full text-left">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="p-3 text-sm font-medium">{t('name')}</th>
-                    <th className="p-3 text-sm font-medium">{t('time')}</th>
-                    <th className="p-3 text-sm font-medium">{t('guests')}</th>
-                    <th className="p-3 text-sm font-medium">{t('phone')}</th>
-                    <th className="p-3 text-sm font-medium">{t('statusHeader')}</th>
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('name')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('time')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('guests')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('phone')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('statusHeader')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.lastReservations.map(r => (
-                    <tr key={r._id} className="border-t">
-                      <td className="p-3 flex items-center gap-2">
+                    <tr key={r._id} className="border-b border-border/50 last:border-0 hover:bg-surface-hover transition-colors">
+                      <td className="px-4 py-3 flex items-center gap-2">
                         <Users size={14} className="text-muted-foreground" />
-                        {r.name}
+                        <span className="font-medium">{r.name}</span>
                       </td>
-                      <td className="p-3">{r.time}</td>
-                      <td className="p-3">{r.guests}</td>
-                      <td className="p-3">
-                        <Phone size={14} className="inline mr-1 text-muted-foreground" />
+                      <td className="px-4 py-3">{r.time}</td>
+                      <td className="px-4 py-3">{r.guests}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <Phone size={12} className="inline mr-1" />
                         {r.phone}
                       </td>
-                      <td className="p-3">
-                        <Badge variant={getStatusVariant(r.status)}>
-                          {statusLabel(r.status)}
-                        </Badge>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className={`status-dot status-dot--${r.status}`} />
+                          <span className="text-sm">{statusLabel(r.status)}</span>
+                        </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="space-y-3 md:hidden">
+              {data.lastReservations.map(r => (
+                <div key={r._id} className="glass-card p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Users size={14} className="text-muted-foreground" />
+                      <span className="font-medium">{r.name}</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 text-sm">
+                      <span className={`status-dot status-dot--${r.status}`} />
+                      {statusLabel(r.status)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Clock size={12} /> {r.time}
+                    </span>
+                    <span>{r.guests} {t('guests')}</span>
+                    <span className="flex items-center gap-1">
+                      <Phone size={12} /> {r.phone}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <p className="text-muted-foreground">{t('noBookings')}</p>
+          <div className="glass-card p-8 text-center text-muted-foreground">
+            {t('noBookings')}
+          </div>
         )}
       </div>
     </div>

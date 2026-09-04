@@ -1,9 +1,12 @@
 // src/shared/api/cachedFetch.ts
 //
 // Shared wrapper around the native fetch API that injects Next.js cache tags
-// and defaults to force-cache for GET requests. This allows Server Components
-// to benefit from the Next.js data cache while still being individually
-// revalidated on demand via revalidateTag().
+// and always uses no-store to bypass the Next.js data cache.
+//
+// Rationale: The multi-tenant system resolves data via headers/cookies that
+// vary per request, and admin mutations must be visible immediately.
+// On-demand revalidation via revalidateTag() is unreliable when the initial
+// fetch was force-cached, so we disable caching entirely for now.
 //
 // Usage:
 //   import { cachedFetch } from '@/shared/api/cachedFetch'
@@ -27,6 +30,6 @@ export async function cachedFetch(
   return fetch(url, {
     ...rest,
     next: { tags },
-    cache: cache ?? 'force-cache',
+    cache: cache ?? 'no-store',
   })
 }

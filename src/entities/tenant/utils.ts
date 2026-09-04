@@ -118,5 +118,12 @@ export function normalizeTenantData(data: any, fallbackTenantId: string): SiteCo
       mapApiKey: data.logistics?.mapApiKey ?? '',
       env: data.logistics?.env === 'production' ? 'production' : 'sandbox',
     },
+    activeLocales: Array.isArray(data.activeLocales) && data.activeLocales.length > 0
+      ? data.activeLocales
+      : ['pl', 'en'],
+    defaultLocale: data.defaultLocale || data.primaryLanguage || 'pl',
+    navigation: data.navigation && Array.isArray(data.navigation.items) && data.navigation.items.length > 0
+      ? { items: data.navigation.items, dropdownLabel: data.navigation.dropdownLabel || '' }
+      : undefined,
   }
 }

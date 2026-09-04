@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { fetchMarketplaceProducts } from '@/entities/platformProduct/api';
 import { usePlatformCartStore } from '@/shared/store/platformCartStore';
@@ -19,20 +20,21 @@ import {
   Package, Search, ShoppingCart, Plus, Eye,
 } from 'lucide-react';
 
-const CATEGORY_OPTIONS = [
-  { value: '', label: 'All' },
-  { value: 'hardware', label: 'Hardware' },
-  { value: 'digital', label: 'Digital' },
-  { value: 'service', label: 'Service' },
-];
-
 interface MarketplaceGridProps {
   onProductSelect: (product: MarketplaceProduct) => void;
 }
 
 export default function MarketplaceGrid({ onProductSelect }: MarketplaceGridProps) {
+  const t = useTranslations('admin.marketplace');
   const tenant = useTenant();
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+
+  const CATEGORY_OPTIONS = [
+    { value: '', label: t('all') },
+    { value: 'hardware', label: t('hardware') },
+    { value: 'digital', label: t('digital') },
+    { value: 'service', label: t('service') },
+  ];
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -76,7 +78,7 @@ export default function MarketplaceGrid({ onProductSelect }: MarketplaceGridProp
       <Card className="border-dashed border-2">
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <Package className="w-8 h-8 text-muted-foreground/40 mb-2" />
-          <p className="text-sm font-medium text-muted-foreground">Failed to load products</p>
+          <p className="text-sm font-medium text-muted-foreground">{t('loadError')}</p>
           <p className="text-xs text-muted-foreground/70">{error}</p>
         </CardContent>
       </Card>
@@ -92,7 +94,7 @@ export default function MarketplaceGrid({ onProductSelect }: MarketplaceGridProp
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products…"
+            placeholder={t('searchPlaceholder')}
             className="pl-9"
           />
         </div>
@@ -118,9 +120,9 @@ export default function MarketplaceGrid({ onProductSelect }: MarketplaceGridProp
         <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <Package className="w-8 h-8 text-muted-foreground/40 mb-2" />
-            <p className="text-sm font-medium text-muted-foreground">No products available</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('noProducts')}</p>
             <p className="text-xs text-muted-foreground/70">
-              Products matching your business niche will appear here.
+              {t('noProductsHint')}
             </p>
           </CardContent>
         </Card>
@@ -158,7 +160,7 @@ export default function MarketplaceGrid({ onProductSelect }: MarketplaceGridProp
                   {product.title}
                 </CardTitle>
                 <CardDescription className="text-xs line-clamp-2 mb-3">
-                  {product.description || 'No description available.'}
+                  {product.description || t('noDescription')}
                 </CardDescription>
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold">
@@ -171,7 +173,7 @@ export default function MarketplaceGrid({ onProductSelect }: MarketplaceGridProp
                         onProductSelect(product);
                       }}
                       className="p-1.5 rounded-lg border border-border hover:border-primary/40 transition-colors"
-                      title="View details"
+                      title={t('viewDetails')}
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>
@@ -187,7 +189,7 @@ export default function MarketplaceGrid({ onProductSelect }: MarketplaceGridProp
                         });
                       }}
                       className="p-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-                      title="Add to cart"
+                      title={t('addToCart')}
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>

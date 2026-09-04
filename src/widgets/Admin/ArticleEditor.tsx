@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import { useCallback, useMemo, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Bold,
@@ -32,9 +33,12 @@ interface ArticleEditorProps {
 export function ArticleEditor({
   body,
   onChange,
-  placeholder = 'Write your content...',
+  placeholder = '',
   className = '',
 }: ArticleEditorProps) {
+  const t = useTranslations('admin.articleEditor');
+  const resolvedPlaceholder = placeholder || t('placeholder');
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -70,14 +74,14 @@ export function ArticleEditor({
   }, [editor, body]);
 
   const addImage = useCallback(() => {
-    const url = window.prompt('Image URL:');
+    const url = window.prompt(t('imageUrlPrompt'));
     if (url) {
       editor?.chain().focus().setImage({ src: url }).run();
     }
   }, [editor]);
 
   const addLink = useCallback(() => {
-    const url = window.prompt('Link URL:');
+    const url = window.prompt(t('linkUrlPrompt'));
     if (url) {
       // Auto-prepend https:// if no protocol provided
       const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
@@ -91,91 +95,91 @@ export function ArticleEditor({
         icon: <Undo className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().undo().run(),
         disabled: !editor?.can().undo(),
-        title: 'Undo',
+        title: t('undo'),
       },
       {
         icon: <Redo className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().redo().run(),
         disabled: !editor?.can().redo(),
-        title: 'Redo',
+        title: t('redo'),
       },
       { type: 'separator' as const },
       {
         icon: <Heading1 className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleHeading({ level: 1 }).run(),
         isActive: editor?.isActive('heading', { level: 1 }),
-        title: 'Heading 1',
+        title: t('heading1'),
       },
       {
         icon: <Heading2 className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleHeading({ level: 2 }).run(),
         isActive: editor?.isActive('heading', { level: 2 }),
-        title: 'Heading 2',
+        title: t('heading2'),
       },
       { type: 'separator' as const },
       {
         icon: <Bold className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleBold().run(),
         isActive: editor?.isActive('bold'),
-        title: 'Bold',
+        title: t('bold'),
       },
       {
         icon: <Italic className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleItalic().run(),
         isActive: editor?.isActive('italic'),
-        title: 'Italic',
+        title: t('italic'),
       },
       {
         icon: <Strikethrough className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleStrike().run(),
         isActive: editor?.isActive('strike'),
-        title: 'Strikethrough',
+        title: t('strikethrough'),
       },
       {
         icon: <Code className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleCode().run(),
         isActive: editor?.isActive('code'),
-        title: 'Inline Code',
+        title: t('inlineCode'),
       },
       { type: 'separator' as const },
       {
         icon: <List className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleBulletList().run(),
         isActive: editor?.isActive('bulletList'),
-        title: 'Bullet List',
+        title: t('bulletList'),
       },
       {
         icon: <ListOrdered className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleOrderedList().run(),
         isActive: editor?.isActive('orderedList'),
-        title: 'Ordered List',
+        title: t('orderedList'),
       },
       {
         icon: <Quote className="w-4 h-4" />,
         onClick: () => editor?.chain().focus().toggleBlockquote().run(),
         isActive: editor?.isActive('blockquote'),
-        title: 'Blockquote',
+        title: t('blockquote'),
       },
       { type: 'separator' as const },
       {
         icon: <LinkIcon className="w-4 h-4" />,
         onClick: addLink,
         isActive: editor?.isActive('link'),
-        title: 'Add Link',
+        title: t('addLink'),
       },
       {
         icon: <ImageIcon className="w-4 h-4" />,
         onClick: addImage,
-        title: 'Add Image',
+        title: t('addImage'),
       },
     ],
-    [editor, addLink, addImage]
+    [editor, addLink, addImage, t]
   );
 
   if (!editor) {
     return (
       <div className={`border rounded-lg ${className}`}>
-        <div className="p-4 text-muted-foreground">Loading editor...</div>
+        <div className="p-4 text-muted-foreground">{t('loadingEditor')}</div>
       </div>
     );
   }

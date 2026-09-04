@@ -4,6 +4,14 @@ export interface BranchFeatures {
   hasVeganTeaser?: boolean;
 }
 
+/** A tenant-created landing page managed via the Admin Page Builder. */
+export interface CustomPage {
+  title: string;
+  slug: string;
+  isActive: boolean;
+  createdAt?: string;
+}
+
 export interface Branch {
   _id: string;
   tenantId: string;
@@ -22,6 +30,9 @@ export interface Branch {
   // кафе в подвале того же здания), отображается вложенно под родителем.
   parentBranchId?: string | null;
   venueType?: VenueType;
+
+  /** Arbitrary landing pages created by the tenant via the Admin Page Builder. */
+  customPages?: CustomPage[];
 
   settingsOverride?: {
     phone?: string;

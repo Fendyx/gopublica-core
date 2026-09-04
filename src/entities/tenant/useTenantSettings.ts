@@ -14,6 +14,8 @@ interface TenantSettings {
   seoDescriptionI18n?: Record<string, string>;
   primaryLanguage?: string;
   primaryCurrency?: string;
+  activeLocales?: string[];
+  defaultLocale?: string;
 }
 
 export function useTenantSettings(tenantId: string) {
@@ -30,6 +32,10 @@ export function useTenantSettings(tenantId: string) {
     seoTitle: rawSettings?.seoTitle ?? '',
     seoDescription: rawSettings?.seoDescription ?? '',
     hours: rawSettings?.hours ?? '',
+    activeLocales: Array.isArray(rawSettings?.activeLocales) && rawSettings.activeLocales.length > 0
+      ? rawSettings.activeLocales
+      : ['pl', 'en'],
+    defaultLocale: rawSettings?.defaultLocale || rawSettings?.primaryLanguage || 'pl',
   };
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { fetchPlatformNews } from '@/entities/platformProduct/api';
 import type { PlatformNewsItem } from '@/entities/platformProduct/types';
 import {
@@ -13,19 +13,20 @@ import {
   Megaphone, Info, Zap, AlertTriangle, Clock,
 } from 'lucide-react';
 
-const TYPE_CONFIG: Record<
-  PlatformNewsItem['type'],
-  { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType; label: string }
-> = {
-  info: { variant: 'secondary', icon: Info, label: 'Info' },
-  update: { variant: 'default', icon: Zap, label: 'Update' },
-  announcement: { variant: 'outline', icon: Megaphone, label: 'Announcement' },
-  promo: { variant: 'default', icon: Megaphone, label: 'Promo' },
-};
-
 export default function PlatformNewsFeed() {
   const locale = useLocale();
+  const t = useTranslations('admin.newsFeed');
   const [news, setNews] = useState<PlatformNewsItem[]>([]);
+
+  const TYPE_CONFIG: Record<
+    PlatformNewsItem['type'],
+    { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType; label: string }
+  > = {
+    info: { variant: 'secondary', icon: Info, label: t('info') },
+    update: { variant: 'default', icon: Zap, label: t('update') },
+    announcement: { variant: 'outline', icon: Megaphone, label: t('announcement') },
+    promo: { variant: 'default', icon: Megaphone, label: t('promo') },
+  };
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function PlatformNewsFeed() {
       <Card className="border-dashed border-2">
         <CardContent className="flex flex-col items-center justify-center py-10 text-center">
           <Zap className="w-6 h-6 text-muted-foreground/40 mb-2" />
-          <p className="text-xs font-medium text-muted-foreground">No updates yet</p>
+          <p className="text-xs font-medium text-muted-foreground">{t('noUpdates')}</p>
         </CardContent>
       </Card>
     );

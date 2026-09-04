@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -27,6 +28,7 @@ const emptyMaster: Omit<BeautyMaster, 'id'> = {
 }
 
 export default function BeautyMastersManager() {
+  const t = useTranslations('admin.beautyMasters')
   const [masters, setMasters] = useState<BeautyMaster[]>([])
   const [services, setServices] = useState<BeautyService[]>([])
   const [loading, setLoading] = useState(true)
@@ -130,25 +132,25 @@ export default function BeautyMastersManager() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div>
-          <CardTitle>Beauty Masters</CardTitle>
-          <p className="text-sm text-muted-foreground">Manage beauty masters and assign services they provide.</p>
+          <CardTitle>{t('title')}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate}>Add master</Button>
+            <Button onClick={openCreate}>{t('addMaster')}</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editingId ? 'Edit master' : 'Create master'}</DialogTitle>
-              <DialogDescription>Set the master name and choose the services they provide.</DialogDescription>
+              <DialogTitle>{editingId ? t('editMaster') : t('createMaster')}</DialogTitle>
+              <DialogDescription>{t('formDescription')}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-2">
               <div className="grid gap-2">
-                <Label htmlFor="master-name">Name</Label>
+                <Label htmlFor="master-name">{t('name')}</Label>
                 <Input id="master-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label>Services</Label>
+                <Label>{t('services')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {services.map((service, index) => {
                     const selected = form.services.includes(service.id)
@@ -167,35 +169,35 @@ export default function BeautyMastersManager() {
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="schedule">Schedule</Label>
+                <Label htmlFor="schedule">{t('schedule')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Default schedule is used (Mon–Fri 09:00–18:00, Sat 10:00–16:00, Sun closed).
+                  {t('scheduleHint')}
                 </p>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="breaks">Breaks</Label>
+                <Label htmlFor="breaks">{t('breaks')}</Label>
                 <Input id="breaks" value={form.breaks} onChange={(e) => setForm({ ...form, breaks: e.target.value })} />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={submit}>{editingId ? 'Save' : 'Create'}</Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>{t('cancel')}</Button>
+              <Button onClick={submit}>{editingId ? t('save') : t('create')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? (
-          <div className="text-sm text-muted-foreground">Loading…</div>
+          <div className="text-sm text-muted-foreground">{t('loading')}</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Services</TableHead>
-                <TableHead>Schedule</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('tableName')}</TableHead>
+                <TableHead>{t('tableServices')}</TableHead>
+                <TableHead>{t('tableSchedule')}</TableHead>
+                <TableHead>{t('tableStatus')}</TableHead>
+                <TableHead className="text-right">{t('tableActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -206,12 +208,12 @@ export default function BeautyMastersManager() {
                   <TableCell>
                     {typeof master.schedule === 'string'
                       ? master.schedule
-                      : 'Mon–Fri 09:00–18:00, Sat 10:00–16:00'}
+                      : t('scheduleFallback')}
                   </TableCell>
-                  <TableCell>{master.isActive ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell>{master.isActive ? t('active') : t('inactive')}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(master)}>Edit</Button>
-                    <Button variant="destructive" size="sm" onClick={() => void remove(master.id)}>Delete</Button>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(master)}>{t('edit')}</Button>
+                    <Button variant="destructive" size="sm" onClick={() => void remove(master.id)}>{t('delete')}</Button>
                   </TableCell>
                 </TableRow>
               ))}

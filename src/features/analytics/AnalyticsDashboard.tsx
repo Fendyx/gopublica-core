@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, Legend, AreaChart, Area
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend, ComposedChart, Line,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -14,49 +14,72 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTranslations } from 'next-intl';
-import { Eye, Users, ShoppingCart, DollarSign, TrendingUp, Activity } from 'lucide-react';
+import {
+  Eye, Users, ShoppingCart, DollarSign, TrendingUp, Activity,
+  ArrowUpRight, ArrowDownRight, Minus,
+} from 'lucide-react';
 
 const COLORS = ['#3b82f6', '#f97316', '#22c55e', '#e11d48', '#a855f7', '#06b6d4'];
-const SALES_COLOR = '#22c55e';
-const ORDERS_COLOR = '#a855f7';
-
-// ─── Mock data generators (used because API doesn't return sales yet) ─
-function generateSalesMock(days: number) {
-  const data = [];
-  const now = new Date();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().slice(0, 10);
-    data.push({
-      date: dateStr.slice(5),   // "MM-DD"
-      revenue: Math.floor(Math.random() * 15000 + 1000),   // 1k–16k
-      orders: Math.floor(Math.random() * 30 + 1),          // 1–30
-    });
-  }
-  return data;
-}
-
-function generateSalesSummary(totalDays: number) {
-  const totalRevenue = Math.floor(Math.random() * 200000 + 20000);
-  const totalOrders = Math.floor(Math.random() * 500 + 20);
-  return {
-    totalRevenue,
-    totalOrders,
-    avgCheck: Math.round(totalRevenue / totalOrders),
-    conversionRate: (Math.random() * 5 + 1).toFixed(1),   // 1–6%
-  };
-}
 
 // ─── Types ─────────────────────────────────────────────────────────────
+interface ComparisonValue {
+  current: number;
+  previous: number;
+  delta: string;
+}
+
+interface SalesTimelineEntry {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+interface SalesSummary {
+  totalRevenue: number;
+  totalOrders: number;
+  avgCheck: number;
+  conversionRate: string;
+  totalItems: number;
+  reservationCount: number;
+}
+
+interface TopItem {
+  name: string;
+  quantity: number;
+  revenue: number;
+}
+
+interface FunnelStep {
+  step: string;
+  value: number;
+}
+
 interface AnalyticsData {
   totalViews: number;
   uniqueVisitors: number;
   timeline: { date: string; totalViews: number; uniqueVisitors: number }[];
   cities: { name: string; value: number }[];
   devices: { name: string; value: number }[];
+  salesTimeline: SalesTimelineEntry[];
+  salesSummary: SalesSummary;
+  topItems: TopItem[];
+  funnel: FunnelStep[];
+  comparison: {
+    views: ComparisonValue;
+    visitors: ComparisonValue;
+    revenue: ComparisonValue;
+    orders: ComparisonValue;
+  };
 }
 
+// ─── Helpers ───────────────────────────────────────────────────────────
+function formatShortDate(dateStr: string) {
+  // "2026-09-01" → "Sep 1"
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+}
+
+// ─── Dashboard ─────────────────────────────────────────────────────────
 export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
   const t = useTranslations('admin.analyticsPage');
   const [days, setDays] = useState(30);
@@ -85,10 +108,6 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
       .finally(() => setLoading(false));
   }, [tenantId, days]);
 
-  // ─── Sales mock – always generated for now, but can be replaced later ─
-  const salesTimeline = useMemo(() => generateSalesMock(days), [days]);
-  const salesSummary = useMemo(() => generateSalesSummary(days), [days]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-muted-foreground">
@@ -104,7 +123,19 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
     );
   }
 
-  const { totalViews, uniqueVisitors, timeline, cities, devices } = data;
+  const {
+    totalViews, uniqueVisitors, timeline, cities, devices,
+    salesTimeline, salesSummary, topItems, funnel, comparison,
+  } = data;
+
+  // Merge timeline into a single dataset for the combined bar chart
+  const viewsLabel = t('views');
+  const ordersLabel = t('orders');
+  const combinedTimeline = timeline.map((entry, i) => ({
+    date: formatShortDate(entry.date),
+    [viewsLabel]: entry.totalViews,
+    [ordersLabel]: salesTimeline[i]?.orders ?? 0,
+  }));
 
   return (
     <div className="space-y-8">
@@ -122,96 +153,121 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
         </Select>
       </div>
 
-      {/* KPI cards – audience + sales */}
+      {/* KPI cards with comparison deltas */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <MetricCard
+        <KpiCard
           icon={<Eye className="w-5 h-5" />}
           label={t('views')}
           value={totalViews.toLocaleString()}
+          delta={comparison.views.delta}
           color="bg-blue-50 text-blue-600"
         />
-        <MetricCard
+        <KpiCard
           icon={<Users className="w-5 h-5" />}
           label={t('uniqueVisitors')}
           value={uniqueVisitors.toLocaleString()}
+          delta={comparison.visitors.delta}
           color="bg-emerald-50 text-emerald-600"
         />
-        <MetricCard
+        <KpiCard
           icon={<DollarSign className="w-5 h-5" />}
-          label="Revenue"
-          value={`$${salesSummary.totalRevenue.toLocaleString()}`}
+          label={t('revenue')}
+          value={`${salesSummary.totalRevenue.toLocaleString()}`}
+          delta={comparison.revenue.delta}
           color="bg-green-50 text-green-600"
         />
-        <MetricCard
+        <KpiCard
           icon={<ShoppingCart className="w-5 h-5" />}
-          label="Orders"
+          label={t('orders')}
           value={salesSummary.totalOrders.toLocaleString()}
+          delta={comparison.orders.delta}
           color="bg-purple-50 text-purple-600"
         />
-        <MetricCard
+        <KpiCard
           icon={<Activity className="w-5 h-5" />}
-          label="Average bill"
-          value={`$${salesSummary.avgCheck.toLocaleString()}`}
+          label={t('avgBill')}
+          value={salesSummary.avgCheck.toLocaleString()}
           color="bg-amber-50 text-amber-600"
         />
-        <MetricCard
+        <KpiCard
           icon={<TrendingUp className="w-5 h-5" />}
-          label="Conversion"
+          label={t('conversion')}
           value={`${salesSummary.conversionRate}%`}
           color="bg-rose-50 text-rose-600"
         />
       </div>
 
-      {/* Audience timeline */}
+      {/* Combined bar chart: Views + Orders over time */}
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{t('viewsOverTime')}</CardTitle>
+          <CardTitle className="text-lg font-semibold">{t('overview')}</CardTitle>
         </CardHeader>
         <CardContent className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={timeline}>
+            <ComposedChart data={combinedTimeline}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+              <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
+              <Tooltip
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+              />
               <Legend />
-              <Line type="monotone" dataKey="totalViews" stroke="#3b82f6" strokeWidth={2} name={t('views')} dot={false} />
-              <Line type="monotone" dataKey="uniqueVisitors" stroke="#f97316" strokeWidth={2} name={t('uniqueVisitors')} dot={false} />
-            </LineChart>
+              <Bar yAxisId="left" dataKey={t('views')} fill="#3b82f6" radius={[3, 3, 0, 0]} barSize={days > 30 ? 6 : 16} />
+              <Line yAxisId="right" type="monotone" dataKey={t('orders')} stroke="#a855f7" strokeWidth={2} dot={false} />
+            </ComposedChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Sales mock chart */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Sales</CardTitle>
-        </CardHeader>
-        <CardContent className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={salesTimeline}>
-              <defs>
-                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={SALES_COLOR} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={SALES_COLOR} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="ordGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={ORDERS_COLOR} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={ORDERS_COLOR} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-              <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
-              <Legend />
-              <Area yAxisId="left" type="monotone" dataKey="revenue" stroke={SALES_COLOR} fill="url(#revGrad)" name="Revenue ($)" />
-              <Area yAxisId="right" type="monotone" dataKey="orders" stroke={ORDERS_COLOR} fill="url(#ordGrad)" name="Orders" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {/* Funnel + Top Items side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Conversion Funnel */}
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">{t('funnel')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FunnelChart funnel={funnel} t={t} />
+          </CardContent>
+        </Card>
+
+        {/* Top Items */}
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">{t('topItems')}</CardTitle>
+          </CardHeader>
+          <CardContent className="h-72">
+            {topItems.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topItems} layout="vertical" margin={{ left: 10, right: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 11 }} />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    tick={{ fontSize: 11 }}
+                    width={100}
+                    tickFormatter={(v: string) => v.length > 14 ? v.slice(0, 14) + '…' : v}
+                  />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                    formatter={(value: number, name: string) => [
+                      name === 'quantity' ? `${value} pcs` : `${value.toLocaleString()}`,
+                      name === 'quantity' ? t('quantity') : t('itemRevenue'),
+                    ]}
+                  />
+                  <Bar dataKey="quantity" fill="#22c55e" radius={[0, 4, 4, 0]} barSize={14} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                {t('noData')}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Devices + Cities */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -261,25 +317,93 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
   );
 }
 
-// ─── Metric card component ────────────────────────────────────────────
-function MetricCard({
-  icon,
-  label,
-  value,
-  color,
+// ─── KPI Card with delta badge ────────────────────────────────────────
+function KpiCard({
+  icon, label, value, delta, color,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  delta?: string;
   color: string;
 }) {
+  const deltaNum = delta ? parseFloat(delta) : null;
+  const DeltaIcon = deltaNum === null ? Minus : deltaNum > 0 ? ArrowUpRight : deltaNum < 0 ? ArrowDownRight : Minus;
+  const deltaColor = deltaNum === null
+    ? 'text-muted-foreground'
+    : deltaNum > 0
+      ? 'text-emerald-600'
+      : deltaNum < 0
+        ? 'text-red-500'
+        : 'text-muted-foreground';
+
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="flex flex-col items-center p-4 gap-2">
+      <CardContent className="flex flex-col items-center p-4 gap-1.5">
         <div className={`p-3 rounded-full ${color}`}>{icon}</div>
-        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
         <span className="text-xl font-bold">{value}</span>
+        {delta !== undefined && (
+          <span className={`flex items-center gap-0.5 text-xs font-medium ${deltaColor}`}>
+            <DeltaIcon className="w-3 h-3" />
+            {delta}%
+          </span>
+        )}
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Funnel visualization ──────────────────────────────────────────────
+function FunnelChart({ funnel, t }: { funnel: FunnelStep[]; t: (key: string) => string }) {
+  const maxValue = funnel[0]?.value || 1;
+  const labels: Record<string, string> = {
+    visitors: t('funnelVisitors'),
+    views:    t('funnelViews'),
+    orders:   t('funnelOrders'),
+    revenue:  t('funnelRevenue'),
+  };
+  const funnelColors = ['#3b82f6', '#f97316', '#a855f7', '#22c55e'];
+
+  return (
+    <div className="flex flex-col gap-3">
+      {funnel.map((step, i) => {
+        const pct = maxValue > 0 ? (step.value / maxValue) * 100 : 0;
+        const stepRate = i > 0 && funnel[i - 1].value > 0
+          ? ((step.value / funnel[i - 1].value) * 100).toFixed(1)
+          : null;
+
+        return (
+          <div key={step.step} className="flex flex-col gap-1">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">{labels[step.step] || step.step}</span>
+              <span className="text-muted-foreground">
+                {step.step === 'revenue'
+                  ? step.value.toLocaleString()
+                  : step.value.toLocaleString()}
+                {stepRate && (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    ({stepRate}% {t('funnelConversion')})
+                  </span>
+                )}
+              </span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-6 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                style={{
+                  width: `${Math.max(pct, 4)}%`,
+                  backgroundColor: funnelColors[i],
+                }}
+              >
+                <span className="text-xs font-medium text-white drop-shadow-sm">
+                  {Math.round(pct)}%
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

@@ -54,6 +54,7 @@ interface CategoryOption {
 
 export default function MenuManager({ token }: { token: string }) {
   const t = useTranslations('admin.menuManager');
+  const tAdmin = useTranslations('admin');
   const tenant = useTenant();
   const { selectedBranch } = useBranch();
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -81,8 +82,8 @@ export default function MenuManager({ token }: { token: string }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { primaryLanguage, loading: settingsLoading } = useBranchSettings();
-  const SUPPORTED_LANGUAGES = ['pl', 'en', 'de', 'ru', 'es', 'ua'];
-  const availableLangs = useMemo(() => SUPPORTED_LANGUAGES.filter(lang => lang !== primaryLanguage), [primaryLanguage]);
+  const activeLocales = tenant?.activeLocales || ['pl', 'en'];
+  const availableLangs = useMemo(() => activeLocales.filter(lang => lang !== primaryLanguage), [activeLocales, primaryLanguage]);
   
   const [customCategoryIcon, setCustomCategoryIcon] = useState('');
   const [hasPersonalization, setHasPersonalization] = useState(false);
@@ -387,7 +388,7 @@ const handleSave = async (e: React.FormEvent) => {
                         required
                       />
                       <div className="space-y-2">
-                        <Label htmlFor="customCategoryIcon">Icon (emoji)</Label>
+                        <Label htmlFor="customCategoryIcon">{tAdmin('iconPlaceholder')}</Label>
                         <Input id="customCategoryIcon" placeholder="🍔" value={customCategoryIcon} onChange={(e) => setCustomCategoryIcon(e.target.value)} className="w-24 text-center text-xl" maxLength={2} />
                       </div>
                       {showSuggestions && (

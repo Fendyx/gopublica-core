@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
-import { BranchSection, HeroSettings, HeroCta, HeroTextAlign } from '@/entities/branch-section/types';
+import { BranchSection, HeroSettings, HeroCta, HeroTextAlign, HeroSlide } from '@/entities/branch-section/types';
 
 interface HeroSectionProps {
   section: BranchSection;
@@ -51,11 +51,28 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
     (s) => s.imageUrl || s.videoUrl
   ) ?? [];
 
+  // ─── Определяем, есть ли контент для отображения ───
+  const hasTitle = Boolean(translations.title);
+  const hasSubtitle = Boolean(translations.subtitle);
+  const hasPrimaryCta = Boolean(settings.primaryCta?.label);
+  const hasSecondaryCta = Boolean(settings.secondaryCta?.label);
+  const hasContent = hasTitle || hasSubtitle || hasPrimaryCta || hasSecondaryCta;
+
   // ─── Embla Carousel ───
   const autoplayDelay = settings.sliderAutoplayMs ?? 5000;
+  const pauseOnInteraction = settings.sliderPauseOnInteraction !== false; // по умолчанию true
+  const showArrows = settings.sliderShowArrows ?? false;
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: slides.length > 1 },
-    [Autoplay({ delay: autoplayDelay, stopOnInteraction: false, stopOnMouseEnter: true })]
+    [
+      Autoplay({
+        delay: autoplayDelay,
+        // Всегда false — управляем паузой вручную через arrow/swipe handlers
+        stopOnInteraction: false,
+        stopOnMouseEnter: true,
+      }),
+    ]
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -72,6 +89,47 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
       emblaApi.off('select', onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  /** Поставить autoplay на паузу при ручном взаимодействии */
+  const pauseAutoplay = useCallback(() => {
+    if (!emblaApi || !pauseOnInteraction) return;
+    try {
+      const autoplayPlugin = (emblaApi as any).plugins?.().autoplay;
+      if (autoplayPlugin && typeof autoplayPlugin.stop === 'function') {
+        autoplayPlugin.stop();
+      }
+    } catch {
+      // Autoplay plugin may not be available
+    }
+  }, [emblaApi, pauseOnInteraction]);
+
+  /** Ручное перелистывание влево */
+  const scrollPrev = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollPrev();
+    pauseAutoplay();
+  }, [emblaApi, pauseAutoplay]);
+
+  /** Ручное перелистывание вправо */
+  const scrollNext = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollNext();
+    pauseAutoplay();
+  }, [emblaApi, pauseAutoplay]);
+
+  /** Обработчик swipe — ставим autoplay на паузу */
+  const handlePointerUp = useCallback(() => {
+    pauseAutoplay();
+  }, [pauseAutoplay]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    // Слушаем событие pointerUp для обработки свайпов
+    emblaApi.on('pointerUp', handlePointerUp);
+    return () => {
+      emblaApi.off('pointerUp', handlePointerUp);
+    };
+  }, [emblaApi, handlePointerUp]);
 
   /**
    * Разрешает целевую ссылку CTA в href:
@@ -110,38 +168,46 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
     // If element not found, let the browser handle it (will do nothing or jump to top)
   };
 
-  /** Рендер одного слайда: видео или изображение */
-  const renderSlide = (slide: { imageUrl?: string; videoUrl?: string }, idx: number) => {
+  /** Рендер одного слайда: видео или изображение, опционально обёрнутое в Link */
+  const renderSlide = (slide: HeroSlide, idx: number) => {
     const isVideo = Boolean(slide.videoUrl) && !slide.imageUrl;
+    const mediaContent = isVideo ? (
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src={slide.videoUrl} type="video/mp4" />
+      </video>
+    ) : (
+      <Image
+        src={slide.imageUrl!}
+        alt={translations.title || `Slide ${idx + 1}`}
+        fill
+        sizes="100vw"
+        className="absolute inset-0 w-full h-full object-cover"
+        priority={idx === 0}
+      />
+    );
+
     return (
       <div key={idx} className="relative flex-[0_0_100%] min-w-0">
-        {isVideo ? (
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src={slide.videoUrl} type="video/mp4" />
-          </video>
+        {slide.clickableUrl ? (
+          <Link href={slide.clickableUrl} className="block absolute inset-0">
+            {mediaContent}
+          </Link>
         ) : (
-          <Image
-            src={slide.imageUrl!}
-            alt={translations.title || `Slide ${idx + 1}`}
-            fill
-            sizes="100vw"
-            className="absolute inset-0 w-full h-full object-cover"
-            priority={idx === 0}
-          />
+          mediaContent
         )}
       </div>
     );
   };
 
-  return (
-    <section className={styles.container}>
-      {/* ─── Медиа-фон ─── */}
+  /** Содержимое медиа-фона (видео / изображение / слайдер) */
+  const mediaBackground = (
+    <>
       {mediaType === 'video' && settings.videoUrl && (
         <video
           autoPlay
@@ -179,7 +245,10 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
                   key={idx}
                   type="button"
                   aria-label={`Go to slide ${idx + 1}`}
-                  onClick={() => emblaApi?.scrollTo(idx)}
+                  onClick={() => {
+                    emblaApi?.scrollTo(idx);
+                    pauseAutoplay();
+                  }}
                   className={`h-2 rounded-full transition-all ${
                     idx === selectedIndex ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/75'
                   }`}
@@ -187,9 +256,40 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
               ))}
             </div>
           )}
+
+          {/* Стрелки навигации (влево / вправо) */}
+          {showArrows && slides.length > 1 && (
+            <>
+              <button
+                type="button"
+                aria-label="Previous slide"
+                onClick={scrollPrev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                aria-label="Next slide"
+                onClick={scrollNext}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </>
+          )}
         </>
       )}
+    </>
+  );
 
+  /** Контент: заголовок + подзаголовок + CTA-кнопки */
+  const contentBlock = hasContent ? (
+    <>
       {/* Затемняющий слой поверх медиа (для читаемости текста) */}
       <div className="absolute inset-0 bg-black/40" />
 
@@ -199,45 +299,66 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
           чтобы визуально сдвинуть текст. Заголовок и подзаголовок наследуют выравнивание
           отсюда (никаких хардкодных text-center/mx-auto на них нет). */}
       <div className={`relative z-10 flex w-full max-w-4xl flex-col px-4 sm:px-6 lg:px-8 text-white ${align.box}`}>
-        {translations.title && (
+        {hasTitle && (
           <h1 className={styles.title}>{translations.title}</h1>
         )}
-        {translations.subtitle && (
+        {hasSubtitle && (
           <p className={styles.subtitle}>{translations.subtitle}</p>
         )}
 
-        <div className={`flex flex-wrap gap-4 ${align.cta}`}>
-          {settings.primaryCta && (() => {
-            const href = resolveCtaHref(settings.primaryCta) || '#';
-            return (
-              <Link
-                href={href}
-                onClick={(e) => handleCtaClick(e, href)}
-                className={`inline-block text-white font-medium transition-opacity hover:opacity-90 ${styles.cta}`}
-                style={{ backgroundColor: 'var(--color-primary)' }}
-              >
-                {settings.primaryCta.label}
-              </Link>
-            );
-          })()}
-          {settings.secondaryCta && (() => {
-            const href = resolveCtaHref(settings.secondaryCta) || '#';
-            return (
-              <Link
-                href={href}
-                onClick={(e) => handleCtaClick(e, href)}
-                className={`inline-block font-medium border-2 transition-colors hover:bg-white/10 ${styles.cta}`}
-                style={{
-                  borderColor: 'var(--color-accent)',
-                  color: 'var(--color-accent)',
-                }}
-              >
-                {settings.secondaryCta.label}
-              </Link>
-            );
-          })()}
-        </div>
+        {(hasPrimaryCta || hasSecondaryCta) && (
+          <div className={`flex flex-wrap gap-4 ${align.cta}`}>
+            {hasPrimaryCta && (() => {
+              const href = resolveCtaHref(settings.primaryCta!) || '#';
+              return (
+                <Link
+                  href={href}
+                  onClick={(e) => handleCtaClick(e, href)}
+                  className={`inline-block text-white font-medium transition-opacity hover:opacity-90 ${styles.cta}`}
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  {settings.primaryCta!.label}
+                </Link>
+              );
+            })()}
+            {hasSecondaryCta && (() => {
+              const href = resolveCtaHref(settings.secondaryCta!) || '#';
+              return (
+                <Link
+                  href={href}
+                  onClick={(e) => handleCtaClick(e, href)}
+                  className={`inline-block font-medium border-2 transition-colors hover:bg-white/10 ${styles.cta}`}
+                  style={{
+                    borderColor: 'var(--color-accent)',
+                    color: 'var(--color-accent)',
+                  }}
+                >
+                  {settings.secondaryCta!.label}
+                </Link>
+              );
+            })()}
+          </div>
+        )}
       </div>
+    </>
+  ) : null;
+
+  // ─── Кликабельный фон (image/video) ───
+  if (settings.clickableUrl && mediaType !== 'slider') {
+    return (
+      <section className={styles.container}>
+        <Link href={settings.clickableUrl} className="absolute inset-0 z-0">
+          {mediaBackground}
+        </Link>
+        {contentBlock}
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.container}>
+      {mediaBackground}
+      {contentBlock}
     </section>
   );
 }

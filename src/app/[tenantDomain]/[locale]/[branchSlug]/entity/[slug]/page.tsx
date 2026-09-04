@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { fetchBranchSectionItemBySlug } from '@/entities/branch-section/api';
 
+export const dynamic = 'force-dynamic';
+
 export default async function EntityDetailPage({
   params,
 }: {

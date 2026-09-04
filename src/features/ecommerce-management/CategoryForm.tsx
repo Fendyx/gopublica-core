@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -8,19 +9,27 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2, ImagePlus } from 'lucide-react';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
+import { useTenant } from '@/entities/tenant/TenantContext';
 
 interface CategoryFormProps {
   isOpen: boolean;
   onClose: () => void;
   editingCategory: any | null;
+  categories: any[];
   token: string;
   onSave: () => void;
 }
 
-export default function CategoryForm({ isOpen, onClose, editingCategory, token, onSave }: CategoryFormProps) {
+export default function CategoryForm({ isOpen, onClose, editingCategory, categories, token, onSave }: CategoryFormProps) {
+  const t = useTranslations('admin.categoryForm');
+  const tenant = useTenant();
+  const activeLocales = tenant?.activeLocales || ['pl', 'en'];
+  const defaultLocale = tenant?.defaultLocale || 'pl';
   const [loading, setLoading] = useState(false);
+  const [translationTab, setTranslationTab] = useState(defaultLocale);
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -32,7 +41,9 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
     productImageAspectRatio: '1/1',
     carouselAutoplay: false,
     productCardVariant: '',
-    productCardWidth: 'default'
+    productCardWidth: 'default',
+    parentCategoryKey: '' as string,
+    translations: {} as Record<string, { name?: string; description?: string }>,
   });
 
   const { openWidget, widgetReady, isWidgetOpen } = useCloudinaryUpload({
@@ -54,7 +65,9 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
         productImageAspectRatio: editingCategory.productImageAspectRatio || '1/1',
         carouselAutoplay: editingCategory.carouselAutoplay || false,
         productCardVariant: editingCategory.productCardVariant || '',
-        productCardWidth: editingCategory.productCardWidth || 'default'
+        productCardWidth: editingCategory.productCardWidth || 'default',
+        parentCategoryKey: editingCategory.parentCategoryKey || '',
+        translations: editingCategory.translations || {},
       });
     } else {
       setForm({
@@ -68,7 +81,9 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
         productImageAspectRatio: '1/1',
         carouselAutoplay: false,
         productCardVariant: '',
-        productCardWidth: 'default'
+        productCardWidth: 'default',
+        parentCategoryKey: '',
+        translations: {},
       });
     }
   }, [editingCategory, isOpen]);
@@ -103,7 +118,9 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
           productImageAspectRatio: form.productImageAspectRatio,
           carouselAutoplay: form.carouselAutoplay,
           productCardVariant: form.productCardVariant || null,
-          productCardWidth: form.productCardWidth
+          productCardWidth: form.productCardWidth,
+          parentCategoryKey: form.parentCategoryKey || null,
+          translations: form.translations,
         }),
       });
 
@@ -119,7 +136,9 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
           productImageAspectRatio: '1/1',
           carouselAutoplay: false,
           productCardVariant: '',
-          productCardWidth: 'default'
+          productCardWidth: 'default',
+          parentCategoryKey: '',
+          translations: {},
         });
         onSave();
         onClose();
@@ -156,14 +175,85 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, token, 
 
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="cat-name">Category Name</Label>
-              <Input id="cat-name" placeholder="e.g. Electronics" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-            </div>
+            {/* Translation tabs for name/description */}
+            {activeLocales.length > 1 ? (
+              <Tabs value={translationTab} onValueChange={setTranslationTab}>
+                <TabsList className="bg-muted/50">
+                  {activeLocales.map((locale) => (
+                    <TabsTrigger key={locale} value={locale} className="text-xs uppercase">
+                      {locale}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {activeLocales.map((locale) => (
+                  <TabsContent key={locale} value={locale} className="space-y-3 mt-3">
+                    <div className="space-y-2">
+                      <Label>Category Name ({locale.toUpperCase()})</Label>
+                      <Input
+                        value={locale === defaultLocale ? form.name : (form.translations[locale]?.name || '')}
+                        onChange={(e) => {
+                          if (locale === defaultLocale) {
+                            setForm({ ...form, name: e.target.value });
+                          } else {
+                            setForm({ ...form, translations: { ...form.translations, [locale]: { ...form.translations[locale], name: e.target.value } } });
+                          }
+                        }}
+                        placeholder={locale === defaultLocale ? 'e.g. Electronics' : `Translation for ${locale.toUpperCase()}`}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description ({locale.toUpperCase()})</Label>
+                      <Textarea
+                        rows={2}
+                        value={locale === defaultLocale ? form.description : (form.translations[locale]?.description || '')}
+                        onChange={(e) => {
+                          if (locale === defaultLocale) {
+                            setForm({ ...form, description: e.target.value });
+                          } else {
+                            setForm({ ...form, translations: { ...form.translations, [locale]: { ...form.translations[locale], description: e.target.value } } });
+                          }
+                        }}
+                        placeholder={locale === defaultLocale ? 'e.g. Just landed' : `Translation for ${locale.toUpperCase()}`}
+                      />
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="cat-name">Category Name</Label>
+                  <Input id="cat-name" placeholder="e.g. Electronics" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cat-description">Description</Label>
+                  <Textarea id="cat-description" placeholder="e.g. Just landed" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                </div>
+              </>
+            )}
 
+            {/* Parent category selector */}
             <div className="space-y-2">
-              <Label htmlFor="cat-description">Description</Label>
-              <Textarea id="cat-description" placeholder="e.g. Just landed" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <Label>Parent Category (optional)</Label>
+              <Select
+                value={form.parentCategoryKey || '__none__'}
+                onValueChange={(val) => setForm({ ...form, parentCategoryKey: val === '__none__' ? '' : val })}
+              >
+                <SelectTrigger><SelectValue placeholder="No parent (top-level)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">No parent (top-level)</SelectItem>
+                  {categories
+                    .filter((c: any) => !c.parentCategoryKey && c.key !== editingCategory?.key)
+                    .map((c: any) => (
+                      <SelectItem key={c.key} value={c.key}>{c.icon} {c.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              {form.parentCategoryKey && (
+                <p className="text-xs text-muted-foreground">
+                  This category will appear under: {categories.find((c: any) => c.key === form.parentCategoryKey)?.name || form.parentCategoryKey}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

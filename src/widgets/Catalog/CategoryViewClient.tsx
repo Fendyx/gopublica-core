@@ -17,12 +17,13 @@ function getCurrencySymbol(currencyCode?: string): string {
 
 interface Props {
   category: any;
+  categories: any[];
   products: MenuItem[];
   locale: string;
   tenant: any;
 }
 
-export default function CategoryViewClient({ category, products, locale, tenant }: Props) {
+export default function CategoryViewClient({ category, categories, products, locale, tenant }: Props) {
   const { branchSlug } = useParams();
   const layout = category.layout || 'grid-3';
   const globalVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
@@ -30,15 +31,41 @@ export default function CategoryViewClient({ category, products, locale, tenant 
   const currencySymbol = getCurrencySymbol(tenant.primaryCurrency);
   const productImageAspectRatio = category.productImageAspectRatio || '1/1';
 
+  // Build breadcrumb from hierarchy
+  const breadcrumbs: { key: string; name: string }[] = [];
+  let current = category;
+  while (current) {
+    breadcrumbs.unshift({ key: current.key, name: current.name });
+    if (current.parentCategoryKey) {
+      current = categories.find((c: any) => c.key === current.parentCategoryKey);
+    } else {
+      break;
+    }
+  }
+
+  // Find subcategories
+  const subcategories = categories.filter((c: any) => c.parentCategoryKey === category.key);
+
   return (
     <section className="py-10 lg:py-16 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb */}
         <div className="mb-8 text-sm text-muted-foreground">
           <Link href={`/${locale}/${branchSlug}/catalog`} className="hover:text-foreground transition-colors">
             Catalog
           </Link>
-          <span className="mx-2">/</span>
-          <span className="text-foreground">{category.name}</span>
+          {breadcrumbs.map((crumb, idx) => (
+            <span key={crumb.key}>
+              <span className="mx-2">/</span>
+              {idx < breadcrumbs.length - 1 ? (
+                <Link href={`/${locale}/${branchSlug}/catalog/${crumb.key}`} className="hover:text-foreground transition-colors">
+                  {crumb.name}
+                </Link>
+              ) : (
+                <span className="text-foreground">{crumb.name}</span>
+              )}
+            </span>
+          ))}
         </div>
 
         {category.coverImage ? (
@@ -75,6 +102,21 @@ export default function CategoryViewClient({ category, products, locale, tenant 
             <p className="text-muted-foreground mt-1">
               {products.length} {products.length === 1 ? 'item' : 'items'}
             </p>
+          </div>
+        )}
+
+        {/* Subcategory chips */}
+        {subcategories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-8">
+            {subcategories.map((sub: any) => (
+              <Link
+                key={sub.key}
+                href={`/${locale}/${branchSlug}/catalog/${sub.key}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm hover:bg-muted/50 transition-colors"
+              >
+                {sub.icon} {sub.name}
+              </Link>
+            ))}
           </div>
         )}
 

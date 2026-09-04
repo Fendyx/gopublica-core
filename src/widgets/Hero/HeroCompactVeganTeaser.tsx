@@ -30,7 +30,7 @@ export default function HeroCompactVeganTeaser() {
   // Не забудь добавить/включить этот флаг в настройках филлиала в админке!
   // Используем утверждение типа (type casting), чтобы TS не ругался
 // Замени 'Cat&Alice Vegan' на реальное название филиала из настроек
-const isVeganBranch = seoTitle === 'Cat&Alice Vegan' || seoTitleI18n?.['pl'] === 'Cat&Alice Vegan';
+const isVeganBranch = seoTitle === 'Cat&Alice Vegan' || Object.values(seoTitleI18n || {}).some(v => v === 'Cat&Alice Vegan');
 
   const videoUrl = tenant?.theme?.heroVideoUrl || ''
   const images = tenant?.theme?.heroSliderImages?.length

@@ -1,13 +1,15 @@
 'use client';
 import Image from 'next/image';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import { Heart, Share2, ChevronLeft, Truck, RotateCcw } from 'lucide-react';
+import { Heart, Share2, ChevronLeft, Truck, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import AddToCartButton from '@/widgets/Catalog/AddToCartButton';
 import ProductGallery from '@/widgets/Catalog/ProductGallery';
 import VariantSelector from '@/widgets/Catalog/VariantSelector';
+import RelatedProducts from '@/widgets/Catalog/RelatedProducts';
 import type { MenuItem } from '@/entities/menu-item/types';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 
@@ -70,10 +72,23 @@ export default function ProductDetail({
     ...(product.images ?? []),
   ];
 
+  const lowStock = stock != null && stock > 0 && stock <= 5;
+
   const priceProps = { showPrice, displayPrice, compareAtPrice, hasDiscount, discountPercent, currencySymbol };
   const variantProps = hasVariants
     ? { variants: product.variants!, selectedId: selectedVariantId, onChange: setSelectedVariantId }
     : null;
+
+  const handleShare = useCallback(async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (navigator.share) {
+      try { await navigator.share({ title: product.name, url }); } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
+  }, [product.name]);
+
+  const hasSpecs = hasAttributes(product) || hasWeightVal(product) || hasDims(product) || hasTagsList(product);
 
   return (
     <div>
@@ -104,6 +119,7 @@ export default function ProductDetail({
               </button>
               <button
                 aria-label={t('share')}
+                onClick={handleShare}
                 className="w-9 h-9 flex items-center justify-center bg-background/60 backdrop-blur-md"
               >
                 <Share2 size={16} className="text-foreground" />
@@ -139,18 +155,16 @@ export default function ProductDetail({
 
             <DeliveryRow inStock={inStock} />
 
-            {product.description && (
-              <div className="border-t border-border-light pt-6">
-                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
-                  {t('description')}
-                </p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {product.description}
-                </p>
+            {lowStock && (
+              <div className="flex items-center gap-2 text-xs text-amber-600">
+                <AlertTriangle size={14} />
+                <span className="tracking-wide">{t('stockLeft', { count: stock })}</span>
               </div>
             )}
 
-            <SpecsTable product={product} />
+            <div className="border-t border-border-light pt-4">
+              <ProductTabs product={product} hasSpecs={hasSpecs} t={t} />
+            </div>
           </div>
         </div>
       </div>
@@ -208,7 +222,10 @@ export default function ProductDetail({
                   {wishlisted ? t('inWishlist') : t('addToWishlist')}
                 </button>
                 <span className="text-border-light">|</span>
-                <button className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-150">
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-150"
+                >
                   <Share2 size={13} />
                   {t('share')}
                 </button>
@@ -231,14 +248,6 @@ export default function ProductDetail({
                 <PriceDisplay {...priceProps} />
               </div>
 
-              {product.description && (
-                <p className="text-sm leading-relaxed text-muted-foreground mb-7">
-                  {product.description}
-                </p>
-              )}
-
-              <div className="border-t border-border-light mb-7" />
-
               {variantProps && (
                 <div className="mb-7">
                   <VariantSelector {...variantProps} />
@@ -247,15 +256,27 @@ export default function ProductDetail({
 
               <AddToCartButton product={product} selectedVariant={activeVariant} />
 
+              {lowStock && (
+                <div className="flex items-center gap-2 text-xs text-amber-600 mt-4">
+                  <AlertTriangle size={14} />
+                  <span className="tracking-wide">{t('stockLeft', { count: stock })}</span>
+                </div>
+              )}
+
               <div className="mt-7 pt-6 border-t border-border-light">
                 <DeliveryRow inStock={inStock} />
               </div>
 
-              <SpecsTable product={product} />
+              <div className="mt-7">
+                <ProductTabs product={product} hasSpecs={hasSpecs} t={t} />
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Related Products */}
+      {product._id && <RelatedProducts productId={product._id} />}
     </div>
   );
 }
@@ -308,89 +329,198 @@ function PriceDisplay({
 function DeliveryRow({ inStock }: { inStock: boolean }) {
   const t = useTranslations('productDetail');
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${inStock ? 'bg-green-500' : 'bg-red-500'}`} />
-        <span className="tracking-wide">
-          {inStock ? t('inStock') : t('outOfStock')}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-        <Truck size={13} className="flex-shrink-0" />
-        <span className="tracking-wide">{t('delivery')}</span>
-      </div>
-
-      <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-        <RotateCcw size={13} className="flex-shrink-0" />
-        <span className="tracking-wide">{t('returnPolicy')}</span>
-      </div>
+    <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${inStock ? 'bg-green-500' : 'bg-red-500'}`} />
+      <span className="tracking-wide">
+        {inStock ? t('inStock') : t('outOfStock')}
+      </span>
     </div>
   );
 }
 
-function SpecsTable({ product }: { product: MenuItem }) {
-  const t = useTranslations('productDetail');
+/* ────────── Attribute helpers ────────── */
 
-  const attrs = (product.attributes ?? []).filter((a) => a.key?.trim() && a.value?.trim());
-  const hasWeight = product.weight && product.weight > 0;
-  const hasDims =
-    product.dimensions &&
-    (product.dimensions.length || product.dimensions.width || product.dimensions.height);
-  const hasTags = product.tags && product.tags.length > 0;
+function hasAttributes(product: MenuItem) {
+  return (product.attributes ?? []).some(a => a.key?.trim() && a.value?.trim());
+}
+function hasWeightVal(product: MenuItem) {
+  return product.weight != null && product.weight > 0;
+}
+function hasDims(product: MenuItem) {
+  if (!product.dimensions) return false;
+  return (
+    (product.dimensions.length ?? 0) > 0 ||
+    (product.dimensions.width ?? 0) > 0 ||
+    (product.dimensions.height ?? 0) > 0
+  );
+}
+function hasTagsList(product: MenuItem) {
+  return Boolean(product.tags && product.tags.length > 0);
+}
 
-  if (!hasWeight && !hasDims && !hasTags && attrs.length === 0) return null;
+/* ────────── Product Tabs ────────── */
+
+function ProductTabs({
+  product,
+  hasSpecs,
+  t,
+}: {
+  product: MenuItem;
+  hasSpecs: boolean;
+  t: ReturnType<typeof useTranslations<'productDetail'>>;
+}) {
+  const hasDescription = Boolean(product.description);
+  if (!hasDescription && !hasSpecs) return null;
+
+  // Single content → no tab chrome
+  if (hasDescription && !hasSpecs) {
+    return (
+      <div>
+        <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
+          {t('description')}
+        </p>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {product.description}
+        </p>
+      </div>
+    );
+  }
+
+  const defaultTab = hasDescription ? 'description' : 'specifications';
 
   return (
-    <div className="mt-6 pt-6 border-t border-border-light space-y-3">
-      <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-4">
-        {t('specifications')}
-      </p>
+    <Tabs defaultValue={defaultTab} className="w-full">
+      <TabsList className="w-full justify-start border-b border-border-light rounded-none bg-transparent p-0 gap-0">
+        {hasDescription && (
+          <TabsTrigger value="description" className="text-[10px] tracking-widest uppercase rounded-none">
+            {t('tabDescription')}
+          </TabsTrigger>
+        )}
+        {hasSpecs && (
+          <TabsTrigger value="specifications" className="text-[10px] tracking-widest uppercase rounded-none">
+            {t('tabSpecifications')}
+          </TabsTrigger>
+        )}
+        <TabsTrigger value="shipping" className="text-[10px] tracking-widest uppercase rounded-none">
+          {t('tabShipping')}
+        </TabsTrigger>
+      </TabsList>
 
-      {/* Dynamic key-value specifications (Author, ISBN, ...) */}
-      {attrs.map((attr, idx) => (
-        <div key={`${attr.key}-${idx}`} className="flex justify-between gap-4 text-xs">
-          <span className="text-muted-foreground tracking-wide">{attr.key}</span>
-          <span className="text-foreground text-right">{attr.value}</span>
-        </div>
-      ))}
-
-      {hasWeight && (
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground tracking-wide">{t('weight')}</span>
-          <span className="text-foreground">
-            {product.weight}&nbsp;{product.weightUnit || 'kg'}
-          </span>
-        </div>
+      {hasDescription && (
+        <TabsContent value="description" className="pt-4">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {product.description}
+          </p>
+        </TabsContent>
       )}
 
-      {hasDims && (
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground tracking-wide">{t('dimensions')}</span>
-          <span className="text-foreground">
-            {product.dimensions!.length}&nbsp;×&nbsp;
-            {product.dimensions!.width}&nbsp;×&nbsp;
-            {product.dimensions!.height}&nbsp;
-            {product.dimensions!.unit || 'cm'}
-          </span>
-        </div>
+      {hasSpecs && (
+        <TabsContent value="specifications" className="pt-4">
+          <SpecificationsTab product={product} t={t} />
+        </TabsContent>
       )}
 
-      {hasTags && (
-        <div className="flex justify-between items-start gap-4 text-xs">
-          <span className="text-muted-foreground tracking-wide flex-shrink-0">{t('tags')}</span>
-          <div className="flex flex-wrap gap-1 justify-end">
-            {product.tags!.map(tag => (
-              <span
-                key={tag}
-                className="border border-border px-2 py-0.5 text-[9px] tracking-widest uppercase text-muted-foreground"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+      <TabsContent value="shipping" className="pt-4">
+        <ShippingTab t={t} />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+/* ────────── Specifications table ────────── */
+
+function SpecificationsTab({
+  product,
+  t,
+}: {
+  product: MenuItem;
+  t: ReturnType<typeof useTranslations<'productDetail'>>;
+}) {
+  const attrs = (product.attributes ?? []).filter(a => a.key?.trim() && a.value?.trim());
+  const wgt = hasWeightVal(product);
+  const dims = hasDims(product);
+  const tags = hasTagsList(product);
+
+  if (!wgt && !dims && !tags && attrs.length === 0) {
+    return <p className="text-sm text-muted-foreground">{t('noSpecifications')}</p>;
+  }
+
+  // Build dimension string — only non-zero parts
+  let dimStr = '';
+  if (dims) {
+    const parts: string[] = [];
+    if ((product.dimensions!.length ?? 0) > 0) parts.push(String(product.dimensions!.length));
+    if ((product.dimensions!.width ?? 0) > 0) parts.push(String(product.dimensions!.width));
+    if ((product.dimensions!.height ?? 0) > 0) parts.push(String(product.dimensions!.height));
+    dimStr = parts.join(' \u00d7 ') + ' ' + (product.dimensions!.unit || 'cm');
+  }
+
+  return (
+    <div className="space-y-0">
+      <table className="w-full text-xs border-collapse">
+        <tbody>
+          {attrs.map((attr, idx) => (
+            <tr key={`${attr.key}-${idx}`} className={idx % 2 === 0 ? 'bg-muted/30' : ''}>
+              <td className="py-2.5 px-3 text-muted-foreground tracking-wide w-[40%]">{attr.key}</td>
+              <td className="py-2.5 px-3 text-foreground">{attr.value}</td>
+            </tr>
+          ))}
+          {wgt && (
+            <tr className={attrs.length % 2 === 0 ? 'bg-muted/30' : ''}>
+              <td className="py-2.5 px-3 text-muted-foreground tracking-wide w-[40%]">{t('weight')}</td>
+              <td className="py-2.5 px-3 text-foreground">
+                {product.weight} {product.weightUnit || 'kg'}
+              </td>
+            </tr>
+          )}
+          {dims && (
+            <tr className={(attrs.length + (wgt ? 1 : 0)) % 2 === 0 ? 'bg-muted/30' : ''}>
+              <td className="py-2.5 px-3 text-muted-foreground tracking-wide w-[40%]">{t('dimensions')}</td>
+              <td className="py-2.5 px-3 text-foreground">{dimStr}</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {tags && (
+        <div className="flex flex-wrap gap-1.5 mt-4">
+          {product.tags!.map(tag => (
+            <span
+              key={tag}
+              className="border border-border px-2.5 py-1 text-[9px] tracking-widest uppercase text-muted-foreground"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ────────── Shipping & Returns tab ────────── */
+
+function ShippingTab({
+  t,
+}: {
+  t: ReturnType<typeof useTranslations<'productDetail'>>;
+}) {
+  return (
+    <div className="space-y-4 text-xs text-muted-foreground">
+      <div className="flex items-start gap-3">
+        <Truck size={14} className="flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-foreground font-medium mb-1">{t('shippingInfo')}</p>
+          <p className="leading-relaxed">{t('estimatedDelivery')}</p>
+        </div>
+      </div>
+      <div className="flex items-start gap-3">
+        <RotateCcw size={14} className="flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-foreground font-medium mb-1">{t('returnInfo')}</p>
+          <p className="leading-relaxed">{t('returnWindow')}</p>
+        </div>
+      </div>
     </div>
   );
 }

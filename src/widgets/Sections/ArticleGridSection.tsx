@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from '@/i18n/routing';
 import useEmblaCarousel from 'embla-carousel-react';
-import AutoPlay from 'embla-carousel-autoplay';
 import { BranchSection, ArticleGridSettings } from '@/entities/branch-section/types';
 import { fetchPublicArticles } from '@/entities/article/api';
 import type { Article } from '@/entities/article/types';
@@ -199,8 +198,27 @@ function ArticleCarouselLayout({
   branchSlug: string;
   itemsPerRow: number;
 }) {
-  const plugins = [AutoPlay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })];
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' }, plugins);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' });
+
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(true);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -211,14 +229,16 @@ function ArticleCarouselLayout({
       <div className="flex justify-end gap-2 mb-4">
         <button
           onClick={scrollPrev}
-          className="p-2 rounded-full border border-border hover:bg-muted transition-colors"
+          disabled={!canScrollPrev}
+          className="p-2 rounded-full border border-border hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Previous articles"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={scrollNext}
-          className="p-2 rounded-full border border-border hover:bg-muted transition-colors"
+          disabled={!canScrollNext}
+          className="p-2 rounded-full border border-border hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Next articles"
         >
           <ChevronRight className="w-5 h-5" />

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { fetchMenu } from '@/entities/menu-item/api';
 import type { MenuItem } from '@/entities/menu-item/types';
 import { Label } from '@/components/ui/label';
@@ -52,6 +53,7 @@ export default function CarouselEntitySelector({
   tenantId,
   branchId,
 }: CarouselEntitySelectorProps) {
+  const t = useTranslations('admin.carouselSelector');
   const [items, setItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [itemsLoading, setItemsLoading] = useState(false);
@@ -126,17 +128,17 @@ export default function CarouselEntitySelector({
     <div className="space-y-4">
       {/* Selection Mode Toggle */}
       <div className="space-y-2">
-        <Label>Selection Mode</Label>
+        <Label>{t('selectionMode')}</Label>
         <Select
           value={selectionMode}
           onValueChange={(val) => onSelectionModeChange(val as 'items' | 'categories')}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select selection mode" />
+            <SelectValue placeholder={t('selectMode')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="items">Select Individual Items</SelectItem>
-            <SelectItem value="categories">Select Categories</SelectItem>
+            <SelectItem value="items">{t('selectIndividual')}</SelectItem>
+            <SelectItem value="categories">{t('selectCategories')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -144,15 +146,15 @@ export default function CarouselEntitySelector({
       {/* Items Selection */}
       {selectionMode === 'items' && (
         <div className="space-y-2">
-          <Label>Selected Items</Label>
+          <Label>{t('selectedItems')}</Label>
           {itemsLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
-              Loading items...
+              {t('loadingItems')}
             </div>
           ) : filteredItems.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No items available for the selected mode.
+              {t('noItemsMode')}
             </p>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto border rounded-md p-2">
@@ -187,15 +189,15 @@ export default function CarouselEntitySelector({
       {/* Categories Selection */}
       {selectionMode === 'categories' && (
         <div className="space-y-2">
-          <Label>Selected Categories</Label>
+          <Label>{t('selectedCategories')}</Label>
           {categoriesLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
-              Loading categories...
+              {t('loadingCategories')}
             </div>
           ) : categories.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No categories available.
+              {t('noCategories')}
             </p>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto border rounded-md p-2">
@@ -233,20 +235,20 @@ export default function CarouselEntitySelector({
             onCheckedChange={(checked) => onViewAllChange(checked === true)}
           />
           <Label htmlFor="carousel-view-all" className="cursor-pointer">
-            Show "View All" card at end of carousel
+            {t('viewAllCard')}
           </Label>
         </div>
 
         {showViewAll && (
           <div className="space-y-1">
             <Label htmlFor="carousel-view-all-label">
-              Custom Label (optional)
+              {t('customLabel')}
             </Label>
             <Input
               id="carousel-view-all-label"
               value={viewAllLabel || ''}
               onChange={(e) => onViewAllLabelChange(e.target.value)}
-              placeholder="e.g. View All Desserts"
+              placeholder={t('customLabelPlaceholder')}
             />
           </div>
         )}

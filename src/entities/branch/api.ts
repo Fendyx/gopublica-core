@@ -1,12 +1,16 @@
-import { headers } from 'next/headers'
-import { detectCityFromHeaders } from '@/shared/lib/geolocation'
-import type { Branch } from './types'
+import type { Branch, CustomPage } from './types'
+
+function getAuthHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') return {}
+  const token = localStorage.getItem('saas_token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export async function fetchBranches(tenantId: string): Promise<Branch[]> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/public/${tenantId}`,
-      { next: { tags: [`branches:${tenantId}`] } }
+      { next: { tags: [`branches:${tenantId}`] }, cache: 'no-store' }
     )
     if (!res.ok) return []
     return res.json()
@@ -25,8 +29,8 @@ export async function fetchBranchBySlug(
 ): Promise<Branch | null> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/branches/slug?tenantId=${tenantId}&slug=${slug}`,
-      { next: { tags: [`branches:${tenantId}`] }, cache: 'force-cache' }
+      `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/public/${tenantId}/slug/${slug}`,
+      { next: { tags: [`branches:${tenantId}`] }, cache: 'no-store' }
     )
     if (!res.ok) return null
     return res.json()
@@ -35,23 +39,65 @@ export async function fetchBranchBySlug(
   }
 }
 
-/**
- * Определяет branchId для SSR-запроса по IP/гео-заголовкам.
- * Повторяет логику BranchContext.detectCityByIp, но на сервере.
- * Возвращает null, если у тенанта нет филиалов вообще (старая single-branch логика).
- */
-export async function resolveBranchId(tenantId: string): Promise<string | null> {
-  const branches = await fetchBranches(tenantId)
-  if (!branches.length) return null
+// ═══════════════════════════════════════════════════════════════════════════
+// Custom Pages CRUD (Admin)
+// ═══════════════════════════════════════════════════════════════════════════
 
-  const headersList = await headers()
-  const { city } = await detectCityFromHeaders(headersList)
+export async function fetchCustomPages(branchId: string): Promise<CustomPage[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages`,
+    { headers: getAuthHeaders() }
+  )
+  if (!res.ok) throw new Error('Failed to fetch custom pages')
+  return res.json()
+}
 
-  if (city) {
-    const match = branches.find(b => b.city?.toLowerCase() === city.toLowerCase())
-    if (match) return match._id
+export async function createCustomPage(
+  branchId: string,
+  title: string
+): Promise<CustomPage> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify({ title }),
+    }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || 'Failed to create custom page')
   }
+  return res.json()
+}
 
-  // fallback — тот же, что в BranchContext: первый филиал после sort по city
-  return branches[0]._id
+export async function updateCustomPage(
+  branchId: string,
+  slug: string,
+  data: { title?: string; isActive?: boolean; slug?: string }
+): Promise<CustomPage> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages/${slug}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify(data),
+    }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || 'Failed to update custom page')
+  }
+  return res.json()
+}
+
+export async function deleteCustomPage(
+  branchId: string,
+  slug: string
+): Promise<void> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages/${slug}`,
+    { method: 'DELETE', headers: getAuthHeaders() }
+  )
+  if (!res.ok) throw new Error('Failed to delete custom page')
 }

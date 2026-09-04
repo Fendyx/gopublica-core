@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useTenant } from '@/entities/tenant/TenantContext';
@@ -8,29 +9,37 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Plus, Search, Pencil, Trash2, Loader2, Star } from 'lucide-react';
-import ProductForm from '@/features/ecommerce-management/ProductForm';
+import { Plus, Search, Trash2, Loader2, Star } from 'lucide-react';
 import CategoryForm from '@/features/ecommerce-management/CategoryForm';
 import SortableCategoryList from '@/features/ecommerce-management/SortableCategoryList';
+import AttributeManager from '@/features/ecommerce-management/AttributeManager';
 import type { MenuItem } from '@/entities/menu-item/types';
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  PLN: 'zł', EUR: '€', USD: '$', UAH: '₴', GBP: '£', CZK: 'Kč', CHF: 'CHF',
+};
+
+function getCurrencySymbol(currencyCode?: string): string {
+  return currencyCode ? CURRENCY_SYMBOLS[currencyCode] || currencyCode : 'zł';
+}
 
 const FEATURED_ID = 'featured';
 const STORAGE_KEY = (tenantId: string) => `${tenantId}_categories_order`;
 
 export default function ProductManager({ token }: { token: string }) {
   const t = useTranslations('admin.productManager');
+  const tAdmin = useTranslations('admin');
   const tenant = useTenant();
   const { selectedBranch } = useBranch();
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<MenuItem | null>(null);
   const [editingCategory, setEditingCategory] = useState<any | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const currencySymbol = getCurrencySymbol(tenant?.primaryCurrency);
 
   const fetchData = async () => {
     if (!tenant?.tenantId) return;
@@ -55,16 +64,6 @@ export default function ProductManager({ token }: { token: string }) {
   useEffect(() => {
     fetchData();
   }, [selectedBranch, tenant?.tenantId]);
-
-  const handleEditProduct = (product: MenuItem) => {
-    setEditingProduct(product);
-    setIsProductFormOpen(true);
-  };
-
-  const handleAddNewProduct = () => {
-    setEditingProduct(null);
-    setIsProductFormOpen(true);
-  };
 
   const handleDeleteProduct = async (id: string) => {
     if (!confirm(t('deleteProductConfirm'))) return;
@@ -165,6 +164,7 @@ export default function ProductManager({ token }: { token: string }) {
         <TabsList className="bg-muted/50 border border-border">
           <TabsTrigger value="products">{`${t('productsTab')} (${products.length})`}</TabsTrigger>
           <TabsTrigger value="categories">{`${t('categoriesTab')} (${categories.length})`}</TabsTrigger>
+          <TabsTrigger value="attributes">{tAdmin('attributesTab')}</TabsTrigger>
         </TabsList>
 
         {/* Products Tab */}
@@ -175,8 +175,10 @@ export default function ProductManager({ token }: { token: string }) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input placeholder={t('searchPlaceholder')} className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background" />
               </div>
-              <Button className="gap-2" onClick={handleAddNewProduct}>
-                <Plus className="w-4 h-4" /> {t('addProduct')}
+              <Button className="gap-2" asChild>
+                <Link href="/admin/ecommerce/products/new">
+                  <Plus className="w-4 h-4" /> {t('addProduct')}
+                </Link>
               </Button>
             </div>
 
@@ -216,15 +218,18 @@ export default function ProductManager({ token }: { token: string }) {
                       <TableCell className="text-muted-foreground">
                         {product.category || categories.find(c => c.key === product.categoryKey)?.name || t('uncategorized')}
                       </TableCell>
-                      <TableCell className="font-medium">${product.price.toFixed(2)}</TableCell>
+                      <TableCell className="font-medium">{currencySymbol} {product.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-muted text-muted-foreground' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
                           {(product as any).status === 'draft' ? t('draft') : t('active')}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditProduct(product)}>
-                          <Pencil className="w-4 h-4" />
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/admin/ecommerce/products/${product._id}`}>
+                            <span className="sr-only">{t('edit')}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                          </Link>
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product._id!)}>
                           <Trash2 className="w-4 h-4 text-destructive" />
@@ -262,14 +267,16 @@ export default function ProductManager({ token }: { token: string }) {
                       {product.category || categories.find(c => c.key === product.categoryKey)?.name || t('uncategorized')}
                     </p>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="font-bold text-sm">${product.price.toFixed(2)}</span>
+                      <span className="font-bold text-sm">{currencySymbol} {product.price.toFixed(2)}</span>
                       <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${(product as any).status === 'draft' ? 'bg-muted text-muted-foreground' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
                         {(product as any).status === 'draft' ? t('draft') : t('active')}
                       </span>
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
-                        <Pencil className="w-3 h-3 mr-1" /> {t('edit')}
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/admin/ecommerce/products/${product._id}`}>
+                          {t('edit')}
+                        </Link>
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product._id!)}>
                         <Trash2 className="w-3 h-3 mr-1 text-destructive" /> {t('delete')}
@@ -305,21 +312,18 @@ export default function ProductManager({ token }: { token: string }) {
             />
           </Card>
         </TabsContent>
+
+        {/* Attributes Tab */}
+        <TabsContent value="attributes" className="mt-6">
+          <AttributeManager token={token} />
+        </TabsContent>
       </Tabs>
 
-      <ProductForm 
-        isOpen={isProductFormOpen} 
-        onClose={() => setIsProductFormOpen(false)} 
-        editingProduct={editingProduct}
-        categories={categories}
-        token={token}
-        branchId={selectedBranch?._id}
-        onSave={fetchData}
-      />
       <CategoryForm 
         isOpen={isCategoryFormOpen} 
         onClose={() => setIsCategoryFormOpen(false)} 
         editingCategory={editingCategory}
+        categories={categories}
         token={token}
         onSave={fetchData}
       />

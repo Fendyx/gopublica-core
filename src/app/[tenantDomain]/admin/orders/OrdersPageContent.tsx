@@ -2,15 +2,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +21,7 @@ import { resolveDelivery } from './deliveryView';
 
 export default function OrdersPageContent() {
   const t = useTranslations('admin.ordersPage');
+  const tAdmin = useTranslations('admin');
   const { selectedBranch, loading: branchLoading } = useBranch();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,8 +216,8 @@ export default function OrdersPageContent() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Package className="w-6 h-6 text-primary" />
-            {t('title')} (E-commerce)
+            <Package className="w-6 h-6 text-[var(--admin-accent)]" />
+            {t('title')} {tAdmin('ecommerceSuffix')}
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
             {t('branchInfo', { name: selectedBranch.name, city: selectedBranch.city ? `(${selectedBranch.city})` : '' })}
@@ -234,95 +226,123 @@ export default function OrdersPageContent() {
       </div>
 
       {orders.length === 0 ? (
-        <Card className="border-dashed border-2 bg-muted/20">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <Box className="w-12 h-12 text-muted-foreground/40 mb-4" />
-            <p className="text-muted-foreground text-lg">{t('empty')}</p>
-          </CardContent>
-        </Card>
+        <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
+          <Box className="w-12 h-12 text-muted-foreground/40 mb-4" />
+          <p className="text-muted-foreground text-lg">{t('empty')}</p>
+        </div>
       ) : (
-        <Card>
-          <CardContent className="p-0 overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('table.idTime')}</TableHead>
-                  <TableHead>{t('table.customer')}</TableHead>
-                  <TableHead>{t('table.shipping')}</TableHead>
-                  <TableHead>{t('table.items')}</TableHead>
-                  <TableHead className="text-right">{t('table.total')}</TableHead>
-                  <TableHead>{t('table.status')}</TableHead>
-                  <TableHead className="text-right">{t('table.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow
-                    key={order._id}
-                    onClick={() => setSelectedOrderId(order._id)}
-                    className="group hover:bg-slate-50 cursor-pointer transition-colors"
-                  >
-                    {/* INFO COLUMN */}
-                    <TableCell className="align-top">
-                      <div className="font-mono text-xs text-primary font-semibold">#{order._id.slice(-6)}</div>
-                      <div className="text-sm font-medium mt-1">
-                        {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </div>
-                    </TableCell>
+        <>
+          {/* Desktop table */}
+          <div className="glass-card overflow-hidden hidden md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('table.idTime')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('table.customer')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('table.shipping')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('table.items')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">{t('table.total')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('table.status')}</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">{t('table.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr
+                      key={order._id}
+                      onClick={() => setSelectedOrderId(order._id)}
+                      className="border-b border-border/50 last:border-0 hover:bg-surface-hover cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3 align-top">
+                        <div className="font-mono text-xs text-[var(--admin-accent)] font-semibold">#{order._id.slice(-6)}</div>
+                        <div className="text-sm font-medium mt-1">
+                          {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <div className="font-medium flex items-center gap-2">
+                          <User className="w-3.5 h-3.5 text-muted-foreground" />
+                          {order.customer.name}
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">{order.customer.phone}</div>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        {renderShippingCell(order)}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <div className="text-sm space-y-1">
+                          {order.items.slice(0, 2).map((item, idx) => (
+                            <div key={idx} className="text-xs">
+                              <span className="font-semibold">{item.quantity}x</span> {item.name}
+                            </div>
+                          ))}
+                          {order.items.length > 2 && (
+                            <div className="text-xs text-muted-foreground italic">{t('moreItems', { count: order.items.length - 2 })}</div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 align-top text-right">
+                        <div className="font-bold text-base">
+                          {order.pricing.total.toFixed(2)} {order.pricing.currency.toUpperCase()}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        {getStatusBadge(order.status, order.confirmation.status)}
+                      </td>
+                      <td className="px-4 py-3 align-top text-right" onClick={(e) => e.stopPropagation()}>
+                        {renderActions(order)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-                    {/* CUSTOMER COLUMN */}
-                    <TableCell className="align-top">
-                      <div className="font-medium flex items-center gap-2">
-                        <User className="w-3.5 h-3.5 text-muted-foreground" />
-                        {order.customer.name}
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-1">{order.customer.phone}</div>
-                    </TableCell>
+          {/* Mobile card list */}
+          <div className="space-y-3 md:hidden">
+            {orders.map((order) => (
+              <div
+                key={order._id}
+                onClick={() => setSelectedOrderId(order._id)}
+                className="glass-card p-4 cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs text-[var(--admin-accent)] font-semibold">#{order._id.slice(-6)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  {getStatusBadge(order.status, order.confirmation.status)}
+                </div>
 
-                    {/* SHIPPING COLUMN */}
-                    <TableCell className="align-top">
-                      {renderShippingCell(order)}
-                    </TableCell>
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="font-medium text-sm">{order.customer.name}</span>
+                  <span className="text-xs text-muted-foreground">{order.customer.phone}</span>
+                </div>
 
-                    {/* ITEMS COLUMN */}
-                    <TableCell className="align-top">
-                      <div className="text-sm space-y-1">
-                        {order.items.slice(0, 2).map((item, idx) => (
-                          <div key={idx} className="text-xs text-gray-800">
-                            <span className="font-semibold">{item.quantity}x</span> {item.name}
-                          </div>
-                        ))}
-                        {order.items.length > 2 && (
-                          <div className="text-xs text-muted-foreground italic">{t('moreItems', { count: order.items.length - 2 })}</div>
-                        )}
-                      </div>
-                    </TableCell>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    {order.items.length} {order.items.length === 1 ? tAdmin('item') : tAdmin('items')}
+                  </div>
+                  <div className="font-bold">
+                    {order.pricing.total.toFixed(2)} {order.pricing.currency.toUpperCase()}
+                  </div>
+                </div>
 
-                    {/* TOTAL COLUMN */}
-                    <TableCell className="align-top text-right">
-                      <div className="font-bold text-base text-gray-900">
-                        {order.pricing.total.toFixed(2)} {order.pricing.currency.toUpperCase()}
-                      </div>
-                    </TableCell>
-
-                    {/* STATUS COLUMN */}
-                    <TableCell className="align-top">
-                      {getStatusBadge(order.status, order.confirmation.status)}
-                    </TableCell>
-
-                    {/* ACTIONS COLUMN */}
-                    <TableCell className="align-top text-right" onClick={(e) => e.stopPropagation()}>
-                      {renderActions(order)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                  {renderActions(order)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Details drawer */}

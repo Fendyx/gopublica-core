@@ -171,6 +171,7 @@ export async function fetchPublicArticles(
 
   const res = await fetch(`${API_URL}/api/public/articles?${params.toString()}`, {
     next: { tags: [`articles:${tenantId}`] },
+    cache: 'no-store',
   });
 
   if (!res.ok) throw new Error('Failed to fetch public articles');
@@ -185,6 +186,7 @@ export async function fetchPublicArticleBySlug(
   console.log('FRONTEND FETCH URL:', url);
   const res = await fetch(url, {
     next: { tags: [`articles:${tenantId}`] },
+    cache: 'no-store',
   });
 
   if (!res.ok) throw new Error('Failed to fetch article');
@@ -204,6 +206,7 @@ export async function fetchPublicEvents(
 
   const res = await fetch(`${API_URL}/api/public/events?${params.toString()}`, {
     next: { tags: [`events:${tenantId}`] },
+    cache: 'no-store',
   });
 
   if (!res.ok) throw new Error('Failed to fetch public events');
@@ -217,6 +220,7 @@ export async function fetchPublicEventBySlug(
   const url = `${API_URL}/api/public/events/${slug}?tenantId=${tenantId}`;
   const res = await fetch(url, {
     next: { tags: [`events:${tenantId}`] },
+    cache: 'no-store',
   });
 
   if (!res.ok) throw new Error('Failed to fetch event');

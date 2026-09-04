@@ -30,6 +30,7 @@ type GalleryItem = {
 
 export default function GalleryAdminPage() {
   const t = useTranslations('admin.galleryPage');
+  const tAdmin = useTranslations('admin');
   const tenant = useTenant();
   const { selectedBranch, loading: branchLoading } = useBranch();
   const [images, setImages] = useState<GalleryItem[]>([]);
@@ -151,7 +152,7 @@ export default function GalleryAdminPage() {
       <Card className="text-center py-12">
         <CardContent>
           <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">Выберите филиал в переключателе справа вверху</p>
+          <p className="text-muted-foreground">{tAdmin('selectBranchHint')}</p>
         </CardContent>
       </Card>
     );
@@ -166,7 +167,7 @@ export default function GalleryAdminPage() {
           <h2 className="text-2xl font-bold">{t('title')}</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Галерея для филиала: <strong>{selectedBranch.name}</strong>
+          {tAdmin('galleryForBranch', { name: '' })} <strong>{selectedBranch.name}</strong>
           {selectedBranch.city && ` (${selectedBranch.city})`}
         </p>
       </div>

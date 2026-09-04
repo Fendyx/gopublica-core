@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
+import { GLOBAL_LOCALES, LANGUAGE_NAMES } from '@/shared/lib/locales';
 import type { Branch } from '@/entities/branch/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,7 +52,6 @@ import {
   MousePointerClick,
   Eye,
   Image,
-  Sparkles,
   Plus,
   Trash2,
   Store,
@@ -67,8 +67,10 @@ import {
   Users,
   CalendarCheck,
   Upload,
+  ListOrdered,
 } from 'lucide-react';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
+import NavigationSettingsTab from '@/widgets/Admin/Settings/NavigationSettingsTab';
 import {
   TelegramConnectionStatus,
   TelegramNotificationSettings,
@@ -103,6 +105,8 @@ export default function SettingsPageContent() {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [primaryLanguage, setPrimaryLanguage] = useState('pl');
+  const [activeLocales, setActiveLocales] = useState<string[]>(['pl', 'en']);
+  const [defaultLocale, setDefaultLocale] = useState('pl');
   const [primaryCurrency, setPrimaryCurrency] = useState('PLN');
 
   // Оставили только радиус и вариант карточки (Каталог убран)
@@ -117,8 +121,8 @@ export default function SettingsPageContent() {
     booking: { sound: true, message: true, soundFile: '' },
   });
 
-  const SUPPORTED_LANGUAGES = ['pl', 'en', 'de', 'ru', 'es', 'ua'];
-  const availableLangs = SUPPORTED_LANGUAGES;
+  const SUPPORTED_LANGUAGES = GLOBAL_LOCALES.map((l) => l.code);
+  const availableLangs = activeLocales;
 
   const [categoryBgColor, setCategoryBgColor] = useState('');
   const [pageBgColor, setPageBgColor] = useState('');
@@ -136,8 +140,7 @@ export default function SettingsPageContent() {
     onSuccess: (url) => setFaviconUrl(url),
   });
 
-  // 👈 НОВОЕ: фича "тизер скоро открытие" для ТЕКУЩЕГО выбранного филиала
-  const [hasVeganTeaser, setHasVeganTeaser] = useState(false);
+
 
   // 👈 НОВОЕ: юридические реквизиты (Regulamin / Polityka prywatności)
   const [legal, setLegal] = useState({
@@ -202,6 +205,10 @@ export default function SettingsPageContent() {
         setWorkingHours(data.workingHours || {});
         if (data.primaryLanguage) setPrimaryLanguage(data.primaryLanguage);
         if (data.primaryCurrency) setPrimaryCurrency(data.primaryCurrency);
+        if (Array.isArray(data.activeLocales) && data.activeLocales.length > 0) {
+          setActiveLocales(data.activeLocales);
+        }
+        if (data.defaultLocale) setDefaultLocale(data.defaultLocale);
 
         setRadius(data.theme?.radius || 'lg');
         setCardVariant(data.theme?.productCardVariant || 'action-bar');
@@ -215,9 +222,6 @@ export default function SettingsPageContent() {
         // ─── Branding: подтягиваем логотип и фавикон ───────────────────────────
         setLogoUrl(data.logoUrl || '');
         setFaviconUrl(data.faviconUrl || '');
-
-        // 👈 НОВОЕ: подтягиваем features.hasVeganTeaser текущего филиала
-        setHasVeganTeaser(Boolean(data.features?.hasVeganTeaser));
 
         // 👈 НОВОЕ: подтягиваем юридические реквизиты
         setLegal({
@@ -263,7 +267,7 @@ export default function SettingsPageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedBranch) return alert('Сначала выберите филиал');
+    if (!selectedBranch) return alert(t('selectBranchFirst'));
 
     try {
       const payload = {
@@ -273,13 +277,11 @@ export default function SettingsPageContent() {
         notifications,
         primaryLanguage,
         primaryCurrency,
+        activeLocales,
+        defaultLocale,
         seoTitleI18n,
         seoDescriptionI18n,
         branchId: selectedBranch._id,
-        // 👈 НОВОЕ: сохраняем фичи филиала (уходит в branch.settingsOverride.features)
-        features: {
-          hasVeganTeaser,
-        },
         // 👈 НОВОЕ: юридические реквизиты (уходит в tenant.legal)
         legal,
         logoUrl,
@@ -426,12 +428,12 @@ export default function SettingsPageContent() {
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to create sub-venue');
+        throw new Error(errData.error || t('subVenues.createFailed'));
       }
       setNewSubName('');
       await refetchBranches();
     } catch (err: any) {
-      setSubError(err.message || 'Ошибка создания подфилии');
+      setSubError(err.message || t('subVenues.createFailed'));
     } finally {
       setCreatingSub(false);
     }
@@ -440,7 +442,7 @@ export default function SettingsPageContent() {
   // 👈 НОВОЕ: удалить (soft-delete) подфилию
   const handleDeleteSubBranch = async (branch: Branch) => {
     if (!token) return;
-    if (!confirm(`Удалить "${branch.name}"?`)) return;
+    if (!confirm(t('subVenues.deleteConfirm', { name: branch.name }))) return;
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branch._id}`, {
         method: 'DELETE',
@@ -468,7 +470,7 @@ export default function SettingsPageContent() {
           {t('branchInfo', { name: selectedBranch.name })} {selectedBranch.city && `(${selectedBranch.city})`}
           {!isMainBranch && (
             <span className="ml-2 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
-              Sub-venue
+              {t('subVenues.badge')}
             </span>
           )}
         </div>
@@ -479,15 +481,19 @@ export default function SettingsPageContent() {
         <Card>
           <CardContent className="p-6">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className={`grid w-full mb-8 ${isMainBranch ? 'grid-cols-2 sm:grid-cols-7' : 'grid-cols-2 sm:grid-cols-6'}`}>
-                <TabsTrigger value="general">General</TabsTrigger>
-                <TabsTrigger value="appearance">Appearance</TabsTrigger>
-                <TabsTrigger value="localization">Localization</TabsTrigger>
-                <TabsTrigger value="seo">SEO & Alerts</TabsTrigger>
-                <TabsTrigger value="telegram">{t('telegram.tabLabel')}</TabsTrigger>
-                <TabsTrigger value="legal">Prawne</TabsTrigger>
-                {isMainBranch && <TabsTrigger value="subvenues">Sub-venues</TabsTrigger>}
-              </TabsList>
+              {/* Scrollable tab bar — overflow-x-auto on wrapper for mobile scroll */}
+              <div className="mb-8 overflow-x-auto scrollbar-hide">
+                <TabsList className="inline-flex w-max gap-1 p-1 bg-muted/50 rounded-xl">
+                  <TabsTrigger value="general" className="px-4 py-2 text-sm">{t('tabs.general')}</TabsTrigger>
+                  <TabsTrigger value="appearance" className="px-4 py-2 text-sm">{t('tabs.appearance')}</TabsTrigger>
+                  <TabsTrigger value="localization" className="px-4 py-2 text-sm">{t('tabs.localization')}</TabsTrigger>
+                  <TabsTrigger value="seo" className="px-4 py-2 text-sm">{t('tabs.seoAndAlerts')}</TabsTrigger>
+                  <TabsTrigger value="telegram" className="px-4 py-2 text-sm">{t('telegram.tabLabel')}</TabsTrigger>
+                  <TabsTrigger value="legal" className="px-4 py-2 text-sm">{t('tabs.legal')}</TabsTrigger>
+                  {isMainBranch && <TabsTrigger value="subvenues" className="px-4 py-2 text-sm">{t('tabs.subVenues')}</TabsTrigger>}
+                  <TabsTrigger value="navigation" className="px-4 py-2 text-sm gap-1.5"><ListOrdered className="w-3.5 h-3.5" />{t('tabs.navigation')}</TabsTrigger>
+                </TabsList>
+              </div>
 
               {/* --- ВКЛАДКА 1: GENERAL --- */}
               <TabsContent value="general" className="space-y-6">
@@ -539,68 +545,46 @@ export default function SettingsPageContent() {
                   </div>
                 </div>
 
-                {/* 👈 НОВОЕ: тизер "скоро открытие" в Hero — только имеет смысл для основных филиалов,
-                    у которых есть/будет подфилия в том же здании */}
-                {isMainBranch && (
-                  <>
-                    <Separator />
-                    <div className="flex items-center justify-between bg-muted/20 p-4 rounded-xl border border-border">
-                      <div className="flex items-start gap-3">
-                        <Sparkles className="w-4 h-4 text-muted-foreground mt-0.5" />
-                        <div>
-                          <Label htmlFor="vegan-teaser" className="cursor-pointer">
-                            Показать тизер «Wkrótce otwarcie» в Hero
-                          </Label>
-                          <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                            Включает 2-й слайд на главной с анонсом подфилии (например, вегетарианского
-                            кафе в том же здании). Слайд появится только для этого филиала.
-                          </p>
-                        </div>
-                      </div>
-                      <Switch id="vegan-teaser" checked={hasVeganTeaser} onCheckedChange={setHasVeganTeaser} />
-                    </div>
-                  </>
-                )}
               </TabsContent>
 
               {/* --- ВКЛАДКА 2: APPEARANCE --- */}
               <TabsContent value="appearance" className="space-y-6">
                 {/* ─── Branding: логотип и фавикон ─────────────────────────────────── */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Branding</h3>
+                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('branding.title')}</h3>
 
                   {/* Company Logo */}
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5"><Image className="w-3.5 h-3.5 text-muted-foreground" />Company Logo</Label>
-                    <p className="text-xs text-muted-foreground">Rectangular logo with text, used in the Navbar and Footer. Recommended: 200×60px.</p>
+                    <Label className="flex items-center gap-1.5"><Image className="w-3.5 h-3.5 text-muted-foreground" />{t('branding.companyLogo')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('branding.logoDescription')}</p>
                     {logoUrl ? (
                       <div className="flex items-center gap-4">
                         <img src={logoUrl} alt="Logo preview" className="h-12 w-auto max-w-[200px] object-contain rounded border border-border bg-white p-1" />
                         <Button type="button" variant="ghost" size="sm" onClick={() => setLogoUrl('')}>
-                          <Trash2 className="w-4 h-4 mr-1" /> Remove
+                          <Trash2 className="w-4 h-4 mr-1" /> {t('common.remove')}
                         </Button>
                       </div>
                     ) : (
                       <Button type="button" variant="outline" size="sm" onClick={() => openLogoWidget()}>
-                        <Upload className="w-4 h-4 mr-2" /> Upload Logo
+                        <Upload className="w-4 h-4 mr-2" /> {t('branding.uploadLogo')}
                       </Button>
                     )}
                   </div>
 
                   {/* Favicon */}
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5"><Image className="w-3.5 h-3.5 text-muted-foreground" />Favicon</Label>
-                    <p className="text-xs text-muted-foreground">Square icon for the browser tab. Recommended: 192×192px or 32×32px.</p>
+                    <Label className="flex items-center gap-1.5"><Image className="w-3.5 h-3.5 text-muted-foreground" />{t('branding.favicon')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('branding.faviconDescription')}</p>
                     {faviconUrl ? (
                       <div className="flex items-center gap-4">
                         <img src={faviconUrl} alt="Favicon preview" className="h-8 w-8 object-contain rounded border border-border bg-white p-0.5" />
                         <Button type="button" variant="ghost" size="sm" onClick={() => setFaviconUrl('')}>
-                          <Trash2 className="w-4 h-4 mr-1" /> Remove
+                          <Trash2 className="w-4 h-4 mr-1" /> {t('common.remove')}
                         </Button>
                       </div>
                     ) : (
                       <Button type="button" variant="outline" size="sm" onClick={() => openFaviconWidget()}>
-                        <Upload className="w-4 h-4 mr-2" /> Upload Favicon
+                        <Upload className="w-4 h-4 mr-2" /> {t('branding.uploadFavicon')}
                       </Button>
                     )}
                   </div>
@@ -609,23 +593,23 @@ export default function SettingsPageContent() {
                 <Separator />
 
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">UI Style</h3>
+                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('appearance.uiStyle')}</h3>
 
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5"><Paintbrush className="w-3.5 h-3.5 text-muted-foreground" />Border Radius</Label>
+                    <Label className="flex items-center gap-1.5"><Paintbrush className="w-3.5 h-3.5 text-muted-foreground" />{t('appearance.borderRadius')}</Label>
                     <Select value={radius} onValueChange={setRadius}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">Sharp (0px)</SelectItem>
-                        <SelectItem value="sm">Subtle (4px)</SelectItem>
-                        <SelectItem value="lg">Default (10px)</SelectItem>
-                        <SelectItem value="xl">Rounded (16px)</SelectItem>
+                        <SelectItem value="none">{t('appearance.radiusSharp')}</SelectItem>
+                        <SelectItem value="sm">{t('appearance.radiusSubtle')}</SelectItem>
+                        <SelectItem value="lg">{t('appearance.radiusDefault')}</SelectItem>
+                        <SelectItem value="xl">{t('appearance.radiusRounded')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2 pt-4">
-                    <Label>Category Block Background</Label>
+                    <Label>{t('appearance.categoryBgColor')}</Label>
                     <div className="flex items-center gap-4">
                       <input
                         type="color"
@@ -634,14 +618,14 @@ export default function SettingsPageContent() {
                         className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
                       />
                       <Input
-                        placeholder="Empty = Default"
+                        placeholder={t('appearance.emptyDefault')}
                         value={categoryBgColor}
                         onChange={(e) => setCategoryBgColor(e.target.value)}
                         className="max-w-xs"
                       />
                       {categoryBgColor && (
                         <Button type="button" variant="ghost" size="sm" onClick={() => setCategoryBgColor('')}>
-                          Reset
+                          {t('common.reset')}
                         </Button>
                       )}
                     </div>
@@ -649,7 +633,7 @@ export default function SettingsPageContent() {
                   </div>
 
                   <div className="space-y-2 pt-4">
-                    <Label>Page Background</Label>
+                    <Label>{t('appearance.pageBgColor')}</Label>
                     <div className="flex items-center gap-4">
                       <input
                         type="color"
@@ -658,14 +642,14 @@ export default function SettingsPageContent() {
                         className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
                       />
                       <Input
-                        placeholder="Empty = Default"
+                        placeholder={t('appearance.emptyDefault')}
                         value={pageBgColor}
                         onChange={(e) => setPageBgColor(e.target.value)}
                         className="max-w-xs"
                       />
                       {pageBgColor && (
                         <Button type="button" variant="ghost" size="sm" onClick={() => setPageBgColor('')}>
-                          Reset
+                          {t('common.reset')}
                         </Button>
                       )}
                     </div>
@@ -678,15 +662,15 @@ export default function SettingsPageContent() {
                       <Separator />
                       {/* Выбор стиля карточки товара */}
                       <div className="space-y-2">
-                        <Label>Product Card Style</Label>
+                        <Label>{t('appearance.productCardStyle')}</Label>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {[
-                            { val: 'action-bar', label: 'Action Bar', desc: 'Button under image', icon: ShoppingBag },
-                            { val: 'overlay', label: 'Hover Overlay', desc: 'Buttons on image', icon: Eye },
-                            { val: 'minimal', label: 'Minimalist', desc: 'Only text & link', icon: MousePointerClick },
-                            { val: 'clean', label: 'Clean', desc: 'Image + name overlay', icon: Image },
-                            { val: 'hover-vertical', label: 'Vertical Overlay', desc: 'Vertical buttons', icon: Eye },
-                            { val: 'action-overlay', label: 'Action + Overlay', desc: 'Info below + overlay', icon: Eye },
+                            { val: 'action-bar', labelKey: 'actionBar', descKey: 'actionBarDesc', icon: ShoppingBag },
+                            { val: 'overlay', labelKey: 'hoverOverlay', descKey: 'hoverOverlayDesc', icon: Eye },
+                            { val: 'minimal', labelKey: 'minimalist', descKey: 'minimalistDesc', icon: MousePointerClick },
+                            { val: 'clean', labelKey: 'clean', descKey: 'cleanDesc', icon: Image },
+                            { val: 'hover-vertical', labelKey: 'verticalOverlay', descKey: 'verticalOverlayDesc', icon: Eye },
+                            { val: 'action-overlay', labelKey: 'actionOverlay', descKey: 'actionOverlayDesc', icon: Eye },
                           ].map(opt => (
                             <button
                               key={opt.val}
@@ -695,8 +679,8 @@ export default function SettingsPageContent() {
                               className={`p-4 border rounded-xl text-left transition-all ${cardVariant === opt.val ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:border-gray-300'}`}
                             >
                               <opt.icon className="w-5 h-5 mb-2 text-primary" />
-                              <div className="text-sm font-semibold text-foreground">{opt.label}</div>
-                              <div className="text-xs text-muted-foreground mt-1">{opt.desc}</div>
+                              <div className="text-sm font-semibold text-foreground">{t(`appearance.${opt.labelKey}`)}</div>
+                              <div className="text-xs text-muted-foreground mt-1">{t(`appearance.${opt.descKey}`)}</div>
                             </button>
                           ))}
                         </div>
@@ -708,18 +692,108 @@ export default function SettingsPageContent() {
 
               {/* --- ВКЛАДКА 3: LOCALIZATION --- */}
               <TabsContent value="localization" className="space-y-6">
+                {/* ─── Active Locales: which languages to show ──────────────────── */}
+                <div className="space-y-3">
+                  <div>
+                    <Label className="flex items-center gap-1.5 text-base font-semibold">
+                      <Languages className="w-4 h-4 text-muted-foreground" />
+                      {t('localization.activeLanguages')}
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('localization.activeLanguagesDesc')}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {GLOBAL_LOCALES.map((locale) => {
+                      const isActive = activeLocales.includes(locale.code);
+                      return (
+                        <button
+                          key={locale.code}
+                          type="button"
+                          onClick={() => {
+                            if (isActive) {
+                              // Prevent removing the last locale
+                              if (activeLocales.length <= 1) return;
+                              const next = activeLocales.filter((c) => c !== locale.code);
+                              setActiveLocales(next);
+                              // If default was removed, switch to the first remaining
+                              if (defaultLocale === locale.code) {
+                                setDefaultLocale(next[0]);
+                              }
+                            } else {
+                              setActiveLocales([...activeLocales, locale.code]);
+                            }
+                          }}
+                          className={`flex items-center gap-2 p-3 border rounded-lg text-left transition-all ${
+                            isActive
+                              ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20'
+                              : 'border-border hover:border-gray-300 opacity-60'
+                          }`}
+                        >
+                          <span className="text-lg">{locale.flag}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium truncate">{locale.label}</div>
+                            <div className="text-[11px] text-muted-foreground uppercase">{locale.code}</div>
+                          </div>
+                          {isActive && (
+                            <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                              <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* ─── Default Locale: fallback language ───────────────────────── */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('localization.defaultLanguage')}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('localization.defaultLanguageDesc')}
+                  </p>
+                  <Select
+                    value={defaultLocale}
+                    onValueChange={(val) => {
+                      setDefaultLocale(val);
+                      // Auto-add to active locales if not already there
+                      if (!activeLocales.includes(val)) {
+                        setActiveLocales([...activeLocales, val]);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full sm:w-64">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeLocales.map((code) => (
+                        <SelectItem key={code} value={code}>
+                          {GLOBAL_LOCALES.find((l) => l.code === code)?.label || code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                {/* ─── Legacy: Primary Language + Currency ───────────────────── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5"><Languages className="w-3.5 h-3.5 text-muted-foreground" />{t('primaryLanguage')}</Label>
+                    <Label className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                      <Languages className="w-3.5 h-3.5" />{t('localization.primaryLanguageDeprecated')}
+                    </Label>
                     <Select value={primaryLanguage} onValueChange={setPrimaryLanguage}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pl">Polski</SelectItem>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="de">Deutsch</SelectItem>
-                        <SelectItem value="ru">Русский</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                        <SelectItem value="ua">Українська</SelectItem>
+                        {GLOBAL_LOCALES.map((locale) => (
+                          <SelectItem key={locale.code} value={locale.code}>{locale.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -738,7 +812,6 @@ export default function SettingsPageContent() {
                     </Select>
                   </div>
                 </div>
-                {/* Полностью убрали Accordion с переводами часов */}
               </TabsContent>
 
               {/* --- ВКЛАДКА 4: SEO & ALERTS --- */}
@@ -1010,23 +1083,22 @@ export default function SettingsPageContent() {
               <TabsContent value="legal" className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">
-                    Dane rejestrowe
+                    {t('legal.title')}
                   </h3>
                   <p className="text-xs text-muted-foreground max-w-lg">
-                    Pola te są wstawiane automatycznie do strony Regulaminu i Polityki prywatności.
-                    Pozostaw puste, jeśli nie dotyczy.
+                    {t('legal.description')}
                   </p>
 
                   <div className="space-y-2">
                     <Label htmlFor="legalCompanyName" className="flex items-center gap-1.5">
                       <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
-                      Nazwa firmy (wymagana w regulaminie)
+                      {t('legal.companyName')}
                     </Label>
                     <Input
                       id="legalCompanyName"
                       value={legal.legalCompanyName}
                       onChange={e => setLegal(prev => ({ ...prev, legalCompanyName: e.target.value }))}
-                      placeholder="np. Kawiarnia Kocia"
+                      placeholder={t('legal.companyNamePlaceholder')}
                     />
                   </div>
 
@@ -1034,25 +1106,25 @@ export default function SettingsPageContent() {
                     <div className="space-y-2">
                       <Label htmlFor="nip" className="flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                        NIP
+                        {t('legal.nip')}
                       </Label>
                       <Input
                         id="nip"
                         value={legal.nip}
                         onChange={e => setLegal(prev => ({ ...prev, nip: e.target.value }))}
-                        placeholder="np. 1234567890"
+                        placeholder={t('legal.nipPlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="regon" className="flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                        REGON
+                        {t('legal.regon')}
                       </Label>
                       <Input
                         id="regon"
                         value={legal.regon}
                         onChange={e => setLegal(prev => ({ ...prev, regon: e.target.value }))}
-                        placeholder="np. 12345678901234"
+                        placeholder={t('legal.regonPlaceholder')}
                       />
                     </div>
                   </div>
@@ -1060,13 +1132,13 @@ export default function SettingsPageContent() {
                   <div className="space-y-2">
                     <Label htmlFor="krs" className="flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                      KRS
+                      {t('legal.krs')}
                     </Label>
                     <Input
                       id="krs"
                       value={legal.krs}
                       onChange={e => setLegal(prev => ({ ...prev, krs: e.target.value }))}
-                      placeholder="np. 0000123456"
+                      placeholder={t('legal.krsPlaceholder')}
                     />
                   </div>
                 </div>
@@ -1078,12 +1150,10 @@ export default function SettingsPageContent() {
                   <div className="space-y-2">
                     <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
                       <Store className="w-3.5 h-3.5" />
-                      Sub-venues в этом здании
+                      {t('subVenues.title')}
                     </h3>
                     <p className="text-xs text-muted-foreground max-w-lg">
-                      Подфилия — отдельное заведение в том же здании (например, веганское кафе в подвале
-                      той же основной точки). У подфилии своё меню и настройки, но общий адрес/город
-                      с родительским филиалом.
+                      {t('subVenues.description')}
                     </p>
                   </div>
 
@@ -1114,10 +1184,10 @@ export default function SettingsPageContent() {
 
                   <div className="flex items-end gap-3 bg-muted/20 p-4 rounded-xl border border-border">
                     <div className="flex-1 space-y-1.5">
-                      <Label htmlFor="new-sub-name">Название подфилии</Label>
+                      <Label htmlFor="new-sub-name">{t('subVenues.nameLabel')}</Label>
                       <Input
                         id="new-sub-name"
-                        placeholder="Kawiarnia wegańska"
+                        placeholder={t('subVenues.namePlaceholder')}
                         value={newSubName}
                         onChange={e => setNewSubName(e.target.value)}
                       />
@@ -1129,17 +1199,21 @@ export default function SettingsPageContent() {
                       className="gap-2"
                     >
                       <Plus className="w-4 h-4" />
-                      Добавить
+                      {t('subVenues.addButton')}
                     </Button>
                   </div>
                   {subError && <p className="text-xs text-destructive">{subError}</p>}
 
                   <p className="text-xs text-muted-foreground">
-                    После создания подфилии выберите её в переключателе филиалов вверху, чтобы настроить
-                    её собственное меню, часы работы и SEO — независимо от основного филиала.
+                    {t('subVenues.hint')}
                   </p>
                 </TabsContent>
               )}
+
+              {/* --- ВКЛАДКА: NAVIGATION --- */}
+              <TabsContent value="navigation" className="space-y-6">
+                <NavigationSettingsTab />
+              </TabsContent>
 
             </Tabs>
           </CardContent>
