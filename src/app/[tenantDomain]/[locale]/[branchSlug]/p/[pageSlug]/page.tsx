@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { fetchBranchBySlug } from '@/entities/branch/api';
 import { fetchPublicBranchSections } from '@/entities/branch-section/api';
+import type { BranchSection } from '@/entities/branch-section/types';
 import SectionRenderer from '@/widgets/Sections/SectionRenderer';
 import { resolveDynamicItems } from '@/widgets/Sections/resolveDynamicItems';
 import type { Branch } from '@/entities/branch/types';
@@ -67,7 +68,7 @@ export default async function CustomPage({
   if (!hasCustomPageInBranch) {
     // Fallback: probe the sections endpoint to see if any sections exist for this page.
     // This handles the case where branch.customPages may not be populated yet.
-    let probeSections: any[] = [];
+    let probeSections: BranchSection[] = [];
     try {
       probeSections = await fetchPublicBranchSections(tenant.tenantId, branchId, pageSlug);
     } catch { /* ignore */ }
@@ -77,7 +78,7 @@ export default async function CustomPage({
   }
 
   // Fetch sections for this custom page
-  let sections = [];
+  let sections: BranchSection[] = [];
   try {
     sections = await fetchPublicBranchSections(tenant.tenantId, branchId, pageSlug);
   } catch (err) {
