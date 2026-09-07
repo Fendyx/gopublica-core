@@ -64,7 +64,7 @@ export function AdminBranchSwitcher() {
               onClick={() => {
                 setBranch(branch);
                 setIsOpen(false);
-                // Stay in the admin panel — just refresh the current route
+                // Stay in the admin panel - just refresh the current route
                 // so data refetches for the newly selected branch.
                 router.refresh();
               }}

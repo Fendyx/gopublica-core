@@ -10,7 +10,7 @@ interface RichTextSectionProps {
 }
 
 /**
- * RichTextSection — renders TipTap-authored HTML content with proper
+ * RichTextSection - renders TipTap-authored HTML content with proper
  * typography styling. Supports multi-language via translations and
  * per-locale content in settings.contentI18n.
  */

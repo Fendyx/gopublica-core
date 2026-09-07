@@ -26,7 +26,7 @@ interface LoadedHistory {
   orders: CustomerOrder[];
 }
 
-/** Muted uppercase section label — the only "header" a section gets (same as OrderDetailsSheet). */
+/** Muted uppercase section label - the only "header" a section gets (same as OrderDetailsSheet). */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -64,7 +64,7 @@ export default function CustomerDetailsSheet({ customer, onClose }: CustomerDeta
 
   if (!customer) return null;
 
-  // Backend may omit stats for freshly registered customers — normalize once.
+  // Backend may omit stats for freshly registered customers - normalize once.
   const totalSpent = customer.totalSpent || 0;
   const orderCount = customer.orderCount || 0;
 

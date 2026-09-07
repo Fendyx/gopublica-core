@@ -57,7 +57,7 @@ export default function MapEmbed({
         }}
       />
 
-      {/* Top vignette — softens the cut */}
+      {/* Top vignette - softens the cut */}
       <div
         aria-hidden
         className="absolute inset-x-0 top-0 h-28 pointer-events-none z-10"
@@ -66,7 +66,7 @@ export default function MapEmbed({
         }}
       />
 
-      {/* Bottom vignette — floats the address card */}
+      {/* Bottom vignette - floats the address card */}
       <div
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-40 pointer-events-none z-10"
@@ -75,7 +75,7 @@ export default function MapEmbed({
         }}
       />
 
-      {/* Get Directions pill — top right */}
+      {/* Get Directions pill - top right */}
       {showDirections && (
         <a
           href={mapsUrl}
@@ -88,7 +88,7 @@ export default function MapEmbed({
         </a>
       )}
 
-      {/* Floating address badge — bottom left */}
+      {/* Floating address badge - bottom left */}
       {showAddressBadge && address && (
         <div className="absolute bottom-5 left-4 right-4 z-20 flex items-center gap-3 pointer-events-none">
           {/* Pin dot */}

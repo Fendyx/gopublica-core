@@ -133,7 +133,7 @@ export default function CustomersPageContent() {
                       {customer.lastOrderAt ? (
                         new Date(customer.lastOrderAt).toLocaleDateString()
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
 

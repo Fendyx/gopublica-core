@@ -60,7 +60,7 @@ export default async function CustomPage({
 
   // Verify that the requested pageSlug is an active custom page on this branch.
   // If we have the full branch object, check the embedded customPages array.
-  // Otherwise, try fetching sections directly — if sections exist, the page is valid.
+  // Otherwise, try fetching sections directly - if sections exist, the page is valid.
   const hasCustomPageInBranch = branch?.customPages?.some(
     (cp) => cp.slug === pageSlug && cp.isActive
   );

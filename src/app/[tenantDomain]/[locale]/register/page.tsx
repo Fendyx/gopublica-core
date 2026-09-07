@@ -53,7 +53,7 @@ export default function RegisterPage() {
         // Если бекенд сразу возвращает токен при регистрации - сохраняем и редиректим
         if (data.token) {
           localStorage.setItem('customer_token', data.token);
-          // Профиль теперь тенант-уровня — ведём всегда туда
+          // Профиль теперь тенант-уровня - ведём всегда туда
           router.push(`/${locale}/profile`);
         } else {
           // Если нужно сначала залогиниться - кидаем на страницу логина

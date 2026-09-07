@@ -111,9 +111,9 @@ export default function BranchesPage() {
                 {localBranches.map((branch) => (
                   <TableRow key={branch._id}>
                     <TableCell className="font-medium">{branch.name}</TableCell>
-                    <TableCell>{branch.city || '—'}</TableCell>
-                    <TableCell>{branch.address || '—'}</TableCell>
-                    <TableCell>{branch.phone || '—'}</TableCell>
+                    <TableCell>{branch.city || '-'}</TableCell>
+                    <TableCell>{branch.address || '-'}</TableCell>
+                    <TableCell>{branch.phone || '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button

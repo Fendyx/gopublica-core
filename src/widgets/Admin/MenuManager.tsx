@@ -98,7 +98,7 @@ export default function MenuManager({ token }: { token: string }) {
       if (selectedBranch) url += `&branchId=${selectedBranch._id}`;
       const res = await fetch(url);
       const data = await res.json();
-      // Filter out e-commerce products — admin menu section should only show food/service items
+      // Filter out e-commerce products - admin menu section should only show food/service items
       const menuItems = Array.isArray(data)
         ? data.filter((item: MenuItem) => item.productType !== 'physical_product')
         : [];

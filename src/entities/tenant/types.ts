@@ -30,7 +30,8 @@ export type Features = {
   hasClickCollect: boolean
   hasGallery: boolean
   hasOnlineOrdering: boolean
-  hasJobApplications?: boolean;
+  hasJobApplications?: boolean
+  showCategoryNav?: boolean
 }
 
 export type ModuleAccessState = {
@@ -66,7 +67,7 @@ export type Seo = {
 export type Niche = 'food' | 'beauty' | 'ecommerce' | 'auto';
 
 // Logistics / Furgonetka integration config exposed to the frontend
-// NOTE: clientId, clientSecret, and tokens are server-only — never sent to the client.
+// NOTE: clientId, clientSecret, and tokens are server-only - never sent to the client.
 export type LogisticsConfig = {
   enabled: boolean
   provider: 'furgonetka' | 'none'

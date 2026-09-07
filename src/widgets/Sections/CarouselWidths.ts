@@ -1,7 +1,7 @@
 /**
  * Static lookup maps for carousel card widths on desktop.
  *
- * IMPORTANT — Tailwind purge safety:
+ * IMPORTANT - Tailwind purge safety:
  * Tailwind v4 only emits classes it can statically see as string literals in
  * source. Building a class at runtime via concatenation (e.g. `'md:w-[' + n + '%]'`)
  * would be stripped at build time. These maps keep every literal class string in

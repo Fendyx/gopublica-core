@@ -401,8 +401,8 @@
         "instructions": {
           "title": "How to connect",
           "step1": "Click \"Connect Telegram\" button",
-          "step2": "Telegram will open — click \"Start\" in the chat",
-          "step3": "Return here — connection will be confirmed automatically"
+          "step2": "Telegram will open - click \"Start\" in the chat",
+          "step3": "Return here - connection will be confirmed automatically"
         },
         "errors": {
           "connectFailed": "Failed to initiate Telegram connection",
@@ -466,7 +466,9 @@
         "verticalOverlay": "Vertical Overlay",
         "verticalOverlayDesc": "Vertical buttons",
         "actionOverlay": "Action + Overlay",
-        "actionOverlayDesc": "Info below + overlay"
+        "actionOverlayDesc": "Info below + overlay",
+        "showCategoryNav": "Category Navigation Sidebar",
+        "showCategoryNavDesc": "Show a sticky sidebar with all product categories on the catalog page"
       },
       "localization": {
         "activeLanguages": "Active Languages",
@@ -493,7 +495,7 @@
         "nameLabel": "Sub-venue name",
         "namePlaceholder": "e.g. Vegan Café",
         "addButton": "Add",
-        "hint": "After creating a sub-venue, select it in the branch switcher at the top to configure its own menu, working hours, and SEO — independently from the main branch.",
+        "hint": "After creating a sub-venue, select it in the branch switcher at the top to configure its own menu, working hours, and SEO - independently from the main branch.",
         "badge": "Sub-venue",
         "deleteConfirm": "Delete \"{name}\"?",
         "createFailed": "Failed to create sub-venue"
@@ -612,7 +614,7 @@
       "templatePreset": "Template / Preset",
       "choosePreset": "Choose a preset to get started quickly…",
       "presetClassic": "Title, subtitle and CTA buttons over background",
-      "presetBanner": "Simple banner link — clickable image without buttons",
+      "presetBanner": "Simple banner link - clickable image without buttons",
       "presetGallery": "Gallery slider with autoplay and navigation arrows",
       "mediaType": "Media Type",
       "selectMediaType": "Select media type",
@@ -642,7 +644,7 @@
       "moveUp": "Move up",
       "moveDown": "Move down",
       "removeSlide": "Remove slide",
-      "slideLinkPlaceholder": "Slide link URL (optional) — click goes to this link",
+      "slideLinkPlaceholder": "Slide link URL (optional) - click goes to this link",
       "addSlides": "+ Add Slides (multi-upload)",
       "primaryCtaLabel": "Primary CTA Label",
       "secondaryCtaLabel": "Secondary CTA Label",
@@ -1065,7 +1067,7 @@
       "dynamicForm": "Dynamic Form",
       "dynamicFormDescription": "Custom form (partner requests, contact, etc.)",
       "richText": "Rich Text",
-      "richTextDescription": "Formatted text block with rich typography — bold, lists, links, headings, etc.",
+      "richTextDescription": "Formatted text block with rich typography - bold, lists, links, headings, etc.",
       "selectType": "Select Section Type"
     },
     "sectionItems": {
@@ -1316,6 +1318,7 @@
     "booking": "Book a table",
     "login": "Login",
     "profile": "Profile",
+    "cart": "Cart",
     "partners": "Partners",
     "articles": "Articles",
     "more": "More"
@@ -1478,7 +1481,7 @@
       "date": "Date:",
       "estimatedCost": "Estimated cost:",
       "selectedDate": "Selected date",
-      "selectedDatePlaceholder": "—",
+      "selectedDatePlaceholder": "-",
       "selectedServices": "Selected services",
       "total": "Total: {totalPrice} {currency}",
       "servicesCount": "{count} services · {totalPrice} {currency}",
@@ -1571,5 +1574,14 @@
     "requiredError": "You must accept the Terms of Service and Privacy Policy to continue",
     "termsLabel": "Terms of Service",
     "privacyLabel": "Privacy Policy"
+  },
+  "cart": {
+    "emptyTitle": "Your cart is empty",
+    "emptyDescription": "Add items from the menu to get started",
+    "browseMenu": "Browse menu",
+    "subtotal": "Subtotal",
+    "totalItems": "{count, plural, =0 {No items} one {# item} other {# items}}",
+    "proceedToCheckout": "Proceed to Checkout",
+    "continueShopping": "Continue shopping"
   }
 }

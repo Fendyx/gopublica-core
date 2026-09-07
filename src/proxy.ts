@@ -17,14 +17,14 @@ export default function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // /admin/* — без локали, просто добавляем tenant
+  // /admin/* - без локали, просто добавляем tenant
   if (pathname.startsWith('/admin')) {
     const url = req.nextUrl.clone();
     url.pathname = `/${hostname}${pathname}`;
     return NextResponse.rewrite(url);
   }
 
-  // Остальное — через next-intl (он сделает / -> /pl и т.д.)
+  // Остальное - через next-intl (он сделает / -> /pl и т.д.)
   let response = handleI18nRouting(req);
 
   // response.ok = true только для 200-299 (т.е. не redirect и не ошибка)

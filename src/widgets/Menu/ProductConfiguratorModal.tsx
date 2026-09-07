@@ -275,7 +275,7 @@ export default function ProductConfiguratorModal({ item, isOpen, onClose, curren
         {/* Прибитый футер */}
         <DialogFooter className="px-6 py-4 bg-background border-t border-border flex-row items-center justify-between gap-4 shrink-0">
 
-          {/* Счётчик количества — строгий, без pill-фона */}
+          {/* Счётчик количества - строгий, без pill-фона */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}

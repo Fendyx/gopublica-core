@@ -112,6 +112,7 @@ export default function SettingsPageContent() {
   // Оставили только радиус и вариант карточки (Каталог убран)
   const [radius, setRadius] = useState('lg');
   const [cardVariant, setCardVariant] = useState('action-bar');
+  const [showCategoryNav, setShowCategoryNav] = useState(false);
 
   // Убрали hoursI18n
   const [seoTitleI18n, setSeoTitleI18n] = useState<Record<string, string>>({});
@@ -150,7 +151,7 @@ export default function SettingsPageContent() {
     krs: '',
   });
 
-  // 👈 НОВОЕ: Telegram Notifications — connection status and preferences
+  // 👈 НОВОЕ: Telegram Notifications - connection status and preferences
   const [telegramStatus, setTelegramStatus] = useState<TelegramConnectionStatus>({ linked: false });
   const [telegramLoading, setTelegramLoading] = useState(false);
   const [telegramSettings, setTelegramSettings] = useState<TelegramNotificationSettings>({
@@ -169,7 +170,7 @@ export default function SettingsPageContent() {
   const [pollingActive, setPollingActive] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 👈 НОВОЕ: подфилии (sub-venues) — только для основных филиалов (без parentBranchId)
+  // 👈 НОВОЕ: подфилии (sub-venues) - только для основных филиалов (без parentBranchId)
   const isMainBranch = !!selectedBranch && !selectedBranch.parentBranchId;
   const subBranches = branches.filter(b => selectedBranch && b.parentBranchId === selectedBranch._id);
   const [newSubName, setNewSubName] = useState('');
@@ -212,6 +213,7 @@ export default function SettingsPageContent() {
 
         setRadius(data.theme?.radius || 'lg');
         setCardVariant(data.theme?.productCardVariant || 'action-bar');
+        setShowCategoryNav(data.features?.showCategoryNav ?? false);
 
         setSeoTitleI18n(data.seoTitleI18n || {});
         setSeoDescriptionI18n(data.seoDescriptionI18n || {});
@@ -291,6 +293,9 @@ export default function SettingsPageContent() {
           productCardVariant: cardVariant,
           categoryBgColor,
           pageBgColor,
+        },
+        features: {
+          showCategoryNav,
         },
       };
 
@@ -481,7 +486,7 @@ export default function SettingsPageContent() {
         <Card>
           <CardContent className="p-6">
             <Tabs defaultValue="general" className="w-full">
-              {/* Scrollable tab bar — overflow-x-auto on wrapper for mobile scroll */}
+              {/* Scrollable tab bar - overflow-x-auto on wrapper for mobile scroll */}
               <div className="mb-8 overflow-x-auto scrollbar-hide">
                 <TabsList className="inline-flex w-max gap-1 p-1 bg-muted/50 rounded-xl">
                   <TabsTrigger value="general" className="px-4 py-2 text-sm">{t('tabs.general')}</TabsTrigger>
@@ -684,6 +689,24 @@ export default function SettingsPageContent() {
                             </button>
                           ))}
                         </div>
+                      </div>
+
+                      {/* Category Navigation Sidebar Toggle */}
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <ListOrdered className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{t('appearance.showCategoryNav')}</p>
+                            <p className="text-xs text-muted-foreground">{t('appearance.showCategoryNavDesc')}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={showCategoryNav}
+                          onCheckedChange={setShowCategoryNav}
+                          disabled={settingsSaving}
+                        />
                       </div>
                     </div>
                   )}
@@ -957,7 +980,7 @@ export default function SettingsPageContent() {
                       <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin text-primary" />
                         <p className="text-sm text-primary">
-                          {t('telegram.status.connecting')} — {t('telegram.instructions.step2')}
+                          {t('telegram.status.connecting')} - {t('telegram.instructions.step2')}
                         </p>
                       </div>
                     )}

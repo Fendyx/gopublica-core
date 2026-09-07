@@ -100,6 +100,7 @@ export function normalizeTenantData(data: any, fallbackTenantId: string): SiteCo
       hasGallery: data.features?.hasGallery ?? canManageGallery ?? true,
       hasOnlineOrdering: data.features?.hasOnlineOrdering ?? canManageOrders ?? false,
       hasJobApplications: data.features?.hasJobApplications ?? canManageJobs ?? false,
+      showCategoryNav: data.features?.showCategoryNav ?? false,
     },
     contact: {
       phone: data.phone ?? '',

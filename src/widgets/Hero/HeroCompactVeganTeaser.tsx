@@ -142,7 +142,7 @@ const isVeganBranch = seoTitle === 'Cat&Alice Vegan' || Object.values(seoTitleI1
           Kawiarnia wegańska
         </h2>
         <p className="text-sm lg:text-base text-neutral-200 mb-5 max-w-md drop-shadow-sm">
-          Nowe miejsce w podziemiach — już wkrótce zapraszamy na roślinne dania i świetną kawę.
+          Nowe miejsce w podziemiach - już wkrótce zapraszamy na roślinne dania i świetną kawę.
         </p>
         <span
           aria-disabled="true"

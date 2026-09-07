@@ -9,7 +9,7 @@ export default function CustomersPage() {
   const router = useRouter();
   const tenant = useTenant();
   const t = useTranslations('admin.customersPage');
-  // Same gating as the Orders page — CRM data derives from orders.
+  // Same gating as the Orders page - CRM data derives from orders.
   const canAccessCustomers = tenant?.canManageOrders ?? tenant?.moduleAccess?.orders?.canManage ?? false;
 
   useEffect(() => {

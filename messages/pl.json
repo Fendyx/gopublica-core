@@ -401,8 +401,8 @@
         "instructions": {
           "title": "Jak połączyć",
           "step1": "Kliknij przycisk \"Połącz z Telegram\"",
-          "step2": "Otworzy się Telegram — kliknij \"Start\" w czacie",
-          "step3": "Wróć tutaj — połączenie zostanie potwierdzone automatycznie"
+          "step2": "Otworzy się Telegram - kliknij \"Start\" w czacie",
+          "step3": "Wróć tutaj - połączenie zostanie potwierdzone automatycznie"
         },
         "errors": {
           "connectFailed": "Nie udało się zainicjować połączenia z Telegram",
@@ -466,7 +466,9 @@
         "verticalOverlay": "Nakładka pionowa",
         "verticalOverlayDesc": "Pionowe przyciski",
         "actionOverlay": "Akcja + Nakładka",
-        "actionOverlayDesc": "Info poniżej + nakładka"
+        "actionOverlayDesc": "Info poniżej + nakładka",
+        "showCategoryNav": "Pasek nawigacji kategorii",
+        "showCategoryNavDesc": "Pokaż przyległy pasek boczny ze wszystkimi kategoriami produktów na stronie katalogu"
       },
       "localization": {
         "activeLanguages": "Aktywne języki",
@@ -493,7 +495,7 @@
         "nameLabel": "Nazwa podfilii",
         "namePlaceholder": "np. Kawiarnia wegańska",
         "addButton": "Dodaj",
-        "hint": "Po utworzeniu podfilii wybierz ją w przełączniku filii u góry, aby skonfigurować jej menu, godziny pracy i SEO — niezależnie od filii głównej.",
+        "hint": "Po utworzeniu podfilii wybierz ją w przełączniku filii u góry, aby skonfigurować jej menu, godziny pracy i SEO - niezależnie od filii głównej.",
         "badge": "Podfilia",
         "deleteConfirm": "Usunąć \"{name}\"?",
         "createFailed": "Nie udało się utworzyć podfilii"
@@ -612,7 +614,7 @@
       "templatePreset": "Szablon / Preset",
       "choosePreset": "Wybierz preset, aby szybko rozpocząć…",
       "presetClassic": "Tytuł, podtytuł i przyciski CTA na tle",
-      "presetBanner": "Prosty baner-link — klikalny obraz bez przycisków",
+      "presetBanner": "Prosty baner-link - klikalny obraz bez przycisków",
       "presetGallery": "Suwak-galeria z autoodtwarzaniem i strzałkami nawigacji",
       "mediaType": "Typ mediów",
       "selectMediaType": "Wybierz typ mediów",
@@ -642,7 +644,7 @@
       "moveUp": "Przesuń w górę",
       "moveDown": "Przesuń w dół",
       "removeSlide": "Usuń slajd",
-      "slideLinkPlaceholder": "URL linku slajdu (opcjonalnie) — kliknięcie prowadzi do tego linku",
+      "slideLinkPlaceholder": "URL linku slajdu (opcjonalnie) - kliknięcie prowadzi do tego linku",
       "addSlides": "+ Dodaj slajdy (wiele naraz)",
       "primaryCtaLabel": "Etykieta głównego CTA",
       "secondaryCtaLabel": "Etykieta wtórnego CTA",
@@ -1030,7 +1032,7 @@
       "dynamicForm": "Formularz dynamiczny",
       "dynamicFormDescription": "Niestandardowy formularz (zapytania partnerów, kontakt itp.)",
       "richText": "Tekst sformatowany",
-      "richTextDescription": "Blok tekstu z bogatą typografią — pogrubienie, listy, linki, nagłówki itp.",
+      "richTextDescription": "Blok tekstu z bogatą typografią - pogrubienie, listy, linki, nagłówki itp.",
       "selectType": "Wybierz typ sekcji"
     },
     "sectionItems": {
@@ -1281,6 +1283,7 @@
     "booking": "Zarezerwuj stolik",
     "login": "Zaloguj się",
     "profile": "Profil",
+    "cart": "Koszyk",
     "partners": "Partnerzy",
     "articles": "Artykuły",
     "more": "Więcej"
@@ -1443,7 +1446,7 @@
       "date": "Data:",
       "estimatedCost": "Szacowany koszt:",
       "selectedDate": "Wybrana data",
-      "selectedDatePlaceholder": "—",
+      "selectedDatePlaceholder": "-",
       "selectedServices": "Wybrane usługi",
       "total": "Razem: {totalPrice} {currency}",
       "servicesCount": "{count} usług · {totalPrice} {currency}",
@@ -1536,5 +1539,14 @@
     "requiredError": "Musisz zaakceptować Regulamin i Politykę Prywatności, aby kontynuować",
     "termsLabel": "Regulamin",
     "privacyLabel": "Polityka Prywatności"
+  },
+  "cart": {
+    "emptyTitle": "Twój koszyk jest pusty",
+    "emptyDescription": "Dodaj produkty z menu, aby rozpocząć",
+    "browseMenu": "Przeglądaj menu",
+    "subtotal": "Suma częściowa",
+    "totalItems": "{count, plural, =0 {Brak artykułów} one {# artykuł} few {# artykuły} many {# artykułów} other {# artykułów}}",
+    "proceedToCheckout": "Przejdź do realizacji zamówienia",
+    "continueShopping": "Kontynuuj zakupy"
   }
 }

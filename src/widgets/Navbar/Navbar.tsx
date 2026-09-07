@@ -7,7 +7,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
 import ThemeToggle from '@/shared/ui/ThemeToggle'
-import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart, User, LogIn } from 'lucide-react'
+import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart, User, LogIn, BookOpen } from 'lucide-react'
+import { useCategoryNav } from '@/shared/ui/CategoryNavContext'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useCartStore } from '@/shared/store/cartStore'
 import { getNavLinks } from '@/shared/lib/navigation'
@@ -37,8 +38,10 @@ export default function Navbar() {
   } = useBranch()
 
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false)
+  const { setMobileDrawerOpen } = useCategoryNav()
 
   const cartItemsCount = useCartStore((s) => s.items.reduce((acc, item) => acc + item.quantity, 0))
+  const openCart = useCartStore((s) => s.openCart)
   const hasOnlineOrdering = tenant?.features?.hasOnlineOrdering ?? false
 
   useEffect(() => {
@@ -130,7 +133,7 @@ export default function Navbar() {
                 >
                   <MapPin size={16} className="text-primary shrink-0" />
                   <span className="max-w-[180px] xl:max-w-[220px] truncate">
-                    {selectedCity} {selectedBranch ? `— ${selectedBranch.name}` : ''}
+                    {selectedCity} {selectedBranch ? `- ${selectedBranch.name}` : ''}
                   </span>
                   <ChevronDown size={14} className={`shrink-0 transition-transform duration-200 ${locationDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -209,10 +212,10 @@ export default function Navbar() {
             </div>
 
             {hasOnlineOrdering && (
-              <Link
-                href={`/${locale}/order/checkout`}
+              <button
+                onClick={openCart}
                 className="relative p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
-                aria-label="Корзина"
+                aria-label={t('cart')}
               >
                 <ShoppingCart size={20} />
                 {cartItemsCount > 0 && (
@@ -220,7 +223,7 @@ export default function Navbar() {
                     {cartItemsCount}
                   </span>
                 )}
-              </Link>
+              </button>
             )}
 
             {/* {hasBooking && (
@@ -229,6 +232,16 @@ export default function Navbar() {
                 <span className="hidden xl:inline-block">{t('booking')}</span>
               </Link>
             )} */}
+
+            {tenant?.features?.showCategoryNav && tenant?.niche === 'ecommerce' && (
+              <button
+                onClick={() => setMobileDrawerOpen(true)}
+                className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                aria-label={t('catalog')}
+              >
+                <BookOpen size={20} />
+              </button>
+            )}
 
             <button ref={burgerRef} onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors" aria-label="Открыть меню">
               {isOpen ? <X size={24} /> : <Menu size={24} />}

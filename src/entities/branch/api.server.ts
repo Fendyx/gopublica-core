@@ -24,6 +24,6 @@ export async function resolveBranchId(tenantId: string): Promise<string | null> 
     if (match) return match._id
   }
 
-  // fallback — тот же, что в BranchContext: первый филиал после sort по city
+  // fallback - тот же, что в BranchContext: первый филиал после sort по city
   return branches[0]._id
 }

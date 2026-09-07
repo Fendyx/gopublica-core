@@ -22,6 +22,9 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
   addItem: (item: CartItem) => void;
   removeItem: (uid: string) => void;
   updateQuantity: (uid: string, quantity: number) => void;
@@ -34,6 +37,9 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      isCartOpen: false,
+      openCart: () => set({ isCartOpen: true }),
+      closeCart: () => set({ isCartOpen: false }),
       addItem: (item) =>
         set((state) => {
           const existing = state.items.find((i) => i.uid === item.uid);
@@ -61,6 +67,6 @@ export const useCartStore = create<CartState>()(
       getSubtotal: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
       getTotalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
-    { name: 'gp-cart' }
+    { name: 'gp-cart', partialize: (state) => ({ items: state.items }) }
   )
 );

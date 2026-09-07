@@ -166,7 +166,7 @@ export default function OrdersPageContent() {
     return <span className="text-xs text-muted-foreground">{t('actions.noActions')}</span>;
   };
 
-  /** Compact shipping summary for the table cell — driven by the same resolver as the sheet. */
+  /** Compact shipping summary for the table cell - driven by the same resolver as the sheet. */
   const renderShippingCell = (order: Order) => {
     const delivery = resolveDelivery(order);
 

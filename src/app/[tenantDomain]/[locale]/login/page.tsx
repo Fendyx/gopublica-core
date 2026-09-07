@@ -44,7 +44,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         localStorage.setItem('customer_token', data.token);
-        // Профиль теперь тенант-уровня — ведём всегда туда
+        // Профиль теперь тенант-уровня - ведём всегда туда
         router.push(`/${locale}/profile`);
       } else {
         setError(data.error || 'Invalid credentials');

@@ -96,7 +96,7 @@ function CtaLinkManager({
             ) : (
               availableSections.map((s) => (
                 <SelectItem key={s._id} value={s._id}>
-                  {s.type} — {s.translations?.[tenant?.defaultLocale || 'en']?.title || s.translations?.en?.title || s._id}
+                  {s.type} - {s.translations?.[tenant?.defaultLocale || 'en']?.title || s.translations?.en?.title || s._id}
                 </SelectItem>
               ))
             )}
@@ -146,7 +146,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
   }, [type, settings.mediaType]);
 
   // ─── Архитектура загрузчиков Cloudinary ───
-  // Отдельный экземпляр хука на каждое назначение — каждый со своим onSuccess.
+  // Отдельный экземпляр хука на каждое назначение - каждый со своим onSuccess.
   // Это убирает хрупкую логику "роутинга по текущему mediaType".
 
   // 1. Одиночное видео Hero
@@ -173,7 +173,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
         const newSlide: HeroSlide =
           resourceType === 'video' ? { videoUrl: url } : { imageUrl: url };
         if (uploadingSlideIndex !== null && slides[uploadingSlideIndex]) {
-          // Замена существующего слайда — сохраняем его позицию
+          // Замена существующего слайда - сохраняем его позицию
           slides[uploadingSlideIndex] = newSlide;
         } else {
           slides.push(newSlide);
@@ -250,7 +250,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
 
         const currentPreset: HeroPreset | undefined = settings.preset;
 
-        /** Применить пресет — автоматически настроить mediaType, layout и прочее */
+        /** Применить пресет - автоматически настроить mediaType, layout и прочее */
         const applyPreset = (preset: HeroPreset) => {
           switch (preset) {
             case 'classic_with_buttons':

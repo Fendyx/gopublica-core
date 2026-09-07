@@ -68,7 +68,7 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
     [
       Autoplay({
         delay: autoplayDelay,
-        // Всегда false — управляем паузой вручную через arrow/swipe handlers
+        // Всегда false - управляем паузой вручную через arrow/swipe handlers
         stopOnInteraction: false,
         stopOnMouseEnter: true,
       }),
@@ -117,7 +117,7 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
     pauseAutoplay();
   }, [emblaApi, pauseAutoplay]);
 
-  /** Обработчик swipe — ставим autoplay на паузу */
+  /** Обработчик swipe - ставим autoplay на паузу */
   const handlePointerUp = useCallback(() => {
     pauseAutoplay();
   }, [pauseAutoplay]);
@@ -294,7 +294,7 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
       <div className="absolute inset-0 bg-black/40" />
 
       {/* ─── Контент ─── */}
-      {/* ВАЖНО: w-full обязателен — без него блок сжимается по контенту (shrink-wrap),
+      {/* ВАЖНО: w-full обязателен - без него блок сжимается по контенту (shrink-wrap),
           и items-start/items-end/text-left/text-right из alignMap не имеют пространства,
           чтобы визуально сдвинуть текст. Заголовок и подзаголовок наследуют выравнивание
           отсюда (никаких хардкодных text-center/mx-auto на них нет). */}

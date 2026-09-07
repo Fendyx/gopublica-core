@@ -27,7 +27,7 @@ export default function SystemMenuSection({ section }: SystemMenuSectionProps) {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/menu?tenantId=${tenantId}&branchId=${branchId}`)
       .then(r => r.json())
       .then(data => {
-        // Filter to food/service items — exclude e-commerce products
+        // Filter to food/service items - exclude e-commerce products
         setItems(data.filter((item: any) => item.productType !== 'physical_product'));
         setLoading(false);
       })

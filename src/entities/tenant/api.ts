@@ -34,6 +34,7 @@ export interface TenantSettings {
     hasClickCollect: boolean;
     hasOnlineOrdering: boolean;
     hasJobApplications?: boolean;
+    showCategoryNav?: boolean;
   };
   phone: string;
   address: string;
@@ -74,7 +75,7 @@ export async function getTenantByDomain(domain: string): Promise<TenantSettings 
  *
  * The backend now supports tenant `aliases` (e.g. `tenant.localhost:3000`).
  * This helper:
- *   1. Queries `/api/saas/settings/by-domain?domain=<host>` — the backend
+ *   1. Queries `/api/saas/settings/by-domain?domain=<host>` - the backend
  *      matches against both `domain` and `aliases`.
  *   2. Returns the canonical `domain` (always the primary domain, never the alias).
  *   3. Caches the result in a module-level Map with a TTL so the middleware

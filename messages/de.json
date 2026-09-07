@@ -401,8 +401,8 @@
         "instructions": {
           "title": "Wie verbinden",
           "step1": "Klicken Sie auf \"Mit Telegram verbinden\"",
-          "step2": "Telegram öffnet sich — klicken Sie im Chat auf \"Start\"",
-          "step3": "Kehren Sie hierher zurück — die Verbindung wird automatisch bestätigt"
+          "step2": "Telegram öffnet sich - klicken Sie im Chat auf \"Start\"",
+          "step3": "Kehren Sie hierher zurück - die Verbindung wird automatisch bestätigt"
         },
         "errors": {
           "connectFailed": "Telegram-Verbindung konnte nicht initiiert werden",
@@ -466,7 +466,9 @@
         "verticalOverlay": "Vertikales Overlay",
         "verticalOverlayDesc": "Vertikale Schaltflächen",
         "actionOverlay": "Aktion + Overlay",
-        "actionOverlayDesc": "Info unten + Overlay"
+        "actionOverlayDesc": "Info unten + Overlay",
+        "showCategoryNav": "Kategorien-Navigation Sidebar",
+        "showCategoryNavDesc": "Zeige eine fixierte Seitenleiste mit allen Produktkategorien auf der Katalogseite"
       },
       "localization": {
         "activeLanguages": "Aktive Sprachen",
@@ -612,7 +614,7 @@
       "templatePreset": "Vorlage / Preset",
       "choosePreset": "Wählen Sie ein Preset zum schnellen Start…",
       "presetClassic": "Titel, Untertitel und CTA-Buttons über dem Hintergrund",
-      "presetBanner": "Einfacher Banner-Link — klickbares Bild ohne Buttons",
+      "presetBanner": "Einfacher Banner-Link - klickbares Bild ohne Buttons",
       "presetGallery": "Galerie-Slider mit Autoplay und Navigationspfeilen",
       "mediaType": "Medientyp",
       "selectMediaType": "Medientyp wählen",
@@ -642,7 +644,7 @@
       "moveUp": "Nach oben",
       "moveDown": "Nach unten",
       "removeSlide": "Folie entfernen",
-      "slideLinkPlaceholder": "Folien-Link-URL (optional) — Klick führt zu diesem Link",
+      "slideLinkPlaceholder": "Folien-Link-URL (optional) - Klick führt zu diesem Link",
       "addSlides": "+ Folien hinzufügen (Mehrfach-Upload)",
       "primaryCtaLabel": "Primäres CTA-Label",
       "secondaryCtaLabel": "Sekundäres CTA-Label",
@@ -1030,7 +1032,7 @@
       "dynamicForm": "Dynamisches Formular",
       "dynamicFormDescription": "Benutzerdefiniertes Formular (Partneranfragen, Kontakt usw.)",
       "richText": "Rich Text",
-      "richTextDescription": "Formatierter Textblock mit reicher Typografie — Fett, Listen, Links, Überschriften usw.",
+      "richTextDescription": "Formatierter Textblock mit reicher Typografie - Fett, Listen, Links, Überschriften usw.",
       "selectType": "Bereichstyp auswählen"
     },
     "sectionItems": {
@@ -1275,6 +1277,7 @@
     "booking": "Tisch reservieren",
     "login": "Anmelden",
     "profile": "Profil",
+    "cart": "Warenkorb",
     "partners": "Partner",
     "articles": "Artikel",
     "more": "Mehr"
@@ -1437,7 +1440,7 @@
       "date": "Datum:",
       "estimatedCost": "Geschätzte Kosten:",
       "selectedDate": "Ausgewähltes Datum",
-      "selectedDatePlaceholder": "—",
+      "selectedDatePlaceholder": "-",
       "selectedServices": "Ausgewählte Leistungen",
       "total": "Gesamt: {totalPrice} {currency}",
       "servicesCount": "{count} Leistungen · {totalPrice} {currency}",
@@ -1530,5 +1533,14 @@
     "requiredError": "Sie müssen die Nutzungsbedingungen und die Datenschutzerklärung akzeptieren, um fortzufahren",
     "termsLabel": "Nutzungsbedingungen",
     "privacyLabel": "Datenschutzerklärung"
+  },
+  "cart": {
+    "emptyTitle": "Ihr Warenkorb ist leer",
+    "emptyDescription": "Fügen Sie Artikel aus dem Menü hinzu, um zu beginnen",
+    "browseMenu": "Menü durchstöbern",
+    "subtotal": "Zwischensumme",
+    "totalItems": "{count, plural, =0 {Keine Artikel} one {# Artikel} other {# Artikel}}",
+    "proceedToCheckout": "Zur Kasse gehen",
+    "continueShopping": "Einkauf fortsetzen"
   }
 }

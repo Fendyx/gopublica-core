@@ -24,7 +24,7 @@ export function TicketCard({ article }: TicketCardProps) {
   const { showToast } = useToast();
   const { addItem } = useCartStore();
 
-  // Quantity state — must live before the early return below (Rules of Hooks).
+  // Quantity state - must live before the early return below (Rules of Hooks).
   const [quantity, setQuantity] = useState(1);
   const maxQty = Math.max(
     1,
@@ -76,7 +76,7 @@ export function TicketCard({ article }: TicketCardProps) {
         <div className="flex flex-col">
           <span className="text-xs text-muted-foreground">{t('price')}</span>
           <span className="text-xl font-bold text-primary leading-tight">
-            {article.ticketPrice ? formatPrice(article.ticketPrice) : '—'}
+            {article.ticketPrice ? formatPrice(article.ticketPrice) : '-'}
           </span>
         </div>
 
@@ -120,14 +120,14 @@ export function TicketCard({ article }: TicketCardProps) {
           <span className="font-medium">{t('eventTicket')}</span>
         </div>
 
-        {/* Secondary event details — hidden on mobile, visible on desktop */}
+        {/* Secondary event details - hidden on mobile, visible on desktop */}
         <div className="hidden lg:block space-y-4 mb-4">
           <div className="flex items-center gap-3">
             <Calendar className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground">{t('eventDate')}</p>
               <p className="font-medium">
-                {article.eventDate ? formatDate(article.eventDate) : '—'}
+                {article.eventDate ? formatDate(article.eventDate) : '-'}
               </p>
             </div>
           </div>
@@ -146,7 +146,7 @@ export function TicketCard({ article }: TicketCardProps) {
             <div className="flex-1">
               <p className="text-xs text-muted-foreground">{t('price')}</p>
               <p className="text-2xl font-bold text-primary">
-                {article.ticketPrice ? formatPrice(article.ticketPrice) : '—'}
+                {article.ticketPrice ? formatPrice(article.ticketPrice) : '-'}
               </p>
             </div>
 

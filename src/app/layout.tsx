@@ -5,6 +5,7 @@ import LayoutWrapper from '@/shared/ui/LayoutWrapper';
 import { BranchProvider } from '@/entities/branch/BranchContext';
 import { TenantProvider } from '@/entities/tenant/TenantContext';
 import { ThemeProvider } from '@/shared/ui/ThemeProvider';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Inter, Playfair_Display, Geist } from 'next/font/google';
 import './globals.css';
 import { cn } from "@/lib/utils";
@@ -69,6 +70,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       } as React.CSSProperties}
       suppressHydrationWarning
     >
+      <head>
+        {/* Blocking script: set data-theme from localStorage BEFORE first paint.
+            This eliminates the "phantom third theme" flash where no data-theme
+            attribute means glass/surface tokens resolve to undefined. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var t = localStorage.getItem('theme');
+                  document.documentElement.setAttribute('data-theme', t || 'light');
+                } catch(e) {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body style={{ backgroundColor: pageBgColor || undefined }}>
         <TrackVisit tenantId={tenantId} />
         <ThemeProvider
@@ -77,13 +97,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           enableSystem={false}
           disableTransitionOnChange
         >
-          <NextIntlClientProvider messages={messages}>
-            <TenantProvider tenantId={tenantId}>
-              <BranchProvider tenantId={tenantId}>
-                <LayoutWrapper>{children}</LayoutWrapper>
-              </BranchProvider>
-            </TenantProvider>
-          </NextIntlClientProvider>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
+            <NextIntlClientProvider messages={messages}>
+              <TenantProvider tenantId={tenantId}>
+                <BranchProvider tenantId={tenantId}>
+                  <LayoutWrapper>{children}</LayoutWrapper>
+                </BranchProvider>
+              </TenantProvider>
+            </NextIntlClientProvider>
+          </GoogleOAuthProvider>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

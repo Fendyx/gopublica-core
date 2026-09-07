@@ -11,7 +11,7 @@ export default function EcommerceGridLayout({ items, locale, columns = 3, varian
   productImageAspectRatio?: string,
   productCardWidth?: string
 }) {
-  // Для full — одна колонка, иначе стандартная сетка
+  // Для full - одна колонка, иначе стандартная сетка
   const gridCols = productCardWidth === 'full' ? 'grid-cols-1' : `grid-cols-2 ${columns === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`;
 
   return (

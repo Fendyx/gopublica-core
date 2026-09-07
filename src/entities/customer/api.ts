@@ -10,7 +10,7 @@ const getAuthHeaders = () => {
   };
 };
 
-/** Raw backend customer shape — stats may be direct fields or nested in a `stats` object/array. */
+/** Raw backend customer shape - stats may be direct fields or nested in a `stats` object/array. */
 interface RawCustomer {
   _id: string;
   name?: string;

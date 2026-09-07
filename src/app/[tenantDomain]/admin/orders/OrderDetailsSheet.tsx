@@ -22,7 +22,7 @@ interface OrderDetailsSheetProps {
   renderActions: (order: Order) => React.ReactNode;
 }
 
-/** Muted uppercase section label — the only "header" a section gets. */
+/** Muted uppercase section label - the only "header" a section gets. */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">

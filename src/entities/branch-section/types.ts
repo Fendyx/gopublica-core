@@ -28,7 +28,7 @@ export type HeroMediaType = 'video' | 'image' | 'slider';
 export type HeroLayout = 'fullscreen' | 'compact';
 export type HeroTextAlign = 'left' | 'center' | 'right';
 
-/** Пресеты Hero-секции — предустановленные конфигурации для быстрого старта */
+/** Пресеты Hero-секции - предустановленные конфигурации для быстрого старта */
 export type HeroPreset =
   | 'classic_with_buttons'   /* Классический Hero с заголовком, подзаголовком и CTA-кнопками */
   | 'banner_link'            /* Простой баннер-ссылка без кнопок (изображение кликабельно) */
@@ -44,7 +44,7 @@ export interface HeroCta {
   targetSectionId?: string;
   /** Произвольный URL (когда targetMode === 'custom') */
   customUrl?: string;
-  /** Устаревшее поле — тип секции для скролла (обратная совместимость) */
+  /** Устаревшее поле - тип секции для скролла (обратная совместимость) */
   targetSectionType?: SectionType;
 }
 
@@ -69,7 +69,7 @@ export interface HeroSettings {
   textAlign?: HeroTextAlign;
   /** Autoplay interval for the slider in ms. 0 or undefined = default (5000ms). */
   sliderAutoplayMs?: number;
-  /** Пресет/шаблон Hero-секции — определяет какие поля отображаются */
+  /** Пресет/шаблон Hero-секции - определяет какие поля отображаются */
   preset?: HeroPreset;
   /** Ссылка для кликабельного фона (для image/video режимов) */
   clickableUrl?: string;
@@ -86,7 +86,7 @@ export interface BaseCarouselSettings {
   desktopItemsPerRow?: 3 | 4 | 5;
   /** Number of items to show per page/viewport (optional, for pagination) */
   limit?: number;
-  /** Card variant for ecommerce mode — reuses existing ProductCardVariant */
+  /** Card variant for ecommerce mode - reuses existing ProductCardVariant */
   productCardVariant?: ProductCardVariant;
   /** Image aspect ratio for ecommerce cards */
   productImageAspectRatio?: string;

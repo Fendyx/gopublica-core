@@ -107,7 +107,7 @@ export default function JobApplicationDetailPage() {
                   {key}
                 </span>
                 <span className="text-sm font-medium text-gray-900 w-full sm:w-2/3 break-words">
-                  {value || '—'}
+                  {value || '-'}
                 </span>
               </div>
             ))}

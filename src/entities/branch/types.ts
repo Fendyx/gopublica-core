@@ -26,7 +26,7 @@ export interface Branch {
   isActive: boolean;
   isDefault?: boolean;
 
-  // "Подфилия": если parentBranchId задан — это под-заведение (напр. веганское
+  // "Подфилия": если parentBranchId задан - это под-заведение (напр. веганское
   // кафе в подвале того же здания), отображается вложенно под родителем.
   parentBranchId?: string | null;
   venueType?: VenueType;

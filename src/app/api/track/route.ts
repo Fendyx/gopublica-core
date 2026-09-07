@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     // Определяем устройство
     const device = /mobile|android|iphone|ipad/i.test(userAgent) ? 'Mobile' : 'Desktop';
 
-    // Анонимный хэш — не храним реальный IP
+    // Анонимный хэш - не храним реальный IP
     const hash = createHash('sha256')
       .update(`${ip}-${userAgent}-${date}`)
       .digest('hex')

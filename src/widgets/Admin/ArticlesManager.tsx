@@ -399,7 +399,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                 </div>
               </div>
 
-              {/* Cover Media — unified image/video field */}
+              {/* Cover Media - unified image/video field */}
               <div className="space-y-2">
                 <Label htmlFor="coverMedia">Cover Media</Label>
                 <div className="flex gap-2">
@@ -420,7 +420,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                     {t('upload')}
                   </Button>
                 </div>
-                {/* Dynamic preview — shows either image or video */}
+                {/* Dynamic preview - shows either image or video */}
                 {form.coverImage && (
                   <Image
                     src={form.coverImage}
@@ -443,7 +443,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                 )}
               </div>
 
-              {/* Author & Published At — hidden for info pages */}
+              {/* Author & Published At - hidden for info pages */}
               {form.contentType === 'article' && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -699,7 +699,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                           )}
                         </TableCell>
                         <TableCell>{article.slug}</TableCell>
-                        <TableCell>{article.author || '—'}</TableCell>
+                        <TableCell>{article.author || '-'}</TableCell>
                         <TableCell>
                           {article.publishedAt ? (
                             <div className="flex items-center gap-1 text-sm">
@@ -707,7 +707,7 @@ export default function ArticlesManager({ token }: ArticlesManagerProps) {
                               {new Date(article.publishedAt).toLocaleDateString()}
                             </div>
                           ) : (
-                            '—'
+                            '-'
                           )}
                         </TableCell>
                         <TableCell>

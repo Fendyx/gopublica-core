@@ -73,7 +73,7 @@ export default function SubmissionsPage() {
   };
 
   const getFormName = (s: Submission) => {
-    return s.sourceSectionId?.settings?.title || s.sourceSectionId?.page || '—';
+    return s.sourceSectionId?.settings?.title || s.sourceSectionId?.page || '-';
   };
 
   if (loading) return <div className="text-center py-10 text-gray-500">Ładowanie...</div>;
@@ -142,7 +142,7 @@ export default function SubmissionsPage() {
                             {Object.entries(s.fields || {}).map(([key, value]) => (
                               <div key={key} className="text-sm border-b pb-1">
                                 <span className="font-medium">{key}: </span>
-                                {value == null ? '—' : String(value)}
+                                {value == null ? '-' : String(value)}
                               </div>
                             ))}
                             {s.resumeUrl && (

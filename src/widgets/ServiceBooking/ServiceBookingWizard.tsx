@@ -154,7 +154,7 @@ export default function ServiceBookingWizard() {
               <div className="mx-auto mt-6 max-w-sm space-y-3 rounded-xl border border-border bg-muted/30 p-5 text-left text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Service:</span>
-                  <span className="font-medium text-foreground">{selectedService?.name ?? '—'}</span>
+                  <span className="font-medium text-foreground">{selectedService?.name ?? '-'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Date:</span>

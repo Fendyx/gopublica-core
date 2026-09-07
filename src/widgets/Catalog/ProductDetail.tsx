@@ -193,7 +193,7 @@ export default function ProductDetail({
                   >
                     <Image
                       src={img}
-                      alt={`${product.name} — ${t('view')} ${idx + 1}`}
+                      alt={`${product.name} - ${t('view')} ${idx + 1}`}
                       fill
                       sizes="(max-width: 768px) 33vw, 25vw"
                       className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03]"
@@ -445,7 +445,7 @@ function SpecificationsTab({
     return <p className="text-sm text-muted-foreground">{t('noSpecifications')}</p>;
   }
 
-  // Build dimension string — only non-zero parts
+  // Build dimension string - only non-zero parts
   let dimStr = '';
   if (dims) {
     const parts: string[] = [];

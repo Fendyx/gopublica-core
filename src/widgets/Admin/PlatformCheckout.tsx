@@ -211,7 +211,7 @@ function StripePaymentForm({ clientSecret }: { clientSecret: string }) {
   );
 }
 
-// ─── Main Checkout — single page ──────────────────────────────────────────
+// ─── Main Checkout - single page ──────────────────────────────────────────
 export default function PlatformCheckout() {
   const router = useRouter();
   const t = useTranslations('admin.gopublicaPage');

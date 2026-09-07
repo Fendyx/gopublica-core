@@ -35,7 +35,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         if (selectedBranch) prodUrl += `&branchId=${selectedBranch._id}`;
         const [prodRes, catRes] = await Promise.all([
           fetch(prodUrl),
-          fetch(`${apiUrl}/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce`),
+          fetch(`${apiUrl}/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce&own=true`),
         ]);
         const products: MenuItem[] = await prodRes.json();
         const cats = await catRes.json();

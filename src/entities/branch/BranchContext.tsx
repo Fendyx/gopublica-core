@@ -17,7 +17,7 @@ interface BranchContextType {
   detectCityByIp: () => Promise<void>
   refetchBranches: () => Promise<void>
   // 👈 НОВОЕ: группировка филиалов по city -> [{ parent, children }]
-  // children — подфилии (venueType 'concept'), у которых parentBranchId === parent._id
+  // children - подфилии (venueType 'concept'), у которых parentBranchId === parent._id
   getBranchGroups: (city: string) => BranchGroup[]
 }
 
@@ -48,7 +48,7 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
 
   const cities = [...new Set(branches.map((b: Branch) => b.city).filter((c): c is string => !!c))]
 
-  // 👈 "Основные" филиалы — те, у которых нет parentBranchId (или явно venueType 'main').
+  // 👈 "Основные" филиалы - те, у которых нет parentBranchId (или явно venueType 'main').
   // Именно они участвуют в авто-детекции по IP и в верхнеуровневом списке городов.
   const mainBranches = branches.filter(b => !b.parentBranchId)
 
@@ -94,14 +94,14 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
       fetchBranches()
       return
     }
-    // Always fetch branches — even if geolocation was already resolved this session.
+    // Always fetch branches - even if geolocation was already resolved this session.
     // The geoResolved flag only controls IP detection, not branch fetching.
     fetchBranches().then(data => {
       if (!geoResolved) {
         // First time: run IP-based city detection, then finalize loading
         detectCityByIp(data).then(() => setLoading(false))
       } else {
-        // Geolocation already resolved — auto-select first branch if none selected
+        // Geolocation already resolved - auto-select first branch if none selected
         if (!selectedBranch && data.length > 0) {
           const first = data.find(b => !b.parentBranchId) || data[0]
           if (first) {
@@ -156,7 +156,7 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
       if (city) {
         if (selectFirstBranchInCity(city)) return
       }
-      // City not found among branches — pick first available
+      // City not found among branches - pick first available
       selectFirstAvailable()
     } catch (err) {
       console.error('IP detection failed', err)
@@ -178,7 +178,7 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
   }
 
   // 👈 Группировка для UI-свитчера: для указанного города возвращает список
-  // { parent, children } — родительский филиал и вложенные под-заведения.
+  // { parent, children } - родительский филиал и вложенные под-заведения.
   const getBranchGroups = (city: string): BranchGroup[] => {
     const inCity = branches.filter(b => b.city === city)
     const parents = inCity.filter(b => !b.parentBranchId)

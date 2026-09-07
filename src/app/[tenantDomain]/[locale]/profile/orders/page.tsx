@@ -33,7 +33,7 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
   const t = useTranslations('profile');
 
-  // Хелпер для перевода статуса. Если перевода нет — вернет как есть.
+  // Хелпер для перевода статуса. Если перевода нет - вернет как есть.
   const getTranslatedStatus = (status: string) => {
     const key = `statusLabels.${status}`;
     const translation = t(key);

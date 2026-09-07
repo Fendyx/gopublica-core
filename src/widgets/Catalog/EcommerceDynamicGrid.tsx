@@ -41,7 +41,7 @@ export default function EcommerceDynamicGrid({ items, locale, variant, currencyS
     return () => observer.disconnect()
   }, [items, locale])
 
-  // Если full — каждая карточка на всю строку
+  // Если full - каждая карточка на всю строку
   if (productCardWidth === 'full') {
     return (
       <div className="flex flex-col gap-4">

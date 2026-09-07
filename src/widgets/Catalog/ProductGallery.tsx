@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 /**
- * ProductGallery — mobile-first sticky-zone gallery.
+ * ProductGallery - mobile-first sticky-zone gallery.
  *
  * On mobile this renders inside a `sticky top-0 h-[75vh]` container
  * managed by ProductDetail. It fills that container entirely.

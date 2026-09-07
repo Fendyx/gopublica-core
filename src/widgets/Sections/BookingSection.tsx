@@ -29,7 +29,7 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
     <section className="py-12 bg-surface-page">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-8 items-stretch">
-          {/* Left: Booking Form — fills its grid column */}
+          {/* Left: Booking Form - fills its grid column */}
           <div className="w-full">
             <BookingForm title={title} subtitle={subtitle} variant="split" checkoutFlow={checkoutFlow} />
           </div>

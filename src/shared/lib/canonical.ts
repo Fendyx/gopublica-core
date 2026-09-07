@@ -7,7 +7,7 @@
  * SEO metadata / absolute links.
  *
  * Invariant: every absolute URL produced here MUST use the canonical domain,
- * never the request alias — even when the visitor arrived through an alias.
+ * never the request alias - even when the visitor arrived through an alias.
  */
 
 export interface TenantDomainInfo {

@@ -19,7 +19,7 @@ function AdminLayoutInner({ token, locale, onLocaleChange, children }: any) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar — sticky on desktop, slide-in on mobile */}
+      {/* Sidebar - sticky on desktop, slide-in on mobile */}
       <AdminSidebar
         locale={locale}
         onLocaleChange={onLocaleChange}

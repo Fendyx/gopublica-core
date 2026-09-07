@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react'
+import { GoogleLogin } from '@react-oauth/google'
 
 export default function LoginPage() {
   const tAuth = useTranslations('auth')
@@ -30,7 +31,7 @@ export default function LoginPage() {
     const savedToken = localStorage.getItem('saas_token')
     if (savedToken) {
       setToken(savedToken)
-      // Hard navigation to force a full page load — ensures AdminLayout
+      // Hard navigation to force a full page load - ensures AdminLayout
       // remounts fresh and all data-fetching effects re-run with the new token.
       window.location.href = '/admin/menu'
     }
@@ -60,7 +61,7 @@ export default function LoginPage() {
       if (data.mustChangePassword) {
         setMustChangePassword(true)
       } else {
-        // Hard navigation to force a full page load — ensures AdminLayout
+        // Hard navigation to force a full page load - ensures AdminLayout
         // remounts fresh and all data-fetching effects re-run with the new token.
         window.location.href = '/admin'
       }
@@ -69,6 +70,35 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setError('')
+    setIsLoading(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credential: credentialResponse.credential,
+          tenantId: tenant?.tenantId,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Google login failed')
+
+      localStorage.setItem('saas_token', data.token)
+      setToken(data.token)
+      window.location.href = '/admin'
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleError = () => {
+    setError('Google sign-in was cancelled or failed')
   }
 
   // Экран принудительной смены пароля
@@ -165,6 +195,30 @@ export default function LoginPage() {
                 tAuth('login')
               )}
             </Button>
+
+            {/* Divider */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            {/* Google OAuth */}
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                useOneTap={false}
+                theme="outline"
+                size="large"
+                width="100%"
+                text="signin_with"
+                shape="rectangular"
+              />
+            </div>
             
           </form>
         </CardContent>

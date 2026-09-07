@@ -86,7 +86,7 @@ export default async function ArticlesPage({
 
   // If no sections configured, show fallback with system_articles-style listing
   if (!sections || sections.length === 0) {
-    // Fallback: render with empty sections — SystemArticlesSection handles its own data
+    // Fallback: render with empty sections - SystemArticlesSection handles its own data
     return (
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

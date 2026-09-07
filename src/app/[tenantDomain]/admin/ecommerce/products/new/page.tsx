@@ -19,7 +19,7 @@ export default function NewProductPage() {
   useEffect(() => {
     if (!tenant?.tenantId) return;
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    fetch(`${apiUrl}/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce`)
+    fetch(`${apiUrl}/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce&own=true`)
       .then((res) => res.json())
       .then(setCategories)
       .catch(console.error)

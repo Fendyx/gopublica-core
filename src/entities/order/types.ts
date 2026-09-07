@@ -24,7 +24,7 @@ export interface ParcelLockerInfo {
     city?: string;
     zip?: string;
   };
-  /** Legacy shape from older checkouts — treated as "locker present". */
+  /** Legacy shape from older checkouts - treated as "locker present". */
   enabled?: boolean;
 }
 

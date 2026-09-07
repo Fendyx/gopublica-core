@@ -1,4 +1,4 @@
-// Service Worker — получает push-уведомления даже при закрытых вкладках
+// Service Worker - получает push-уведомления даже при закрытых вкладках
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
@@ -33,7 +33,7 @@ self.addEventListener('notificationclick', event => {
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then(clientList => {
-        // Есть открытая вкладка с админкой — фокусируем и переходим
+        // Есть открытая вкладка с админкой - фокусируем и переходим
         for (const client of clientList) {
           if (client.url.includes('/admin')) {
             client.navigate(targetUrl)

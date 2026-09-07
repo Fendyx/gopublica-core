@@ -33,7 +33,7 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
   // 👇 Достаем данные тенанта из контекста
   const tenant = useTenant()
   const tenantId = tenant?.tenantId
-  // Always use 'food' niche for menu categories — hybrid tenants may have niche='ecommerce'
+  // Always use 'food' niche for menu categories - hybrid tenants may have niche='ecommerce'
   const niche = 'food'
 
   const [categoryMap, setCategoryMap] = useState<Record<string, CategoryData>>({})

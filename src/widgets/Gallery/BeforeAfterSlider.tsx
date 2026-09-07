@@ -23,7 +23,7 @@ export interface BeforeAfterSliderProps {
   hideHeader?: boolean
 }
 
-// Profesjonalne zdjęcia detailingowe (Unsplash) — fallback, gdy nie podano propsów.
+// Profesjonalne zdjęcia detailingowe (Unsplash) - fallback, gdy nie podano propsów.
 const DEFAULT_BEFORE =
   'https://res.cloudinary.com/dsag3lsvx/image/upload/v1784557330/Gemini_Generated_Image_4jn7o24jn7o24jn7_u90gw9.png'
 const DEFAULT_AFTER =
@@ -53,12 +53,12 @@ export default function BeforeAfterSlider({
   const [isDragging, setIsDragging] = React.useState(false)
   const [hasPointer, setHasPointer] = React.useState(false)
 
-  // Framer Motion — płynna animacja wartości procentowej pozycji suwaka.
+  // Framer Motion - płynna animacja wartości procentowej pozycji suwaka.
   const position = useMotionValue(initialPosition)
   const clipInset = useTransform(position, (v) => `inset(0 ${100 - v}% 0 0)`)
   const handleLeft = useTransform(position, (v) => `${v}%`)
 
-  // Wykryj urządzenia z myszą (desktop) — pozwala ukryć podpowiedź dotykową.
+  // Wykryj urządzenia z myszą (desktop) - pozwala ukryć podpowiedź dotykową.
   React.useEffect(() => {
     setHasPointer(window.matchMedia('(pointer: fine)').matches)
   }, [])
@@ -140,7 +140,7 @@ export default function BeforeAfterSlider({
         </div>
       )}
 
-      {/* Wspólny kontener obrazów — wymusza proporcje i przycina nadmiar. */}
+      {/* Wspólny kontener obrazów - wymusza proporcje i przycina nadmiar. */}
       <div
         ref={containerRef}
         onPointerMove={handlePointerMove}
@@ -184,7 +184,7 @@ export default function BeforeAfterSlider({
           />
         </motion.div>
 
-        {/* Etykieta "Przed" — prawy górny róg. */}
+        {/* Etykieta "Przed" - prawy górny róg. */}
         <span
           className={cn(
             'pointer-events-none absolute right-3 top-3 z-20 rounded-full px-3 py-1',
@@ -195,7 +195,7 @@ export default function BeforeAfterSlider({
           Przed
         </span>
 
-        {/* Etykieta "Po" — lewy górny róg. */}
+        {/* Etykieta "Po" - lewy górny róg. */}
         <span
           className={cn(
             'pointer-events-none absolute left-3 top-3 z-20 rounded-full px-3 py-1',
@@ -214,7 +214,7 @@ export default function BeforeAfterSlider({
             'bg-background/90 shadow-[0_0_0_1px_rgba(0,0,0,0.06)]',
           )}
         >
-          {/* Uchwyt na środku — ikona MoveHorizontal w szklanym kółku. */}
+          {/* Uchwyt na środku - ikona MoveHorizontal w szklanym kółku. */}
           <div
             className={cn(
               'absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center',
@@ -231,7 +231,7 @@ export default function BeforeAfterSlider({
           <div className="absolute inset-y-0 -left-px w-0.5 bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
         </motion.div>
 
-        {/* Podpowiedź dla desktopu — znika po pierwszym przeciągnięciu. */}
+        {/* Podpowiedź dla desktopu - znika po pierwszym przeciągnięciu. */}
         {hasPointer && !isDragging && (
           <motion.div
             initial={{ opacity: 0 }}

@@ -41,7 +41,7 @@ export default async function CatalogSlugPage({
   const branchId = branch?._id ?? branchSlug;
   const allItems: MenuItem[] = await fetchMenu(tenant.tenantId, branchId);
 
-  // Если слаг — ID товара
+  // Если слаг - ID товара
   if (isObjectId(decodedSlug)) {
     const product = allItems.find((p) => p._id === decodedSlug);
     if (!product) return notFound();

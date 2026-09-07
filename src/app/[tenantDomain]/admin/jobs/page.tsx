@@ -156,7 +156,7 @@ export default function JobApplicationsPage() {
                       {app.fields?.fullName || t('table.anonymous')}
                     </TableCell>
                     <TableCell className="text-gray-600">
-                      {app.fields?.position || '—'}
+                      {app.fields?.position || '-'}
                     </TableCell>
                     <TableCell>
                       <Badge variant={statusColors[app.status] || 'default'} className="shadow-none">

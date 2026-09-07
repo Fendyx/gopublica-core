@@ -9,7 +9,7 @@ const LOCAL_FALLBACK: CityDetectionResult = { city: 'Warsaw', lat: 52.2297, lon:
 /**
  * Определяет город посетителя по заголовкам запроса.
  * 1) Vercel сам добавляет x-vercel-ip-city к каждому запросу (быстро, без доп. запросов).
- * 2) Если заголовка нет (локальная разработка / другой хостинг) — идём в ip-api.com по IP.
+ * 2) Если заголовка нет (локальная разработка / другой хостинг) - идём в ip-api.com по IP.
  */
 export async function detectCityFromHeaders(headersList: Headers): Promise<CityDetectionResult> {
   const vercelCity = headersList.get('x-vercel-ip-city')
@@ -31,7 +31,7 @@ export async function detectCityFromHeaders(headersList: Headers): Promise<CityD
   }
 
   try {
-    // ВАЖНО: добавлен status,message в fields — без этого data.status всегда undefined
+    // ВАЖНО: добавлен status,message в fields - без этого data.status всегда undefined
     const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,city,lat,lon`, {
       signal: AbortSignal.timeout(3000),
     })

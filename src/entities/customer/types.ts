@@ -13,7 +13,7 @@ export interface CustomerSummary {
   totalSpent?: number;
   /** Number of orders, computed by the backend. May be omitted for customers with no orders yet. */
   orderCount?: number;
-  /** Optional store currency code (e.g. "pln") — confirm with backend whether provided. */
+  /** Optional store currency code (e.g. "pln") - confirm with backend whether provided. */
   currency?: string;
   lastOrderAt?: string | null;
   createdAt: string;

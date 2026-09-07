@@ -46,7 +46,7 @@ interface GetNavLinksOptions {
   customPages?: CustomPage[]
   locale: string
   branchSlug: string
-  /** i18n translate function scoped to 'nav' namespace — t('home'), etc. */
+  /** i18n translate function scoped to 'nav' namespace - t('home'), etc. */
   t: (key: string) => string
 }
 
@@ -70,7 +70,7 @@ export function getNavLinks({
   if (!navigation || !navigation.items || navigation.items.length === 0) {
     const allLinks: ResolvedNavLink[] = []
 
-    // Home — always first
+    // Home - always first
     allLinks.push({
       id: 'home',
       href: `/${locale}/${branchSlug}`,
@@ -116,7 +116,7 @@ export function getNavLinks({
       })
     }
 
-    // Partners — always
+    // Partners - always
     allLinks.push({
       id: 'partners',
       href: `/${locale}/${branchSlug}/partners`,
@@ -127,7 +127,7 @@ export function getNavLinks({
       type: 'system',
     })
 
-    // Contact — always
+    // Contact - always
     allLinks.push({
       id: 'contacts',
       href: `/${locale}/${branchSlug}/contacts`,
@@ -169,7 +169,7 @@ export function getNavLinks({
     if (item.type === 'system' || item.type === 'home') {
       const sysPage = SYSTEM_PAGES.find((sp) => sp.slug === item.slug)
       if (sysPage && !isSystemPageEnabled(sysPage.featureFlag, features || ({} as Features))) {
-        continue // Feature disabled — skip this item
+        continue // Feature disabled - skip this item
       }
     }
 

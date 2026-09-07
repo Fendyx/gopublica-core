@@ -131,7 +131,7 @@ function ArticleCard({
       className="group block relative"
     >
       <article className="relative flex flex-col bg-card border border-border rounded-xl overflow-hidden shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:-translate-y-1">
-        {/* Image / Video wrapper — no height class so aspect ratio dictates height */}
+        {/* Image / Video wrapper - no height class so aspect ratio dictates height */}
         <div className={`relative w-full shrink-0 ${aspectMap[aspectRatio]} overflow-hidden`}>
           {article.videoUrl ? (
             <video

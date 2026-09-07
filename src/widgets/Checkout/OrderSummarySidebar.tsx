@@ -129,7 +129,7 @@ export default function OrderSummarySidebar({
           {estimating ? (
             <Loader2 size={14} className="animate-spin" />
           ) : (
-            <span className="text-gray-800">{fees?.serviceFee?.toFixed(2) || '—'} {currencySymbol}</span>
+            <span className="text-gray-800">{fees?.serviceFee?.toFixed(2) || '-'} {currencySymbol}</span>
           )}
         </div>
         <div className="flex justify-between font-bold text-base text-gray-900 pt-3 border-t border-gray-100 mt-2">
@@ -137,7 +137,7 @@ export default function OrderSummarySidebar({
           {estimating ? (
             <Loader2 size={18} className="animate-spin" />
           ) : (
-            <span className="text-primary text-lg">{fees?.total?.toFixed(2) || '—'} {currencySymbol}</span>
+            <span className="text-primary text-lg">{fees?.total?.toFixed(2) || '-'} {currencySymbol}</span>
           )}
         </div>
       </div>

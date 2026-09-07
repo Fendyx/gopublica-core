@@ -93,7 +93,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground mt-1">{t('summary')}</p>
       </div>
 
-      {/* Stat cards — glass with accent stripe */}
+      {/* Stat cards - glass with accent stripe */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map(({ label, value, icon: Icon }) => (
           <div key={label} className="glass-card glass-stat-accent p-5">
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick actions — glass pill buttons */}
+      {/* Quick actions - glass pill buttons */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t('quickActions')}</h2>
         <div className="flex flex-wrap gap-2">

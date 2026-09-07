@@ -82,7 +82,7 @@ export default function ParcelLockerSection({ onSelect, selectedLockerId }: Prop
         );
         setScriptFailed(true);
         setIsLoading(false);
-        // Don't set error here — show it only when the user tries to open the map
+        // Don't set error here - show it only when the user tries to open the map
       };
 
       document.head.appendChild(script);

@@ -2,7 +2,7 @@ import type { Order, ParcelLockerInfo, ShippingAddress } from '@/entities/order/
 
 /**
  * Single source of truth for how an order is delivered.
- * Exactly one branch applies per order — both the table and the details
+ * Exactly one branch applies per order - both the table and the details
  * sheet render from this, so they can never disagree.
  */
 export type DeliveryView =
@@ -33,7 +33,7 @@ export function resolveDelivery(order: Order): DeliveryView {
   }
 }
 
-/** True only when a REAL carrier label exists — no demo fallbacks in production. */
+/** True only when a REAL carrier label exists - no demo fallbacks in production. */
 export function hasShippingLabel(order: Order): boolean {
   return !!(order.shipping?.labelUrl || order.shipping?.trackingNumber);
 }
