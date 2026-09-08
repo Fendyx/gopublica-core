@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import type { MenuItem } from '@/entities/menu-item/types';
 import EcommerceGridLayout from './EcommerceGridLayout';
@@ -20,6 +21,8 @@ interface RelatedProductsProps {
 
 export default function RelatedProducts({ productId }: RelatedProductsProps) {
   const t = useTranslations('productDetail');
+  const { locale } = useParams();
+  const localeStr = Array.isArray(locale) ? locale[0] : locale;
   const tenant = useTenant();
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +65,7 @@ export default function RelatedProducts({ productId }: RelatedProductsProps) {
           columns={3}
           variant={variant}
           currencySymbol={currencySymbol}
+          locale={localeStr}
         />
       </div>
     </section>

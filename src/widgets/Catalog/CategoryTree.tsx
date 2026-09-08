@@ -72,19 +72,19 @@ function CategoryNode({
         <Link
           href={href}
           onClick={onNavigate}
-          className={`block py-1 px-2 text-sm rounded-md transition-colors flex-1 min-w-0 truncate ${
+          className={`block py-1.5 px-2.5 text-sm rounded-md transition-colors flex-1 min-w-0 truncate ${
             isActive
               ? 'font-semibold text-primary bg-primary/5'
               : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'
           }`}
           style={isActive ? { borderLeft: '2px solid var(--tenant-primary, hsl(var(--primary)))' } : undefined}
         >
-          {node.icon && <span className="mr-1.5">{node.icon}</span>}
+          <span className="w-5 mr-1 shrink-0 text-center leading-none">{node.icon || ''}</span>
           {node.name}
         </Link>
       </div>
       {hasChildren && expanded && (
-        <ul className="ml-4 pl-2 border-l border-border-light">
+        <ul className="ml-4 pl-3 border-l border-border-light space-y-0.5">
           {node.children.map((child) => (
             <CategoryNode
               key={child.key}
@@ -139,7 +139,7 @@ export default function CategoryTree({ categories, onNavigate, className }: Cate
       <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {t('catalog')}
       </div>
-      <ul className="space-y-0.5 px-1">
+      <ul className="space-y-1 px-1">
         {tree.map((node) => (
           <CategoryNode
             key={node.key}

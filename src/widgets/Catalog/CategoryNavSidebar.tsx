@@ -12,7 +12,7 @@ export default function CategoryNavSidebar({ categories }: CategoryNavSidebarPro
 
   return (
     <aside className="hidden lg:block sticky top-16 z-40 w-64 shrink-0 h-[calc(100vh-4rem)] overflow-y-auto border-r border-border bg-background/80 backdrop-blur-sm">
-      <div className="py-3">
+      <div className="py-4">
         <CategoryTree categories={categories} />
       </div>
     </aside>

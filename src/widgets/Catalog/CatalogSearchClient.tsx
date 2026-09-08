@@ -92,6 +92,7 @@ export default function CatalogSearchClient() {
           ) : (
             <EcommerceGridLayout
               items={filtered}
+              locale={locale}
               columns={3}
               variant={(tenant?.theme?.productCardVariant as any) || 'action-bar'}
             />

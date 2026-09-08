@@ -59,6 +59,7 @@ export default function AdminSidebar({ locale, onLocaleChange, mobileOpen, onClo
       : []),
     ...(canManageOrders ? [{ href: '/admin/orders', label: t('orders'), icon: FileText }] : []),
     ...(canManageOrders ? [{ href: '/admin/customers', label: t('customers'), icon: Users }] : []),
+    { href: '/admin/team', label: t('teamNav'), icon: Users2 },
     ...(canManageOrders ? [{ href: '/admin/submissions', label: t('submissions'), icon: ClipboardList }] : []),
     ...(isBeauty ? [
       { href: '/admin/beauty-services', label: t('beautyServicesNav'), icon: Sparkles },

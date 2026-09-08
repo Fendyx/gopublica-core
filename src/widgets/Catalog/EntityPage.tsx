@@ -101,6 +101,7 @@ export default function EntityPage({ attribute, products, allAttributes, tenant 
         ) : (
           <EcommerceGridLayout
             items={products}
+            locale={locale}
             columns={3}
             variant={variant}
             currencySymbol={currencySymbol}

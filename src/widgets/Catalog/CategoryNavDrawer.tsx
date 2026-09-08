@@ -25,7 +25,7 @@ export default function CategoryNavDrawer({ categories }: CategoryNavDrawerProps
         <SheetHeader className="px-4 py-3 border-b border-border">
           <SheetTitle className="text-base">Catalog</SheetTitle>
         </SheetHeader>
-        <div className="py-3 overflow-y-auto h-[calc(100vh-4rem)]">
+        <div className="py-4 overflow-y-auto h-[calc(100vh-4rem)]">
           <CategoryTree
             categories={categories}
             onNavigate={() => setMobileDrawerOpen(false)}

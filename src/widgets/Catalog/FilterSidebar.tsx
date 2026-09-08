@@ -60,7 +60,7 @@ function CollapsibleSection({
         {title}
         <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      {open && <div className="mt-2 space-y-1.5">{children}</div>}
+      {open && <div className="mt-2 space-y-2">{children}</div>}
     </div>
   );
 }
@@ -198,7 +198,7 @@ export default function FilterSidebar({
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border-light">
         <div className="flex items-center gap-2 text-sm font-semibold">
@@ -226,7 +226,7 @@ export default function FilterSidebar({
           {filterData.catList.map((cat) => (
             <CheckboxItem
               key={cat.key}
-              label={`${cat.icon} ${cat.name}`}
+              label={cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
               count={cat.count}
               checked={activeFilters.categories.includes(cat.key)}
               onChange={() => toggle('categories', cat.key)}

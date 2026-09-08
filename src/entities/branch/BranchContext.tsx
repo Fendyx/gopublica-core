@@ -67,7 +67,8 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
       }
       
       const res = await fetch(url, { headers })
-      const data: Branch[] = await res.json()
+      const json = await res.json()
+      const data: Branch[] = Array.isArray(json) ? json : []
       setBranches(data)
       // If we have an initialBranch, ensure it's in the branches list
       if (initialBranch && !data.some(b => b._id === initialBranch._id)) {
