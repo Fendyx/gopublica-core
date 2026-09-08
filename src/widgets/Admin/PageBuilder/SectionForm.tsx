@@ -366,6 +366,9 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 <SelectContent>
                   <SelectItem value="fullscreen">{t('fullscreen')}</SelectItem>
                   <SelectItem value="compact">{t('compact')}</SelectItem>
+                  <SelectItem value="compact_large">{t('compactLarge')}</SelectItem>
+                  <SelectItem value="full_compact">{t('fullCompact')}</SelectItem>
+                  <SelectItem value="full_small">{t('fullSmall')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -36,6 +36,30 @@ const layoutStyles = {
     subtitle: 'hidden sm:block text-sm lg:text-base mb-4 opacity-90 line-clamp-2',
     cta: 'px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base',
   },
+  // Компактный крупный: тот же стиль, но высота +10%
+  compact_large: {
+    container:
+      'relative h-[38vh] min-h-[266px] max-h-[436px] w-[calc(100%-2rem)] mx-auto my-3 rounded-2xl md:rounded-3xl overflow-hidden flex items-center justify-center shadow-xl',
+    title: 'text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 leading-tight',
+    subtitle: 'hidden sm:block text-sm lg:text-base mb-4 opacity-90 line-clamp-2',
+    cta: 'px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base',
+  },
+  // Полная ширина, но компактная высота (как compact_large)
+  full_compact: {
+    container:
+      'relative h-[38vh] min-h-[266px] max-h-[436px] w-full overflow-hidden flex items-center justify-center',
+    title: 'text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 leading-tight',
+    subtitle: 'hidden sm:block text-sm lg:text-base mb-4 opacity-90 line-clamp-2',
+    cta: 'px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base',
+  },
+  // Полная ширина, но компактная высота (как compact)
+  full_small: {
+    container:
+      'relative h-[32vh] min-h-[220px] max-h-[360px] w-full overflow-hidden flex items-center justify-center',
+    title: 'text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 leading-tight',
+    subtitle: 'hidden sm:block text-sm lg:text-base mb-4 opacity-90 line-clamp-2',
+    cta: 'px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base',
+  },
 } as const;
 
 export default function HeroSection({ section, locale, tenantDomain }: HeroSectionProps) {

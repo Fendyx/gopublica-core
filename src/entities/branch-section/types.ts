@@ -25,7 +25,7 @@ export interface LocalizedText {
 export type Translations = Record<string, LocalizedText>;
 
 export type HeroMediaType = 'video' | 'image' | 'slider';
-export type HeroLayout = 'fullscreen' | 'compact';
+export type HeroLayout = 'fullscreen' | 'compact' | 'compact_large' | 'full_compact' | 'full_small';
 export type HeroTextAlign = 'left' | 'center' | 'right';
 
 /** Пресеты Hero-секции - предустановленные конфигурации для быстрого старта */
