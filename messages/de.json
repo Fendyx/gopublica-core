@@ -1084,7 +1084,12 @@
       "notesPlaceholder": "Optionale Notizen zu dieser Schicht...",
       "shiftsLabel": "Schichten",
       "legendTemplate": "Wochenplan",
-      "legendShift": "Zugewiesene Schicht"
+      "legendShift": "Zugewiesene Schicht",
+      "export": "Exportieren",
+      "exporting": "Exportiere...",
+      "exportAllExcel": "Alle Mitarbeiter (Excel)",
+      "exportAllPdf": "Alle Mitarbeiter (PDF)",
+      "exportSingleHint": "Pro Mitarbeiter:"
     },
     "branchSwitcher": {
       "loading": "Laden...",

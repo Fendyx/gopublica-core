@@ -1119,7 +1119,12 @@
       "notesPlaceholder": "Optional notes about this shift...",
       "shiftsLabel": "shifts",
       "legendTemplate": "Weekly template",
-      "legendShift": "Assigned shift"
+      "legendShift": "Assigned shift",
+      "export": "Export",
+      "exporting": "Exporting...",
+      "exportAllExcel": "All Staff (Excel)",
+      "exportAllPdf": "All Staff (PDF)",
+      "exportSingleHint": "Per staff member:"
     },
     "branchSwitcher": {
       "loading": "Loading...",

@@ -5,8 +5,15 @@ import { useTranslations, useLocale } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, ChevronRight, CalendarDays, LayoutGrid, Rows3, Plus, Zap } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarDays, LayoutGrid, Rows3, Plus, Zap, Download, FileSpreadsheet, FileText, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   buildMonthGrid,
   getWeek,
@@ -22,6 +29,7 @@ import {
   type CalendarEvent,
 } from '@/features/staff/generateCalendarEvents'
 import { getShifts, createShift, updateShift, deleteShift } from '@/entities/staffShift/api'
+import { exportToExcel, exportToPDF, type ExportScope } from '@/shared/lib/exportSchedule'
 import type { StaffMember } from '@/entities/staff/types'
 import type { StaffShift, CreateShiftPayload } from '@/entities/staffShift/types'
 import ShiftEditor from '@/features/staff/ShiftEditor'
@@ -129,6 +137,41 @@ export default function ScheduleCalendar({ staff }: ScheduleCalendarProps) {
     [fetchShifts],
   )
 
+  // ── Export handler ──
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = useCallback(
+    async (format: 'excel' | 'pdf', scope: ExportScope, targetStaffId?: string, targetStaffName?: string) => {
+      setExporting(true)
+      try {
+        const label = viewMode === 'week'
+          ? `${new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric' }).format(startDate)} – ${new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' }).format(endDate)}`
+          : new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(referenceDate)
+
+        const baseName = scope === 'single' && targetStaffName
+          ? `schedule-${targetStaffName.replace(/\s+/g, '-').toLowerCase()}`
+          : 'schedule-team'
+
+        const filename = `${baseName}-${toISODate(startDate)}-to-${toISODate(endDate)}`
+
+        const exportFn = format === 'excel' ? exportToExcel : exportToPDF
+        exportFn(events, {
+          format,
+          scope,
+          staffId: targetStaffId,
+          staffName: targetStaffName,
+          dateRangeLabel: label,
+          filename,
+        })
+      } catch (err) {
+        console.error('Export failed:', err)
+      } finally {
+        setExporting(false)
+      }
+    },
+    [events, startDate, endDate, viewMode, locale, referenceDate],
+  )
+
   // ── Click to add shift ──
   const openAddShift = useCallback((date?: string, staffId?: string) => {
     setEditingShift(null)
@@ -216,6 +259,43 @@ export default function ScheduleCalendar({ staff }: ScheduleCalendarProps) {
               <Plus className="mr-1 h-3.5 w-3.5" />
               {t('addShift')}
             </Button>
+            {/* Export dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8" disabled={exporting || events.length === 0}>
+                  <Download className="mr-1 h-3.5 w-3.5" />
+                  {exporting ? t('exporting') : t('export')}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport('excel', 'all')}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  {t('exportAllExcel')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('pdf', 'all')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  {t('exportAllPdf')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled className="text-xs text-muted-foreground px-2">
+                  <User className="mr-2 h-3 w-3" />
+                  {t('exportSingleHint')}
+                </DropdownMenuItem>
+                {staffLegend.map((s) => {
+                  const staffMember = staff.find((m) => m.name === s.name)
+                  if (!staffMember) return null
+                  return (
+                    <DropdownMenuItem
+                      key={s.name}
+                      onClick={() => handleExport('pdf', 'single', staffMember._id, s.name)}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      {s.name} (PDF)
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* View toggle */}
             <div className="flex rounded-md border">
               <Button

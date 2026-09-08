@@ -1084,7 +1084,12 @@
       "notesPlaceholder": "Opcjonalne notatki o tej zmianie...",
       "shiftsLabel": "zmian",
       "legendTemplate": "Szablon tygodniowy",
-      "legendShift": "Przypisana zmiana"
+      "legendShift": "Przypisana zmiana",
+      "export": "Eksportuj",
+      "exporting": "Eksportowanie...",
+      "exportAllExcel": "Wszyscy pracownicy (Excel)",
+      "exportAllPdf": "Wszyscy pracownicy (PDF)",
+      "exportSingleHint": "Według pracownika:"
     },
     "branchSwitcher": {
       "loading": "Ładowanie...",

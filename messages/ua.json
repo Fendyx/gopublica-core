@@ -1119,7 +1119,12 @@
       "notesPlaceholder": "Необов'язкові нотатки про цю зміну...",
       "shiftsLabel": "змін",
       "legendTemplate": "Тижневий шаблон",
-      "legendShift": "Призначена зміна"
+      "legendShift": "Призначена зміна",
+      "export": "Експорт",
+      "exporting": "Експортування...",
+      "exportAllExcel": "Усі працівники (Excel)",
+      "exportAllPdf": "Усі працівники (PDF)",
+      "exportSingleHint": "За працівником:"
     },
     "branchSwitcher": {
       "loading": "Завантаження...",
