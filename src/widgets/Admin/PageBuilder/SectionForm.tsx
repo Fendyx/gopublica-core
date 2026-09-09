@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, HeroPreset, CarouselMode, HeroCta, CtaTargetMode, HeroSlide, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
+import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, HeroPreset, HeroCtaVariant, GradientDirection, CarouselMode, HeroCta, CtaTargetMode, HeroSlide, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { saveBranchSectionItem, deleteBranchSectionItem } from '@/entities/branch-section/api';
 import { fetchArticles } from '@/entities/article/api';
@@ -585,42 +585,442 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
             {/* ─── CTA Buttons (hidden for banner_link preset) ─── */}
             {showCtaFields && (
               <>
-                <div>
-                  <Label>{t('primaryCtaLabel')}</Label>
-                  <Input
-                    value={settings.primaryCta?.label || ''}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        primaryCta: { ...settings.primaryCta, label: e.target.value },
-                      })
-                    }
+                {/* ─── Overlay Opacity ─── */}
+                <div className="space-y-2">
+                  <Label>{t('overlayOpacity')}</Label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={settings.overlayOpacity ?? 40}
+                      onChange={(e) =>
+                        setSettings({ ...settings, overlayOpacity: Number(e.target.value) })
+                      }
+                      className="flex-1 h-2 rounded-full appearance-none bg-muted cursor-pointer accent-primary"
+                    />
+                    <span className="text-sm text-muted-foreground w-10 text-right tabular-nums">
+                      {settings.overlayOpacity ?? 40}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* ─── Button 1 ─── */}
+                <div className="rounded-lg border p-3 space-y-3">
+                  <p className="text-sm font-medium text-muted-foreground">{t('button1Label')}</p>
+                  <div>
+                    <Label>{t('buttonTextLabel')}</Label>
+                    <Input
+                      value={settings.primaryCta?.label || ''}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          primaryCta: { ...settings.primaryCta, label: e.target.value },
+                        })
+                      }
+                      placeholder={t('buttonTextPlaceholder')}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>{t('buttonStyle')}</Label>
+                      <Select
+                        value={settings.primaryCta?.variant || 'filled'}
+                        onValueChange={(val) =>
+                          setSettings({
+                            ...settings,
+                            primaryCta: { ...settings.primaryCta, variant: val as HeroCtaVariant },
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="filled">{t('buttonStyleFilled')}</SelectItem>
+                          <SelectItem value="outline">{t('buttonStyleOutline')}</SelectItem>
+                          <SelectItem value="ghost">{t('buttonStyleGhost')}</SelectItem>
+                          <SelectItem value="soft">{t('buttonStyleSoft')}</SelectItem>
+                          <SelectItem value="borderless">{t('buttonStyleBorderless')}</SelectItem>
+                          <SelectItem value="underline">{t('buttonStyleUnderline')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>{t('buttonColor')}</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.primaryCta?.color || '#ff0505'}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              primaryCta: { ...settings.primaryCta, color: e.target.value },
+                            })
+                          }
+                          className="h-9 w-9 rounded border cursor-pointer p-0.5"
+                        />
+                        <Input
+                          value={settings.primaryCta?.color || ''}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              primaryCta: { ...settings.primaryCta, color: e.target.value || undefined },
+                            })
+                          }
+                          placeholder={t('defaultColor')}
+                          className="flex-1"
+                        />
+                        {settings.primaryCta?.color && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setSettings({
+                                ...settings,
+                                primaryCta: { ...settings.primaryCta, color: undefined },
+                              })
+                            }
+                          >
+                            {t('resetToDefault')}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>{t('buttonTextColor')}</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={settings.primaryCta?.textColor || '#ffffff'}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            primaryCta: { ...settings.primaryCta, textColor: e.target.value },
+                          })
+                        }
+                        className="h-9 w-9 rounded border cursor-pointer p-0.5"
+                      />
+                      <Input
+                        value={settings.primaryCta?.textColor || ''}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            primaryCta: { ...settings.primaryCta, textColor: e.target.value || undefined },
+                          })
+                        }
+                        placeholder={t('defaultColor')}
+                        className="flex-1"
+                      />
+                      {settings.primaryCta?.textColor && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setSettings({
+                              ...settings,
+                              primaryCta: { ...settings.primaryCta, textColor: undefined },
+                            })
+                          }
+                        >
+                          {t('resetToDefault')}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  {/* ─── Gradient (Button 1) ─── */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>{t('gradient')}</Label>
+                      <Switch
+                        checked={Boolean(settings.primaryCta?.gradientFrom && settings.primaryCta?.gradientTo)}
+                        onCheckedChange={(checked) =>
+                          setSettings({
+                            ...settings,
+                            primaryCta: {
+                              ...settings.primaryCta,
+                              gradientFrom: checked ? (settings.primaryCta?.gradientFrom || settings.primaryCta?.color || '#ff0505') : undefined,
+                              gradientTo: checked ? (settings.primaryCta?.gradientTo || settings.primaryCta?.color || '#F1A208') : undefined,
+                              gradientDirection: checked ? (settings.primaryCta?.gradientDirection || 'to-r') : undefined,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    {settings.primaryCta?.gradientFrom && settings.primaryCta?.gradientTo && (
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <Label className="text-xs">{t('gradientFrom')}</Label>
+                          <input
+                            type="color"
+                            value={settings.primaryCta.gradientFrom}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                primaryCta: { ...settings.primaryCta, gradientFrom: e.target.value },
+                              })
+                            }
+                            className="h-9 w-full rounded border cursor-pointer p-0.5"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">{t('gradientTo')}</Label>
+                          <input
+                            type="color"
+                            value={settings.primaryCta.gradientTo}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                primaryCta: { ...settings.primaryCta, gradientTo: e.target.value },
+                              })
+                            }
+                            className="h-9 w-full rounded border cursor-pointer p-0.5"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">{t('gradientDirection')}</Label>
+                          <Select
+                            value={settings.primaryCta.gradientDirection || 'to-r'}
+                            onValueChange={(val) =>
+                              setSettings({
+                                ...settings,
+                                primaryCta: { ...settings.primaryCta, gradientDirection: val as GradientDirection },
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="to-r">→</SelectItem>
+                              <SelectItem value="to-br">↘</SelectItem>
+                              <SelectItem value="to-b">↓</SelectItem>
+                              <SelectItem value="to-bl">↙</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <CtaLinkManager
+                    label={t('button1Label')}
+                    cta={settings.primaryCta}
+                    sections={sections || []}
+                    onChange={(cta) => setSettings({ ...settings, primaryCta: cta })}
                   />
                 </div>
-                <CtaLinkManager
-                  label="Primary"
-                  cta={settings.primaryCta}
-                  sections={sections || []}
-                  onChange={(cta) => setSettings({ ...settings, primaryCta: cta })}
-                />
-                <div>
-                  <Label>{t('secondaryCtaLabel')}</Label>
-                  <Input
-                    value={settings.secondaryCta?.label || ''}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        secondaryCta: { ...settings.secondaryCta, label: e.target.value },
-                      })
-                    }
+
+                {/* ─── Button 2 ─── */}
+                <div className="rounded-lg border p-3 space-y-3">
+                  <p className="text-sm font-medium text-muted-foreground">{t('button2Label')}</p>
+                  <div>
+                    <Label>{t('buttonTextLabel')}</Label>
+                    <Input
+                      value={settings.secondaryCta?.label || ''}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          secondaryCta: { ...settings.secondaryCta, label: e.target.value },
+                        })
+                      }
+                      placeholder={t('buttonTextPlaceholder')}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>{t('buttonStyle')}</Label>
+                      <Select
+                        value={settings.secondaryCta?.variant || 'outline'}
+                        onValueChange={(val) =>
+                          setSettings({
+                            ...settings,
+                            secondaryCta: { ...settings.secondaryCta, variant: val as HeroCtaVariant },
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="filled">{t('buttonStyleFilled')}</SelectItem>
+                          <SelectItem value="outline">{t('buttonStyleOutline')}</SelectItem>
+                          <SelectItem value="ghost">{t('buttonStyleGhost')}</SelectItem>
+                          <SelectItem value="soft">{t('buttonStyleSoft')}</SelectItem>
+                          <SelectItem value="borderless">{t('buttonStyleBorderless')}</SelectItem>
+                          <SelectItem value="underline">{t('buttonStyleUnderline')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>{t('buttonColor')}</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.secondaryCta?.color || '#F1A208'}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              secondaryCta: { ...settings.secondaryCta, color: e.target.value },
+                            })
+                          }
+                          className="h-9 w-9 rounded border cursor-pointer p-0.5"
+                        />
+                        <Input
+                          value={settings.secondaryCta?.color || ''}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              secondaryCta: { ...settings.secondaryCta, color: e.target.value || undefined },
+                            })
+                          }
+                          placeholder={t('defaultColor')}
+                          className="flex-1"
+                        />
+                        {settings.secondaryCta?.color && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setSettings({
+                                ...settings,
+                                secondaryCta: { ...settings.secondaryCta, color: undefined },
+                              })
+                            }
+                          >
+                            {t('resetToDefault')}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>{t('buttonTextColor')}</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={settings.secondaryCta?.textColor || '#F1A208'}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            secondaryCta: { ...settings.secondaryCta, textColor: e.target.value },
+                          })
+                        }
+                        className="h-9 w-9 rounded border cursor-pointer p-0.5"
+                      />
+                      <Input
+                        value={settings.secondaryCta?.textColor || ''}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            secondaryCta: { ...settings.secondaryCta, textColor: e.target.value || undefined },
+                          })
+                        }
+                        placeholder={t('defaultColor')}
+                        className="flex-1"
+                      />
+                      {settings.secondaryCta?.textColor && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setSettings({
+                              ...settings,
+                              secondaryCta: { ...settings.secondaryCta, textColor: undefined },
+                            })
+                          }
+                        >
+                          {t('resetToDefault')}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  {/* ─── Gradient (Button 2) ─── */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>{t('gradient')}</Label>
+                      <Switch
+                        checked={Boolean(settings.secondaryCta?.gradientFrom && settings.secondaryCta?.gradientTo)}
+                        onCheckedChange={(checked) =>
+                          setSettings({
+                            ...settings,
+                            secondaryCta: {
+                              ...settings.secondaryCta,
+                              gradientFrom: checked ? (settings.secondaryCta?.gradientFrom || settings.secondaryCta?.color || '#F1A208') : undefined,
+                              gradientTo: checked ? (settings.secondaryCta?.gradientTo || settings.secondaryCta?.color || '#ff0505') : undefined,
+                              gradientDirection: checked ? (settings.secondaryCta?.gradientDirection || 'to-r') : undefined,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    {settings.secondaryCta?.gradientFrom && settings.secondaryCta?.gradientTo && (
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <Label className="text-xs">{t('gradientFrom')}</Label>
+                          <input
+                            type="color"
+                            value={settings.secondaryCta.gradientFrom}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                secondaryCta: { ...settings.secondaryCta, gradientFrom: e.target.value },
+                              })
+                            }
+                            className="h-9 w-full rounded border cursor-pointer p-0.5"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">{t('gradientTo')}</Label>
+                          <input
+                            type="color"
+                            value={settings.secondaryCta.gradientTo}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                secondaryCta: { ...settings.secondaryCta, gradientTo: e.target.value },
+                              })
+                            }
+                            className="h-9 w-full rounded border cursor-pointer p-0.5"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">{t('gradientDirection')}</Label>
+                          <Select
+                            value={settings.secondaryCta.gradientDirection || 'to-r'}
+                            onValueChange={(val) =>
+                              setSettings({
+                                ...settings,
+                                secondaryCta: { ...settings.secondaryCta, gradientDirection: val as GradientDirection },
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="to-r">→</SelectItem>
+                              <SelectItem value="to-br">↘</SelectItem>
+                              <SelectItem value="to-b">↓</SelectItem>
+                              <SelectItem value="to-bl">↙</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <CtaLinkManager
+                    label={t('button2Label')}
+                    cta={settings.secondaryCta}
+                    sections={sections || []}
+                    onChange={(cta) => setSettings({ ...settings, secondaryCta: cta })}
                   />
                 </div>
-                <CtaLinkManager
-                  label="Secondary"
-                  cta={settings.secondaryCta}
-                  sections={sections || []}
-                  onChange={(cta) => setSettings({ ...settings, secondaryCta: cta })}
-                />
               </>
             )}
           </div>
@@ -816,8 +1216,100 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
       case 'booking': {
         const sideContentType = settings.sideContentType || 'none';
         const checkoutFlow = settings.checkoutFlow || 'inline';
+        const bookingMode = settings.bookingMode || 'reservation';
         return (
           <div className="space-y-4">
+            {/* ── Booking Mode Toggle ── */}
+            <div className="space-y-2">
+              <Label>{t('bookingMode')}</Label>
+              <Select
+                value={bookingMode}
+                onValueChange={(val) =>
+                  setSettings({
+                    ...settings,
+                    bookingMode: val as 'reservation' | 'slot_booking',
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('selectBookingMode')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="reservation">{t('reservationMode')}</SelectItem>
+                  <SelectItem value="slot_booking">{t('slotBookingMode')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{t('bookingModeHint')}</p>
+            </div>
+
+            {/* ── Slot Booking Config (shown only in slot_booking mode) ── */}
+            {bookingMode === 'slot_booking' && (
+              <div className="space-y-4 p-4 border border-dashed rounded-lg bg-muted/30">
+                <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                  {t('slotConfig')}
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t('slotStartTime')}</Label>
+                    <Input
+                      type="time"
+                      value={settings.slotStartTime || '09:00'}
+                      onChange={(e) =>
+                        setSettings({ ...settings, slotStartTime: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('slotEndTime')}</Label>
+                    <Input
+                      type="time"
+                      value={settings.slotEndTime || '22:00'}
+                      onChange={(e) =>
+                        setSettings({ ...settings, slotEndTime: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t('slotInterval')}</Label>
+                    <Select
+                      value={String(settings.slotIntervalMinutes || 60)}
+                      onValueChange={(val) =>
+                        setSettings({ ...settings, slotIntervalMinutes: Number(val) as any })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15">15 min</SelectItem>
+                        <SelectItem value="30">30 min</SelectItem>
+                        <SelectItem value="60">60 min</SelectItem>
+                        <SelectItem value="90">90 min</SelectItem>
+                        <SelectItem value="120">120 min</SelectItem>
+                        <SelectItem value="180">180 min</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('slotCapacity')}</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={999}
+                      value={settings.slotCapacity || 10}
+                      onChange={(e) =>
+                        setSettings({ ...settings, slotCapacity: parseInt(e.target.value) || 10 })
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">{t('slotCapacityHint')}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Checkout Flow (shown in reservation mode or slot_booking mode) ── */}
             <div className="space-y-2">
               <Label>{t('checkoutFlow')}</Label>
               <Select
@@ -848,7 +1340,6 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                   setSettings({
                     ...settings,
                     sideContentType: val as 'none' | 'map' | 'text',
-                    // Clear stale fields when switching away from a mode
                     ...(val === 'map' ? {} : { customText: undefined }),
                     ...(val === 'text' ? {} : { address: undefined }),
                   })

@@ -27,6 +27,10 @@ interface SectionProps {
   branchSlug?: string;
   /** Pre-fetched dynamic items for carousel sections */
   dynamicItems?: MenuItem[];
+  /** Pre-fetched all menu/catalog items for system sections (avoids client re-fetch) */
+  allMenuItems?: MenuItem[];
+  /** Pre-fetched categories for system sections (avoids client re-fetch) */
+  categories?: Array<{ key: string; name: string; icon?: string; niche?: string; [k: string]: unknown }>;
   /** Currency symbol for price display */
   currencySymbol?: string;
 }

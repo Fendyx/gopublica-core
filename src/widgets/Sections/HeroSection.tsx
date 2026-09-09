@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
-import { BranchSection, HeroSettings, HeroCta, HeroTextAlign, HeroSlide } from '@/entities/branch-section/types';
+import { BranchSection, HeroSettings, HeroCta, HeroCtaVariant, GradientDirection, HeroTextAlign, HeroSlide } from '@/entities/branch-section/types';
 
 interface HeroSectionProps {
   section: BranchSection;
@@ -154,6 +154,84 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
       emblaApi.off('pointerUp', handlePointerUp);
     };
   }, [emblaApi, handlePointerUp]);
+
+  /** Преобразует направление градиента из enum в CSS-значение */
+  const gradientDirMap: Record<GradientDirection, string> = {
+    'to-r': 'to right',
+    'to-br': 'to bottom right',
+    'to-b': 'to bottom',
+    'to-bl': 'to bottom left',
+  };
+
+  /**
+   * Вычисляет inline-стили и CSS-классы для кнопки CTA на основе variant, color, textColor, gradient.
+   * Использует CSS-переменные тенанта как fallback.
+   */
+  const getCtaStyles = (
+    cta: HeroCta,
+    /** Индекс кнопки: 0 = primary (fallback: primary color, filled), 1 = secondary (fallback: accent, outline) */
+    index: 0 | 1
+  ): { className: string; style: React.CSSProperties } => {
+    const variant: HeroCtaVariant = cta.variant || (index === 0 ? 'filled' : 'outline');
+    const fallbackColor = index === 0 ? 'var(--color-primary)' : 'var(--color-accent)';
+    const color = cta.color || fallbackColor;
+
+    const hasGradient = Boolean(cta.gradientFrom && cta.gradientTo);
+    const bgImage = hasGradient
+      ? `linear-gradient(${gradientDirMap[cta.gradientDirection || 'to-r']}, ${cta.gradientFrom}, ${cta.gradientTo})`
+      : undefined;
+
+    const base = `inline-block font-medium transition-all ${styles.cta}`;
+
+    switch (variant) {
+      case 'filled':
+        return {
+          className: `${base} hover:opacity-90`,
+          style: {
+            ...(bgImage ? { backgroundImage: bgImage } : { backgroundColor: color }),
+            color: cta.textColor || '#ffffff',
+          },
+        };
+      case 'outline':
+        return {
+          className: `${base} bg-transparent hover:bg-white/10`,
+          style: {
+            borderColor: color,
+            color: cta.textColor || color,
+            borderWidth: '2px',
+            borderStyle: 'solid',
+          },
+        };
+      case 'ghost':
+        return {
+          className: `${base} bg-transparent hover:underline`,
+          style: {
+            color: cta.textColor || color,
+          },
+        };
+      case 'soft':
+        return {
+          className: `${base} bg-white/15 text-white hover:bg-white/25`,
+          style: {
+            ...(cta.textColor ? { color: cta.textColor } : {}),
+          },
+        };
+      case 'borderless':
+        return {
+          className: `${base} bg-transparent border-none hover:bg-white/10`,
+          style: {
+            color: cta.textColor || '#ffffff',
+          },
+        };
+      case 'underline':
+        return {
+          className: `${base} bg-transparent border-none underline underline-offset-4 hover:text-white/80`,
+          style: {
+            color: cta.textColor || '#ffffff',
+          },
+        };
+    }
+  };
 
   /**
    * Разрешает целевую ссылку CTA в href:
@@ -315,7 +393,10 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
   const contentBlock = hasContent ? (
     <>
       {/* Затемняющий слой поверх медиа (для читаемости текста) */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div
+        className="absolute inset-0 bg-black"
+        style={{ opacity: (settings.overlayOpacity ?? 40) / 100 }}
+      />
 
       {/* ─── Контент ─── */}
       {/* ВАЖНО: w-full обязателен - без него блок сжимается по контенту (shrink-wrap),
@@ -334,12 +415,13 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
           <div className={`flex flex-wrap gap-4 ${align.cta}`}>
             {hasPrimaryCta && (() => {
               const href = resolveCtaHref(settings.primaryCta!) || '#';
+              const ctaStyles = getCtaStyles(settings.primaryCta!, 0);
               return (
                 <Link
                   href={href}
                   onClick={(e) => handleCtaClick(e, href)}
-                  className={`inline-block text-white font-medium transition-opacity hover:opacity-90 ${styles.cta}`}
-                  style={{ backgroundColor: 'var(--color-primary)' }}
+                  className={ctaStyles.className}
+                  style={ctaStyles.style}
                 >
                   {settings.primaryCta!.label}
                 </Link>
@@ -347,15 +429,13 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
             })()}
             {hasSecondaryCta && (() => {
               const href = resolveCtaHref(settings.secondaryCta!) || '#';
+              const ctaStyles = getCtaStyles(settings.secondaryCta!, 1);
               return (
                 <Link
                   href={href}
                   onClick={(e) => handleCtaClick(e, href)}
-                  className={`inline-block font-medium border-2 transition-colors hover:bg-white/10 ${styles.cta}`}
-                  style={{
-                    borderColor: 'var(--color-accent)',
-                    color: 'var(--color-accent)',
-                  }}
+                  className={ctaStyles.className}
+                  style={ctaStyles.style}
                 >
                   {settings.secondaryCta!.label}
                 </Link>

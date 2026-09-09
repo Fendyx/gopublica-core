@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout';
 import { getTenantByDomain } from '@/entities/tenant/api';
-import { fetchMenu } from '@/entities/menu-item/api';
+import { fetchMenu, fetchMenuWithCategories } from '@/entities/menu-item/api';
 import { fetchBranchBySlug } from '@/entities/branch/api';
 import { fetchPublicBranchSections } from '@/entities/branch-section/api';
 import SectionRenderer from '@/widgets/Sections/SectionRenderer';
@@ -14,26 +14,16 @@ import type { MenuItem } from '@/entities/menu-item/types';
 // Dynamic: uses headers() for multi-tenant domain detection.
 export const dynamic = 'force-dynamic';
 
-async function resolveDynamicItems(
-  tenantId: string,
-  branchId: string,
+/** Build dynamic items map from pre-fetched items (avoids redundant fetch). */
+function resolveDynamicItemsFromItems(
+  allItems: MenuItem[],
   sections: BranchSection[]
-): Promise<Map<string, MenuItem[]>> {
+): Map<string, MenuItem[]> {
   const dynamicSections = sections.filter((section) => {
     if (section.type !== 'entity_carousel' && section.type !== 'feature_carousel') return false;
     const settings = (section.settings || {}) as EntityCarouselSettings | FeatureCarouselSettings;
     return settings.mode === 'ecommerce' || settings.mode === 'menu';
   });
-
-  if (dynamicSections.length === 0) return new Map();
-
-  let allItems: MenuItem[] = [];
-  try {
-    allItems = await fetchMenu(tenantId, branchId);
-  } catch (err) {
-    console.error('[catalog] fetchMenu failed:', err);
-    return new Map();
-  }
 
   const itemsMap = new Map<string, MenuItem[]>();
   for (const section of dynamicSections) {
@@ -93,7 +83,18 @@ export default async function CatalogPage({
 
   // If page-builder sections exist, render via SectionRenderer (system_catalog handles the grid)
   if (sections && sections.length > 0) {
-    const dynamicItemsMap = await resolveDynamicItems(tenant.tenantId, branchId, sections);
+    // Single merged call: fetch menu items + categories in one round-trip
+    let allItems: MenuItem[] = [];
+    let categories: Array<{ key: string; name: string; coverImage?: string; productCount?: number; cardBgColor?: string; description?: string; imageAspectRatio?: string; parentCategoryKey?: string }> = [];
+    try {
+      const result = await fetchMenuWithCategories(tenant.tenantId, branchId, 'ecommerce');
+      allItems = result.items;
+      categories = result.categories;
+    } catch (err) {
+      console.error('[catalog] fetchMenuWithCategories failed:', err);
+    }
+
+    const dynamicItemsMap = resolveDynamicItemsFromItems(allItems, sections);
     const currencySymbol = tenant.primaryCurrency === 'PLN' ? 'zł' : tenant.primaryCurrency || '€';
 
     return (
@@ -103,6 +104,8 @@ export default async function CatalogPage({
         tenantDomain={tenantDomain}
         branchSlug={branchSlug}
         dynamicItemsMap={dynamicItemsMap}
+        allMenuItems={allItems}
+        categories={categories}
         currencySymbol={currencySymbol}
       />
     );

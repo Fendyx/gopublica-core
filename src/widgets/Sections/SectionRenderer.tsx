@@ -9,11 +9,15 @@ interface SectionRendererProps {
   branchSlug?: string;
   /** Pre-fetched dynamic items for carousel sections, keyed by section._id */
   dynamicItemsMap?: Map<string, MenuItem[]>;
+  /** Pre-fetched all menu/catalog items for system sections */
+  allMenuItems?: MenuItem[];
+  /** Pre-fetched categories for system sections */
+  categories?: Array<{ key: string; name: string; icon?: string; niche?: string; [k: string]: unknown }>;
   /** Currency symbol for price display */
   currencySymbol?: string;
 }
 
-export default function SectionRenderer({ sections, locale, tenantDomain, branchSlug, dynamicItemsMap = new Map(), currencySymbol = 'zł' }: SectionRendererProps) {
+export default function SectionRenderer({ sections, locale, tenantDomain, branchSlug, dynamicItemsMap = new Map(), allMenuItems, categories, currencySymbol = 'zł' }: SectionRendererProps) {
   const activeSections = sections
     .filter((s) => s.isActive)
     .sort((a, b) => a.order - b.order);
@@ -36,6 +40,8 @@ export default function SectionRenderer({ sections, locale, tenantDomain, branch
               tenantDomain={tenantDomain}
               branchSlug={branchSlug}
               dynamicItems={dynamicItems}
+              allMenuItems={allMenuItems}
+              categories={categories}
               currencySymbol={currencySymbol}
             />
           </div>

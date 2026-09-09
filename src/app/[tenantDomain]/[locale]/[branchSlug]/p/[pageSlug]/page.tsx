@@ -6,6 +6,7 @@
 
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { getTenantByDomain } from '@/entities/tenant/api';
 import { fetchBranchBySlug } from '@/entities/branch/api';
 import { fetchPublicBranchSections } from '@/entities/branch-section/api';
@@ -16,6 +17,47 @@ import type { Branch } from '@/entities/branch/types';
 
 // Dynamic: uses headers() for multi-tenant domain detection.
 export const dynamic = 'force-dynamic';
+
+/** Resolve SEO metadata for a custom page. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tenantDomain: string; locale: string; branchSlug: string; pageSlug: string }>;
+}): Promise<Metadata> {
+  const { locale, tenantDomain, branchSlug, pageSlug } = await params;
+
+  const headersList = await headers();
+  const host = headersList.get('host') ?? tenantDomain;
+  const tenant = await getTenantByDomain(host);
+  if (!tenant) return {};
+
+  let branch: Branch | null = null;
+  try {
+    branch = await fetchBranchBySlug(tenant.tenantId, branchSlug);
+  } catch { /* ignore */ }
+
+  const customPage = branch?.customPages?.find(
+    (cp) => cp.slug === pageSlug && cp.isActive
+  );
+
+  if (!customPage) return {};
+
+  const title = customPage.titleI18n?.[locale] || customPage.title || tenant.clientName;
+  const description = customPage.descriptionI18n?.[locale] || customPage.description || '';
+
+  return {
+    title,
+    description: description || undefined,
+    openGraph: {
+      title,
+      description: description || undefined,
+      url: `/${locale}/${branchSlug}/p/${pageSlug}`,
+      siteName: tenant.clientName,
+      locale,
+      type: 'website',
+    },
+  };
+}
 
 /**
  * Gets the currency symbol for a branch/tenant.
@@ -86,9 +128,14 @@ export default async function CustomPage({
   }
 
   if (!sections || sections.length === 0) {
+    const pageTitle = branch?.customPages?.find(
+      (cp) => cp.slug === pageSlug && cp.isActive
+    );
+    const displayTitle = pageTitle?.titleI18n?.[locale] || pageTitle?.title || 'This page';
+
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <h1 className="text-2xl text-text-secondary">This page has no content yet.</h1>
+        <h1 className="text-2xl text-text-secondary">{displayTitle} has no content yet.</h1>
       </div>
     );
   }

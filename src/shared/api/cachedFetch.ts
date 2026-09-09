@@ -1,12 +1,10 @@
 // src/shared/api/cachedFetch.ts
 //
 // Shared wrapper around the native fetch API that injects Next.js cache tags
-// and always uses no-store to bypass the Next.js data cache.
+// and supports time-based revalidation for public data.
 //
-// Rationale: The multi-tenant system resolves data via headers/cookies that
-// vary per request, and admin mutations must be visible immediately.
-// On-demand revalidation via revalidateTag() is unreliable when the initial
-// fetch was force-cached, so we disable caching entirely for now.
+// Default behavior: 60-second revalidation with tags for on-demand invalidation.
+// Admin data should pass { cache: 'no-store' } explicitly.
 //
 // Usage:
 //   import { cachedFetch } from '@/shared/api/cachedFetch'
@@ -18,6 +16,7 @@ type CacheOption = 'force-cache' | 'no-store' | 'default'
 interface CachedFetchOptions extends RequestInit {
   tags?: string[]
   cache?: CacheOption
+  revalidate?: number
 }
 
 export async function cachedFetch(
@@ -25,11 +24,11 @@ export async function cachedFetch(
   tags: string[] = [],
   init?: CachedFetchOptions
 ): Promise<Response> {
-  const { tags: _tags, cache, ...rest } = init ?? {}
+  const { tags: _tags, cache, revalidate, ...rest } = init ?? {}
 
   return fetch(url, {
     ...rest,
-    next: { tags },
-    cache: cache ?? 'no-store',
+    next: { tags, revalidate: revalidate ?? 60 },
+    cache: cache ?? 'default',
   })
 }

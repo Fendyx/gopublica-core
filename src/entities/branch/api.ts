@@ -54,14 +54,15 @@ export async function fetchCustomPages(branchId: string): Promise<CustomPage[]> 
 
 export async function createCustomPage(
   branchId: string,
-  title: string
+  data: string | { title: string; titleI18n?: Record<string, string>; description?: string; descriptionI18n?: Record<string, string> }
 ): Promise<CustomPage> {
+  const body = typeof data === 'string' ? { title: data } : data
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-      body: JSON.stringify({ title }),
+      body: JSON.stringify(body),
     }
   )
   if (!res.ok) {
@@ -74,7 +75,7 @@ export async function createCustomPage(
 export async function updateCustomPage(
   branchId: string,
   slug: string,
-  data: { title?: string; isActive?: boolean; slug?: string }
+  data: { title?: string; titleI18n?: Record<string, string>; description?: string; descriptionI18n?: Record<string, string>; isActive?: boolean; slug?: string }
 ): Promise<CustomPage> {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages/${slug}`,

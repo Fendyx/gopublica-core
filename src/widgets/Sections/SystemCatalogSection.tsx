@@ -15,14 +15,16 @@ interface SystemCatalogSectionProps {
   locale: string;
   tenantDomain: string;
   branchSlug?: string;
+  allMenuItems?: MenuItem[];
+  categories?: Array<{ key: string; name: string; coverImage?: string; productCount?: number; cardBgColor?: string; description?: string; imageAspectRatio?: string; parentCategoryKey?: string }>;
 }
 
-export default function SystemCatalogSection({ section, locale, branchSlug }: SystemCatalogSectionProps) {
+export default function SystemCatalogSection({ section, locale, branchSlug, allMenuItems, categories: preloadedCategories }: SystemCatalogSectionProps) {
   const t = useTranslations('catalog');
   const tenant = useTenant();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<CategoryCardData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!allMenuItems);
 
   const tenantId = tenant?.tenantId;
   const branchId = (section as any).branchId;
@@ -30,6 +32,23 @@ export default function SystemCatalogSection({ section, locale, branchSlug }: Sy
   const currencySymbol = tenant?.primaryCurrency === 'PLN' ? 'zł' : tenant?.primaryCurrency || '€';
 
   useEffect(() => {
+    // Use pre-fetched data when available
+    if (allMenuItems && preloadedCategories) {
+      setItems(allMenuItems.filter((item) => item.productType === 'physical_product'));
+      setCategories(preloadedCategories.map((cat) => ({
+        name: cat.name,
+        key: cat.key,
+        coverImage: cat.coverImage,
+        productCount: cat.productCount,
+        cardBgColor: cat.cardBgColor,
+        description: cat.description,
+        imageAspectRatio: cat.imageAspectRatio,
+        parentCategoryKey: cat.parentCategoryKey,
+      })));
+      setLoading(false);
+      return;
+    }
+
     if (!tenantId || !branchId) return;
 
     Promise.all([
@@ -51,7 +70,7 @@ export default function SystemCatalogSection({ section, locale, branchSlug }: Sy
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [tenantId, branchId]);
+  }, [tenantId, branchId, allMenuItems, preloadedCategories]);
 
   if (loading) {
     return <div className="py-10 text-center text-muted-foreground">Loading catalog…</div>;

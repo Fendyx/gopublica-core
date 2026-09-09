@@ -12,6 +12,7 @@ import VariantSelector from '@/widgets/Catalog/VariantSelector';
 import RelatedProducts from '@/widgets/Catalog/RelatedProducts';
 import type { MenuItem } from '@/entities/menu-item/types';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
+import { useLinkedAttributes, type LinkedAttribute } from '@/shared/hooks/useLinkedAttributes';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   PLN: 'zł', EUR: '€', USD: '$', UAH: '₴', GBP: '£', CZK: 'Kč', CHF: 'CHF',
@@ -88,7 +89,8 @@ export default function ProductDetail({
     }
   }, [product.name]);
 
-  const hasSpecs = hasAttributes(product) || hasWeightVal(product) || hasDims(product) || hasTagsList(product);
+  const linkedAttrs = useLinkedAttributes(product.attributeRefs, tenant.tenantId);
+  const hasSpecs = hasAttributes(product) || hasWeightVal(product) || hasDims(product) || hasTagsList(product) || linkedAttrs.length > 0;
 
   return (
     <div>
@@ -163,7 +165,7 @@ export default function ProductDetail({
             )}
 
             <div className="border-t border-border-light pt-4">
-              <ProductTabs product={product} hasSpecs={hasSpecs} t={t} />
+              <ProductTabs product={product} hasSpecs={hasSpecs} linkedAttrs={linkedAttrs} t={t} />
             </div>
           </div>
         </div>
@@ -268,7 +270,7 @@ export default function ProductDetail({
               </div>
 
               <div className="mt-7">
-                <ProductTabs product={product} hasSpecs={hasSpecs} t={t} />
+                <ProductTabs product={product} hasSpecs={hasSpecs} linkedAttrs={linkedAttrs} t={t} />
               </div>
             </div>
           </div>
@@ -363,10 +365,12 @@ function hasTagsList(product: MenuItem) {
 function ProductTabs({
   product,
   hasSpecs,
+  linkedAttrs,
   t,
 }: {
   product: MenuItem;
   hasSpecs: boolean;
+  linkedAttrs: LinkedAttribute[];
   t: ReturnType<typeof useTranslations<'productDetail'>>;
 }) {
   const hasDescription = Boolean(product.description);
@@ -416,7 +420,7 @@ function ProductTabs({
 
       {hasSpecs && (
         <TabsContent value="specifications" className="pt-4">
-          <SpecificationsTab product={product} t={t} />
+          <SpecificationsTab product={product} linkedAttrs={linkedAttrs} t={t} />
         </TabsContent>
       )}
 
@@ -431,19 +435,38 @@ function ProductTabs({
 
 function SpecificationsTab({
   product,
+  linkedAttrs,
   t,
 }: {
   product: MenuItem;
+  linkedAttrs: LinkedAttribute[];
   t: ReturnType<typeof useTranslations<'productDetail'>>;
 }) {
+  const { locale, branchSlug } = useParams();
   const attrs = (product.attributes ?? []).filter(a => a.key?.trim() && a.value?.trim());
   const wgt = hasWeightVal(product);
   const dims = hasDims(product);
   const tags = hasTagsList(product);
 
-  if (!wgt && !dims && !tags && attrs.length === 0) {
+  if (!wgt && !dims && !tags && attrs.length === 0 && linkedAttrs.length === 0) {
     return <p className="text-sm text-muted-foreground">{t('noSpecifications')}</p>;
   }
+
+  // Group linked attributes by type for display
+  const linkedByType = new Map<string, LinkedAttribute[]>();
+  for (const la of linkedAttrs) {
+    const list = linkedByType.get(la.type) ?? [];
+    list.push(la);
+    linkedByType.set(la.type, list);
+  }
+  const TYPE_LABELS: Record<string, string> = {
+    author: 'Authors',
+    publisher: 'Publishers',
+    genre: 'Genres',
+    language: 'Languages',
+    series: 'Series',
+    custom: 'Attributes',
+  };
 
   // Build dimension string - only non-zero parts
   let dimStr = '';
@@ -457,6 +480,30 @@ function SpecificationsTab({
 
   return (
     <div className="space-y-0">
+      {/* Linked managed attributes (Authors, Genres, etc.) */}
+      {linkedAttrs.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {[...linkedByType.entries()].map(([type, items]) => (
+            <div key={type} className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-[10px] tracking-widest uppercase text-muted-foreground min-w-[70px]">
+                {TYPE_LABELS[type] ?? type}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {items.map((attr) => (
+                  <Link
+                    key={attr.attributeId}
+                    href={`/${locale}/${branchSlug}/catalog/${attr.type}/${attr.slug}`}
+                    className="inline-block px-2.5 py-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    {attr.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <table className="w-full text-xs border-collapse">
         <tbody>
           {attrs.map((attr, idx) => (

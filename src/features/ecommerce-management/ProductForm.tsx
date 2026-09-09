@@ -70,6 +70,7 @@ export default function ProductForm({
   const [attrSearch, setAttrSearch] = useState<Record<string, string>>({});
   const [attrResults, setAttrResults] = useState<Record<string, ProductAttribute[]>>({});
   const [attrLoading, setAttrLoading] = useState<Record<string, boolean>>({});
+  const [selectedAttrNames, setSelectedAttrNames] = useState<Record<string, string>>({});
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -119,11 +120,31 @@ export default function ProductForm({
         isFeatured: editingProduct.isFeatured || false,
       });
       setHasVariants(!!(editingProduct.variants && editingProduct.variants.length > 0));
+
+      // Resolve attribute names for existing attributeRefs
+      const refs = editingProduct.attributeRefs || [];
+      if (refs.length > 0 && tenant?.tenantId) {
+        const types = [...new Set(refs.map((r) => r.type))] as AttributeType[];
+        Promise.all(
+          types.map((type) =>
+            suggestAttributes(tenant.tenantId, type, '').then((attrs) => ({ type, attrs }))
+          ),
+        ).then((results) => {
+          const names: Record<string, string> = {};
+          for (const { attrs } of results) {
+            for (const a of attrs) {
+              names[a._id] = a.name;
+            }
+          }
+          setSelectedAttrNames(names);
+        }).catch(() => {});
+      }
     } else {
       setForm({ ...EMPTY_FORM });
       setHasVariants(false);
+      setSelectedAttrNames({});
     }
-  }, [editingProduct, isOpen, categories]);
+  }, [editingProduct, isOpen, categories, tenant?.tenantId]);
 
   /* ---------- translations ---------- */
   const updateTranslation = (locale: string, field: 'name' | 'description', value: string) => {
@@ -158,6 +179,7 @@ export default function ProductForm({
       if (prev.attributeRefs.some((r) => r.attributeId === attr._id)) return prev;
       return { ...prev, attributeRefs: [...prev.attributeRefs, { type, attributeId: attr._id }] };
     });
+    setSelectedAttrNames((prev) => ({ ...prev, [attr._id]: attr.name }));
     setAttrSearch((prev) => ({ ...prev, [type]: '' }));
     setAttrResults((prev) => ({ ...prev, [type]: [] }));
   };
@@ -167,6 +189,11 @@ export default function ProductForm({
       ...prev,
       attributeRefs: prev.attributeRefs.filter((r) => !(r.type === type && r.attributeId === attributeId)),
     }));
+    setSelectedAttrNames((prev) => {
+      const next = { ...prev };
+      delete next[attributeId];
+      return next;
+    });
   };
 
   const createAndAddAttribute = async (type: AttributeType) => {
@@ -556,7 +583,7 @@ export default function ProductForm({
                       <div className="flex flex-wrap gap-1.5">
                         {selected.map((ref) => (
                           <span key={ref.attributeId} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-xs">
-                            {ref.attributeId.slice(0, 8)}...
+                            {selectedAttrNames[ref.attributeId] || ref.attributeId.slice(0, 8) + '...'}
                             <button type="button" onClick={() => removeAttributeRef(type, ref.attributeId)}><X size={10} /></button>
                           </span>
                         ))}

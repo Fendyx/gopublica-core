@@ -7,7 +7,10 @@ export interface BranchFeatures {
 /** A tenant-created landing page managed via the Admin Page Builder. */
 export interface CustomPage {
   title: string;
+  titleI18n?: Record<string, string>;
   slug: string;
+  description?: string;
+  descriptionI18n?: Record<string, string>;
   isActive: boolean;
   createdAt?: string;
 }

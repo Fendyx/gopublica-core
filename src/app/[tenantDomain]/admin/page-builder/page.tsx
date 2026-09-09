@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { BranchSection } from '@/entities/branch-section/types';
@@ -12,8 +13,9 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Plus, Edit, Trash2, ChevronUp, ChevronDown, Lock, GripVertical, FileText } from 'lucide-react';
+import { Loader2, Plus, Edit, Trash2, ChevronUp, ChevronDown, Lock, GripVertical, FileText, ExternalLink } from 'lucide-react';
 import SectionTypePicker from '@/widgets/Admin/PageBuilder/SectionTypePicker';
+import { getLabelForLocale } from '@/shared/lib/locales';
 
 /** System (hardcoded) pages that support page-builder sections and their feature gates */
 const SYSTEM_PAGE_TABS = [
@@ -108,12 +110,24 @@ export default function PageBuilderPage() {
     searchParams.get('page') || 'home'
   );
 
+  const adminLocale = useLocale();
+
   // ── Custom pages state ──
   const [customPages, setCustomPages] = useState<CustomPage[]>([]);
   const [isAddPageOpen, setIsAddPageOpen] = useState(false);
   const [newPageTitle, setNewPageTitle] = useState('');
+  const [newPageTitleI18n, setNewPageTitleI18n] = useState<Record<string, string>>({});
+  const [newPageTitleTab, setNewPageTitleTab] = useState('pl');
   const [creatingPage, setCreatingPage] = useState(false);
   const [deleteConfirmSlug, setDeleteConfirmSlug] = useState<string | null>(null);
+
+  const activeLocales = tenant?.activeLocales || ['pl', 'en'];
+  const defaultLocale = tenant?.defaultLocale || 'pl';
+
+  /** Resolve a custom page's display label for the current admin locale */
+  const getCustomPageLabel = useCallback((cp: CustomPage) => {
+    return cp.titleI18n?.[adminLocale] || cp.title || cp.slug;
+  }, [adminLocale]);
 
   // Filter system tabs based on tenant features
   const availableSystemTabs = SYSTEM_PAGE_TABS.filter((tab) => {
@@ -126,7 +140,7 @@ export default function PageBuilderPage() {
     ...availableSystemTabs,
     ...customPages.filter(p => p.isActive).map(p => ({
       key: p.slug,
-      label: p.title,
+      label: getCustomPageLabel(p),
       isCustom: true as const,
     })),
   ];
@@ -153,9 +167,13 @@ export default function PageBuilderPage() {
     if (!selectedBranch?._id || !newPageTitle.trim()) return;
     setCreatingPage(true);
     try {
-      const created = await createCustomPage(selectedBranch._id, newPageTitle.trim());
+      const created = await createCustomPage(selectedBranch._id, {
+        title: newPageTitle.trim(),
+        titleI18n: newPageTitleI18n,
+      });
       setCustomPages(prev => [...prev, created]);
       setNewPageTitle('');
+      setNewPageTitleI18n({});
       setIsAddPageOpen(false);
       // Switch to the new page tab
       setActivePage(created.slug);
@@ -247,7 +265,7 @@ export default function PageBuilderPage() {
             {customPages.filter(p => p.isActive).map((cp) => (
               <TabsTrigger key={cp.slug} value={cp.slug} className="gap-1.5">
                 <FileText className="h-3.5 w-3.5" />
-                {cp.title}
+                {getCustomPageLabel(cp)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -268,15 +286,31 @@ export default function PageBuilderPage() {
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold">Page Builder</h1>
           {isCustomActivePage && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setDeleteConfirmSlug(activePage)}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete Page
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+              >
+                <a
+                  href={`/${tenant?.defaultLocale || 'pl'}/${selectedBranch?.slug}/p/${activePage}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                  View Page
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDeleteConfirmSlug(activePage)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete Page
+              </Button>
+            </>
           )}
         </div>
         <Button onClick={() => setIsPickerOpen(true)}>
@@ -311,32 +345,60 @@ export default function PageBuilderPage() {
 
       {/* ── Add Page dialog ── */}
       <Dialog open={isAddPageOpen} onOpenChange={setIsAddPageOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Create Custom Page</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            {/* Locale tabs for page title */}
             <div className="space-y-2">
-              <Label htmlFor="page-title">Page Title</Label>
-              <Input
-                id="page-title"
-                placeholder="e.g. Ceramics Painting"
-                value={newPageTitle}
-                onChange={(e) => setNewPageTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newPageTitle.trim()) {
-                    handleCreatePage();
+              <Label>Page Title</Label>
+              <div className="flex gap-1 mb-2">
+                {activeLocales.map((lang) => (
+                  <Button
+                    key={lang}
+                    type="button"
+                    variant={newPageTitleTab === lang ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setNewPageTitleTab(lang)}
+                  >
+                    {lang === defaultLocale
+                      ? `Base (${lang.toUpperCase()})`
+                      : getLabelForLocale(lang)}
+                  </Button>
+                ))}
+              </div>
+              {/* Base locale input (required) */}
+              {newPageTitleTab === defaultLocale ? (
+                <Input
+                  id="page-title"
+                  placeholder="e.g. Ceramics Painting"
+                  value={newPageTitle}
+                  onChange={(e) => setNewPageTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newPageTitle.trim()) {
+                      handleCreatePage();
+                    }
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <Input
+                  id={`page-title-${newPageTitleTab}`}
+                  placeholder={`Title in ${getLabelForLocale(newPageTitleTab)}`}
+                  value={newPageTitleI18n[newPageTitleTab] || ''}
+                  onChange={(e) =>
+                    setNewPageTitleI18n((prev) => ({ ...prev, [newPageTitleTab]: e.target.value }))
                   }
-                }}
-                autoFocus
-              />
+                />
+              )}
               <p className="text-xs text-gray-500">
-                A URL-safe slug will be auto-generated from the title.
+                A URL-safe slug will be auto-generated from the base locale title.
               </p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsAddPageOpen(false); setNewPageTitle(''); }}>
+            <Button variant="outline" onClick={() => { setIsAddPageOpen(false); setNewPageTitle(''); setNewPageTitleI18n({}); }}>
               Cancel
             </Button>
             <Button onClick={handleCreatePage} disabled={!newPageTitle.trim() || creatingPage}>

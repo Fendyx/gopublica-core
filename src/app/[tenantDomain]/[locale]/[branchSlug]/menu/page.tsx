@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import Menu from '@/widgets/Menu';
 import { getTenantByDomain } from '@/entities/tenant/api';
-import { fetchMenu } from '@/entities/menu-item/api';
+import { fetchMenu, fetchMenuWithCategories } from '@/entities/menu-item/api';
 import { fetchBranchBySlug } from '@/entities/branch/api';
 import { fetchPublicBranchSections } from '@/entities/branch-section/api';
 import SectionRenderer from '@/widgets/Sections/SectionRenderer';
@@ -33,6 +33,20 @@ async function resolveDynamicItems(
     console.error('[menu] fetchMenu failed:', err);
     return new Map();
   }
+
+  return resolveDynamicItemsFromItems(allItems, sections);
+}
+
+/** Build dynamic items map from pre-fetched items (avoids redundant fetch). */
+function resolveDynamicItemsFromItems(
+  allItems: MenuItem[],
+  sections: BranchSection[]
+): Map<string, MenuItem[]> {
+  const dynamicSections = sections.filter((section) => {
+    if (section.type !== 'entity_carousel' && section.type !== 'feature_carousel') return false;
+    const settings = (section.settings || {}) as EntityCarouselSettings | FeatureCarouselSettings;
+    return settings.mode === 'ecommerce' || settings.mode === 'menu';
+  });
 
   const itemsMap = new Map<string, MenuItem[]>();
   for (const section of dynamicSections) {
@@ -92,7 +106,18 @@ export default async function MenuPage({
 
   // If page-builder sections exist, render via SectionRenderer (system_menu handles the menu)
   if (sections && sections.length > 0) {
-    const dynamicItemsMap = await resolveDynamicItems(tenant.tenantId, branchId, sections);
+    // Single merged call: fetch menu items + categories in one round-trip
+    let allItems: MenuItem[] = [];
+    let categories: Array<{ key: string; name: string; icon?: string; niche?: string }> = [];
+    try {
+      const result = await fetchMenuWithCategories(tenant.tenantId, branchId, 'food');
+      allItems = result.items;
+      categories = result.categories;
+    } catch (err) {
+      console.error('[menu] fetchMenuWithCategories failed:', err);
+    }
+
+    const dynamicItemsMap = resolveDynamicItemsFromItems(allItems, sections);
 
     return (
       <SectionRenderer
@@ -101,6 +126,8 @@ export default async function MenuPage({
         tenantDomain={tenantDomain}
         branchSlug={branchSlug}
         dynamicItemsMap={dynamicItemsMap}
+        allMenuItems={allItems}
+        categories={categories}
       />
     );
   }

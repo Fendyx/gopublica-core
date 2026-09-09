@@ -146,7 +146,7 @@ export function getNavLinks({
         allLinks.push({
           id: `custom-${cp.slug}`,
           href: `/${locale}/${branchSlug}/p/${cp.slug}`,
-          label: cp.title,
+          label: cp.titleI18n?.[locale] || cp.title,
           isVisible: true,
           placement: 'dropdown',
           order: 60 + i,
@@ -196,7 +196,7 @@ export function getNavLinks({
         label = sysPage ? t(sysPage.defaultLabelKey) : item.slug
       } else if (item.type === 'custom') {
         const cp = customPages?.find((c) => c.slug === item.slug)
-        label = cp?.title || item.slug
+        label = cp?.titleI18n?.[locale] || cp?.title || item.slug
       } else {
         label = item.slug
       }

@@ -21,7 +21,7 @@ interface CategoryApiItem {
   icon?: string
 }
 
-export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; menuStyle: 'grid' | 'list' }) {
+export default function MenuLayout({ items, menuStyle, initialCategoryMap }: { items: MenuItem[]; menuStyle: 'grid' | 'list'; initialCategoryMap?: Record<string, CategoryData> }) {
   const searchParams = useSearchParams()
   const urlCategory = searchParams.get('category')
   const [activeCategory, setActiveCategory] = useState<string>(urlCategory || 'all')
@@ -36,18 +36,17 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
   // Always use 'food' niche for menu categories - hybrid tenants may have niche='ecommerce'
   const niche = 'food'
 
-  const [categoryMap, setCategoryMap] = useState<Record<string, CategoryData>>({})
+  const [categoryMap, setCategoryMap] = useState<Record<string, CategoryData>>(initialCategoryMap || {})
 
   useEffect(() => {
+    // Skip client-side fetch if categories were pre-fetched server-side
+    if (initialCategoryMap && Object.keys(initialCategoryMap).length > 0) return
+
     // Ждем, пока прогрузится tenantId
     if (!tenantId) return
 
     // Передаем tenantId и niche в параметры запроса
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenantId}&niche=${niche}`, {
-      headers: { 
-        Authorization: typeof window !== 'undefined' ? `Bearer ${localStorage.getItem('saas_token') || ''}` : '' 
-      },
-    })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenantId}&niche=${niche}`)
       .then(res => res.json())
       .then((data: any) => {
         // Защита на случай, если бэк вернул объект с ошибкой, а не массив
@@ -67,7 +66,7 @@ export default function MenuLayout({ items, menuStyle }: { items: MenuItem[]; me
         setCategoryMap(map)
       })
       .catch(console.error)
-  }, [tenantId, niche]) // Добавили переменные в зависимости
+  }, [tenantId, niche, initialCategoryMap]) // Добавили переменные в зависимости
 
   const getCategoryName = (categoryKey: string, locale: string): string => {
     const cat = categoryMap[categoryKey]

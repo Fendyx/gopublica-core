@@ -68,6 +68,7 @@ export default function AdminSidebar({ locale, onLocaleChange, mobileOpen, onClo
     { href: '/admin/gallery', label: t('gallery'), icon: ImageIcon },
     { href: '/admin/articles', label: t('articles'), icon: FileText },
     { href: '/admin/reservations', label: t('reservations'), icon: CalendarCheck },
+    { href: '/admin/slots', label: t('slots'), icon: CalendarCheck },
     { href: '/admin/analytics', label: t('analytics'), icon: ChartLine },
     { href: '/admin/branches', label: t('branches'), icon: Store },
     { href: '/admin/jobs', label: t('jobs'), icon: FileText },

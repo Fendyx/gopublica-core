@@ -1,6 +1,7 @@
 'use client';
 import { BranchSection, BookingSettings } from '@/entities/branch-section/types';
 import BookingForm from '@/features/reservation/BookingForm';
+import SlotBookingForm from '@/features/reservation/SlotBookingForm';
 import MapEmbed from '@/components/ui/MapEmbed';
 
 interface BookingSectionProps {
@@ -13,13 +14,29 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
   const title = section.translations?.[locale]?.title;
   const subtitle = section.translations?.[locale]?.subtitle;
   const settings = (section.settings || {}) as BookingSettings;
-  const { sideContentType = 'none', checkoutFlow = 'inline', address, customText } = settings;
+  const {
+    sideContentType = 'none',
+    checkoutFlow = 'inline',
+    address,
+    customText,
+    bookingMode = 'reservation',
+    slotStartTime,
+    slotEndTime,
+    slotIntervalMinutes,
+    slotCapacity,
+  } = settings;
+
+  // ── Pick the right form component based on booking mode ──
+  const FormComponent = bookingMode === 'slot_booking' ? SlotBookingForm : BookingForm;
+
+  const formProps = { title, subtitle, variant: 'centered' as const, checkoutFlow };
+  const splitFormProps = { title, subtitle, variant: 'split' as const, checkoutFlow };
 
   // ── Single-column layout (default) ──
   if (sideContentType === 'none') {
     return (
       <section className="py-12 bg-surface-page">
-        <BookingForm title={title} subtitle={subtitle} variant="centered" checkoutFlow={checkoutFlow} />
+        <FormComponent {...formProps} />
       </section>
     );
   }
@@ -31,7 +48,7 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-8 items-stretch">
           {/* Left: Booking Form - fills its grid column */}
           <div className="w-full">
-            <BookingForm title={title} subtitle={subtitle} variant="split" checkoutFlow={checkoutFlow} />
+            <FormComponent {...splitFormProps} />
           </div>
 
           {/* Right: Map or Custom Text */}

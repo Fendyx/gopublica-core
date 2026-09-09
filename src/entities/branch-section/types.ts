@@ -36,6 +36,12 @@ export type HeroPreset =
 
 export type CtaTargetMode = 'section' | 'custom';
 
+/** Визуальный стиль кнопки CTA */
+export type HeroCtaVariant = 'filled' | 'outline' | 'ghost' | 'soft' | 'borderless' | 'underline';
+
+/** Направление градиента кнопки */
+export type GradientDirection = 'to-r' | 'to-br' | 'to-b' | 'to-bl';
+
 export interface HeroCta {
   label?: string;
   /** Какой режим назначения ссылки: выбор секции или произвольный URL */
@@ -46,6 +52,18 @@ export interface HeroCta {
   customUrl?: string;
   /** Устаревшее поле - тип секции для скролла (обратная совместимость) */
   targetSectionType?: SectionType;
+  /** Цвет кнопки (hex). По умолчанию: tenant primary для кнопки 1, accent для кнопки 2 */
+  color?: string;
+  /** Цвет текста кнопки (hex). По умолчанию: белый для filled, цвет кнопки для outline/ghost */
+  textColor?: string;
+  /** Визуальный стиль: filled, outline, ghost, soft, borderless, underline */
+  variant?: HeroCtaVariant;
+  /** Цвет градиента — начало (hex). Если заданы gradientFrom и gradientTo, перезаписывает color */
+  gradientFrom?: string;
+  /** Цвет градиента — конец (hex) */
+  gradientTo?: string;
+  /** Направление градиента */
+  gradientDirection?: GradientDirection;
 }
 
 export interface HeroSlide {
@@ -77,6 +95,8 @@ export interface HeroSettings {
   sliderShowArrows?: boolean;
   /** Ставить autoplay на паузу при ручном взаимодействии (свайп/стрелка) */
   sliderPauseOnInteraction?: boolean;
+  /** Прозрачность затемняющего слоя фона (0–100%). По умолчанию 40%. */
+  overlayOpacity?: number;
 }
 
 export interface BaseCarouselSettings {
@@ -127,6 +147,16 @@ export interface BookingSettings {
   address?: string;
   /** Custom text shown when sideContentType === 'text' */
   customText?: string;
+  /** Booking mode: 'reservation' (classic restaurant) or 'slot_booking' (group events/masterclasses) */
+  bookingMode?: 'reservation' | 'slot_booking';
+  /** Start of the booking time window (HH:mm) — slot_booking mode */
+  slotStartTime?: string;
+  /** End of the booking time window (HH:mm) — slot_booking mode */
+  slotEndTime?: string;
+  /** Slot interval in minutes (15|30|60|90|120|180) — slot_booking mode */
+  slotIntervalMinutes?: 15 | 30 | 60 | 90 | 120 | 180;
+  /** Maximum capacity per slot — slot_booking mode */
+  slotCapacity?: number;
 }
 
 export interface MapSettings {
