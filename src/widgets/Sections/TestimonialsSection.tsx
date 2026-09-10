@@ -116,7 +116,7 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
 
         {/* Carousel */}
         <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex gap-4 md:gap-6">
+          <div className="flex items-stretch gap-4 md:gap-6">
             {items.map((item) => {
               const reviewHtml =
                 item.bodyI18n?.[locale] ||
@@ -130,12 +130,12 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
 
               const cardContent = (
                 <div
-                  className={`flex-none w-[85%] sm:w-[60%] md:w-[40%] lg:w-[33%] ${
+                  className={`flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33%] ${
                     cardStyle === 'card'
-                      ? 'rounded-xl border bg-card p-6 shadow-sm'
+                      ? 'h-full rounded-xl border bg-card p-6 shadow-sm'
                       : cardStyle === 'quote'
-                        ? 'rounded-xl border-l-4 border-primary bg-card/50 p-6 pl-8'
-                        : 'p-4'
+                        ? 'h-full rounded-xl border-l-4 border-primary bg-card/50 p-6 pl-8'
+                        : 'h-full p-4'
                   }`}
                 >
                   {/* Quote icon for 'quote' style */}
