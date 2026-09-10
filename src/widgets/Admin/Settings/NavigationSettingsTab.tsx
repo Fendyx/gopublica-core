@@ -23,6 +23,7 @@ import { useTenant } from '@/entities/tenant/TenantContext'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { SYSTEM_PAGES, isSystemPageEnabled, buildDefaultNavigationConfig } from '@/shared/lib/navigation'
 import type { NavItem, NavigationConfig, Features } from '@/entities/tenant/types'
+import type { CustomPage } from '@/entities/branch/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -37,6 +38,7 @@ function SortableNavItem({
   onMoveToPrimary,
   onLabelChange,
   isSystemPageDisabled,
+  customPages,
 }: {
   item: NavItem
   onToggleVisibility: (id: string) => void
@@ -44,6 +46,7 @@ function SortableNavItem({
   onMoveToPrimary: (id: string) => void
   onLabelChange: (id: string, label: string) => void
   isSystemPageDisabled: boolean
+  customPages?: CustomPage[]
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
 
@@ -58,6 +61,22 @@ function SortableNavItem({
   const defaultName = sysPage ? sysPage.slug : item.slug
   const displayName = item.label || defaultName
   const isHome = item.type === 'home'
+
+  // For custom pages, resolve the actual current slug from branch.customPages
+  // so the admin always sees the real link target, even if navigation config is stale.
+  let actualSlug = item.slug
+  let isStale = false
+  if (item.type === 'custom' && customPages) {
+    // Try matching by item.slug first, then by id suffix
+    const cp = customPages.find((c) => c.slug === item.slug)
+      || (item.id.startsWith('custom-')
+        ? customPages.find((c) => c.slug === item.id.slice(7))
+        : null)
+    if (cp) {
+      actualSlug = cp.slug
+      isStale = cp.slug !== item.slug
+    }
+  }
 
   return (
     <div
@@ -96,7 +115,14 @@ function SortableNavItem({
             </span>
           )}
         </div>
-        <span className="text-xs text-muted-foreground truncate block">{item.slug}</span>
+        <span className="text-xs text-muted-foreground truncate block">
+          {item.type === 'custom' ? `/p/${actualSlug}` : item.slug}
+          {isStale && (
+            <span className="ml-1.5 text-[10px] px-1 py-0.5 rounded bg-amber-100 text-amber-700 font-medium dark:bg-amber-900/30 dark:text-amber-400">
+              Updated
+            </span>
+          )}
+        </span>
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
@@ -250,11 +276,38 @@ export default function NavigationSettingsTab() {
       const token = localStorage.getItem('saas_token')
       if (!token || !selectedBranch || !tenant) return
 
+      // Validation: sync stale custom page slugs before saving.
+      // This prevents navigation config from saving outdated slugs that
+      // would break storefront links after a custom page is renamed.
+      const customPages = selectedBranch.customPages || []
+      const syncedItems = navConfig.items.map((item) => {
+        if (item.type !== 'custom') return item
+
+        // Find the actual custom page: try by slug, then by id suffix
+        const cp = customPages.find((c) => c.slug === item.slug)
+          || (item.id.startsWith('custom-')
+            ? customPages.find((c) => c.slug === item.id.slice(7))
+            : null)
+
+        if (!cp) {
+          // Custom page was deleted — remove this nav item
+          return null
+        }
+
+        // If slug or id is stale, sync to the actual values
+        if (cp.slug !== item.slug || `custom-${cp.slug}` !== item.id) {
+          return { ...item, slug: cp.slug, id: `custom-${cp.slug}` }
+        }
+        return item
+      }).filter(Boolean) as NavItem[]
+
+      const syncedConfig = { ...navConfig, items: syncedItems }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          navigation: navConfig,
+          navigation: syncedConfig,
           branchId: selectedBranch._id,
         }),
       })
@@ -319,6 +372,7 @@ export default function NavigationSettingsTab() {
                     onMoveToDropdown={onMoveToDropdown}
                     onMoveToPrimary={onMoveToPrimary}
                     onLabelChange={onLabelChange}
+                    customPages={selectedBranch?.customPages}
                     isSystemPageDisabled={
                       (item.type === 'system' || item.type === 'home') &&
                       !isSystemPageEnabled(
@@ -357,6 +411,7 @@ export default function NavigationSettingsTab() {
                     onMoveToDropdown={onMoveToDropdown}
                     onMoveToPrimary={onMoveToPrimary}
                     onLabelChange={onLabelChange}
+                    customPages={selectedBranch?.customPages}
                     isSystemPageDisabled={
                       (item.type === 'system' || item.type === 'home') &&
                       !isSystemPageEnabled(

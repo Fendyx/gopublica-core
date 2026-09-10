@@ -162,6 +162,15 @@ export function getNavLinks({
 
   // ── Config-based rendering ────────────────────────────────────────────────
   const { items, dropdownLabel } = navigation
+
+  // Build a slug→CustomPage lookup for dynamic resolution.
+  // This ensures storefront links always use the actual current slug from
+  // Branch.customPages, even if the navigation config has a stale slug.
+  const cpBySlug = new Map<string, CustomPage>()
+  for (const cp of customPages || []) {
+    cpBySlug.set(cp.slug, cp)
+  }
+
   const resolved: ResolvedNavLink[] = []
 
   for (const item of items) {
@@ -180,10 +189,18 @@ export function getNavLinks({
     } else if (item.type === 'system') {
       href = `/${locale}/${branchSlug}/${item.slug}`
     } else if (item.type === 'custom') {
-      // Check if this custom page actually exists on the current branch
-      const cpExists = customPages?.some((cp) => cp.slug === item.slug && cp.isActive)
-      if (!cpExists) continue // Skip missing/deleted custom pages
-      href = `/${locale}/${branchSlug}/p/${item.slug}`
+      // Dynamic resolution: find the custom page by slug, then fall back to
+      // matching by nav item id (`custom-{slug}`) in case slug was renamed
+      // and the nav config was not yet synced.
+      let cp = cpBySlug.get(item.slug)
+      if (!cp) {
+        // Fallback: extract slug from nav item id (e.g. "custom-ceramics" → "ceramics")
+        const idSlug = item.id.startsWith('custom-') ? item.id.slice(7) : null
+        if (idSlug) cp = cpBySlug.get(idSlug)
+      }
+      if (!cp || !cp.isActive) continue // Skip missing/deleted custom pages
+      // Always use the actual slug from Branch.customPages for the href
+      href = `/${locale}/${branchSlug}/p/${cp.slug}`
     } else if (item.type === 'external') {
       href = item.slug // For external links, slug stores the full URL
     }
@@ -195,8 +212,10 @@ export function getNavLinks({
         const sysPage = SYSTEM_PAGES.find((sp) => sp.slug === item.slug)
         label = sysPage ? t(sysPage.defaultLabelKey) : item.slug
       } else if (item.type === 'custom') {
-        const cp = customPages?.find((c) => c.slug === item.slug)
-        label = cp?.titleI18n?.[locale] || cp?.title || item.slug
+        // Use the same dynamic lookup as above for the label
+        const cpLabel = cpBySlug.get(item.slug)
+          || (item.id.startsWith('custom-') ? cpBySlug.get(item.id.slice(7)) : null)
+        label = cpLabel?.titleI18n?.[locale] || cpLabel?.title || item.slug
       } else {
         label = item.slug
       }
