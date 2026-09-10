@@ -42,7 +42,7 @@ export async function generateMetadata({
 
   if (!customPage) return {};
 
-  const title = customPage.seoTitleI18n?.[locale] || customPage.seoTitle || customPage.titleI18n?.[locale] || customPage.title || tenant.clientName;
+  const title = customPage.seoTitleI18n?.[locale] || customPage.seoTitle || customPage.titleI18n?.[locale] || customPage.title || tenant.businessName;
   const description = customPage.seoDescriptionI18n?.[locale] || customPage.seoDescription || customPage.descriptionI18n?.[locale] || customPage.description || '';
 
   const ogImage = customPage.ogImage || undefined;
@@ -55,7 +55,7 @@ export async function generateMetadata({
       description: description || undefined,
       images: ogImage ? [{ url: ogImage }] : undefined,
       url: `/${locale}/${branchSlug}/p/${pageSlug}`,
-      siteName: tenant.clientName,
+      siteName: tenant.businessName,
       locale,
       type: 'website',
     },
