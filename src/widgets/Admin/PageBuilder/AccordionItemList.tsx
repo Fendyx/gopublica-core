@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GripVertical, Plus, Edit, Trash2, X, Check } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import {
   DndContext,
   closestCenter,
@@ -242,6 +243,25 @@ export default function AccordionItemList({
     });
   };
 
+  // ── Attributes helpers ──
+  const getAttr = (key: string): boolean => {
+    return editingItem?.attributes?.some((a) => a.key === key && a.value === 'true') ?? false;
+  };
+
+  const setAttr = (key: string, value: boolean) => {
+    setEditingItem((prev) => {
+      if (!prev) return prev;
+      const attrs = [...(prev.attributes || [])];
+      const idx = attrs.findIndex((a) => a.key === key);
+      if (idx >= 0) {
+        attrs[idx] = { key, value: String(value) };
+      } else {
+        attrs.push({ key, value: String(value) });
+      }
+      return { ...prev, attributes: attrs };
+    });
+  };
+
   // ─── List Mode ──────────────────────────────────────────────────────
   if (!editingItem) {
     return (
@@ -369,6 +389,20 @@ export default function AccordionItemList({
               onChange={(val: string) => updateBody(currentLang === 'base' ? 'base' : currentLang, val)}
             />
           </div>
+        </div>
+
+        {/* Open by Default */}
+        <div className="flex items-center justify-between rounded-lg border p-3">
+          <div className="space-y-0.5">
+            <Label className="text-sm font-medium cursor-pointer">Open by Default</Label>
+            <p className="text-xs text-muted-foreground">
+              This item will be expanded when the page loads.
+            </p>
+          </div>
+          <Switch
+            checked={getAttr('isOpenByDefault')}
+            onCheckedChange={(checked) => setAttr('isOpenByDefault', checked)}
+          />
         </div>
 
         {/* Actions */}

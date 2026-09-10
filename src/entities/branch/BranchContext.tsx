@@ -109,6 +109,11 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
 
   const refetchBranches = async () => {
     const data = await fetchBranches()
+    // Keep selectedBranch in sync: swap to the fresh copy from the updated list
+    if (selectedBranch) {
+      const updated = data.find(b => b._id === selectedBranch._id)
+      if (updated) setSelectedBranch(updated)
+    }
     if (selectedCity && !data.some(b => b.city === selectedCity)) {
       setSelectedCity(null)
       setSelectedBranch(null)
