@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { BranchSection, ContactBlockSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
 
@@ -14,6 +15,7 @@ interface ContactBlockSectionProps {
 export default function ContactBlockSection({ section }: ContactBlockSectionProps) {
   const { address, phone, email, googleMapsUrl } = useBranchSettings();
   const settings = (section.settings || {}) as ContactBlockSettings;
+  const bg = settings.background;
 
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -154,7 +156,8 @@ export default function ContactBlockSection({ section }: ContactBlockSectionProp
 
   if (preset === 'map_and_form') {
     return (
-      <section className="py-10 lg:py-16">
+      <section className="relative py-10 lg:py-16">
+        <SectionBackground background={bg} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {mapEmbed && <div>{mapEmbed}</div>}
@@ -170,7 +173,8 @@ export default function ContactBlockSection({ section }: ContactBlockSectionProp
 
   if (preset === 'simple_info') {
     return (
-      <section className="py-10 lg:py-16">
+      <section className="relative py-10 lg:py-16">
+        <SectionBackground background={bg} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto space-y-8">
             {contactInfo}
@@ -183,7 +187,8 @@ export default function ContactBlockSection({ section }: ContactBlockSectionProp
 
   // split_layout (default)
   return (
-    <section className="py-10 lg:py-16">
+    <section className="relative py-10 lg:py-16">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">

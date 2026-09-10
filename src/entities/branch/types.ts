@@ -11,6 +11,11 @@ export interface CustomPage {
   slug: string;
   description?: string;
   descriptionI18n?: Record<string, string>;
+  seoTitle?: string;
+  seoTitleI18n?: Record<string, string>;
+  seoDescription?: string;
+  seoDescriptionI18n?: Record<string, string>;
+  ogImage?: string;
   isActive: boolean;
   createdAt?: string;
 }

@@ -10,20 +10,47 @@ const getAuthHeaders = () => {
   };
 };
 
-export const getOrders = async (branchId?: string): Promise<Order[]> => {
+export interface OrdersResponse {
+  orders: Order[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface OrdersQuery {
+  branchId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
+export const getOrders = async (branchIdOrQuery?: string | OrdersQuery): Promise<OrdersResponse> => {
   try {
     let url = `${API_URL}/api/saas/orders`;
     const params = new URLSearchParams();
-    if (branchId) params.append('branchId', branchId);
-    
+
+    if (typeof branchIdOrQuery === 'string') {
+      if (branchIdOrQuery) params.append('branchId', branchIdOrQuery);
+    } else if (branchIdOrQuery) {
+      if (branchIdOrQuery.branchId) params.append('branchId', branchIdOrQuery.branchId);
+      if (branchIdOrQuery.status) params.append('status', branchIdOrQuery.status);
+      if (branchIdOrQuery.page) params.append('page', String(branchIdOrQuery.page));
+      if (branchIdOrQuery.limit) params.append('limit', String(branchIdOrQuery.limit));
+    }
+
     if (params.toString()) url += `?${params.toString()}`;
 
     const res = await fetch(url, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error('Failed to fetch orders');
-    return await res.json();
+    const data = await res.json();
+    // Handle both old (array) and new (paginated) response shapes
+    if (Array.isArray(data)) {
+      return { orders: data, total: data.length, page: 1, limit: 50 };
+    }
+    return data;
   } catch (error) {
     console.error(error);
-    return [];
+    return { orders: [], total: 0, page: 1, limit: 50 };
   }
 };
 

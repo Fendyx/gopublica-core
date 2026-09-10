@@ -9,6 +9,9 @@ import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import { useBranch } from '@/entities/branch/BranchContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/shared/ui/Toast';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -88,6 +91,9 @@ export default function MenuManager({ token }: { token: string }) {
   const [customCategoryIcon, setCustomCategoryIcon] = useState('');
   const [hasPersonalization, setHasPersonalization] = useState(false);
   const [modifierGroups, setModifierGroups] = useState<MenuItemModifierGroup[]>([]);
+  const { showToast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const tenantId = tenant?.tenantId;
 
@@ -174,7 +180,7 @@ const fetchCategories = async () => {
 
   const openCloudinaryWidget = () => {
     if (cloudinaryWidgetRef.current && widgetReady) cloudinaryWidgetRef.current.open();
-    else alert(t('uploaderNotReady'));
+    else showToast(t('uploaderNotReady'), 'error');
   };
 
   const resetForm = () => {
@@ -238,10 +244,15 @@ const fetchCategories = async () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('deleteConfirm'))) return;
+  const handleDelete = (id: string) => {
+    setDeletingId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingId) return;
     try {
-      await fetch(`${apiUrl}/api/saas/menu/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      await fetch(`${apiUrl}/api/saas/menu/${deletingId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       await fetchItems();
     } catch (err) { console.error(err); }
   };
@@ -315,7 +326,29 @@ const handleSave = async (e: React.FormEvent) => {
     }
   };
 
-  if (loading || settingsLoading) return <div className="text-center py-10 text-muted-foreground">{t('loading')}</div>;
+  if (loading || settingsLoading) {
+    return (
+      <div className="max-w-6xl mx-auto pb-12 space-y-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-9 w-36 rounded-full" />
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="glass-card p-4 space-y-3">
+              <Skeleton className="aspect-video w-full rounded-lg" />
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (!tenantId) return <div className="text-center py-10">{t('clientMissing')}</div>;
   if (!selectedBranch) return <div className="text-center py-10">{t('branchSelectionPrompt')}</div>;
 
@@ -711,6 +744,15 @@ const handleSave = async (e: React.FormEvent) => {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={t('deleteConfirm')}
+        confirmLabel={t('deleteConfirm')}
+        variant="destructive"
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

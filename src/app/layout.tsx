@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { TrackVisit } from '@/shared/ui/TrackVisit';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import Script from 'next/script';
+import BranchSelectionProvider from '@/widgets/BranchSelection/BranchSelectionProvider';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -70,25 +72,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       } as React.CSSProperties}
       suppressHydrationWarning
     >
-      <head>
-        {/* Blocking script: set data-theme from localStorage BEFORE first paint.
-            This eliminates the "phantom third theme" flash where no data-theme
-            attribute means glass/surface tokens resolve to undefined. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var t = localStorage.getItem('theme');
-                  document.documentElement.setAttribute('data-theme', t || 'light');
-                } catch(e) {
-                  document.documentElement.setAttribute('data-theme', 'light');
-                }
-              })();
-            `,
-          }}
-        />
-      </head>
+      <Script
+        id="theme-init"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                var t = localStorage.getItem('theme');
+                document.documentElement.setAttribute('data-theme', t || 'light');
+              } catch(e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+              }
+            })();
+          `,
+        }}
+      />
       <body style={{ backgroundColor: pageBgColor || undefined }}>
         <TrackVisit tenantId={tenantId} />
         <ThemeProvider
@@ -101,7 +100,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <NextIntlClientProvider messages={messages}>
               <TenantProvider tenantId={tenantId}>
                 <BranchProvider tenantId={tenantId}>
-                  <LayoutWrapper>{children}</LayoutWrapper>
+                  <BranchSelectionProvider>
+                    <LayoutWrapper>{children}</LayoutWrapper>
+                  </BranchSelectionProvider>
                 </BranchProvider>
               </TenantProvider>
             </NextIntlClientProvider>

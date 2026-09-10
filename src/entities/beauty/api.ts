@@ -73,7 +73,7 @@ export async function getPublicServices(tenantId: string, branchId?: string) {
   const headers = buildHeaders()
   if (tenantId) headers['x-tenant-id'] = tenantId
   const query = branchId ? `?branchId=${encodeURIComponent(branchId)}` : ''
-  return apiFetch<BeautyService[]>(`/api/saas/beauty/public/services${query}`, { headers })
+  return apiFetch<BeautyService[]>(`/api/public/beauty/services${query}`, { headers })
 }
 
 export async function getAvailableSlots(tenantId: string, branchId: string | undefined, serviceId: string, date: string, masterId?: string) {
@@ -82,13 +82,13 @@ export async function getAvailableSlots(tenantId: string, branchId: string | und
   const params = new URLSearchParams({ serviceId, date })
   if (branchId) params.set('branchId', branchId)
   if (masterId) params.set('masterId', masterId)
-  return apiFetch<BeautyAvailabilitySlot[]>(`/api/saas/beauty/public/availability?${params.toString()}`, { headers })
+  return apiFetch<BeautyAvailabilitySlot[]>(`/api/public/beauty/availability/slots?${params.toString()}`, { headers })
 }
 
 export async function createPublicAppointment(payload: PublicBeautyAppointmentPayload) {
   const headers = buildHeaders()
   if (payload.tenantId) headers['x-tenant-id'] = payload.tenantId
-  return apiFetch<{ ok: boolean }>('/api/saas/beauty/public/appointments', {
+  return apiFetch<{ ok: boolean }>('/api/public/beauty/appointments', {
     method: 'POST',
     headers,
     body: JSON.stringify(payload),

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { BranchSection, SectionType, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, HeroPreset, HeroCtaVariant, GradientDirection, CarouselMode, HeroCta, CtaTargetMode, HeroSlide, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
+import { BranchSection, SectionType, SectionBackground, ArticleGridSettings, ArticleGridLayoutMode, ArticleGridAspectRatio, ArticleGridCardVariant, HeroSettings, HeroMediaType, HeroLayout, HeroTextAlign, HeroPreset, HeroCtaVariant, GradientDirection, CarouselMode, HeroCta, CtaTargetMode, HeroSlide, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { saveBranchSectionItem, deleteBranchSectionItem } from '@/entities/branch-section/api';
 import { fetchArticles } from '@/entities/article/api';
@@ -26,6 +26,8 @@ import SectionItemList from './SectionItemList';
 import CarouselEntitySelector from './CarouselEntitySelector';
 import FormFieldsEditor from '@/features/dynamic-form/FormFieldsEditor';
 import { ArticleEditor } from '../ArticleEditor';
+import AccordionItemList from './AccordionItemList';
+import BackgroundSettings from './BackgroundSettings';
 
 interface SectionFormProps {
   initialData?: BranchSection;
@@ -1146,6 +1148,7 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 ) : (
                   <SectionItemList
                     sectionId={initialData._id}
+                    sectionType={type}
                     initialItems={initialData.items || []}
                     onSaveItem={async (item) => {
                       await saveBranchSectionItem(initialData._id, item);
@@ -1548,6 +1551,206 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
           </div>
         );
       }
+      case 'accordion': {
+        return (
+          <div className="space-y-4">
+            {!initialData?._id ? (
+              <div className="p-4 bg-amber-50 text-amber-600 rounded-md">
+                {t('saveSectionFirst')}
+              </div>
+            ) : (
+              <AccordionItemList
+                sectionId={initialData._id}
+                initialItems={initialData.items || []}
+                onSaveItem={async (item) => {
+                  await saveBranchSectionItem(initialData._id, item);
+                }}
+                onDeleteItem={async (itemId) => {
+                  await deleteBranchSectionItem(initialData._id, itemId);
+                }}
+              />
+            )}
+          </div>
+        );
+      }
+      case 'testimonials': {
+        const testimonialsSettings = settings as any;
+        return (
+          <div className="space-y-4">
+            {/* ─── Autoplay ─── */}
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={testimonialsSettings.autoplay ?? true}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, autoplay: checked })
+                }
+              />
+              <Label className="cursor-pointer">{t('autoplay')}</Label>
+            </div>
+
+            {/* ─── Autoplay Delay ─── */}
+            {testimonialsSettings.autoplay !== false && (
+              <div className="space-y-2">
+                <Label>{t('autoplayDelayMs')}</Label>
+                <Input
+                  type="number"
+                  min={1000}
+                  max={15000}
+                  step={500}
+                  value={testimonialsSettings.autoplayDelay ?? 5000}
+                  onChange={(e) =>
+                    setSettings({ ...settings, autoplayDelay: Number(e.target.value) || 5000 })
+                  }
+                />
+              </div>
+            )}
+
+            {/* ─── Show Rating ─── */}
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={testimonialsSettings.showRating ?? true}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, showRating: checked })
+                }
+              />
+              <Label className="cursor-pointer">{t('showRating')}</Label>
+            </div>
+
+            {/* ─── Card Style ─── */}
+            <div className="space-y-2">
+              <Label>{t('testimonialsCardStyle')}</Label>
+              <Select
+                value={testimonialsSettings.cardStyle || 'card'}
+                onValueChange={(val) => setSettings({ ...settings, cardStyle: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="card">{t('cardStyleCard')}</SelectItem>
+                  <SelectItem value="minimal">{t('cardStyleMinimal')}</SelectItem>
+                  <SelectItem value="quote">{t('cardStyleQuote')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* ─── Items ─── */}
+            {!initialData?._id ? (
+              <div className="p-4 bg-amber-50 text-amber-600 rounded-md">
+                {t('saveSectionFirst')}
+              </div>
+            ) : (
+              <SectionItemList
+                sectionId={initialData._id}
+                sectionType={type}
+                initialItems={initialData.items || []}
+                onSaveItem={async (item) => {
+                  await saveBranchSectionItem(initialData._id, item);
+                }}
+                onDeleteItem={async (itemId) => {
+                  await deleteBranchSectionItem(initialData._id, itemId);
+                }}
+              />
+            )}
+          </div>
+        );
+      }
+      case 'before_after': {
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {t('beforeAfterHint')}
+            </p>
+
+            {/* ─── Items ─── */}
+            {!initialData?._id ? (
+              <div className="p-4 bg-amber-50 text-amber-600 rounded-md">
+                {t('saveSectionFirst')}
+              </div>
+            ) : (
+              <SectionItemList
+                sectionId={initialData._id}
+                sectionType={type}
+                initialItems={initialData.items || []}
+                onSaveItem={async (item) => {
+                  await saveBranchSectionItem(initialData._id, item);
+                }}
+                onDeleteItem={async (itemId) => {
+                  await deleteBranchSectionItem(initialData._id, itemId);
+                }}
+              />
+            )}
+          </div>
+        );
+      }
+      case 'logo_ticker': {
+        const tickerSettings = settings as any;
+        return (
+          <div className="space-y-4">
+            {/* ─── Speed ─── */}
+            <div className="space-y-2">
+              <Label>{t('scrollSpeed')}</Label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min={10}
+                  max={100}
+                  step={5}
+                  value={tickerSettings.speed ?? 30}
+                  onChange={(e) =>
+                    setSettings({ ...settings, speed: Number(e.target.value) })
+                  }
+                  className="flex-1 h-2 rounded-full appearance-none bg-muted cursor-pointer accent-primary"
+                />
+                <span className="text-sm text-muted-foreground w-16 text-right tabular-nums">
+                  {tickerSettings.speed ?? 30} px/s
+                </span>
+              </div>
+            </div>
+
+            {/* ─── Pause on Hover ─── */}
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={tickerSettings.pauseOnHover ?? true}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, pauseOnHover: checked })
+                }
+              />
+              <Label className="cursor-pointer">{t('pauseOnHover')}</Label>
+            </div>
+
+            {/* ─── Grayscale on Idle ─── */}
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={tickerSettings.grayscaleOnIdle ?? false}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, grayscaleOnIdle: checked })
+                }
+              />
+              <Label className="cursor-pointer">{t('grayscaleOnIdle')}</Label>
+            </div>
+
+            {/* ─── Items ─── */}
+            {!initialData?._id ? (
+              <div className="p-4 bg-amber-50 text-amber-600 rounded-md">
+                {t('saveSectionFirst')}
+              </div>
+            ) : (
+              <SectionItemList
+                sectionId={initialData._id}
+                sectionType={type}
+                initialItems={initialData.items || []}
+                onSaveItem={async (item) => {
+                  await saveBranchSectionItem(initialData._id, item);
+                }}
+                onDeleteItem={async (itemId) => {
+                  await deleteBranchSectionItem(initialData._id, itemId);
+                }}
+              />
+            )}
+          </div>
+        );
+      }
       default:
         return <p className="text-sm text-gray-500">{t('additionalItems')}</p>;
     }
@@ -1566,6 +1769,16 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b pb-2">{t('settings')}</h3>
         {renderSettings()}
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b pb-2">{t('sectionBackground')}</h3>
+        <BackgroundSettings
+          background={settings.background}
+          onChange={(bg: SectionBackground | undefined) =>
+            setSettings((prev: any) => ({ ...prev, background: bg }))
+          }
+        />
       </div>
 
       <div className="space-y-4">

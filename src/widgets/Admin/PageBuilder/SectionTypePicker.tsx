@@ -13,6 +13,10 @@ import {
   Phone,
   List,
   AlignLeft,
+  ListCollapse,
+  Quote,
+  ArrowLeftRight,
+  Images,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -34,6 +38,10 @@ const sectionIcons: Record<string, React.ElementType> = {
   contact_block: Phone,
   category_list: List,
   rich_text: AlignLeft,
+  accordion: ListCollapse,
+  testimonials: Quote,
+  before_after: ArrowLeftRight,
+  logo_ticker: Images,
 };
 
 export default function SectionTypePicker({ isOpen, onClose, onSelect }: SectionTypePickerProps) {
@@ -51,6 +59,10 @@ export default function SectionTypePicker({ isOpen, onClose, onSelect }: Section
     { type: 'contact_block', label: t('contactBlock'), description: t('contactBlockDescription') },
     { type: 'category_list', label: t('categoryList'), description: t('categoryListDescription') },
     { type: 'rich_text', label: t('richText'), description: t('richTextDescription') },
+    { type: 'accordion', label: t('accordion'), description: t('accordionDescription') },
+    { type: 'testimonials', label: t('testimonials'), description: t('testimonialsDescription') },
+    { type: 'before_after', label: t('beforeAfter'), description: t('beforeAfterDescription') },
+    { type: 'logo_ticker', label: t('logoTicker'), description: t('logoTickerDescription') },
   ];
 
   return (

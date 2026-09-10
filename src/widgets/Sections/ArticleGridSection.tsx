@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from '@/i18n/routing';
 import useEmblaCarousel from 'embla-carousel-react';
 import { BranchSection, ArticleGridSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { fetchPublicArticles } from '@/entities/article/api';
 import type { Article } from '@/entities/article/types';
 import { useTenant } from '@/entities/tenant/TenantContext';
@@ -269,6 +270,7 @@ function ArticleCarouselLayout({
 
 export default function ArticleGridSection({ section, locale, tenantDomain }: ArticleGridSectionProps) {
   const settings = section.settings as ArticleGridSettings;
+  const bg = settings.background;
   const translations = section.translations?.[locale] || {};
   const tenant = useTenant();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -319,7 +321,8 @@ export default function ArticleGridSection({ section, locale, tenantDomain }: Ar
   }
 
   return (
-    <section className="py-12">
+    <section className="relative py-12">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {(translations.title || translations.subtitle) && (
           <div className="text-center mb-8">

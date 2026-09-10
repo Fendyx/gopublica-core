@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { BranchSection, FeaturedGridSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 
 interface FeaturedGridSectionProps {
   section: BranchSection;
@@ -11,6 +12,7 @@ interface FeaturedGridSectionProps {
 
 export default function FeaturedGridSection({ section, locale, tenantDomain }: FeaturedGridSectionProps) {
   const settings = section.settings as FeaturedGridSettings;
+  const bg = settings.background;
   const translations = section.translations[locale] ?? {};
   const { branchSlug } = useParams();
 
@@ -18,7 +20,8 @@ export default function FeaturedGridSection({ section, locale, tenantDomain }: F
     str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
-    <section className="py-12">
+    <SectionBackground background={bg}>
+      <section className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {(translations.title || translations.subtitle) && (
           <div className="text-center mb-8">
@@ -75,5 +78,6 @@ export default function FeaturedGridSection({ section, locale, tenantDomain }: F
         </div>
       </div>
     </section>
+    </SectionBackground>
   );
 }

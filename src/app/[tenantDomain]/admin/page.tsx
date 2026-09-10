@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type DashboardData = {
   menuCount: number;
@@ -59,7 +60,45 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  if (loading) return <div className="text-center py-10">{t('loading')}</div>;
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="glass-card glass-stat-accent p-5">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-12 w-12 rounded-lg" />
+                <div className="flex-1">
+                  <Skeleton className="h-3 w-24 mb-2" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <Skeleton className="h-4 w-32 mb-3" />
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-9 w-28 rounded-full" />
+            ))}
+          </div>
+        </div>
+        <div className="glass-card p-5">
+          <Skeleton className="h-5 w-48 mb-4" />
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const canManageMenu = tenant?.canManageMenu ?? tenant?.moduleAccess?.menu?.canManage ?? false;
   const canManageOrders = tenant?.canManageOrders ?? tenant?.moduleAccess?.orders?.canManage ?? false;

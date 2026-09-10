@@ -19,6 +19,10 @@ import SystemArticlesSection from './SystemArticlesSection';
 import SystemGallerySection from './SystemGallerySection';
 import SystemContactsSection from './SystemContactsSection';
 import SystemBookingCheckoutSection from './SystemBookingCheckoutSection';
+import AccordionSection from './AccordionSection';
+import TestimonialsSection from './TestimonialsSection';
+import BeforeAfterSection from './BeforeAfterSection';
+import LogoTickerSection from './LogoTickerSection';
 
 interface SectionProps {
   section: BranchSection;
@@ -48,6 +52,10 @@ export const sectionRegistry: Record<SectionType, ComponentType<SectionProps>> =
   contact_block: ContactBlockSection,
   category_list: CategoryListSection,
   rich_text: RichTextSection,
+  accordion: AccordionSection,
+  testimonials: TestimonialsSection,
+  before_after: BeforeAfterSection,
+  logo_ticker: LogoTickerSection,
   // System section types
   system_catalog: SystemCatalogSection,
   system_menu: SystemMenuSection,

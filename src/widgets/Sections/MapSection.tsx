@@ -1,5 +1,6 @@
 'use client';
 import { BranchSection, MapSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 
 interface MapSectionProps {
   section: BranchSection;
@@ -9,6 +10,7 @@ interface MapSectionProps {
 
 export default function MapSection({ section, locale, tenantDomain }: MapSectionProps) {
   const settings = section.settings as MapSettings;
+  const bg = settings.background;
   const translations = section.translations[locale] ?? {};
 
   const mapAddress = encodeURIComponent(settings.address || 'Poland');
@@ -16,7 +18,8 @@ export default function MapSection({ section, locale, tenantDomain }: MapSection
   const mapsUrl = `https://maps.google.com/?q=${mapAddress}`;
 
   return (
-    <section className="py-12">
+    <SectionBackground background={bg}>
+      <section className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {(translations.title || translations.subtitle) && (
           <div className="text-center mb-8">
@@ -92,5 +95,6 @@ export default function MapSection({ section, locale, tenantDomain }: MapSection
         </div>
       </div>
     </section>
+    </SectionBackground>
   );
 }

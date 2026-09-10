@@ -54,7 +54,17 @@ export async function fetchCustomPages(branchId: string): Promise<CustomPage[]> 
 
 export async function createCustomPage(
   branchId: string,
-  data: string | { title: string; titleI18n?: Record<string, string>; description?: string; descriptionI18n?: Record<string, string> }
+  data: string | {
+    title: string;
+    titleI18n?: Record<string, string>;
+    description?: string;
+    descriptionI18n?: Record<string, string>;
+    seoTitle?: string;
+    seoTitleI18n?: Record<string, string>;
+    seoDescription?: string;
+    seoDescriptionI18n?: Record<string, string>;
+    ogImage?: string;
+  }
 ): Promise<CustomPage> {
   const body = typeof data === 'string' ? { title: data } : data
   const res = await fetch(
@@ -75,7 +85,19 @@ export async function createCustomPage(
 export async function updateCustomPage(
   branchId: string,
   slug: string,
-  data: { title?: string; titleI18n?: Record<string, string>; description?: string; descriptionI18n?: Record<string, string>; isActive?: boolean; slug?: string }
+  data: {
+    title?: string;
+    titleI18n?: Record<string, string>;
+    description?: string;
+    descriptionI18n?: Record<string, string>;
+    seoTitle?: string;
+    seoTitleI18n?: Record<string, string>;
+    seoDescription?: string;
+    seoDescriptionI18n?: Record<string, string>;
+    ogImage?: string;
+    isActive?: boolean;
+    slug?: string;
+  }
 ): Promise<CustomPage> {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages/${slug}`,

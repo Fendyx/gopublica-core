@@ -1,5 +1,6 @@
 'use client';
 import { BranchSection } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 
@@ -21,8 +22,11 @@ export default function SystemContactsSection({ section }: SystemContactsSection
 
   if (!hasAnyInfo) return null;
 
+  const bg = (section.settings as any)?.background;
+
   return (
-    <section id="contact" className="py-10 lg:py-16 bg-surface-page">
+    <section id="contact" className="relative py-10 lg:py-16 bg-surface-page">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold mb-8 text-foreground">Contact</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

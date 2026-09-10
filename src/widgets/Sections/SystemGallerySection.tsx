@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { BranchSection } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import Gallery from '@/widgets/Gallery/Gallery';
 import type { GalleryItem } from '@/entities/gallery/types';
@@ -40,10 +41,13 @@ export default function SystemGallerySection({ section }: SystemGallerySectionPr
     return <div className="py-10 text-center text-muted-foreground">Loading gallery…</div>;
   }
 
+  const bg = (section.settings as any)?.background;
+
   if (!images.length) return null;
 
   return (
-    <section id="gallery" className="py-10 lg:py-16">
+    <section id="gallery" className="relative py-10 lg:py-16">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Gallery images={images} galleryStyle={galleryStyle} />
       </div>

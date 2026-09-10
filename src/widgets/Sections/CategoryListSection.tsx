@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { BranchSection, CategoryListSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import Image from 'next/image';
 
@@ -30,6 +31,7 @@ export default function CategoryListSection({ section, locale, branchSlug }: Cat
 
   const tenantId = tenant?.tenantId;
   const settings = (section.settings || {}) as CategoryListSettings;
+  const bg = settings.background;
   const categoryOrder = settings.categoryOrder || [];
   const layout = settings.layout || 'grid';
   const columns = settings.columns || 3;
@@ -69,7 +71,8 @@ export default function CategoryListSection({ section, locale, branchSlug }: Cat
 
   if (layout === 'carousel') {
     return (
-      <section className="py-10 lg:py-16">
+      <section className="relative py-10 lg:py-16">
+        <SectionBackground background={bg} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-8 text-foreground">Shop by Category</h2>
           <div className="flex gap-4 overflow-x-auto pb-4">
@@ -106,7 +109,8 @@ export default function CategoryListSection({ section, locale, branchSlug }: Cat
   }
 
   return (
-    <section className="py-10 lg:py-16">
+    <section className="relative py-10 lg:py-16">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold mb-8 text-foreground">Shop by Category</h2>
         <div className={`grid grid-cols-1 ${gridCols} gap-4 lg:gap-6`}>

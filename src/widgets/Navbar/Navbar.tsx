@@ -7,9 +7,10 @@ import { useParams, useRouter } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
 import ThemeToggle from '@/shared/ui/ThemeToggle'
-import { Menu, X, CalendarDays, ChevronDown, MapPin, Store, Check, ShoppingCart, User, LogIn, BookOpen } from 'lucide-react'
+import { Menu, X, CalendarDays, ChevronDown, MapPin, ShoppingCart, User, LogIn, BookOpen } from 'lucide-react'
 import { useCategoryNav } from '@/shared/ui/CategoryNavContext'
 import { useBranch } from '@/entities/branch/BranchContext'
+import { useBranchSelectionUI } from '@/widgets/BranchSelection/BranchSelectionProvider'
 import { useCartStore } from '@/shared/store/cartStore'
 import { getNavLinks } from '@/shared/lib/navigation'
 import NavMoreDropdown from '@/widgets/Navbar/NavMoreDropdown'
@@ -23,22 +24,18 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const burgerRef = useRef<HTMLButtonElement>(null)
-  const locationDropdownRef = useRef<HTMLDivElement>(null)
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   const {
-    cities,
     selectedCity,
     selectedBranch,
-    setCity,
-    setBranch,
     branches,
     loading: branchLoading,
   } = useBranch()
 
-  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false)
   const { setMobileDrawerOpen } = useCategoryNav()
+  const { openBranchSelection } = useBranchSelectionUI()
 
   const cartItemsCount = useCartStore((s) => s.items.reduce((acc, item) => acc + item.quantity, 0))
   const openCart = useCartStore((s) => s.openCart)
@@ -60,18 +57,10 @@ export default function Navbar() {
       ) {
         setIsOpen(false)
       }
-
-      if (
-        locationDropdownOpen &&
-        locationDropdownRef.current &&
-        !locationDropdownRef.current.contains(event.target as Node)
-      ) {
-        setLocationDropdownOpen(false)
-      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isOpen, locationDropdownOpen])
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
@@ -124,58 +113,17 @@ export default function Navbar() {
             </nav>
 
             {!branchLoading && branches.length > 1 && (
-              <div className="relative border-l border-border-light pl-4 xl:pl-6" ref={locationDropdownRef}>
+              <div className="relative border-l border-border-light pl-4 xl:pl-6">
                 <button
-                  onClick={() => setLocationDropdownOpen(!locationDropdownOpen)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    locationDropdownOpen ? 'bg-surface-hover text-text-primary' : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
-                  }`}
+                  onClick={openBranchSelection}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                 >
                   <MapPin size={16} className="text-primary shrink-0" />
                   <span className="max-w-[180px] xl:max-w-[220px] truncate">
                     {selectedCity} {selectedBranch ? `- ${selectedBranch.name}` : ''}
                   </span>
-                  <ChevronDown size={14} className={`shrink-0 transition-transform duration-200 ${locationDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className="shrink-0" />
                 </button>
-                
-                {locationDropdownOpen && (
-                  <div className="absolute top-full left-0 xl:right-0 xl:left-auto mt-2 min-w-[260px] bg-popover shadow-dropdown rounded-xl border border-border overflow-hidden z-50 py-2">
-                    {cities.map((city) => {
-                      const cityBranches = branches.filter((b) => b.city === city)
-                      return (
-                        <div key={city} className="mb-2 last:mb-0">
-                          <div className="px-4 py-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider flex items-center justify-between bg-surface-page/50">
-                            {city}
-                          </div>
-                          {cityBranches.map((branch) => (
-                            <button
-                              key={branch._id}
-                              onClick={() => {
-                                setCity(city)
-                                setBranch(branch)
-                                setLocationDropdownOpen(false)
-                                router.push(`/${locale}/${branch.slug}`)
-                              }}
-                              className="flex flex-col w-full text-left px-4 py-2 text-sm hover:bg-surface-hover transition-colors group"
-                            >
-                              <div className="flex items-center justify-between w-full">
-                                <span className={`font-medium ${selectedBranch?._id === branch._id ? 'text-primary' : 'text-text-primary'}`}>
-                                  {branch.name}
-                                </span>
-                                {selectedBranch?._id === branch._id && <Check size={14} className="text-primary shrink-0" />}
-                              </div>
-                              {branch.address && (
-                                <span className="text-xs text-text-tertiary mt-0.5 truncate w-full group-hover:text-text-secondary">
-                                  {branch.address}
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -262,46 +210,13 @@ export default function Navbar() {
 
           {!branchLoading && branches.length > 1 && (
             <div className="mt-2 pt-4 border-t border-border-light flex flex-col gap-4">
-              <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider px-2">Локация</span>
-              
-              <div className="flex flex-col gap-4">
-                {cities.map((city) => (
-                  <div key={city} className="flex flex-col gap-2">
-                    <div className="px-2 text-sm font-medium text-text-secondary flex items-center gap-1.5">
-                      <MapPin size={14} className="text-primary" />
-                      {city}
-                    </div>
-                    <div className="flex flex-col gap-2 pl-2">
-                      {branches.filter(b => b.city === city).map((branch) => (
-                        <button
-                          key={branch._id}
-                          onClick={() => {
-                            setCity(city)
-                            setBranch(branch)
-                            setIsOpen(false)
-                            router.push(`/${locale}/${branch.slug}`)
-                          }}
-                          className={`flex flex-col text-left px-4 py-3 rounded-xl text-sm transition-all border ${
-                            selectedBranch?._id === branch._id 
-                              ? 'bg-primary/5 border-primary text-primary' 
-                              : 'bg-surface-hover border-transparent text-text-secondary hover:bg-surface-card hover:border-border'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Store size={14} className={selectedBranch?._id === branch._id ? 'text-primary' : 'text-text-tertiary'} />
-                            <span className="font-medium">{branch.name}</span>
-                          </div>
-                          {branch.address && (
-                            <span className={`mt-1 pl-6 text-xs ${selectedBranch?._id === branch._id ? 'text-primary/80' : 'text-text-tertiary'}`}>
-                              {branch.address}
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <button
+                onClick={() => { openBranchSelection(); setIsOpen(false) }}
+                className="flex items-center gap-2 px-2 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors rounded-lg hover:bg-surface-hover"
+              >
+                <MapPin size={16} className="text-primary" />
+                {selectedCity} {selectedBranch ? `- ${selectedBranch.name}` : ''}
+              </button>
             </div>
           )}
 

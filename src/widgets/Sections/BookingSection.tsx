@@ -1,5 +1,6 @@
 'use client';
 import { BranchSection, BookingSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import BookingForm from '@/features/reservation/BookingForm';
 import SlotBookingForm from '@/features/reservation/SlotBookingForm';
 import MapEmbed from '@/components/ui/MapEmbed';
@@ -14,6 +15,7 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
   const title = section.translations?.[locale]?.title;
   const subtitle = section.translations?.[locale]?.subtitle;
   const settings = (section.settings || {}) as BookingSettings;
+  const bg = settings.background;
   const {
     sideContentType = 'none',
     checkoutFlow = 'inline',
@@ -35,7 +37,8 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
   // ── Single-column layout (default) ──
   if (sideContentType === 'none') {
     return (
-      <section className="py-12 bg-surface-page">
+      <section className="relative py-12 bg-surface-page">
+        <SectionBackground background={bg} />
         <FormComponent {...formProps} />
       </section>
     );
@@ -43,7 +46,8 @@ export default function BookingSection({ section, locale, tenantDomain }: Bookin
 
   // ── Split-screen layout ──
   return (
-    <section className="py-12 bg-surface-page">
+    <section className="relative py-12 bg-surface-page">
+      <SectionBackground background={bg} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-8 items-stretch">
           {/* Left: Booking Form - fills its grid column */}

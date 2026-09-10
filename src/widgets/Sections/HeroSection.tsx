@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { BranchSection, HeroSettings, HeroCta, HeroCtaVariant, GradientDirection, HeroTextAlign, HeroSlide } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 
 interface HeroSectionProps {
   section: BranchSection;
@@ -447,6 +448,34 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
     </>
   ) : null;
 
+  // ─── Новая система фонов (SectionBackground) ───
+  const hasNewBackground = settings.background && settings.background.type !== 'none';
+
+  if (hasNewBackground) {
+    if (settings.clickableUrl && mediaType !== 'slider') {
+      return (
+        <section className={styles.container}>
+          <Link href={settings.clickableUrl} className="absolute inset-0 z-0">
+            <SectionBackground background={settings.background}>
+              <div className="h-screen w-full" />
+            </SectionBackground>
+          </Link>
+          {contentBlock}
+        </section>
+      );
+    }
+
+    return (
+      <section className={styles.container}>
+        <SectionBackground background={settings.background}>
+          <div className="h-screen w-full" />
+        </SectionBackground>
+        {contentBlock}
+      </section>
+    );
+  }
+
+  // ─── Legacy: медиа-фон (видео / изображение / слайдер) ───
   // ─── Кликабельный фон (image/video) ───
   if (settings.clickableUrl && mediaType !== 'slider') {
     return (

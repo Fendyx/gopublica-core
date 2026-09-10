@@ -1,10 +1,36 @@
 'use client'
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import type { Branch, BranchGroup } from '@/entities/branch/types'
 
 // Session-level cache: geolocation only needs to fire once per browser session,
 // not on every component mount or route navigation.
 let geoResolved = false
+
+// Persistence keys
+const STORAGE_KEY_SLUG = 'selectedBranchSlug'
+const STORAGE_KEY_CITY = 'selectedBranchCity'
+const COOKIE_NAME = 'selectedBranch'
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
+
+function persistBranchSelection(slug: string, city: string | null) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_KEY_SLUG, slug)
+    if (city) localStorage.setItem(STORAGE_KEY_CITY, city)
+    document.cookie = `${COOKIE_NAME}=${encodeURIComponent(slug)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
+  } catch {
+    // localStorage may be unavailable (private browsing, quota exceeded)
+  }
+}
+
+function readSavedBranchSlug(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    return localStorage.getItem(STORAGE_KEY_SLUG)
+  } catch {
+    return null
+  }
+}
 
 interface BranchContextType {
   branches: Branch[]
@@ -102,12 +128,19 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
         // First time: run IP-based city detection, then finalize loading
         detectCityByIp(data).then(() => setLoading(false))
       } else {
-        // Geolocation already resolved - auto-select first branch if none selected
+        // Geolocation already resolved - try to restore saved preference or auto-select first
         if (!selectedBranch && data.length > 0) {
-          const first = data.find(b => !b.parentBranchId) || data[0]
-          if (first) {
-            setSelectedBranch(first)
-            setSelectedCity(first.city)
+          const savedSlug = readSavedBranchSlug()
+          const saved = savedSlug ? data.find(b => b.slug === savedSlug) : null
+          if (saved) {
+            setSelectedBranch(saved)
+            setSelectedCity(saved.city)
+          } else {
+            const first = data.find(b => !b.parentBranchId) || data[0]
+            if (first) {
+              setSelectedBranch(first)
+              setSelectedCity(first.city)
+            }
           }
         }
         setLoading(false)
@@ -133,6 +166,7 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
       if (found) {
         setSelectedCity(cityName)
         setSelectedBranch(found)
+        persistBranchSelection(found.slug, cityName)
         return true
       }
       return false
@@ -146,7 +180,10 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
       const firstCity = uniqueCities[0] || candidates[0].city
       if (firstCity) setSelectedCity(firstCity)
       const firstBranch = candidates.find(b => b.city === firstCity)
-      if (firstBranch) setSelectedBranch(firstBranch)
+      if (firstBranch) {
+        setSelectedBranch(firstBranch)
+        persistBranchSelection(firstBranch.slug, firstCity)
+      }
     }
 
     try {
@@ -170,12 +207,16 @@ export function BranchProvider({ children, tenantId, initialBranch, token }: Pro
     setSelectedCity(city)
     // При смене города выбираем основной (не под-заведение) филиал в этом городе
     const branchInCity = mainBranches.find(b => b.city === city)
-    if (branchInCity) setSelectedBranch(branchInCity)
+    if (branchInCity) {
+      setSelectedBranch(branchInCity)
+      persistBranchSelection(branchInCity.slug, city)
+    }
   }
 
   const setBranch = (branch: Branch) => {
     setSelectedBranch(branch)
     setSelectedCity(branch.city)
+    persistBranchSelection(branch.slug, branch.city)
   }
 
   // 👈 Группировка для UI-свитчера: для указанного города возвращает список

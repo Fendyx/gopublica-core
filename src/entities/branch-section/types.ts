@@ -1,11 +1,51 @@
 import type { ProductCardVariant } from '@/entities/menu-item/types';
 
+// ─── Section Background ────────────────────────────────────────────────
+
+export type BackgroundType = 'none' | 'color' | 'gradient' | 'image' | 'video';
+
+export type BackgroundGradientDirection = 'to-r' | 'to-br' | 'to-b' | 'to-bl' | 'to-l';
+
+export type BackgroundMediaFit = 'cover' | 'contain';
+
+export interface SectionBackgroundGradient {
+  /** Start color (hex, e.g. '#ff0000') */
+  from: string;
+  /** End color (hex, e.g. '#0000ff') */
+  to: string;
+  /** Gradient direction */
+  direction: BackgroundGradientDirection;
+}
+
+export interface SectionBackground {
+  /** Background type */
+  type: BackgroundType;
+  /** Solid color (hex, e.g. '#ffffff') — used when type='color' */
+  color?: string;
+  /** Gradient config — used when type='gradient' */
+  gradient?: SectionBackgroundGradient;
+  /** Cloudinary URL for image — used when type='image' */
+  imageUrl?: string;
+  /** Cloudinary URL for video — used when type='video' */
+  videoUrl?: string;
+  /** CSS object-fit for media: 'cover' (default) or 'contain' */
+  mediaFit?: BackgroundMediaFit;
+  /** Overlay opacity 0–100 (default 0 = no overlay) */
+  overlayOpacity?: number;
+  /** Overlay color (hex, default '#000000') */
+  overlayColor?: string;
+}
+
+// ─── Section Types ─────────────────────────────────────────────────────
+
 export type SectionType =
   | 'hero' | 'hero_video'
   | 'entity_carousel' | 'feature_carousel'
   | 'booking' | 'map'
   | 'menu_categories' | 'article_grid' | 'dynamic_form'
   | 'contact_block' | 'category_list' | 'rich_text'
+  | 'accordion'
+  | 'testimonials' | 'before_after' | 'logo_ticker'
   // System section types
   | 'system_catalog' | 'system_menu' | 'system_articles' | 'system_gallery' | 'system_contacts'
   | 'system_booking_checkout';
@@ -97,6 +137,8 @@ export interface HeroSettings {
   sliderPauseOnInteraction?: boolean;
   /** Прозрачность затемняющего слоя фона (0–100%). По умолчанию 40%. */
   overlayOpacity?: number;
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
 }
 
 export interface BaseCarouselSettings {
@@ -123,6 +165,8 @@ export interface BaseCarouselSettings {
 }
 
 export interface EntityCarouselSettings extends BaseCarouselSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   /** When mode === 'manual', items are managed via SectionItemList (existing behavior) */
   linkToDetailPage?: boolean;
   /** When mode === 'ecommerce', IDs of selected products (MenuItem._id) */
@@ -132,6 +176,8 @@ export interface EntityCarouselSettings extends BaseCarouselSettings {
 }
 
 export interface FeatureCarouselSettings extends BaseCarouselSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   /** When mode === 'ecommerce', IDs of selected products */
   selectedProductIds?: string[];
   /** When mode === 'menu', IDs of selected menu items */
@@ -139,6 +185,8 @@ export interface FeatureCarouselSettings extends BaseCarouselSettings {
 }
 
 export interface BookingSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   /** Layout mode for the right side of the booking section */
   sideContentType?: 'none' | 'map' | 'text';
   /** Checkout flow: 'inline' (default) shows step 2 in same component, 'redirect' navigates to /reservations page */
@@ -160,12 +208,16 @@ export interface BookingSettings {
 }
 
 export interface MapSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   latitude: number;
   longitude: number;
   address: string;
 }
 
 export interface FeaturedGridSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   displayType: 'categories' | 'products';
   items: string[];
 }
@@ -175,6 +227,8 @@ export type ArticleGridAspectRatio = '16:9' | '4:3' | '1:1' | '9:16';
 export type ArticleGridCardVariant = 'default' | 'overlay';
 
 export interface ArticleGridSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   mode?: 'latest' | 'manual';
   limit?: number;
   selectedSlugs?: string[];
@@ -205,6 +259,8 @@ export interface FormField {
 }
 
 export interface DynamicFormSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   fields: FormField[];
   submitLabel?: string;
   submitLabelI18n?: Record<string, string>;
@@ -220,6 +276,8 @@ export interface DynamicFormSettings {
 export type ContactBlockPreset = 'map_and_form' | 'simple_info' | 'split_layout';
 
 export interface ContactBlockSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   /** Layout preset */
   preset: ContactBlockPreset;
   /** Show embedded Google Map */
@@ -239,6 +297,8 @@ export interface ContactBlockSettings {
 export type CategoryListLayout = 'grid' | 'carousel';
 
 export interface CategoryListSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   /** Ordered array of category keys for display order */
   categoryOrder?: string[];
   /** Layout mode */
@@ -250,10 +310,54 @@ export interface CategoryListSettings {
 }
 
 export interface RichTextSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
   /** Base-language HTML content from TipTap editor */
   content?: string;
   /** Localized HTML content per locale */
   contentI18n?: Record<string, string>;
+}
+
+export interface AccordionSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
+}
+
+// ─── Testimonials Section ──────────────────────────────────
+
+export type TestimonialsCardStyle = 'card' | 'minimal' | 'quote';
+
+export interface TestimonialsSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
+  /** Autoplay the carousel (default: true) */
+  autoplay?: boolean;
+  /** Autoplay delay in ms (default: 5000, range: 1000–15000) */
+  autoplayDelay?: number;
+  /** Show star ratings on cards (default: true) */
+  showRating?: boolean;
+  /** Visual style of review cards */
+  cardStyle?: TestimonialsCardStyle;
+}
+
+// ─── Before & After Section ─────────────────────────────────
+
+export interface BeforeAfterSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
+}
+
+// ─── Logo Ticker Section ────────────────────────────────────
+
+export interface LogoTickerSettings {
+  /** Universal section background (color, gradient, image, video) */
+  background?: SectionBackground;
+  /** Scroll speed in px/s (default: 30, range: 10–100) */
+  speed?: number;
+  /** Pause animation on hover (default: true) */
+  pauseOnHover?: boolean;
+  /** Apply grayscale filter to logos until hovered (default: false) */
+  grayscaleOnIdle?: boolean;
 }
 
 export type SectionSettings =
@@ -267,7 +371,11 @@ export type SectionSettings =
   | DynamicFormSettings
   | ContactBlockSettings
   | CategoryListSettings
-  | RichTextSettings;
+  | RichTextSettings
+  | AccordionSettings
+  | TestimonialsSettings
+  | BeforeAfterSettings
+  | LogoTickerSettings;
 
 export interface BranchSectionItem {
   _id: string;
@@ -280,6 +388,8 @@ export interface BranchSectionItem {
   translations: Translations;
   isActive: boolean;
   body?: string;
+  /** Localized rich-text HTML per locale (used by accordion items with TipTap) */
+  bodyI18n?: Record<string, string>;
   gallery?: { type: 'video' | 'image'; url: string }[];
   attributes?: { key: string; value: string }[];
 }

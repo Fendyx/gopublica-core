@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { BranchSection } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import MenuLayout from '@/widgets/Menu/MenuLayout';
 import type { MenuItem } from '@/entities/menu-item/types';
@@ -52,8 +53,11 @@ export default function SystemMenuSection({ section, allMenuItems, categories }:
     ? Object.fromEntries(categories.map(c => [c.key, { name: c.name, icon: c.icon || '🍽️', translations: c.translations || {} }]))
     : undefined;
 
+  const bg = (section.settings as any)?.background;
+
   return (
-    <section id="menu" className="py-16 bg-surface-page">
+    <section id="menu" className="relative py-16 bg-surface-page">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <MenuLayout items={items} menuStyle={menuStyle} initialCategoryMap={categoryMap} />
       </div>

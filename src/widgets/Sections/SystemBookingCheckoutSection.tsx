@@ -6,6 +6,7 @@ import { useTenant } from '@/entities/tenant/TenantContext';
 import { useBranch } from '@/entities/branch/BranchContext';
 import ConsentCheckboxes, { type ConsentState, INITIAL_CONSENT } from '@/shared/ui/ConsentCheckboxes';
 import type { BranchSection } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 
 interface SystemBookingCheckoutProps {
   section: BranchSection;
@@ -74,9 +75,12 @@ export default function SystemBookingCheckoutSection({
     }
   };
 
+  const bg = (section.settings as any)?.background;
+
   if (status === 'success') {
     return (
-      <section className="py-12 bg-surface-page">
+      <section className="relative py-12 bg-surface-page">
+        <SectionBackground background={bg} />
         <div className="max-w-xl mx-auto px-4 sm:px-6">
           <div className="bg-surface-card border border-border rounded-2xl p-8 text-center shadow-card">
             <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mx-auto mb-5">
@@ -105,7 +109,8 @@ export default function SystemBookingCheckoutSection({
   }
 
   return (
-    <section className="py-12 bg-surface-page">
+    <section className="relative py-12 bg-surface-page">
+      <SectionBackground background={bg} />
       <div className="max-w-xl mx-auto px-4 sm:px-6">
         <div className="mb-8">
           <h2 className="font-heading text-3xl sm:text-4xl text-text-primary leading-tight text-center mb-2">

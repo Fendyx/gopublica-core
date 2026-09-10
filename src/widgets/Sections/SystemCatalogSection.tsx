@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { BranchSection } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout';
 import CategoryGrid from '@/widgets/Catalog/CategoryGrid';
@@ -72,12 +73,15 @@ export default function SystemCatalogSection({ section, locale, branchSlug, allM
       .catch(() => setLoading(false));
   }, [tenantId, branchId, allMenuItems, preloadedCategories]);
 
+  const bg = (section.settings as any)?.background;
+
   if (loading) {
     return <div className="py-10 text-center text-muted-foreground">Loading catalog…</div>;
   }
 
   return (
-    <section className="py-10 lg:py-16">
+    <section className="relative py-10 lg:py-16">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold mb-8 text-foreground">{t('ourProducts')}</h2>
         {categories.length > 0 && (

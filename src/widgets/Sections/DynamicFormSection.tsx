@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { BranchSection, DynamicFormSettings, FormField } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,6 +38,7 @@ export default function DynamicFormSection({ section, locale, tenantDomain }: Dy
   const tenant = useTenant();
   const defaultLocale = tenant?.defaultLocale || 'en';
   const settings = (section.settings || {}) as DynamicFormSettings;
+  const bg = settings.background;
   const fields = settings.fields || [];
 
   const title = section.translations?.[locale]?.title;
@@ -114,7 +116,8 @@ export default function DynamicFormSection({ section, locale, tenantDomain }: Dy
   if (status === 'success') {
     const successMessage = getLocText(settings.successMessage || '', settings.successMessageI18n, locale) || t('successDefault');
     return (
-      <section className="py-12 bg-surface-page">
+      <section className="relative py-12 bg-surface-page">
+        <SectionBackground background={bg} />
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -138,7 +141,8 @@ export default function DynamicFormSection({ section, locale, tenantDomain }: Dy
   const hasSideText = !!rawSideText && rawSideText !== '<p></p>';
 
   return (
-    <section className="py-16 bg-surface-page">
+    <section className="relative py-16 bg-surface-page">
+      <SectionBackground background={bg} />
       <div className={`mx-auto px-4 ${hasSideText ? 'max-w-6xl' : 'max-w-2xl'}`}>
         {(title || subtitle) && (
           <div className="text-center mb-10">

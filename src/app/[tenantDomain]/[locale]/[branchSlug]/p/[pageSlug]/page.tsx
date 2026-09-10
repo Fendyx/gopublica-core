@@ -42,8 +42,10 @@ export async function generateMetadata({
 
   if (!customPage) return {};
 
-  const title = customPage.titleI18n?.[locale] || customPage.title || tenant.clientName;
-  const description = customPage.descriptionI18n?.[locale] || customPage.description || '';
+  const title = customPage.seoTitleI18n?.[locale] || customPage.seoTitle || customPage.titleI18n?.[locale] || customPage.title || tenant.clientName;
+  const description = customPage.seoDescriptionI18n?.[locale] || customPage.seoDescription || customPage.descriptionI18n?.[locale] || customPage.description || '';
+
+  const ogImage = customPage.ogImage || undefined;
 
   return {
     title,
@@ -51,6 +53,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description: description || undefined,
+      images: ogImage ? [{ url: ogImage }] : undefined,
       url: `/${locale}/${branchSlug}/p/${pageSlug}`,
       siteName: tenant.clientName,
       locale,

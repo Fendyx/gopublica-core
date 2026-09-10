@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRef, useCallback, useEffect, useState } from 'react';
 import { BranchSection, BranchSectionItem, FeatureCarouselSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 import type { MenuItem } from '@/entities/menu-item/types';
 import { DESKTOP_SIZES, DESKTOP_WIDTH_CLASSES, DEFAULT_ITEMS_PER_ROW } from '@/widgets/Sections/CarouselWidths';
 import ProductCard from '@/widgets/Catalog/ProductCard';
@@ -23,6 +24,7 @@ interface FeatureCarouselProps {
 export default function FeatureCarousel({ section, locale, tenantDomain, branchSlug, dynamicItems = [], currencySymbol = 'zł' }: FeatureCarouselProps) {
   const effectiveBranchSlug = branchSlug || tenantDomain;
   const settings = (section.settings || {}) as FeatureCarouselSettings;
+  const bg = settings.background;
   const itemsPerRow = settings.desktopItemsPerRow ?? DEFAULT_ITEMS_PER_ROW.feature;
   const widthClass = DESKTOP_WIDTH_CLASSES[itemsPerRow];
   const imageSizes = DESKTOP_SIZES[itemsPerRow];
@@ -74,7 +76,8 @@ export default function FeatureCarousel({ section, locale, tenantDomain, branchS
     if (items.length === 0) return null;
 
     return (
-      <section className="py-12">
+      <section className="relative py-12">
+        <SectionBackground background={bg} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
             {sectionTitle && (
@@ -179,7 +182,8 @@ export default function FeatureCarousel({ section, locale, tenantDomain, branchS
   const viewAllLabel = settings.viewAllLabel || (mode === 'ecommerce' ? 'View All Products' : 'View All Menu');
 
   return (
-    <section className="py-12">
+    <section className="relative py-12">
+      <SectionBackground background={bg} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           {sectionTitle && (

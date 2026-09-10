@@ -1,6 +1,7 @@
 'use client';
 
 import { BranchSection, RichTextSettings } from '@/entities/branch-section/types';
+import SectionBackground from './SectionBackground';
 
 interface RichTextSectionProps {
   section: BranchSection;
@@ -16,6 +17,7 @@ interface RichTextSectionProps {
  */
 export default function RichTextSection({ section, locale }: RichTextSectionProps) {
   const settings = (section.settings || {}) as RichTextSettings;
+  const bg = settings.background;
 
   // Resolve content for the current locale: check contentI18n first, then base content
   const htmlContent = settings.contentI18n?.[locale] || settings.content || '';
@@ -23,7 +25,8 @@ export default function RichTextSection({ section, locale }: RichTextSectionProp
   if (!htmlContent) return null;
 
   return (
-    <section className="py-8 md:py-12">
+    <SectionBackground background={bg}>
+      <section className="py-8 md:py-12">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div
           className="prose prose-slate dark:prose-invert
@@ -43,5 +46,6 @@ export default function RichTextSection({ section, locale }: RichTextSectionProp
         />
       </div>
     </section>
+    </SectionBackground>
   );
 }

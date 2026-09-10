@@ -70,6 +70,8 @@ import {
   ListOrdered,
 } from 'lucide-react';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
+import { useToast } from '@/shared/ui/Toast';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import NavigationSettingsTab from '@/widgets/Admin/Settings/NavigationSettingsTab';
 import {
   TelegramConnectionStatus,
@@ -104,15 +106,34 @@ export default function SettingsPageContent() {
 
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const { showToast } = useToast();
+  const [deleteSubDialogOpen, setDeleteSubDialogOpen] = useState(false);
+  const [deletingSubBranch, setDeletingSubBranch] = useState<Branch | null>(null);
   const [primaryLanguage, setPrimaryLanguage] = useState('pl');
   const [activeLocales, setActiveLocales] = useState<string[]>(['pl', 'en']);
   const [defaultLocale, setDefaultLocale] = useState('pl');
   const [primaryCurrency, setPrimaryCurrency] = useState('PLN');
 
-  // Оставили только радиус и вариант карточки (Каталог убран)
+  // Theme settings
   const [radius, setRadius] = useState('lg');
   const [cardVariant, setCardVariant] = useState('action-bar');
   const [showCategoryNav, setShowCategoryNav] = useState(false);
+  const [primaryColor, setPrimaryColor] = useState('');
+  const [accentColor, setAccentColor] = useState('');
+  const [fontHeading, setFontHeading] = useState('');
+  const [fontBody, setFontBody] = useState('');
+  const [themePreset, setThemePreset] = useState('');
+
+  // Theme presets
+  const THEME_PRESETS = [
+    { id: '', label: 'Custom' },
+    { id: 'restaurant-warm', label: 'Restaurant Warm', primary: '#C0392B', accent: '#E67E22', radius: 'lg' },
+    { id: 'elegant-dark', label: 'Elegant Dark', primary: '#1A1A2E', accent: '#E94560', radius: 'none' },
+    { id: 'fresh-green', label: 'Fresh & Natural', primary: '#27AE60', accent: '#F39C12', radius: 'xl' },
+    { id: 'minimal-blue', label: 'Minimal Blue', primary: '#2980B9', accent: '#34495E', radius: 'sm' },
+    { id: 'beauty-pink', label: 'Beauty & Wellness', primary: '#E91E8C', accent: '#8E44AD', radius: 'xl' },
+    { id: 'bold-red', label: 'Bold & Energetic', primary: '#E74C3C', accent: '#2C3E50', radius: 'none' },
+  ];
 
   // Убрали hoursI18n
   const [seoTitleI18n, setSeoTitleI18n] = useState<Record<string, string>>({});
@@ -214,6 +235,10 @@ export default function SettingsPageContent() {
         setRadius(data.theme?.radius || 'lg');
         setCardVariant(data.theme?.productCardVariant || 'action-bar');
         setShowCategoryNav(data.features?.showCategoryNav ?? false);
+        setPrimaryColor(data.theme?.primary || '');
+        setAccentColor(data.theme?.accent || '');
+        setFontHeading(data.theme?.fontHeading || '');
+        setFontBody(data.theme?.fontBody || '');
 
         setSeoTitleI18n(data.seoTitleI18n || {});
         setSeoDescriptionI18n(data.seoDescriptionI18n || {});
@@ -269,7 +294,7 @@ export default function SettingsPageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedBranch) return alert(t('selectBranchFirst'));
+    if (!selectedBranch) { showToast(t('selectBranchFirst'), 'error'); return; }
 
     try {
       const payload = {
@@ -293,6 +318,10 @@ export default function SettingsPageContent() {
           productCardVariant: cardVariant,
           categoryBgColor,
           pageBgColor,
+          primary: primaryColor || undefined,
+          accent: accentColor || undefined,
+          fontHeading: fontHeading || undefined,
+          fontBody: fontBody || undefined,
         },
         features: {
           showCategoryNav,
@@ -313,6 +342,51 @@ export default function SettingsPageContent() {
       console.error(err);
     }
   };
+
+  // Per-tab save: sends only the fields relevant to the specified tab
+  const [savedTab, setSavedTab] = useState<string | null>(null);
+  const saveTab = async (tabName: string, tabPayload: Record<string, unknown>) => {
+    if (!selectedBranch || !token) return;
+    try {
+      const payload = { ...tabPayload, branchId: selectedBranch._id };
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setSavedTab(tabName);
+        setTimeout(() => setSavedTab(null), 2000);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const saveGeneral = () => saveTab('general', {
+    ...form, businessName, workingHours,
+  });
+  const saveAppearance = () => saveTab('appearance', {
+    logoUrl, faviconUrl,
+    theme: {
+      radius,
+      productCardVariant: cardVariant,
+      categoryBgColor,
+      pageBgColor,
+      primary: primaryColor || undefined,
+      accent: accentColor || undefined,
+      fontHeading: fontHeading || undefined,
+      fontBody: fontBody || undefined,
+    },
+    features: { showCategoryNav },
+  });
+  const saveLocalization = () => saveTab('localization', {
+    primaryLanguage, primaryCurrency, activeLocales, defaultLocale,
+  });
+  const saveSeo = () => saveTab('seo', {
+    seoTitleI18n, seoDescriptionI18n, notifications,
+  });
+  const saveLegal = () => saveTab('legal', { legal });
 
   // 👈 НОВОЕ: Telegram handlers
   const handleTelegramConnect = async () => {
@@ -384,7 +458,7 @@ export default function SettingsPageContent() {
       setShowDisconnectConfirm(false);
     } catch (err: any) {
       console.error('Telegram disconnect failed:', err);
-      alert(t('telegram.errors.disconnectFailed'));
+      showToast(t('telegram.errors.disconnectFailed'), 'error');
     } finally {
       setDisconnecting(false);
     }
@@ -404,9 +478,8 @@ export default function SettingsPageContent() {
       });
     } catch (err: any) {
       console.error('Failed to save Telegram settings:', err);
-      // Revert on error
       setTelegramSettings(telegramSettings);
-      alert(t('telegram.errors.settingsSaveFailed'));
+      showToast(t('telegram.errors.settingsSaveFailed'), 'error');
     } finally {
       setSettingsSaving(false);
     }
@@ -445,11 +518,15 @@ export default function SettingsPageContent() {
   };
 
   // 👈 НОВОЕ: удалить (soft-delete) подфилию
-  const handleDeleteSubBranch = async (branch: Branch) => {
-    if (!token) return;
-    if (!confirm(t('subVenues.deleteConfirm', { name: branch.name }))) return;
+  const handleDeleteSubBranch = (branch: Branch) => {
+    setDeletingSubBranch(branch);
+    setDeleteSubDialogOpen(true);
+  };
+
+  const confirmDeleteSubBranch = async () => {
+    if (!token || !deletingSubBranch) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branch._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${deletingSubBranch._id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -540,14 +617,80 @@ export default function SettingsPageContent() {
 
                 <div className="space-y-3">
                   <Label className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-muted-foreground" />{t('workingHoursByDay')}</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-muted/20 p-4 rounded-xl border border-border">
-                    {DAY_KEYS.map(day => (
-                      <div key={day} className="flex flex-col gap-1.5">
-                        <Label className="text-[11px] uppercase text-muted-foreground ml-1 font-semibold">{t(`days.${day}`)}</Label>
-                        <Input placeholder="10:00 - 22:00" value={workingHours[day] || ''} onChange={e => setWorkingHours(prev => ({ ...prev, [day]: e.target.value }))} />
-                      </div>
-                    ))}
+                  <div className="space-y-2 bg-muted/20 p-4 rounded-xl border border-border">
+                    {DAY_KEYS.map(day => {
+                      const raw = workingHours[day] || '';
+                      // Parse structured format: "10:00-22:00" or "closed"
+                      const isClosed = raw === 'closed' || raw.toLowerCase() === 'closed';
+                      let startTime = '';
+                      let endTime = '';
+                      if (!isClosed && raw) {
+                        const parts = raw.split(/\s*[-–]\s*/);
+                        startTime = parts[0] || '';
+                        endTime = parts[1] || '';
+                      }
+
+                      const handleDayChange = (field: 'open' | 'close' | 'closed', value: string) => {
+                        setWorkingHours(prev => {
+                          if (field === 'closed') {
+                            return { ...prev, [day]: value === 'true' ? 'closed' : '' };
+                          }
+                          // Get current values
+                          const current = prev[day] || '';
+                          const isCurrentlyClosed = current === 'closed';
+                          if (isCurrentlyClosed) return prev;
+                          const parts = current.split(/\s*[-–]\s*/);
+                          const newStart = field === 'open' ? value : (parts[0] || '');
+                          const newEnd = field === 'close' ? value : (parts[1] || '');
+                          if (newStart && newEnd) return { ...prev, [day]: `${newStart}-${newEnd}` };
+                          if (newStart) return { ...prev, [day]: newStart };
+                          return { ...prev, [day]: '' };
+                        });
+                      };
+
+                      return (
+                        <div key={day} className="flex items-center gap-3 p-2 rounded-lg bg-background/50">
+                          <span className="text-xs font-semibold uppercase text-muted-foreground w-20 shrink-0">{t(`days.${day}`)}</span>
+                          {isClosed ? (
+                            <span className="text-xs text-muted-foreground italic">Closed</span>
+                          ) : (
+                            <div className="flex items-center gap-2 flex-1">
+                              <Input
+                                type="time"
+                                className="w-32 h-8 text-xs"
+                                value={startTime}
+                                onChange={(e) => handleDayChange('open', e.target.value)}
+                              />
+                              <span className="text-xs text-muted-foreground">–</span>
+                              <Input
+                                type="time"
+                                className="w-32 h-8 text-xs"
+                                value={endTime}
+                                onChange={(e) => handleDayChange('close', e.target.value)}
+                              />
+                            </div>
+                          )}
+                          <Button
+                            type="button"
+                            variant={isClosed ? 'default' : 'ghost'}
+                            size="sm"
+                            className="h-7 text-xs px-2"
+                            onClick={() => handleDayChange('closed', isClosed ? 'false' : 'true')}
+                          >
+                            {isClosed ? 'Open' : 'Closed'}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Set opening and closing times for each day. Click "Closed" to mark a day as closed.
+                    </p>
                   </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <Button type="button" onClick={saveGeneral} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
+                  {savedTab === 'general' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
                 </div>
 
               </TabsContent>
@@ -599,6 +742,38 @@ export default function SettingsPageContent() {
 
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('appearance.uiStyle')}</h3>
+
+                  {/* Theme Presets */}
+                  <div className="space-y-2">
+                    <Label>Theme Preset</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {THEME_PRESETS.map((preset) => (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => {
+                            setThemePreset(preset.id);
+                            if (preset.id && preset.primary) {
+                              setPrimaryColor(preset.primary);
+                              setAccentColor(preset.accent || '');
+                              setRadius(preset.radius || 'lg');
+                            }
+                          }}
+                          className={`p-3 border rounded-lg text-left transition-all ${themePreset === preset.id ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20' : 'border-border hover:border-gray-300'}`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            {preset.primary && (
+                              <div className="flex -space-x-1">
+                                <div className="w-4 h-4 rounded-full border border-white" style={{ backgroundColor: preset.primary }} />
+                                {preset.accent && <div className="w-4 h-4 rounded-full border border-white" style={{ backgroundColor: preset.accent }} />}
+                              </div>
+                            )}
+                            <span className="text-xs font-medium">{preset.label}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Paintbrush className="w-3.5 h-3.5 text-muted-foreground" />{t('appearance.borderRadius')}</Label>
@@ -661,6 +836,94 @@ export default function SettingsPageContent() {
                     <p className="text-xs text-muted-foreground">{t('leaveEmptyDefaultColor')}</p>
                   </div>
 
+                  {/* Primary & Accent Colors */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                    <div className="space-y-2">
+                      <Label>Primary Color</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={primaryColor || '#000000'}
+                          onChange={(e) => setPrimaryColor(e.target.value)}
+                          className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
+                        />
+                        <Input
+                          placeholder="#000000"
+                          value={primaryColor}
+                          onChange={(e) => setPrimaryColor(e.target.value)}
+                          className="max-w-[140px]"
+                        />
+                        {primaryColor && (
+                          <Button type="button" variant="ghost" size="sm" onClick={() => setPrimaryColor('')}>
+                            Reset
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Brand color for buttons, accents, and highlights</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Accent Color</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={accentColor || '#000000'}
+                          onChange={(e) => setAccentColor(e.target.value)}
+                          className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
+                        />
+                        <Input
+                          placeholder="#000000"
+                          value={accentColor}
+                          onChange={(e) => setAccentColor(e.target.value)}
+                          className="max-w-[140px]"
+                        />
+                        {accentColor && (
+                          <Button type="button" variant="ghost" size="sm" onClick={() => setAccentColor('')}>
+                            Reset
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Secondary color for hover states and gradients</p>
+                    </div>
+                  </div>
+
+                  {/* Font Selection */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                    <div className="space-y-2">
+                      <Label>Heading Font</Label>
+                      <Select value={fontHeading || '_system_default'} onValueChange={(v) => setFontHeading(v === '_system_default' ? '' : v)}>
+                        <SelectTrigger><SelectValue placeholder="System default" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="_system_default">System default</SelectItem>
+                          <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                          <SelectItem value="Montserrat">Montserrat</SelectItem>
+                          <SelectItem value="Poppins">Poppins</SelectItem>
+                          <SelectItem value="Raleway">Raleway</SelectItem>
+                          <SelectItem value="Oswald">Oswald</SelectItem>
+                          <SelectItem value="Lora">Lora</SelectItem>
+                          <SelectItem value="Merriweather">Merriweather</SelectItem>
+                          <SelectItem value="DM Sans">DM Sans</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Body Font</Label>
+                      <Select value={fontBody || '_system_default'} onValueChange={(v) => setFontBody(v === '_system_default' ? '' : v)}>
+                        <SelectTrigger><SelectValue placeholder="System default" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="_system_default">System default</SelectItem>
+                          <SelectItem value="Inter">Inter</SelectItem>
+                          <SelectItem value="Poppins">Poppins</SelectItem>
+                          <SelectItem value="Nunito">Nunito</SelectItem>
+                          <SelectItem value="Open Sans">Open Sans</SelectItem>
+                          <SelectItem value="Lato">Lato</SelectItem>
+                          <SelectItem value="DM Sans">DM Sans</SelectItem>
+                          <SelectItem value="Source Sans 3">Source Sans 3</SelectItem>
+                          <SelectItem value="Work Sans">Work Sans</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   {/* Настройки каталога для E-commerce (Убран Catalog Layout) */}
                   {tenant?.niche === 'ecommerce' && (
                     <div className="pt-4 space-y-6">
@@ -711,6 +974,12 @@ export default function SettingsPageContent() {
                     </div>
                   )}
                 </div>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <Button type="button" onClick={saveAppearance} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
+                  {savedTab === 'appearance' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
+                </div>
+
               </TabsContent>
 
               {/* --- ВКЛАДКА 3: LOCALIZATION --- */}
@@ -835,6 +1104,12 @@ export default function SettingsPageContent() {
                     </Select>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <Button type="button" onClick={saveLocalization} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
+                  {savedTab === 'localization' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
+                </div>
+
               </TabsContent>
 
               {/* --- ВКЛАДКА 4: SEO & ALERTS --- */}
@@ -886,6 +1161,12 @@ export default function SettingsPageContent() {
                     </AccordionItem>
                   </Accordion>
                 </div>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <Button type="button" onClick={saveSeo} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
+                  {savedTab === 'seo' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
+                </div>
+
               </TabsContent>
 
               {/* --- ВКЛАДКА: TELEGRAM --- */}
@@ -1165,6 +1446,12 @@ export default function SettingsPageContent() {
                     />
                   </div>
                 </div>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <Button type="button" onClick={saveLegal} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
+                  {savedTab === 'legal' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
+                </div>
+
               </TabsContent>
 
               {/* --- ВКЛАДКА 6 (НОВАЯ): SUB-VENUES --- */}
@@ -1284,6 +1571,15 @@ export default function SettingsPageContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteSubDialogOpen}
+        onOpenChange={setDeleteSubDialogOpen}
+        title={t('subVenues.deleteConfirm', { name: deletingSubBranch?.name || '' })}
+        confirmLabel={t('subVenues.deleteConfirm', { name: deletingSubBranch?.name || '' })}
+        variant="destructive"
+        onConfirm={confirmDeleteSubBranch}
+      />
     </div>
   );
 }
