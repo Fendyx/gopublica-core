@@ -1,4 +1,5 @@
 import { apiFetch } from '@/shared/api/apiClient'
+import { getAuthHeaders } from '@/shared/lib/authFetch'
 import type {
   StaffShift,
   CreateShiftPayload,
@@ -11,13 +12,11 @@ const getTenantId = () => {
   return window.localStorage.getItem('tenantId') || ''
 }
 
-const buildHeaders = () => {
-  const token = typeof window !== 'undefined' ? window.localStorage.getItem('saas_token') : null
-  const headers: Record<string, string> = {}
-  if (token) headers.Authorization = `Bearer ${token}`
-  if (getTenantId()) headers['x-tenant-id'] = getTenantId()
-  return headers
-}
+/** Merges centralized auth headers with x-tenant-id for staff shift API calls. */
+const buildHeaders = () => ({
+  ...getAuthHeaders(),
+  ...(getTenantId() ? { 'x-tenant-id': getTenantId() } : {}),
+})
 
 /** List shifts for a date range, optionally filtered by staffId */
 export async function getShifts(params: { from?: string; to?: string; staffId?: string }) {

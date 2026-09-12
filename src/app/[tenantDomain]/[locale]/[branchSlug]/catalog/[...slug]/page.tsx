@@ -13,10 +13,9 @@ import type { Branch } from '@/entities/branch/types';
 import ProductDetail from '@/widgets/Catalog/ProductDetail';
 import EntityPage from '@/widgets/Catalog/EntityPage';
 import type { MenuItem } from '@/entities/menu-item/types';
+import type { ProductAttributeGroup } from '@/entities/product-attribute/types';
 
 export const dynamic = 'force-dynamic';
-
-const VALID_ENTITY_TYPES = ['author', 'publisher', 'genre', 'language', 'series', 'custom'];
 
 const isObjectId = (str: string) => /^[a-f\d]{24}$/i.test(str);
 
@@ -43,47 +42,65 @@ export default async function CatalogSlugPage({
 
   const branchId = branch?._id ?? branchSlug;
 
-  // ── Entity page: /catalog/author/serhiy-zhadan ──
-  if (slugParts.length === 2 && VALID_ENTITY_TYPES.includes(slugParts[0])) {
-    const [type, entitySlug] = slugParts;
-
-    let attribute = null;
-    let attributes: any[] = [];
-    let products: any[] = [];
+  // ── Entity page: /catalog/{groupSlug}/{attributeSlug} ──
+  // Dynamically resolve — check if first segment matches any attribute group
+  if (slugParts.length === 2) {
+    const [groupSlug, attrSlug] = slugParts;
 
     try {
-      const attrRes = await fetch(
-        `${API_BASE}/api/saas/product-attributes/suggest?tenantId=${tenant.tenantId}&type=${type}&q=${entitySlug.replace(/-/g, ' ')}`,
+      // Fetch all attribute groups for this tenant
+      const groupsRes = await fetch(
+        `${API_BASE}/api/saas/attribute-groups?tenantId=${tenant.tenantId}&active=true`,
         { cache: 'no-store' },
       );
-      if (attrRes.ok) {
-        const attrs = await attrRes.json();
-        attribute = attrs.find((a: any) => a.slug === entitySlug) || attrs[0] || null;
-      }
 
-      const allAttrRes = await fetch(
-        `${API_BASE}/api/saas/product-attributes?tenantId=${tenant.tenantId}&type=${type}`,
-        { cache: 'no-store' },
-      );
-      if (allAttrRes.ok) attributes = await allAttrRes.json();
+      if (groupsRes.ok) {
+        const groups: ProductAttributeGroup[] = await groupsRes.json();
+        const matchedGroup = groups.find((g) => g.slug === groupSlug);
 
-      if (attribute) {
-        const prodRes = await fetch(
-          `${API_BASE}/api/saas/menu?tenantId=${tenant.tenantId}&attributeRefType=${type}&attributeRefId=${attribute._id}`,
-          { cache: 'no-store' },
-        );
-        if (prodRes.ok) {
-          const allProducts = await prodRes.json();
-          products = allProducts.filter((p: any) => p.status !== 'hidden');
+        if (matchedGroup) {
+          // Resolve attribute by slug within the matched group
+          const resolveRes = await fetch(
+            `${API_BASE}/api/saas/attribute-groups/resolve/${groupSlug}/${attrSlug}?tenantId=${tenant.tenantId}`,
+            { cache: 'no-store' },
+          );
+
+          if (resolveRes.ok) {
+            const { group, attribute } = await resolveRes.json();
+
+            // Fetch all attributes in this group (for sidebar / related)
+            const allAttrRes = await fetch(
+              `${API_BASE}/api/saas/product-attributes?tenantId=${tenant.tenantId}&type=${group.slug}`,
+              { cache: 'no-store' },
+            );
+            const attributes = allAttrRes.ok ? await allAttrRes.json() : [];
+
+            // Fetch products linked to this attribute
+            let products: any[] = [];
+            const prodRes = await fetch(
+              `${API_BASE}/api/saas/menu?tenantId=${tenant.tenantId}&attributeRefType=${group.slug}&attributeRefId=${attribute._id}`,
+              { cache: 'no-store' },
+            );
+            if (prodRes.ok) {
+              const allProducts = await prodRes.json();
+              products = allProducts.filter((p: any) => p.status !== 'hidden');
+            }
+
+            return (
+              <EntityPage
+                attribute={attribute}
+                attributeGroup={group}
+                products={products}
+                allAttributes={attributes}
+                tenant={tenant}
+              />
+            );
+          }
         }
       }
     } catch {
-      // silently fail
+      // silently fall through to product/category lookup
     }
-
-    if (!attribute) return notFound();
-
-    return <EntityPage attribute={attribute} products={products} allAttributes={attributes} tenant={tenant} />;
   }
 
   // ── Single-segment: product detail or category ──

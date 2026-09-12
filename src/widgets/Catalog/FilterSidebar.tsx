@@ -4,12 +4,14 @@ import { useTranslations } from 'next-intl';
 import { ChevronDown, X, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { MenuItem, AttributeRef, AttributeType } from '@/entities/menu-item/types';
-import type { ProductAttribute } from '@/entities/product-attribute/types';
+import type { MenuItem, AttributeRef } from '@/entities/menu-item/types';
+import type { ProductAttribute, ProductAttributeGroup } from '@/entities/product-attribute/types';
+import { useLocale } from 'next-intl';
 
 interface FilterSidebarProps {
   products: MenuItem[];
   attributes: ProductAttribute[];
+  attributeGroups: ProductAttributeGroup[];
   categories: any[];
   activeFilters: FilterState;
   onFilterChange: (filters: FilterState) => void;
@@ -17,11 +19,8 @@ interface FilterSidebarProps {
 
 export interface FilterState {
   categories: string[];
-  authors: string[];
-  publishers: string[];
-  genres: string[];
-  languages: string[];
-  series: string[];
+  /** Dynamic: groupSlug → selected attribute IDs */
+  attributeFilters: Record<string, string[]>;
   tags: string[];
   priceMin: number | null;
   priceMax: number | null;
@@ -30,16 +29,18 @@ export interface FilterState {
 
 export const EMPTY_FILTERS: FilterState = {
   categories: [],
-  authors: [],
-  publishers: [],
-  genres: [],
-  languages: [],
-  series: [],
+  attributeFilters: {},
   tags: [],
   priceMin: null,
   priceMax: null,
   inStock: null,
 };
+
+/** Resolve localized name from translations map */
+function localized(translations?: Record<string, { name?: string }>, locale?: string, fallback: string = ''): string {
+  if (!translations || !locale) return fallback;
+  return translations[locale]?.name || translations[locale?.split('-')[0]]?.name || fallback;
+}
 
 function CollapsibleSection({
   title,
@@ -95,11 +96,13 @@ function CheckboxItem({
 export default function FilterSidebar({
   products,
   attributes,
+  attributeGroups,
   categories,
   activeFilters,
   onFilterChange,
 }: FilterSidebarProps) {
   const t = useTranslations('catalog');
+  const locale = useLocale();
 
   // Compute available filter values from products
   const filterData = useMemo(() => {
@@ -117,44 +120,30 @@ export default function FilterSidebar({
     }
     const catList = categories
       .filter((c) => catCounts.has(c.key))
-      .map((c) => ({ key: c.key, name: c.name, icon: c.icon, count: catCounts.get(c.key) || 0 }))
+      .map((c) => ({ key: c.key, name: localized(c.translations, locale, c.name), icon: c.icon, count: catCounts.get(c.key) || 0 }))
       .sort((a, b) => b.count - a.count);
 
-    // Attribute-based filters
-    const attrFilters: Record<string, { id: string; name: string; count: number }[]> = {
-      authors: [],
-      publishers: [],
-      genres: [],
-      languages: [],
-      series: [],
-    };
-
-    const typeToKey: Record<string, string> = {
-      author: 'authors',
-      publisher: 'publishers',
-      genre: 'genres',
-      language: 'languages',
-      series: 'series',
-    };
+    // Dynamic attribute-based filters: groupSlug → items[]
+    const attrFilters: Record<string, { id: string; name: string; count: number }[]> = {};
 
     const attrCounts = new Map<string, Map<string, number>>();
     for (const p of products) {
       for (const ref of p.attributeRefs || []) {
-        const key = typeToKey[ref.type];
-        if (!key) continue;
-        if (!attrCounts.has(key)) attrCounts.set(key, new Map());
-        const map = attrCounts.get(key)!;
+        const groupSlug = ref.type;
+        if (!groupSlug) continue;
+        if (!attrCounts.has(groupSlug)) attrCounts.set(groupSlug, new Map());
+        const map = attrCounts.get(groupSlug)!;
         map.set(ref.attributeId, (map.get(ref.attributeId) || 0) + 1);
       }
     }
 
-    for (const [key, map] of attrCounts) {
+    for (const [groupSlug, map] of attrCounts) {
       const list: { id: string; name: string; count: number }[] = [];
       for (const [attrId, count] of map) {
         const attr = attrMap.get(attrId);
         if (attr) list.push({ id: attr._id, name: attr.name, count });
       }
-      attrFilters[key] = list.sort((a, b) => b.count - a.count);
+      attrFilters[groupSlug] = list.sort((a, b) => b.count - a.count);
     }
 
     // Tags
@@ -178,24 +167,57 @@ export default function FilterSidebar({
 
   const activeCount = useMemo(() => {
     let count = 0;
-    for (const key of ['categories', 'authors', 'publishers', 'genres', 'languages', 'series', 'tags'] as const) {
-      count += activeFilters[key].length;
+    count += activeFilters.categories.length;
+    for (const ids of Object.values(activeFilters.attributeFilters)) {
+      count += ids.length;
     }
+    count += activeFilters.tags.length;
     if (activeFilters.priceMin !== null || activeFilters.priceMax !== null) count++;
     if (activeFilters.inStock !== null) count++;
     return count;
   }, [activeFilters]);
 
-  const toggle = (key: keyof FilterState, value: string) => {
-    const current = activeFilters[key] as string[];
+  const toggleAttribute = (groupSlug: string, attrId: string) => {
+    const current = activeFilters.attributeFilters[groupSlug] || [];
+    const next = current.includes(attrId)
+      ? current.filter((v) => v !== attrId)
+      : [...current, attrId];
+    onFilterChange({
+      ...activeFilters,
+      attributeFilters: { ...activeFilters.attributeFilters, [groupSlug]: next },
+    });
+  };
+
+  const toggleCategory = (value: string) => {
+    const current = activeFilters.categories;
     const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
-    onFilterChange({ ...activeFilters, [key]: next });
+    onFilterChange({ ...activeFilters, categories: next });
+  };
+
+  const toggleTag = (value: string) => {
+    const current = activeFilters.tags;
+    const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+    onFilterChange({ ...activeFilters, tags: next });
   };
 
   const setPrice = (field: 'priceMin' | 'priceMax', value: string) => {
     const num = value === '' ? null : Number(value);
     onFilterChange({ ...activeFilters, [field]: num });
   };
+
+  // Build ordered list of groups that have matching products
+  const activeGroupSlugs = Object.keys(filterData.attrFilters).filter(
+    (slug) => filterData.attrFilters[slug].length > 0,
+  );
+
+  // Sort groups by their sortOrder from attributeGroups config
+  const groupOrder = new Map(attributeGroups.map((g, i) => [g.slug, g.sortOrder ?? i]));
+  const sortedGroupSlugs = activeGroupSlugs.sort(
+    (a, b) => (groupOrder.get(a) ?? 999) - (groupOrder.get(b) ?? 999),
+  );
+
+  // Lookup group by slug for localized display name
+  const groupBySlug = new Map(attributeGroups.map((g) => [g.slug, g]));
 
   return (
     <div className="space-y-2">
@@ -229,26 +251,29 @@ export default function FilterSidebar({
               label={cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
               count={cat.count}
               checked={activeFilters.categories.includes(cat.key)}
-              onChange={() => toggle('categories', cat.key)}
+              onChange={() => toggleCategory(cat.key)}
             />
           ))}
         </CollapsibleSection>
       )}
 
-      {/* Attribute-based filters */}
-      {(['authors', 'publishers', 'genres', 'languages', 'series'] as const).map((key) => {
-        const items = filterData.attrFilters[key];
+      {/* Dynamic attribute group filters */}
+      {sortedGroupSlugs.map((groupSlug) => {
+        const items = filterData.attrFilters[groupSlug];
         if (!items || items.length === 0) return null;
-        const title = key.charAt(0).toUpperCase() + key.slice(1);
+        const group = groupBySlug.get(groupSlug);
+        const title = group
+          ? `${group.icon || ''} ${localized(group.translations, locale, group.name)}`.trim()
+          : groupSlug.charAt(0).toUpperCase() + groupSlug.slice(1).replace(/-/g, ' ');
         return (
-          <CollapsibleSection key={key} title={title} defaultOpen={key === 'genres'}>
+          <CollapsibleSection key={groupSlug} title={title} defaultOpen={false}>
             {items.map((item) => (
               <CheckboxItem
                 key={item.id}
                 label={item.name}
                 count={item.count}
-                checked={(activeFilters[key] as string[]).includes(item.id)}
-                onChange={() => toggle(key, item.id)}
+                checked={(activeFilters.attributeFilters[groupSlug] || []).includes(item.id)}
+                onChange={() => toggleAttribute(groupSlug, item.id)}
               />
             ))}
           </CollapsibleSection>
@@ -299,7 +324,7 @@ export default function FilterSidebar({
               label={tag.name}
               count={tag.count}
               checked={activeFilters.tags.includes(tag.name)}
-              onChange={() => toggle('tags', tag.name)}
+              onChange={() => toggleTag(tag.name)}
             />
           ))}
         </CollapsibleSection>
@@ -310,9 +335,6 @@ export default function FilterSidebar({
 
 // ── Helper: apply filters to products ──
 export function applyFilters(products: MenuItem[], filters: FilterState, attributes: ProductAttribute[]): MenuItem[] {
-  const attrMap = new Map<string, ProductAttribute>();
-  for (const attr of attributes) attrMap.set(attr._id, attr);
-
   return products.filter((p) => {
     // Category filter
     if (filters.categories.length > 0) {
@@ -320,14 +342,13 @@ export function applyFilters(products: MenuItem[], filters: FilterState, attribu
       if (!filters.categories.includes(catKey)) return false;
     }
 
-    // Attribute ref filters
-    for (const key of ['authors', 'publishers', 'genres', 'languages', 'series'] as const) {
-      const ids = filters[key];
-      if (ids.length === 0) continue;
-      const typeMap: Record<string, string> = { authors: 'author', publishers: 'publisher', genres: 'genre', languages: 'language', series: 'series' };
-      const attrType = typeMap[key];
-      const productAttrIds = (p.attributeRefs || []).filter((r) => r.type === attrType).map((r) => r.attributeId);
-      if (!ids.some((id) => productAttrIds.includes(id))) return false;
+    // Dynamic attribute ref filters: groupSlug → selected IDs
+    for (const [groupSlug, selectedIds] of Object.entries(filters.attributeFilters)) {
+      if (!selectedIds || selectedIds.length === 0) continue;
+      const productAttrIds = (p.attributeRefs || [])
+        .filter((r) => r.type === groupSlug)
+        .map((r) => r.attributeId);
+      if (!selectedIds.some((id) => productAttrIds.includes(id))) return false;
     }
 
     // Tag filter

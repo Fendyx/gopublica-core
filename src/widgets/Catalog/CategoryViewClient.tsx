@@ -31,11 +31,11 @@ export default function CategoryViewClient({ category, categories, products, loc
   const currencySymbol = getCurrencySymbol(tenant.primaryCurrency);
   const productImageAspectRatio = category.productImageAspectRatio || '1/1';
 
-  // Build breadcrumb from hierarchy
+  // Build breadcrumb from hierarchy (locale-aware)
   const breadcrumbs: { key: string; name: string }[] = [];
   let current = category;
   while (current) {
-    breadcrumbs.unshift({ key: current.key, name: current.name });
+    breadcrumbs.unshift({ key: current.key, name: current.translations?.[locale]?.name || current.name });
     if (current.parentCategoryKey) {
       current = categories.find((c: any) => c.key === current.parentCategoryKey);
     } else {
@@ -72,7 +72,7 @@ export default function CategoryViewClient({ category, categories, products, loc
           <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden mb-10 border border-border">
             <Image
               src={category.coverImage}
-              alt={category.name}
+              alt={category.translations?.[locale]?.name || category.name}
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -81,11 +81,11 @@ export default function CategoryViewClient({ category, categories, products, loc
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6 md:p-8">
               <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
-                {category.name}
+                {category.translations?.[locale]?.name || category.name}
               </h1>
               {category.description && (
                 <p className="text-white/70 mt-2 text-sm md:text-base max-w-xl">
-                  {category.description}
+                  {category.translations?.[locale]?.description || category.description}
                 </p>
               )}
               <p className="text-white/80 mt-2">
@@ -95,9 +95,9 @@ export default function CategoryViewClient({ category, categories, products, loc
           </div>
         ) : (
           <div className="mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">{category.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">{category.translations?.[locale]?.name || category.name}</h1>
             {category.description && (
-              <p className="text-muted-foreground mt-2 text-lg">{category.description}</p>
+              <p className="text-muted-foreground mt-2 text-lg">{category.translations?.[locale]?.description || category.description}</p>
             )}
             <p className="text-muted-foreground mt-1">
               {products.length} {products.length === 1 ? 'item' : 'items'}
@@ -114,7 +114,7 @@ export default function CategoryViewClient({ category, categories, products, loc
                 href={`/${locale}/${branchSlug}/catalog/${sub.key}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm hover:bg-muted/50 transition-colors"
               >
-                {sub.icon} {sub.name}
+                {sub.icon} {sub.translations?.[locale]?.name || sub.name}
               </Link>
             ))}
           </div>

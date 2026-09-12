@@ -89,7 +89,7 @@ export default function ProductDetail({
     }
   }, [product.name]);
 
-  const linkedAttrs = useLinkedAttributes(product.attributeRefs, tenant.tenantId);
+  const linkedAttrs = useLinkedAttributes(product.attributeRefs, tenant.tenantId, locale);
   const hasSpecs = hasAttributes(product) || hasWeightVal(product) || hasDims(product) || hasTagsList(product) || linkedAttrs.length > 0;
 
   return (
@@ -455,18 +455,10 @@ function SpecificationsTab({
   // Group linked attributes by type for display
   const linkedByType = new Map<string, LinkedAttribute[]>();
   for (const la of linkedAttrs) {
-    const list = linkedByType.get(la.type) ?? [];
+    const list = linkedByType.get(la.groupSlug) ?? [];
     list.push(la);
-    linkedByType.set(la.type, list);
+    linkedByType.set(la.groupSlug, list);
   }
-  const TYPE_LABELS: Record<string, string> = {
-    author: 'Authors',
-    publisher: 'Publishers',
-    genre: 'Genres',
-    language: 'Languages',
-    series: 'Series',
-    custom: 'Attributes',
-  };
 
   // Build dimension string - only non-zero parts
   let dimStr = '';
@@ -483,16 +475,16 @@ function SpecificationsTab({
       {/* Linked managed attributes (Authors, Genres, etc.) */}
       {linkedAttrs.length > 0 && (
         <div className="mb-4 space-y-2">
-          {[...linkedByType.entries()].map(([type, items]) => (
-            <div key={type} className="flex items-baseline gap-2 flex-wrap">
+          {[...linkedByType.entries()].map(([groupSlug, items]) => (
+            <div key={groupSlug} className="flex items-baseline gap-2 flex-wrap">
               <span className="text-[10px] tracking-widest uppercase text-muted-foreground min-w-[70px]">
-                {TYPE_LABELS[type] ?? type}
+                {items[0]?.groupIcon} {items[0]?.groupName || groupSlug}
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {items.map((attr) => (
                   <Link
                     key={attr.attributeId}
-                    href={`/${locale}/${branchSlug}/catalog/${attr.type}/${attr.slug}`}
+                    href={`/${locale}/${branchSlug}/catalog/${attr.groupSlug}/${attr.slug}`}
                     className="inline-block px-2.5 py-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                   >
                     {attr.name}

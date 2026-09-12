@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { BranchSection } from '@/entities/branch-section/types';
@@ -11,26 +11,38 @@ import type { MenuItem } from '@/entities/menu-item/types';
 import type { CategoryCardData } from '@/widgets/Catalog/CategoryGrid';
 import type { ProductCardVariant } from '@/entities/menu-item/types';
 
+interface EnrichedCategoryData extends CategoryCardData {
+  productCardVariant?: ProductCardVariant;
+  productImageAspectRatio?: string;
+  productCardWidth?: string;
+}
+
 interface SystemCatalogSectionProps {
   section: BranchSection;
   locale: string;
   tenantDomain: string;
   branchSlug?: string;
   allMenuItems?: MenuItem[];
-  categories?: Array<{ key: string; name: string; coverImage?: string; productCount?: number; cardBgColor?: string; description?: string; imageAspectRatio?: string; parentCategoryKey?: string }>;
+  categories?: Array<{ key: string; name: string; coverImage?: string; productCount?: number; cardBgColor?: string; description?: string; imageAspectRatio?: string; parentCategoryKey?: string; productCardVariant?: string; productImageAspectRatio?: string; productCardWidth?: string; translations?: Record<string, { name?: string; description?: string }> }>;
 }
 
 export default function SystemCatalogSection({ section, locale, branchSlug, allMenuItems, categories: preloadedCategories }: SystemCatalogSectionProps) {
   const t = useTranslations('catalog');
   const tenant = useTenant();
   const [items, setItems] = useState<MenuItem[]>([]);
-  const [categories, setCategories] = useState<CategoryCardData[]>([]);
+  const [categories, setCategories] = useState<EnrichedCategoryData[]>([]);
   const [loading, setLoading] = useState(!allMenuItems);
 
   const tenantId = tenant?.tenantId;
   const branchId = (section as any).branchId;
-  const variant: ProductCardVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
+  const globalVariant: ProductCardVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
   const currencySymbol = tenant?.primaryCurrency === 'PLN' ? 'zł' : tenant?.primaryCurrency || '€';
+
+  // Section-level card overrides (from page builder settings)
+  const sectionSettings = (section.settings || {}) as Record<string, unknown>;
+  const sectionVariant = sectionSettings.productCardVariant as ProductCardVariant | undefined;
+  const sectionAspectRatio = sectionSettings.productImageAspectRatio as string | undefined;
+  const sectionCardWidth = sectionSettings.productCardWidth as string | undefined;
 
   useEffect(() => {
     // Use pre-fetched data when available
@@ -45,6 +57,10 @@ export default function SystemCatalogSection({ section, locale, branchSlug, allM
         description: cat.description,
         imageAspectRatio: cat.imageAspectRatio,
         parentCategoryKey: cat.parentCategoryKey,
+        productCardVariant: cat.productCardVariant as ProductCardVariant | undefined,
+        productImageAspectRatio: cat.productImageAspectRatio,
+        productCardWidth: cat.productCardWidth,
+        translations: cat.translations || {},
       })));
       setLoading(false);
       return;
@@ -67,11 +83,39 @@ export default function SystemCatalogSection({ section, locale, branchSlug, allM
           description: cat.description,
           imageAspectRatio: cat.imageAspectRatio,
           parentCategoryKey: cat.parentCategoryKey,
+          productCardVariant: cat.productCardVariant || undefined,
+          productImageAspectRatio: cat.productImageAspectRatio || undefined,
+          productCardWidth: cat.productCardWidth || undefined,
+          translations: cat.translations || {},
         })));
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [tenantId, branchId, allMenuItems, preloadedCategories]);
+
+  // Group items by category and resolve per-category card settings
+  // Fallback chain: section setting → category setting → global → default
+  const groupedByCategory = useMemo(() => {
+    const grouped: Record<string, { category: EnrichedCategoryData; products: MenuItem[] }> = {};
+
+    for (const cat of categories) {
+      if (cat.parentCategoryKey) continue; // skip subcategories in top-level grouping
+      grouped[cat.key] = { category: cat, products: [] };
+    }
+
+    for (const item of items) {
+      const key = (item.categoryKey || item.category || 'uncategorized') as string;
+      if (!grouped[key]) {
+        grouped[key] = {
+          category: { name: key, key },
+          products: [],
+        };
+      }
+      grouped[key].products.push(item);
+    }
+
+    return Object.values(grouped).filter(g => g.products.length > 0);
+  }, [categories, items]);
 
   const bg = (section.settings as any)?.background;
 
@@ -89,12 +133,29 @@ export default function SystemCatalogSection({ section, locale, branchSlug, allM
             <CategoryGrid categories={categories} />
           </div>
         )}
-        <EcommerceGridLayout
-          items={items}
-          variant={variant}
-          currencySymbol={currencySymbol}
-          locale={locale}
-        />
+
+        {groupedByCategory.map(({ category, products }) => {
+          const variant: ProductCardVariant =
+            sectionVariant ||
+            category.productCardVariant ||
+            globalVariant;
+          const aspectRatio = sectionAspectRatio || category.productImageAspectRatio || '1/1';
+          const cardWidth = sectionCardWidth || category.productCardWidth || 'default';
+
+          return (
+            <div key={category.key} className="mb-10 last:mb-0">
+              <h3 className="text-xl font-semibold text-foreground mb-4">{(category as any).translations?.[locale]?.name || category.name}</h3>
+              <EcommerceGridLayout
+                items={products}
+                variant={variant}
+                currencySymbol={currencySymbol}
+                locale={locale}
+                productImageAspectRatio={aspectRatio}
+                productCardWidth={cardWidth}
+              />
+            </div>
+          );
+        })}
       </div>
     </section>
   );

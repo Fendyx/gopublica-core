@@ -10,14 +10,14 @@ import { useTenant } from '@/entities/tenant/TenantContext'
 
 interface CategoryData {
   name: string
-  translations: Record<string, string>
+  translations: Record<string, { name?: string; description?: string }>
   icon: string
 }
 
 interface CategoryApiItem {
   key: string
   name?: string
-  translations?: Record<string, string>
+  translations?: Record<string, { name?: string; description?: string }>
   icon?: string
 }
 
@@ -71,7 +71,7 @@ export default function MenuLayout({ items, menuStyle, initialCategoryMap }: { i
   const getCategoryName = (categoryKey: string, locale: string): string => {
     const cat = categoryMap[categoryKey]
     if (!cat) return categoryKey
-    if (cat.translations?.[locale]) return cat.translations[locale]
+    if (cat.translations?.[locale]?.name) return cat.translations[locale].name
     if (locale === primaryLanguage) return cat.name
     return cat.name || categoryKey
   }

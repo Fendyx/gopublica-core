@@ -1,12 +1,5 @@
 import { BranchSection, BranchSectionItem } from './types';
-
-const getAuthHeaders = () => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('saas_token') : null;
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-  };
-};
+import { authFetch, getAuthHeaders } from '@/shared/lib/authFetch';
 
 export async function fetchBranchSections(
   tenantId: string,
@@ -15,8 +8,8 @@ export async function fetchBranchSections(
 ): Promise<BranchSection[]> {
   const params = new URLSearchParams({ tenantId, branchId, page });
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections?${params.toString()}`,
+  const res = await authFetch(
+    `/api/saas/branch-sections?${params.toString()}`,
     {
       cache: 'no-store',
       headers: getAuthHeaders(),
@@ -36,7 +29,7 @@ export async function fetchBranchSectionItemBySlug(
 
   console.log('FETCHING ENTITY URL:', url);
 
-  const res = await fetch(url, {
+  const res = await authFetch(url, {
     cache: 'no-store',
     headers: getAuthHeaders(),
   });
@@ -46,8 +39,8 @@ export async function fetchBranchSectionItemBySlug(
 }
 
 export async function saveBranchSection(data: Partial<BranchSection>): Promise<BranchSection> {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections${data._id ? `/${data._id}` : ''}`;
-  const res = await fetch(url, {
+  const url = `/api/saas/branch-sections${data._id ? `/${data._id}` : ''}`;
+  const res = await authFetch(url, {
     method: data._id ? 'PUT' : 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -66,7 +59,7 @@ export async function saveBranchSection(data: Partial<BranchSection>): Promise<B
 }
 
 export async function deleteBranchSection(id: string): Promise<void> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections/${id}`, {
+  const res = await authFetch(`/api/saas/branch-sections/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
@@ -74,7 +67,7 @@ export async function deleteBranchSection(id: string): Promise<void> {
 }
 
 export async function reorderBranchSections(branchId: string, orderedIds: string[]): Promise<void> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections/reorder`, {
+  const res = await authFetch('/api/saas/branch-sections/reorder', {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify({ branchId, orderedIds })
@@ -83,8 +76,8 @@ export async function reorderBranchSections(branchId: string, orderedIds: string
 }
 
 export async function reorderBranchSectionsBulk(updates: { _id: string; order: number }[]): Promise<void> {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections/reorder-bulk`;
-  const res = await fetch(url, {
+  const url = '/api/saas/branch-sections/reorder-bulk';
+  const res = await authFetch(url, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify({ updates }),
@@ -93,8 +86,8 @@ export async function reorderBranchSectionsBulk(updates: { _id: string; order: n
 }
 
 export async function fetchBranchSectionItems(sectionId: string): Promise<BranchSectionItem[]> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections/${sectionId}/items`,
+  const res = await authFetch(
+    `/api/saas/branch-sections/${sectionId}/items`,
     {
       cache: 'no-store',
       headers: getAuthHeaders(),
@@ -106,8 +99,8 @@ export async function fetchBranchSectionItems(sectionId: string): Promise<Branch
 }
 
 export async function saveBranchSectionItem(sectionId: string, item: Partial<BranchSectionItem>): Promise<BranchSectionItem> {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections/${sectionId}/items${item._id ? `/${item._id}` : ''}`;
-  const res = await fetch(url, {
+  const url = `/api/saas/branch-sections/${sectionId}/items${item._id ? `/${item._id}` : ''}`;
+  const res = await authFetch(url, {
     method: item._id ? 'PUT' : 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(item)
@@ -122,7 +115,7 @@ export async function saveBranchSectionItem(sectionId: string, item: Partial<Bra
 }
 
 export async function deleteBranchSectionItem(sectionId: string, itemId: string): Promise<void> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/branch-sections/${sectionId}/items/${itemId}`, {
+  const res = await authFetch(`/api/saas/branch-sections/${sectionId}/items/${itemId}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });

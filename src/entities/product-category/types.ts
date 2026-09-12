@@ -6,6 +6,7 @@ export interface CategoryNavItem {
   productCount?: number;
   parentCategoryKey?: string | null;
   order?: number;
+  translations?: Record<string, { name?: string; description?: string }>;
 }
 
 export interface CategoryTreeItem extends CategoryNavItem {

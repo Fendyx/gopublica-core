@@ -1,4 +1,5 @@
 import { apiFetch } from '@/shared/api/apiClient'
+import { getAuthHeaders } from '@/shared/lib/authFetch'
 import type { StaffMember } from '@/entities/staff/types'
 
 const getTenantId = () => {
@@ -6,13 +7,11 @@ const getTenantId = () => {
   return window.localStorage.getItem('tenantId') || ''
 }
 
-const buildHeaders = () => {
-  const token = typeof window !== 'undefined' ? window.localStorage.getItem('saas_token') : null
-  const headers: Record<string, string> = {}
-  if (token) headers.Authorization = `Bearer ${token}`
-  if (getTenantId()) headers['x-tenant-id'] = getTenantId()
-  return headers
-}
+/** Merges centralized auth headers with x-tenant-id for staff API calls. */
+const buildHeaders = () => ({
+  ...getAuthHeaders(),
+  ...(getTenantId() ? { 'x-tenant-id': getTenantId() } : {}),
+})
 
 export async function getStaffMembers(branchId?: string) {
   const params = branchId ? `?branchId=${encodeURIComponent(branchId)}` : ''

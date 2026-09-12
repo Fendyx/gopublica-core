@@ -10,6 +10,7 @@ import { useBranch } from '@/entities/branch/BranchContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/shared/ui/Toast';
+import { authFetch } from '@/shared/lib/authFetch';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ import {
   Settings2,
   ChevronDown,
 } from 'lucide-react';
+import EmojiPickerButton from '@/shared/ui/EmojiPickerButton';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -100,9 +102,9 @@ export default function MenuManager({ token }: { token: string }) {
   const fetchItems = async () => {
     if (!tenantId) return;
     try {
-      let url = `${apiUrl}/api/saas/menu?tenantId=${tenantId}`;
+      let url = `/api/saas/menu?tenantId=${tenantId}`;
       if (selectedBranch) url += `&branchId=${selectedBranch._id}`;
-      const res = await fetch(url);
+      const res = await authFetch(url);
       const data = await res.json();
       // Filter out e-commerce products - admin menu section should only show food/service items
       const menuItems = Array.isArray(data)
@@ -120,10 +122,10 @@ const fetchCategories = async () => {
     if (!token || !tenantId) return;
     try {
       // 👈 ОБЯЗАТЕЛЬНО передаем tenantId в запрос
-      let url = `${apiUrl}/api/saas/categories?tenantId=${tenantId}`;
+      let url = `/api/saas/categories?tenantId=${tenantId}`;
       if (selectedBranch) url += `&branchId=${selectedBranch._id}`;
       
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await authFetch(url);
       const data = await res.json();
       
       // Защита от ошибок бэкенда
@@ -252,7 +254,7 @@ const fetchCategories = async () => {
   const confirmDelete = async () => {
     if (!deletingId) return;
     try {
-      await fetch(`${apiUrl}/api/saas/menu/${deletingId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      await authFetch(`/api/saas/menu/${deletingId}`, { method: 'DELETE' });
       await fetchItems();
     } catch (err) { console.error(err); }
   };
@@ -263,9 +265,9 @@ const fetchCategories = async () => {
   const searchCategories = async (query: string) => {
     if (query.length < 2) { setCategorySuggestions([]); setShowSuggestions(false); return; }
     try {
-      let url = `${apiUrl}/api/saas/categories/suggest?q=${encodeURIComponent(query)}`;
+      let url = `/api/saas/categories/suggest?q=${encodeURIComponent(query)}`;
       if (selectedBranch) url += `&branchId=${selectedBranch._id}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await authFetch(url);
       const data = await res.json();
       setCategorySuggestions(data);
       setShowSuggestions(data.length > 0);
@@ -280,9 +282,8 @@ const handleSave = async (e: React.FormEvent) => {
     if (useCustomCategory) {
       const categoryKey = customCategoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       try {
-        await fetch(`${apiUrl}/api/saas/categories`, {
+        await authFetch('/api/saas/categories', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             key: categoryKey, 
             name: customCategoryName, 
@@ -298,7 +299,7 @@ const handleSave = async (e: React.FormEvent) => {
       finalCategoryKey = categoryKey;
     }
 
-    const url = editingId ? `${apiUrl}/api/saas/menu/${editingId}` : `${apiUrl}/api/saas/menu`;
+    const url = editingId ? `/api/saas/menu/${editingId}` : '/api/saas/menu';
     const method = editingId ? 'PUT' : 'POST';
     const payload = {
       ...form, 
@@ -311,9 +312,8 @@ const handleSave = async (e: React.FormEvent) => {
     };
 
     try {
-      const res = await fetch(url, { 
+      const res = await authFetch(url, { 
         method, 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, 
         body: JSON.stringify(payload) 
       });
       if (res.ok) { 
@@ -422,7 +422,10 @@ const handleSave = async (e: React.FormEvent) => {
                       />
                       <div className="space-y-2">
                         <Label htmlFor="customCategoryIcon">{tAdmin('iconPlaceholder')}</Label>
-                        <Input id="customCategoryIcon" placeholder="🍔" value={customCategoryIcon} onChange={(e) => setCustomCategoryIcon(e.target.value)} className="w-24 text-center text-xl" maxLength={2} />
+                        <div className="flex gap-2 items-center">
+                          <Input id="customCategoryIcon" placeholder="🍔" value={customCategoryIcon} onChange={(e) => setCustomCategoryIcon(e.target.value)} className="w-24 text-center text-xl" maxLength={2} />
+                          <EmojiPickerButton value={customCategoryIcon} onChange={setCustomCategoryIcon} placeholder="🍔" />
+                        </div>
                       </div>
                       {showSuggestions && (
                         <ul className="absolute z-20 w-full bg-card border border-border rounded-xl shadow-dropdown mt-1 max-h-48 overflow-y-auto overflow-hidden">

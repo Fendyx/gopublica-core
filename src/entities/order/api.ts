@@ -1,14 +1,7 @@
 import { Order, OrderStatus } from '@/entities/order/types';
+import { authFetch, getAuthHeaders } from '@/shared/lib/authFetch';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const getAuthHeaders = () => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('saas_token') : null;
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
 
 export interface OrdersResponse {
   orders: Order[];
@@ -40,7 +33,7 @@ export const getOrders = async (branchIdOrQuery?: string | OrdersQuery): Promise
 
     if (params.toString()) url += `?${params.toString()}`;
 
-    const res = await fetch(url, { headers: getAuthHeaders() });
+    const res = await authFetch(url, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error('Failed to fetch orders');
     const data = await res.json();
     // Handle both old (array) and new (paginated) response shapes
@@ -55,7 +48,7 @@ export const getOrders = async (branchIdOrQuery?: string | OrdersQuery): Promise
 };
 
 export const acceptOrder = async (orderId: string): Promise<Order> => {
-  const res = await fetch(`${API_URL}/api/saas/orders/${orderId}/accept`, {
+  const res = await authFetch(`/api/saas/orders/${orderId}/accept`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
@@ -64,7 +57,7 @@ export const acceptOrder = async (orderId: string): Promise<Order> => {
 };
 
 export const declineOrder = async (orderId: string, reason: string): Promise<Order> => {
-  const res = await fetch(`${API_URL}/api/saas/orders/${orderId}/decline`, {
+  const res = await authFetch(`/api/saas/orders/${orderId}/decline`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ reason }),
@@ -74,7 +67,7 @@ export const declineOrder = async (orderId: string, reason: string): Promise<Ord
 };
 
 export const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<Order> => {
-  const res = await fetch(`${API_URL}/api/saas/orders/${orderId}/status`, {
+  const res = await authFetch(`/api/saas/orders/${orderId}/status`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify({ status }),

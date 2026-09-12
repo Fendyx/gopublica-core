@@ -14,7 +14,7 @@ import FeaturedProductBanner from '@/widgets/Catalog/FeaturedProductBanner'
 import SearchBar from '@/widgets/Catalog/SearchBar'
 import FilterSidebar, { applyFilters, EMPTY_FILTERS, type FilterState } from '@/widgets/Catalog/FilterSidebar'
 import type { MenuItem, ProductCardVariant } from '@/entities/menu-item/types'
-import type { ProductAttribute } from '@/entities/product-attribute/types'
+import type { ProductAttribute, ProductAttributeGroup } from '@/entities/product-attribute/types'
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   PLN: 'zł', EUR: '€', USD: '$', UAH: '₴', GBP: '£', CZK: 'Kč', CHF: 'CHF',
@@ -34,6 +34,7 @@ export default function CatalogClient() {
   const [items, setItems] = useState<MenuItem[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [attributes, setAttributes] = useState<ProductAttribute[]>([])
+  const [attributeGroups, setAttributeGroups] = useState<ProductAttributeGroup[]>([])
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS)
   const [loading, setLoading] = useState(true)
 
@@ -65,6 +66,9 @@ export default function CatalogClient() {
 
         const attrRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/product-attributes?tenantId=${tenantId}`, { cache: 'no-store' })
         if (attrRes.ok) setAttributes(await attrRes.json())
+
+        const groupRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/attribute-groups?tenantId=${tenantId}`, { cache: 'no-store' })
+        if (groupRes.ok) setAttributeGroups(await groupRes.json())
       } catch (err) {
         console.error(err)
       } finally {
@@ -101,6 +105,7 @@ export default function CatalogClient() {
           imageAspectRatio: cat.imageAspectRatio,
           productImageAspectRatio: cat.productImageAspectRatio,
           parentCategoryKey: cat.parentCategoryKey,
+          translations: cat.translations || {},
         };
       })
       .filter(cat => cat.productCount > 0 || categories.some(c => c.parentCategoryKey === cat.key));
@@ -146,6 +151,7 @@ export default function CatalogClient() {
                 <FilterSidebar
                   products={allItems}
                   attributes={attributes}
+                  attributeGroups={attributeGroups}
                   categories={categories}
                   activeFilters={filters}
                   onFilterChange={setFilters}
@@ -190,8 +196,8 @@ export default function CatalogClient() {
                             className={!bgColor ? '' : 'py-12 shadow-sm border-y border-border'}
                           >
                             <div className="mb-6">
-                              <h2 className="text-2xl font-bold text-foreground mb-1">{cat.name}</h2>
-                              {cat.description && <p className="text-muted-foreground mb-6">{cat.description}</p>}
+                              <h2 className="text-2xl font-bold text-foreground mb-1">{cat.translations?.[locale]?.name || cat.name}</h2>
+                              {cat.description && <p className="text-muted-foreground mb-6">{cat.translations?.[locale]?.description || cat.description}</p>}
                             </div>
                             {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} productCardWidth={cat.productCardWidth || 'default'} />}
                             {layout === 'dynamic' && <EcommerceDynamicGrid items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} productCardWidth={cat.productCardWidth || 'default'} />}
@@ -238,10 +244,10 @@ export default function CatalogClient() {
                     >
                       <div>
                         <h2 className="text-2xl font-bold text-foreground mb-1">
-                          {cat.name}
+                          {cat.translations?.[locale]?.name || cat.name}
                         </h2>
                         {cat.description && (
-                          <p className="text-muted-foreground mb-6">{cat.description}</p>
+                          <p className="text-muted-foreground mb-6">{cat.translations?.[locale]?.description || cat.description}</p>
                         )}
 
                         {layout === 'carousel' && <EcommerceCarouselLayout items={products} locale={locale} variant={variant} currencySymbol={currencySymbol} productImageAspectRatio={cat.productImageAspectRatio || '1/1'} autoplay={cat.carouselAutoplay ?? false} productCardWidth={cat.productCardWidth || 'default'}/>}

@@ -14,8 +14,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, ArrowLeft, X, Plus, ImagePlus, Trash2 } from 'lucide-react';
 import type { MenuItem, ProductVariant, ProductAttribute as ProductAttr, AttributeRef, AttributeType } from '@/entities/menu-item/types';
-import type { ProductAttribute } from '@/entities/product-attribute/types';
-import { suggestAttributes, createAttribute } from '@/entities/product-attribute/api';
+import type { ProductAttribute, ProductAttributeGroup } from '@/entities/product-attribute/types';
+import { suggestAttributes, createAttribute, fetchAttributeGroups } from '@/entities/product-attribute/api';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { useToast } from '@/shared/ui/Toast';
 import { useTenant } from '@/entities/tenant/TenantContext';
@@ -68,6 +68,7 @@ export default function ProductFormPage({ editingProduct, categories, token }: P
   const [translationTab, setTranslationTab] = useState(defaultLocale);
 
   // Managed attribute picker state
+  const [attrGroups, setAttrGroups] = useState<ProductAttributeGroup[]>([]);
   const [attrSearch, setAttrSearch] = useState<Record<string, string>>({});
   const [attrResults, setAttrResults] = useState<Record<string, ProductAttribute[]>>({});
   const [attrLoading, setAttrLoading] = useState<Record<string, boolean>>({});
@@ -122,6 +123,14 @@ export default function ProductFormPage({ editingProduct, categories, token }: P
       setHasVariants(!!(editingProduct.variants && editingProduct.variants.length > 0));
     }
   }, [editingProduct, categories]);
+
+  // Fetch attribute groups for the picker
+  useEffect(() => {
+    if (!tenant?.tenantId) return;
+    fetchAttributeGroups(tenant.tenantId)
+      .then(setAttrGroups)
+      .catch(() => {});
+  }, [tenant?.tenantId]);
 
   /* ---------- translations ---------- */
   const updateTranslation = (locale: string, field: 'name' | 'description', value: string) => {
@@ -661,7 +670,9 @@ export default function ProductFormPage({ editingProduct, categories, token }: P
                   <CardTitle className="text-base">Attributes</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5">
-                  {([['author', 'Authors'], ['publisher', 'Publishers'], ['genre', 'Genres'], ['language', 'Languages'], ['series', 'Series']] as [AttributeType, string][]).map(([type, label]) => {
+                  {attrGroups.map((group) => {
+                    const type = group.slug;
+                    const label = `${group.icon || ''} ${group.name}`.trim();
                     const selected = form.attributeRefs.filter((r) => r.type === type);
                     const results = attrResults[type] || [];
                     const loading = attrLoading[type] || false;
@@ -713,7 +724,7 @@ export default function ProductFormPage({ editingProduct, categories, token }: P
                             onClick={() => createAndAddAttribute(type)}
                             className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-muted/50 border border-dashed rounded-lg"
                           >
-                            <Plus size={12} className="inline mr-1" /> Create "{attrSearch[type]}" as {type}
+                            <Plus size={12} className="inline mr-1" /> Create "{attrSearch[type]}" as {label}
                           </button>
                         )}
                       </div>

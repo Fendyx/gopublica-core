@@ -13,7 +13,9 @@ import { Plus, Search, Trash2, Loader2, Star } from 'lucide-react';
 import CategoryForm from '@/features/ecommerce-management/CategoryForm';
 import SortableCategoryList from '@/features/ecommerce-management/SortableCategoryList';
 import AttributeManager from '@/features/ecommerce-management/AttributeManager';
+import AttributeGroupManager from '@/features/ecommerce-management/AttributeGroupManager';
 import type { MenuItem } from '@/entities/menu-item/types';
+import { authFetch } from '@/shared/lib/authFetch';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   PLN: 'zł', EUR: '€', USD: '$', UAH: '₴', GBP: '£', CZK: 'Kč', CHF: 'CHF',
@@ -47,11 +49,11 @@ export default function ProductManager({ token }: { token: string }) {
     try {
       let prodUrl = `${apiUrl}/api/saas/menu?tenantId=${tenant.tenantId}`;
       if (selectedBranch) prodUrl += `&branchId=${selectedBranch._id}`;
-      const prodRes = await fetch(prodUrl);
+      const prodRes = await authFetch(prodUrl);
       const prodData = await prodRes.json();
       setProducts(prodData);
 
-      const catRes = await fetch(`${apiUrl}/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce&own=true`);
+      const catRes = await authFetch(`/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce&own=true`);
       const catData = await catRes.json();
       setCategories(catData);
     } catch (err) {
@@ -67,7 +69,7 @@ export default function ProductManager({ token }: { token: string }) {
 
   const handleDeleteProduct = async (id: string) => {
     if (!confirm(t('deleteProductConfirm'))) return;
-    await fetch(`${apiUrl}/api/saas/menu/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    await authFetch(`/api/saas/menu/${id}`, { method: 'DELETE' });
     fetchData();
   };
 
@@ -85,7 +87,7 @@ export default function ProductManager({ token }: { token: string }) {
   const handleDeleteCategory = async (id: string) => {
     if (id === FEATURED_ID) return;
     if (!confirm(t('deleteCategoryConfirm'))) return;
-    await fetch(`${apiUrl}/api/saas/categories/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    await authFetch(`/api/saas/categories/${id}`, { method: 'DELETE' });
     fetchData();
   };
 
@@ -96,9 +98,8 @@ export default function ProductManager({ token }: { token: string }) {
     
     const realCats = newOrder.filter(c => c.key !== FEATURED_ID);
     try {
-      const res = await fetch(`${apiUrl}/api/saas/categories/reorder`, {
+      const res = await authFetch('/api/saas/categories/reorder', {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderedIds: realCats.map(c => c._id) }),
       });
       if (res.ok) {
@@ -117,7 +118,7 @@ export default function ProductManager({ token }: { token: string }) {
   const orderedCategories = useMemo(() => {
     const savedOrder = (typeof window !== 'undefined') ? localStorage.getItem(STORAGE_KEY(tenant?.tenantId || '')) : null;
     const baseList = [
-      ...(hasFeatured ? [{ _id: FEATURED_ID, key: FEATURED_ID, name: '⭐ Featured', layout: 'featured', order: -1, tenantId: tenant?.tenantId }] : []),
+      ...(hasFeatured ? [{ _id: FEATURED_ID, key: FEATURED_ID, name: `⭐ ${t('featuredTab')}`, layout: 'featured', order: -1, tenantId: tenant?.tenantId }] : []),
       ...categories,
     ];
 
@@ -164,6 +165,7 @@ export default function ProductManager({ token }: { token: string }) {
         <TabsList className="bg-muted/50 border border-border">
           <TabsTrigger value="products">{`${t('productsTab')} (${products.length})`}</TabsTrigger>
           <TabsTrigger value="categories">{`${t('categoriesTab')} (${categories.length})`}</TabsTrigger>
+          <TabsTrigger value="attr-groups">{tAdmin('attributeGroupsTab')}</TabsTrigger>
           <TabsTrigger value="attributes">{tAdmin('attributesTab')}</TabsTrigger>
         </TabsList>
 
@@ -311,6 +313,11 @@ export default function ProductManager({ token }: { token: string }) {
               featuredId={FEATURED_ID}
             />
           </Card>
+        </TabsContent>
+
+        {/* Attribute Groups Tab */}
+        <TabsContent value="attr-groups" className="mt-6">
+          <AttributeGroupManager token={token} />
         </TabsContent>
 
         {/* Attributes Tab */}

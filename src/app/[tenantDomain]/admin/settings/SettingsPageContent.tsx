@@ -40,8 +40,6 @@ import {
   MapPin,
   Clock,
   Globe,
-  Volume2,
-  Bell,
   Languages,
   Banknote,
   Search,
@@ -138,10 +136,6 @@ export default function SettingsPageContent() {
   // Убрали hoursI18n
   const [seoTitleI18n, setSeoTitleI18n] = useState<Record<string, string>>({});
   const [seoDescriptionI18n, setSeoDescriptionI18n] = useState<Record<string, string>>({});
-
-  const [notifications, setNotifications] = useState({
-    booking: { sound: true, message: true, soundFile: '' },
-  });
 
   const SUPPORTED_LANGUAGES = GLOBAL_LOCALES.map((l) => l.code);
   const availableLangs = activeLocales;
@@ -258,14 +252,6 @@ export default function SettingsPageContent() {
           krs: data.legal?.krs || '',
         });
 
-        if (data.notifications) {
-          setNotifications(prev => ({
-            ...prev,
-            ...data.notifications,
-            booking: { ...prev.booking, ...(data.notifications.booking || {}) },
-          }));
-        }
-
         // 👈 НОВОЕ: подтягиваем Telegram notification preferences
         if (data.notifications?.telegram) {
           const tg = data.notifications.telegram;
@@ -301,7 +287,6 @@ export default function SettingsPageContent() {
         ...form,
         businessName,
         workingHours,
-        notifications,
         primaryLanguage,
         primaryCurrency,
         activeLocales,
@@ -384,7 +369,7 @@ export default function SettingsPageContent() {
     primaryLanguage, primaryCurrency, activeLocales, defaultLocale,
   });
   const saveSeo = () => saveTab('seo', {
-    seoTitleI18n, seoDescriptionI18n, notifications,
+    seoTitleI18n, seoDescriptionI18n,
   });
   const saveLegal = () => saveTab('legal', { legal });
 
@@ -1115,20 +1100,6 @@ export default function SettingsPageContent() {
               {/* --- ВКЛАДКА 4: SEO & ALERTS --- */}
               <TabsContent value="seo" className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('notifications.title')}</h3>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="notif-sound" className="flex items-center gap-2 cursor-pointer"><Volume2 className="w-4 h-4 text-muted-foreground" />{t('notifications.sound')}</Label>
-                    <Switch id="notif-sound" checked={notifications.booking.sound} onCheckedChange={(checked) => setNotifications({ ...notifications, booking: { ...notifications.booking, sound: checked } })} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="notif-message" className="flex items-center gap-2 cursor-pointer"><Bell className="w-4 h-4 text-muted-foreground" />{t('notifications.message')}</Label>
-                    <Switch id="notif-message" checked={notifications.booking.message} onCheckedChange={(checked) => setNotifications({ ...notifications, booking: { ...notifications.booking, message: checked } })} />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
                   <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">{t('seoTranslations')}</h3>
                   <Accordion type="multiple" className="space-y-2">
                     <AccordionItem value="seo-title" className="border rounded-lg px-3">
@@ -1297,7 +1268,7 @@ export default function SettingsPageContent() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-medium text-foreground flex items-center gap-2">
-                        <Bell className="w-4 h-4 text-muted-foreground" />
+                        <MessageCircle className="w-4 h-4 text-muted-foreground" />
                         {t('telegram.preferences')}
                       </h4>
                       {settingsSaving && (

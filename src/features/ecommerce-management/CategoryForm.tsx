@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2, ImagePlus } from 'lucide-react';
+import EmojiPickerButton from '@/shared/ui/EmojiPickerButton';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { useTenant } from '@/entities/tenant/TenantContext';
+import { slugify } from '@/shared/lib/slugify';
 
 interface CategoryFormProps {
   isOpen: boolean;
@@ -106,7 +108,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          key: editingCategory?.key || form.name.toLowerCase().replace(/\s+/g, '-'),
+          key: editingCategory?.key || slugify(form.name),
           name: form.name,
           description: form.description,
           icon: form.icon,
@@ -144,13 +146,13 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
         onClose();
       } else {
         const errData = await res.json().catch(() => ({}));
-        errorMessage = errData.error || 'Failed to save category';
+        errorMessage = errData.error || t('errorSave');
         console.error('Backend error:', errorMessage);
-        alert(`Error: ${errorMessage}`);
+        alert(t('errorSave'));
       }
     } catch (err) {
       console.error('Network error:', err);
-      alert('Network error. Check console.');
+      alert(t('networkError'));
     } finally {
       setLoading(false);
     }
@@ -167,9 +169,9 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
     >
       <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 flex flex-col">
         <SheetHeader className="p-6 border-b border-border">
-          <SheetTitle className="text-xl">{editingCategory ? 'Edit Category' : 'Add New Category'}</SheetTitle>
+          <SheetTitle className="text-xl">{editingCategory ? t('editTitle') : t('addTitle')}</SheetTitle>
           <SheetDescription>
-            {editingCategory ? 'Update the category details.' : 'Create a category to group your products.'}
+            {editingCategory ? t('editDescription') : t('addDescription')}
           </SheetDescription>
         </SheetHeader>
 
@@ -188,7 +190,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
                 {activeLocales.map((locale) => (
                   <TabsContent key={locale} value={locale} className="space-y-3 mt-3">
                     <div className="space-y-2">
-                      <Label>Category Name ({locale.toUpperCase()})</Label>
+                      <Label>{t('categoryNameLocale', { locale: locale.toUpperCase() })}</Label>
                       <Input
                         value={locale === defaultLocale ? form.name : (form.translations[locale]?.name || '')}
                         onChange={(e) => {
@@ -198,11 +200,11 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
                             setForm({ ...form, translations: { ...form.translations, [locale]: { ...form.translations[locale], name: e.target.value } } });
                           }
                         }}
-                        placeholder={locale === defaultLocale ? 'e.g. Electronics' : `Translation for ${locale.toUpperCase()}`}
+                        placeholder={locale === defaultLocale ? t('namePlaceholder') : t('translationFor', { locale: locale.toUpperCase() })}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Description ({locale.toUpperCase()})</Label>
+                      <Label>{t('descriptionLocale', { locale: locale.toUpperCase() })}</Label>
                       <Textarea
                         rows={2}
                         value={locale === defaultLocale ? form.description : (form.translations[locale]?.description || '')}
@@ -213,7 +215,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
                             setForm({ ...form, translations: { ...form.translations, [locale]: { ...form.translations[locale], description: e.target.value } } });
                           }
                         }}
-                        placeholder={locale === defaultLocale ? 'e.g. Just landed' : `Translation for ${locale.toUpperCase()}`}
+                        placeholder={locale === defaultLocale ? t('descriptionPlaceholder') : t('translationFor', { locale: locale.toUpperCase() })}
                       />
                     </div>
                   </TabsContent>
@@ -222,26 +224,26 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
             ) : (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="cat-name">Category Name</Label>
-                  <Input id="cat-name" placeholder="e.g. Electronics" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                  <Label htmlFor="cat-name">{t('categoryName')}</Label>
+                  <Input id="cat-name" placeholder={t('namePlaceholder')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cat-description">Description</Label>
-                  <Textarea id="cat-description" placeholder="e.g. Just landed" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                  <Label htmlFor="cat-description">{t('description')}</Label>
+                  <Textarea id="cat-description" placeholder={t('descriptionPlaceholder')} rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
                 </div>
               </>
             )}
 
             {/* Parent category selector */}
             <div className="space-y-2">
-              <Label>Parent Category (optional)</Label>
+              <Label>{t('parentCategory')}</Label>
               <Select
                 value={form.parentCategoryKey || '__none__'}
                 onValueChange={(val) => setForm({ ...form, parentCategoryKey: val === '__none__' ? '' : val })}
               >
-                <SelectTrigger><SelectValue placeholder="No parent (top-level)" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('noParent')} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">No parent (top-level)</SelectItem>
+                  <SelectItem value="__none__">{t('noParent')}</SelectItem>
                   {categories
                     .filter((c: any) => !c.parentCategoryKey && c.key !== editingCategory?.key)
                     .map((c: any) => (
@@ -251,25 +253,28 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
               </Select>
               {form.parentCategoryKey && (
                 <p className="text-xs text-muted-foreground">
-                  This category will appear under: {categories.find((c: any) => c.key === form.parentCategoryKey)?.name || form.parentCategoryKey}
+                  {t('willAppearUnder')} {categories.find((c: any) => c.key === form.parentCategoryKey)?.name || form.parentCategoryKey}
                 </p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="cat-icon">Icon (Emoji)</Label>
-                <Input id="cat-icon" placeholder="📦" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="text-center text-xl" maxLength={2} />
+                <Label htmlFor="cat-icon">{t('icon')}</Label>
+                <div className="flex gap-2 items-center">
+                  <Input id="cat-icon" placeholder="📦" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="text-center text-xl" maxLength={2} />
+                  <EmojiPickerButton value={form.icon} onChange={(emoji) => setForm({ ...form, icon: emoji })} />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label>Display Layout</Label>
+                <Label>{t('layout')}</Label>
                 <Select value={form.layout} onValueChange={(val) => setForm({ ...form, layout: val })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="grid-3">Grid (3 cols)</SelectItem>
-                    <SelectItem value="grid-4">Grid (4 cols)</SelectItem>
-                    <SelectItem value="carousel">Carousel</SelectItem>
-                    <SelectItem value="dynamic">Dynamic Bento</SelectItem>
+                    <SelectItem value="grid-3">{t('grid3')}</SelectItem>
+                    <SelectItem value="grid-4">{t('grid4')}</SelectItem>
+                    <SelectItem value="carousel">{t('carousel')}</SelectItem>
+                    <SelectItem value="dynamic">{t('dynamicBento')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -277,31 +282,31 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
 
             {/* Новый селект для выбора стиля карточек */}
             <div className="space-y-2">
-              <Label>Product Card Style</Label>
+              <Label>{t('cardStyle')}</Label>
               <Select value={form.productCardVariant || '__global__'} onValueChange={(val) => setForm({ ...form, productCardVariant: val === '__global__' ? '' : val })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__global__">Use global setting</SelectItem>
-                  <SelectItem value="action-bar">Action Bar</SelectItem>
-                  <SelectItem value="overlay">Hover Overlay</SelectItem>
-                  <SelectItem value="minimal">Minimalist</SelectItem>
-                  <SelectItem value="clean">Clean (image only)</SelectItem>
-                  <SelectItem value="hover-vertical">Vertical Overlay</SelectItem>
-                  <SelectItem value="action-overlay">Action + Overlay</SelectItem>
+                  <SelectItem value="__global__">{t('useGlobal')}</SelectItem>
+                  <SelectItem value="action-bar">{t('actionBar')}</SelectItem>
+                  <SelectItem value="overlay">{t('hoverOverlay')}</SelectItem>
+                  <SelectItem value="minimal">{t('minimalist')}</SelectItem>
+                  <SelectItem value="clean">{t('clean')}</SelectItem>
+                  <SelectItem value="hover-vertical">{t('verticalOverlay')}</SelectItem>
+                  <SelectItem value="action-overlay">{t('actionOverlay')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Product Card Width</Label>
+              <Label>{t('cardWidth')}</Label>
               <Select value={form.productCardWidth} onValueChange={(val) => setForm({ ...form, productCardWidth: val })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Default</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="large">Large</SelectItem>
-                  <SelectItem value="xlarge">Extra Large</SelectItem>
-                  <SelectItem value="full">Full Width</SelectItem>
+                  <SelectItem value="default">{t('default')}</SelectItem>
+                  <SelectItem value="medium">{t('medium')}</SelectItem>
+                  <SelectItem value="large">{t('large')}</SelectItem>
+                  <SelectItem value="xlarge">{t('extraLarge')}</SelectItem>
+                  <SelectItem value="full">{t('fullWidth')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -309,16 +314,16 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
             {form.layout === 'carousel' && (
               <div className="flex items-center space-x-2 pt-2">
                 <Switch id="carouselAutoplay" checked={form.carouselAutoplay} onCheckedChange={(checked) => setForm({ ...form, carouselAutoplay: checked })} />
-                <Label htmlFor="carouselAutoplay">Auto‑scroll carousel</Label>
+                <Label htmlFor="carouselAutoplay">{t('carouselAutoplay')}</Label>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="cat-cover">Cover Image</Label>
+              <Label htmlFor="cat-cover">{t('coverImage')}</Label>
               <div className="flex gap-2">
                 <Input id="cat-cover" placeholder="https://..." value={form.coverImage} onChange={(e) => setForm({ ...form, coverImage: e.target.value })} />
                 <Button type="button" variant="outline" onClick={openWidget} disabled={!widgetReady} className="gap-2 shrink-0">
-                  <ImagePlus className="w-4 h-4" /> Upload
+                  <ImagePlus className="w-4 h-4" /> {t('upload')}
                 </Button>
               </div>
               {form.coverImage && (
@@ -327,33 +332,33 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
             </div>
 
             <div className="space-y-2">
-              <Label>Category Card Image Aspect Ratio</Label>
+              <Label>{t('categoryAspectRatio')}</Label>
               <Select value={form.imageAspectRatio} onValueChange={(val) => setForm({ ...form, imageAspectRatio: val })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1/1">Square (1:1)</SelectItem>
-                  <SelectItem value="4/5">Portrait (4:5)</SelectItem>
-                  <SelectItem value="3/4">Portrait (3:4)</SelectItem>
-                  <SelectItem value="16/9">Landscape (16:9)</SelectItem>
+                  <SelectItem value="1/1">{t('square')}</SelectItem>
+                  <SelectItem value="4/5">{t('portrait45')}</SelectItem>
+                  <SelectItem value="3/4">{t('portrait34')}</SelectItem>
+                  <SelectItem value="16/9">{t('landscape169')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Product Image Aspect Ratio</Label>
+              <Label>{t('productAspectRatio')}</Label>
               <Select value={form.productImageAspectRatio} onValueChange={(val) => setForm({ ...form, productImageAspectRatio: val })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1/1">Square (1:1)</SelectItem>
-                  <SelectItem value="4/5">Portrait (4:5)</SelectItem>
-                  <SelectItem value="3/4">Portrait (3:4)</SelectItem>
-                  <SelectItem value="16/9">Landscape (16:9)</SelectItem>
+                  <SelectItem value="1/1">{t('square')}</SelectItem>
+                  <SelectItem value="4/5">{t('portrait45')}</SelectItem>
+                  <SelectItem value="3/4">{t('portrait34')}</SelectItem>
+                  <SelectItem value="16/9">{t('landscape169')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cat-bg-color">Card Background Color</Label>
+              <Label htmlFor="cat-bg-color">{t('bgColor')}</Label>
               <div className="flex items-center gap-4">
                 <input
                   type="color"
@@ -362,14 +367,14 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
                   className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
                 />
                 <Input
-                  placeholder="Empty = Default"
+                  placeholder={t('bgColorEmpty')}
                   value={form.cardBgColor}
                   onChange={(e) => setForm({ ...form, cardBgColor: e.target.value })}
                   className="max-w-xs"
                 />
                 {form.cardBgColor && (
                   <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, cardBgColor: '' })}>
-                    Reset
+                    {t('reset')}
                   </Button>
                 )}
               </div>
@@ -378,9 +383,9 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
 
           <SheetFooter className="p-6 border-t border-border">
             <div className="flex justify-end gap-3 w-full">
-              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={onClose}>{t('cancel')}</Button>
               <Button type="submit" disabled={loading}>
-                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : 'Save Category'}
+                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('saving')}</> : t('save')}
               </Button>
             </div>
           </SheetFooter>

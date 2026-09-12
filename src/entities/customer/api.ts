@@ -1,14 +1,7 @@
 import type { CustomerDetails, CustomerSummary } from './types';
+import { authFetch, getAuthHeaders } from '@/shared/lib/authFetch';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const getAuthHeaders = () => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('saas_token') : null;
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
 
 /** Raw backend customer shape - stats may be direct fields or nested in a `stats` object/array. */
 interface RawCustomer {
@@ -60,7 +53,7 @@ const normalizeCustomer = (raw: RawCustomer): CustomerSummary => {
  */
 export const getCustomers = async (): Promise<CustomerSummary[]> => {
   try {
-    const res = await fetch(`${API_URL}/api/saas/customers`, { headers: getAuthHeaders() });
+    const res = await authFetch('/api/saas/customers', { headers: getAuthHeaders() });
     if (!res.ok) throw new Error('Failed to fetch customers');
     const data = await res.json();
     const list: RawCustomer[] = data.customers || (Array.isArray(data) ? data : []);
@@ -73,7 +66,7 @@ export const getCustomers = async (): Promise<CustomerSummary[]> => {
 
 /** Single customer with their full order history: `{ customer, orders }`. */
 export const getCustomerDetails = async (customerId: string): Promise<CustomerDetails> => {
-  const res = await fetch(`${API_URL}/api/saas/customers/${customerId}`, {
+  const res = await authFetch(`/api/saas/customers/${customerId}`, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to fetch customer details');

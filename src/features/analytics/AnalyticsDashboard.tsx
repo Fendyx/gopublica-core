@@ -18,6 +18,7 @@ import {
   Eye, Users, ShoppingCart, DollarSign, TrendingUp, Activity,
   ArrowUpRight, ArrowDownRight, Minus,
 } from 'lucide-react';
+import { authFetch } from '@/shared/lib/authFetch';
 
 const COLORS = ['#3b82f6', '#f97316', '#22c55e', '#e11d48', '#a855f7', '#06b6d4'];
 
@@ -88,11 +89,8 @@ export default function AnalyticsDashboard({ tenantId }: { tenantId: string }) {
 
   useEffect(() => {
     if (!tenantId) return;
-    const token = localStorage.getItem('saas_token');
     setLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/analytics?days=${days}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    authFetch(`/api/saas/analytics?days=${days}`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();

@@ -24,6 +24,7 @@ import { useBranch } from '@/entities/branch/BranchContext'
 import { SYSTEM_PAGES, isSystemPageEnabled, buildDefaultNavigationConfig } from '@/shared/lib/navigation'
 import type { NavItem, NavigationConfig, Features } from '@/entities/tenant/types'
 import type { CustomPage } from '@/entities/branch/types'
+import { authFetch } from '@/shared/lib/authFetch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -273,8 +274,7 @@ export default function NavigationSettingsTab() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const token = localStorage.getItem('saas_token')
-      if (!token || !selectedBranch || !tenant) return
+      if (!selectedBranch || !tenant) return
 
       // Validation: sync stale custom page slugs before saving.
       // This prevents navigation config from saving outdated slugs that
@@ -303,9 +303,8 @@ export default function NavigationSettingsTab() {
 
       const syncedConfig = { ...navConfig, items: syncedItems }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings`, {
+      const res = await authFetch('/api/saas/settings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           navigation: syncedConfig,
           branchId: selectedBranch._id,

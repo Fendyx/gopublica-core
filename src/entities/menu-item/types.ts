@@ -1,7 +1,7 @@
 export type Niche = 'food' | 'beauty' | 'ecommerce' | 'auto';
 export type ProductType = 'food' | 'service' | 'physical_product' | 'digital';
 export type ProductStatus = 'published' | 'draft' | 'hidden';
-export type AttributeType = 'author' | 'publisher' | 'genre' | 'language' | 'series' | 'custom';
+export type AttributeType = string;
 
 export interface AttributeRef {
   type: AttributeType;

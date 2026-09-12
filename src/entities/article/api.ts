@@ -1,4 +1,5 @@
 import type { Article, ArticlePayload, Event, EventPayload } from './types';
+import { authFetch } from '@/shared/lib/authFetch';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 

@@ -8,7 +8,7 @@ import { Search } from 'lucide-react';
 import type { MenuItem } from '@/entities/menu-item/types';
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout';
 import FilterSidebar, { applyFilters, EMPTY_FILTERS, type FilterState } from '@/widgets/Catalog/FilterSidebar';
-import type { ProductAttribute } from '@/entities/product-attribute/types';
+import type { ProductAttribute, ProductAttributeGroup } from '@/entities/product-attribute/types';
 
 export default function CatalogSearchClient() {
   const locale = useLocale();
@@ -21,6 +21,7 @@ export default function CatalogSearchClient() {
 
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
+  const [attributeGroups, setAttributeGroups] = useState<ProductAttributeGroup[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
@@ -41,12 +42,14 @@ export default function CatalogSearchClient() {
         if (res.ok) setProducts(await res.json());
 
         // Also fetch attributes for filters
-        const [attrRes, catRes] = await Promise.all([
+        const [attrRes, catRes, groupRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/product-attributes?tenantId=${tenantId}`, { cache: 'no-store' }),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenantId}&niche=ecommerce`, { cache: 'no-store' }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/attribute-groups?tenantId=${tenantId}`, { cache: 'no-store' }),
         ]);
         if (attrRes.ok) setAttributes(await attrRes.json());
         if (catRes.ok) setCategories(await catRes.json());
+        if (groupRes.ok) setAttributeGroups(await groupRes.json());
       } catch {
         setProducts([]);
       } finally {
@@ -75,6 +78,7 @@ export default function CatalogSearchClient() {
           <FilterSidebar
             products={products}
             attributes={attributes}
+            attributeGroups={attributeGroups}
             categories={categories}
             activeFilters={filters}
             onFilterChange={setFilters}

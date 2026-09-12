@@ -3,14 +3,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { TenantProvider } from '@/entities/tenant/TenantContext';
-import { NotificationProvider } from '@/shared/lib/useNotifications';
-import AdminNotifications from '@/widgets/Admin/AdminNotifications';
 import AdminSidebar from '@/widgets/Admin/AdminSidebar';
 import AdminTopBar from '@/widgets/Admin/AdminTopBar';
 import { AdminBranchSwitcher } from '@/widgets/Admin/AdminBranchSwitcher';
 import { loadMessages } from '@/shared/lib/adminLocale';
 import { ToastProvider } from '@/shared/ui/Toast';
 import { BranchProvider } from '@/entities/branch/BranchContext';
+import { authFetch } from '@/shared/lib/authFetch';
 
 const DEFAULT_LOCALE = 'pl';
 
@@ -77,15 +76,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const savedToken = localStorage.getItem('saas_token');
     if (!savedToken) {
       router.push('/admin/login');
-    } else {
-      setToken(savedToken);
-      // Extract tenantId from JWT payload
-      const payload = decodeJwtPayload(savedToken);
-      console.log('JWT Payload:', payload); // DEBUG: check what's in the token
-      if (payload?.tenantId) {
-        setTenantId(payload.tenantId);
-      }
+      return;
     }
+
+    // Extract tenantId from JWT payload (optimistic — we set it immediately)
+    const payload = decodeJwtPayload(savedToken);
+    if (payload?.tenantId) {
+      setTenantId(payload.tenantId);
+    }
+
+    // Validate the token against the backend.
+    // authFetch handles 401 → refresh → retry → forceLogout automatically.
+    // This catches tokens that are expired but still in localStorage.
+    authFetch('/api/saas/auth/me')
+      .then(async (res) => {
+        if (res.ok) {
+          setToken(savedToken);
+        }
+        // If !res.ok, authFetch already attempted refresh.
+        // If refresh succeeded, we still have a valid session.
+        // If refresh failed, authFetch redirects to /admin/login.
+      })
+      .catch(() => {
+        // Network error — still allow the UI to render with cached token.
+        // The individual API calls will handle 401 via authFetch.
+        setToken(savedToken);
+      });
   }, []);
 
   useEffect(() => {
@@ -110,16 +126,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <TenantProvider tenantId={tenantId}>
-        <NotificationProvider token={token} tenantId={tenantId}>
-          <BranchProvider tenantId={tenantId} token={token}>
-            <ToastProvider>
-              <AdminLayoutInner token={token} locale={locale} onLocaleChange={handleLocaleChange}>
-                {children}
-              </AdminLayoutInner>
-            </ToastProvider>
-          </BranchProvider>
-          <AdminNotifications />
-        </NotificationProvider>
+        <BranchProvider tenantId={tenantId} token={token}>
+          <ToastProvider>
+            <AdminLayoutInner token={token} locale={locale} onLocaleChange={handleLocaleChange}>
+              {children}
+            </AdminLayoutInner>
+          </ToastProvider>
+        </BranchProvider>
       </TenantProvider>
     </NextIntlClientProvider>
   );

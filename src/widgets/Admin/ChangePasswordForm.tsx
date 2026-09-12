@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { authFetch } from '@/shared/lib/authFetch'
 
 export default function ChangePasswordForm({
   token,
@@ -20,12 +21,8 @@ export default function ChangePasswordForm({
     setError('')
     setSuccess('')
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/auth/change-password`, {
+      const res = await authFetch('/api/saas/auth/change-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ oldPassword, newPassword }),
       })
       const data = await res.json()

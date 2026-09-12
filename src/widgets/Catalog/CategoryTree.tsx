@@ -80,7 +80,7 @@ function CategoryNode({
           style={isActive ? { borderLeft: '2px solid var(--tenant-primary, hsl(var(--primary)))' } : undefined}
         >
           <span className="w-5 mr-1 shrink-0 text-center leading-none">{node.icon || ''}</span>
-          {node.name}
+          {node.translations?.[locale]?.name || node.name}
         </Link>
       </div>
       {hasChildren && expanded && (

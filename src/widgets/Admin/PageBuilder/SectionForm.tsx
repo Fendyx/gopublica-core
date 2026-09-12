@@ -1206,6 +1206,89 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 branchId={branch?.selectedBranch?._id}
               />
             )}
+
+            {/* ── Card Appearance (ecommerce only) ── */}
+            {carouselMode === 'ecommerce' && (
+              <div className="space-y-4 p-4 border border-dashed rounded-lg bg-muted/30">
+                <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                  {t('cardAppearance')}
+                </p>
+                <div className="space-y-2">
+                  <Label>{t('productCardStyle')}</Label>
+                  <Select
+                    value={settings.productCardVariant || '__section_default__'}
+                    onValueChange={(val) =>
+                      setSettings({
+                        ...settings,
+                        productCardVariant: val === '__section_default__' ? undefined : val,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('sectionDefault')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__section_default__">{t('sectionDefault')}</SelectItem>
+                      <SelectItem value="action-bar">Action Bar</SelectItem>
+                      <SelectItem value="overlay">Hover Overlay</SelectItem>
+                      <SelectItem value="minimal">Minimalist</SelectItem>
+                      <SelectItem value="clean">Clean (image only)</SelectItem>
+                      <SelectItem value="hover-vertical">Vertical Overlay</SelectItem>
+                      <SelectItem value="action-overlay">Action + Overlay</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t('productImageAspectRatio')}</Label>
+                    <Select
+                      value={settings.productImageAspectRatio || '__section_default__'}
+                      onValueChange={(val) =>
+                        setSettings({
+                          ...settings,
+                          productImageAspectRatio: val === '__section_default__' ? undefined : val,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('sectionDefault')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__section_default__">{t('sectionDefault')}</SelectItem>
+                        <SelectItem value="1/1">1:1 (Square)</SelectItem>
+                        <SelectItem value="4/5">4:5 (Portrait)</SelectItem>
+                        <SelectItem value="3/4">3:4 (Portrait)</SelectItem>
+                        <SelectItem value="16/9">16:9 (Landscape)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('productCardWidth')}</Label>
+                    <Select
+                      value={settings.productCardWidth || '__section_default__'}
+                      onValueChange={(val) =>
+                        setSettings({
+                          ...settings,
+                          productCardWidth: val === '__section_default__' ? undefined : val,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('sectionDefault')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__section_default__">{t('sectionDefault')}</SelectItem>
+                        <SelectItem value="default">Default</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
+                        <SelectItem value="xlarge">Extra Large</SelectItem>
+                        <SelectItem value="full">Full Width</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
       }
@@ -1748,6 +1831,95 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 }}
               />
             )}
+          </div>
+        );
+      }
+      case 'system_catalog': {
+        return (
+          <div className="space-y-4">
+            <div className="space-y-4 p-4 border border-dashed rounded-lg bg-muted/30">
+              <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                {t('cardAppearance')}
+              </p>
+              <div className="space-y-2">
+                <Label>{t('productCardStyle')}</Label>
+                <Select
+                  value={settings.productCardVariant || '__section_default__'}
+                  onValueChange={(val) =>
+                    setSettings({
+                      ...settings,
+                      productCardVariant: val === '__section_default__' ? undefined : val,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('sectionDefault')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__section_default__">{t('sectionDefault')}</SelectItem>
+                    <SelectItem value="action-bar">Action Bar</SelectItem>
+                    <SelectItem value="overlay">Hover Overlay</SelectItem>
+                    <SelectItem value="minimal">Minimalist</SelectItem>
+                    <SelectItem value="clean">Clean (image only)</SelectItem>
+                    <SelectItem value="hover-vertical">Vertical Overlay</SelectItem>
+                    <SelectItem value="action-overlay">Action + Overlay</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('productImageAspectRatio')}</Label>
+                  <Select
+                    value={settings.productImageAspectRatio || '__section_default__'}
+                    onValueChange={(val) =>
+                      setSettings({
+                        ...settings,
+                        productImageAspectRatio: val === '__section_default__' ? undefined : val,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('sectionDefault')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__section_default__">{t('sectionDefault')}</SelectItem>
+                      <SelectItem value="1/1">1:1 (Square)</SelectItem>
+                      <SelectItem value="4/5">4:5 (Portrait)</SelectItem>
+                      <SelectItem value="3/4">3:4 (Portrait)</SelectItem>
+                      <SelectItem value="16/9">16:9 (Landscape)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('productCardWidth')}</Label>
+                  <Select
+                    value={settings.productCardWidth || '__section_default__'}
+                    onValueChange={(val) =>
+                      setSettings({
+                        ...settings,
+                        productCardWidth: val === '__section_default__' ? undefined : val,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('sectionDefault')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__section_default__">{t('sectionDefault')}</SelectItem>
+                      <SelectItem value="default">Default</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                      <SelectItem value="xlarge">Extra Large</SelectItem>
+                      <SelectItem value="full">Full Width</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              These settings override the global and per-category card styles for this section.
+              Per-category settings (from the catalog manager) will be used when this section default is selected.
+            </p>
           </div>
         );
       }

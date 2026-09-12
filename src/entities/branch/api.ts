@@ -1,10 +1,5 @@
 import type { Branch, CustomPage } from './types'
-
-function getAuthHeaders(): Record<string, string> {
-  if (typeof window === 'undefined') return {}
-  const token = localStorage.getItem('saas_token')
-  return token ? { Authorization: `Bearer ${token}` } : {}
-}
+import { authFetch, getAuthHeaders } from '@/shared/lib/authFetch'
 
 export async function fetchBranches(tenantId: string): Promise<Branch[]> {
   try {
@@ -44,8 +39,8 @@ export async function fetchBranchBySlug(
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function fetchCustomPages(branchId: string): Promise<CustomPage[]> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages`,
+  const res = await authFetch(
+    `/api/saas/branches/${branchId}/custom-pages`,
     { headers: getAuthHeaders() }
   )
   if (!res.ok) throw new Error('Failed to fetch custom pages')
@@ -67,11 +62,11 @@ export async function createCustomPage(
   }
 ): Promise<CustomPage> {
   const body = typeof data === 'string' ? { title: data } : data
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages`,
+  const res = await authFetch(
+    `/api/saas/branches/${branchId}/custom-pages`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      headers: getAuthHeaders(),
       body: JSON.stringify(body),
     }
   )
@@ -99,11 +94,11 @@ export async function updateCustomPage(
     slug?: string;
   }
 ): Promise<CustomPage> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages/${slug}`,
+  const res = await authFetch(
+    `/api/saas/branches/${branchId}/custom-pages/${slug}`,
     {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     }
   )
@@ -118,8 +113,8 @@ export async function deleteCustomPage(
   branchId: string,
   slug: string
 ): Promise<void> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/saas/branches/${branchId}/custom-pages/${slug}`,
+  const res = await authFetch(
+    `/api/saas/branches/${branchId}/custom-pages/${slug}`,
     { method: 'DELETE', headers: getAuthHeaders() }
   )
   if (!res.ok) throw new Error('Failed to delete custom page')

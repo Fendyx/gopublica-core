@@ -15,6 +15,14 @@ export interface CategoryCardData {
   imageAspectRatio?: string;
   parentCategoryKey?: string;
   children?: CategoryCardData[];
+  translations?: Record<string, { name?: string; description?: string }>;
+}
+
+/** Resolve localized category name, falling back to primary name. */
+function catName(cat: CategoryCardData, locale: string): string {
+  const t = cat.translations?.[locale];
+  if (t?.name) return t.name;
+  return cat.name;
 }
 
 export default function CategoryGrid({ categories, bgColor }: { categories: CategoryCardData[], bgColor?: string }) {
@@ -58,7 +66,7 @@ export default function CategoryGrid({ categories, bgColor }: { categories: Cate
                   {cat.coverImage ? (
                     <Image
                       src={cat.coverImage}
-                      alt={cat.name}
+                      alt={catName(cat, locale)}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                       className="object-cover w-full h-full transition-transform duration-500 ease-out group-hover:scale-105"
@@ -72,7 +80,7 @@ export default function CategoryGrid({ categories, bgColor }: { categories: Cate
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                   <div className="absolute bottom-0 left-0 p-4 z-10">
-                    <h3 className="text-lg font-medium text-white drop-shadow-md">{cat.name}</h3>
+                    <h3 className="text-lg font-medium text-white drop-shadow-md">{catName(cat, locale)}</h3>
                     {cat.description && (
                       <p className="text-sm text-white/70 drop-shadow-md mt-1">{cat.description}</p>
                     )}
@@ -93,7 +101,7 @@ export default function CategoryGrid({ categories, bgColor }: { categories: Cate
                         href={`/${locale}/${branchSlug}/catalog/${child.key}`}
                         className="text-xs text-muted-foreground hover:text-foreground border border-border-light rounded-full px-2.5 py-1 hover:bg-muted/50 transition-colors"
                       >
-                        {child.name}
+                        {catName(child, locale)}
                         {child.productCount !== undefined && (
                           <span className="ml-1 text-muted-foreground/60">({child.productCount})</span>
                         )}

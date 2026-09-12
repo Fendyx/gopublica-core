@@ -12,7 +12,7 @@ interface SystemMenuSectionProps {
   tenantDomain: string;
   branchSlug?: string;
   allMenuItems?: MenuItem[];
-  categories?: Array<{ key: string; name: string; icon?: string; translations?: Record<string, string> }>;
+  categories?: Array<{ key: string; name: string; icon?: string; translations?: Record<string, { name?: string; description?: string }> }>;
 }
 
 export default function SystemMenuSection({ section, allMenuItems, categories }: SystemMenuSectionProps) {

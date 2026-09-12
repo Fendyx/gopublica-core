@@ -2,7 +2,6 @@
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminBranchSwitcher } from '@/widgets/Admin/AdminBranchSwitcher';
-import AdminNotifications from '@/widgets/Admin/AdminNotifications';
 
 interface AdminTopBarProps {
   onOpenMenu: () => void;
@@ -26,10 +25,9 @@ export default function AdminTopBar({ onOpenMenu, showMenuButton }: AdminTopBarP
         )}
       </div>
 
-      {/* Right: branch switcher + notifications */}
+      {/* Right: branch switcher */}
       <div className="flex items-center gap-2">
         <AdminBranchSwitcher />
-        <AdminNotifications />
       </div>
     </header>
   );

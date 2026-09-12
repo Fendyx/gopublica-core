@@ -19,6 +19,7 @@ export async function fetchCategoriesForNav(
       productCount: cat.productCount,
       parentCategoryKey: cat.parentCategoryKey || null,
       order: cat.order ?? 0,
+      translations: cat.translations || {},
     }));
   } catch {
     return [];
