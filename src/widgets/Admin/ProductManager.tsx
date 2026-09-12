@@ -53,7 +53,7 @@ export default function ProductManager({ token }: { token: string }) {
       const prodData = await prodRes.json();
       setProducts(prodData);
 
-      const catRes = await authFetch(`/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce&own=true`);
+      const catRes = await authFetch(`/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce`);
       const catData = await catRes.json();
       setCategories(catData);
     } catch (err) {

@@ -33,18 +33,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       try {
         let prodUrl = `${apiUrl}/api/saas/menu?tenantId=${tenant.tenantId}`;
         if (selectedBranch) prodUrl += `&branchId=${selectedBranch._id}`;
-        const [prodRes, catRes, allCatRes] = await Promise.all([
+        const [prodRes, catRes] = await Promise.all([
           fetch(prodUrl),
-          fetch(`${apiUrl}/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce&own=true`),
           fetch(`${apiUrl}/api/saas/categories?tenantId=${tenant.tenantId}&niche=ecommerce`),
         ]);
         const products: MenuItem[] = await prodRes.json();
-        const ownCats = await catRes.json();
-        const allCats = await allCatRes.json();
-        // Merge: own categories first, then global ones not already present
-        const ownKeys = new Set(ownCats.map((c: any) => c.key));
-        const mergedCats = [...ownCats, ...allCats.filter((c: any) => !ownKeys.has(c.key))];
-        setCategories(mergedCats);
+        const cats = await catRes.json();
+        setCategories(cats);
 
         const found = products.find((p) => p._id === productId);
         if (found) {

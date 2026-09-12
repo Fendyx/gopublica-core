@@ -6,7 +6,7 @@ export async function fetchCategoriesForNav(
 ): Promise<CategoryNavItem[]> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenantId}&niche=${niche}&own=true`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/saas/categories?tenantId=${tenantId}&niche=${niche}`,
       { cache: 'no-store' }
     );
     if (!res.ok) return [];
