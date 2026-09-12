@@ -448,7 +448,11 @@ function SpecificationsTab({
   const dims = hasDims(product);
   const tags = hasTagsList(product);
 
-  if (!wgt && !dims && !tags && attrs.length === 0 && linkedAttrs.length === 0) {
+  // Deduplicate: exclude old manual attributes whose key matches a linked attribute name
+  const linkedNames = new Set(linkedAttrs.map((la) => la.name.toLowerCase()));
+  const dedupedAttrs = attrs.filter((a) => !linkedNames.has(a.key.toLowerCase()));
+
+  if (!wgt && !dims && !tags && dedupedAttrs.length === 0 && linkedAttrs.length === 0) {
     return <p className="text-sm text-muted-foreground">{t('noSpecifications')}</p>;
   }
 
@@ -498,14 +502,14 @@ function SpecificationsTab({
 
       <table className="w-full text-xs border-collapse">
         <tbody>
-          {attrs.map((attr, idx) => (
+          {dedupedAttrs.map((attr, idx) => (
             <tr key={`${attr.key}-${idx}`} className={idx % 2 === 0 ? 'bg-muted/30' : ''}>
               <td className="py-2.5 px-3 text-muted-foreground tracking-wide w-[40%]">{attr.key}</td>
               <td className="py-2.5 px-3 text-foreground">{attr.value}</td>
             </tr>
           ))}
           {wgt && (
-            <tr className={attrs.length % 2 === 0 ? 'bg-muted/30' : ''}>
+            <tr className={dedupedAttrs.length % 2 === 0 ? 'bg-muted/30' : ''}>
               <td className="py-2.5 px-3 text-muted-foreground tracking-wide w-[40%]">{t('weight')}</td>
               <td className="py-2.5 px-3 text-foreground">
                 {product.weight} {product.weightUnit || 'kg'}
@@ -513,7 +517,7 @@ function SpecificationsTab({
             </tr>
           )}
           {dims && (
-            <tr className={(attrs.length + (wgt ? 1 : 0)) % 2 === 0 ? 'bg-muted/30' : ''}>
+            <tr className={(dedupedAttrs.length + (wgt ? 1 : 0)) % 2 === 0 ? 'bg-muted/30' : ''}>
               <td className="py-2.5 px-3 text-muted-foreground tracking-wide w-[40%]">{t('dimensions')}</td>
               <td className="py-2.5 px-3 text-foreground">{dimStr}</td>
             </tr>

@@ -78,7 +78,7 @@ export default async function CatalogSlugPage({
             // Fetch products linked to this attribute
             let products: any[] = [];
             const prodRes = await fetch(
-              `${API_BASE}/api/saas/menu?tenantId=${tenant.tenantId}&attributeRefType=${group.slug}&attributeRefId=${attribute._id}`,
+              `${API_BASE}/api/saas/menu?tenantId=${tenant.tenantId}&branchSlug=${encodeURIComponent(branchSlug)}&attributeRefType=${group.slug}&attributeRefId=${attribute._id}`,
               { cache: 'no-store' },
             );
             if (prodRes.ok) {

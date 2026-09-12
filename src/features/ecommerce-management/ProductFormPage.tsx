@@ -92,6 +92,13 @@ export default function ProductFormPage({ editingProduct, categories, token }: P
         if (match) resolvedKey = match.key;
       }
 
+      // Resolve category name from categories list (MenuItem model only stores categoryKey)
+      let resolvedCategoryName = editingProduct.category || '';
+      if (!resolvedCategoryName && resolvedKey && categories.length > 0) {
+        const matchedCat = categories.find((c: any) => c.key === resolvedKey);
+        if (matchedCat) resolvedCategoryName = matchedCat.name;
+      }
+
       setForm({
         ...EMPTY_FORM,
         name: editingProduct.name,
@@ -99,7 +106,7 @@ export default function ProductFormPage({ editingProduct, categories, token }: P
         price: editingProduct.price,
         image: editingProduct.image || '',
         categoryKey: resolvedKey === '' ? '__none__' : resolvedKey,
-        category: editingProduct.category || '',
+        category: resolvedCategoryName,
         status: editingProduct.status || 'published',
         sku: editingProduct.sku || '',
         stock: editingProduct.stock || 0,
