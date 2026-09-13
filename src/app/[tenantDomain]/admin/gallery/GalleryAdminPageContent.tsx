@@ -18,7 +18,7 @@ import {
   ImageIcon,
 } from 'lucide-react';
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'твой-cloud-name';
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'menu_photos';
 
 type GalleryItem = {
@@ -176,7 +176,7 @@ export default function GalleryAdminPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">{t('addPhoto')}</CardTitle>
-          <CardDescription>Загрузите изображение через Cloudinary или вставьте URL вручную</CardDescription>
+          <CardDescription>{t('uploadHint')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">

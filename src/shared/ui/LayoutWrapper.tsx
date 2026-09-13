@@ -3,8 +3,10 @@ import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import Navbar from '@/widgets/Navbar/Navbar'
+import MobileBottomNav from '@/widgets/Navbar/MobileBottomNav'
 import Footer from '@/widgets/Footer/Footer'
 import { CartToastProvider } from '@/shared/ui/CartToast'
+import { ToastProvider } from '@/shared/ui/Toast'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { fetchCategoriesForNav } from '@/entities/product-category/api'
 import type { CategoryNavItem } from '@/entities/product-category/types'
@@ -44,6 +46,11 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   
   const isAdmin = pathname.startsWith('/admin')
   const isCheckout = pathname.includes('/order/checkout')
+  const showBottomNav = mounted
+    && tenant?.features?.bottomNav?.enabled
+    && tenant?.niche === 'ecommerce'
+    && !isAdmin
+    && !isCheckout
 
   // Админка - свой контейнер с изоляцией тем (admin-light / admin-dark)
   if (isAdmin) {
@@ -55,13 +62,14 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   }
 
   const mainClassName = showCatNav
-    ? 'flex-1 pt-16 space-y-8 min-w-0'
-    : 'flex-1 pt-16 space-y-8'
+    ? `flex-1 pt-16 space-y-8 min-w-0${showBottomNav ? ' pb-20 md:pb-0' : ''}`
+    : `flex-1 pt-16 space-y-8${showBottomNav ? ' pb-20 md:pb-0' : ''}`
 
   // Чекаут - принудительно светлая тема (checkout)
   if (isCheckout) {
     return (
       <div className="checkout-page">
+        <ToastProvider>
         <CartToastProvider>
           <CartSheet />
           <Navbar />
@@ -69,6 +77,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
             {children}
           </main>
         </CartToastProvider>
+        </ToastProvider>
       </div>
     )
   }
@@ -77,6 +86,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   // showCatNav requires mounted=true, so category nav only renders after hydration.
   return (
     <div className="public-page flex flex-col min-h-screen">
+      <ToastProvider>
       <CartToastProvider>
         <CartSheet />
         <CategoryNavProvider>
@@ -90,15 +100,17 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
               </main>
             </div>
           ) : (
-            <main className="flex-1 min-h-0 pt-16 space-y-8">
+            <main className={`flex-1 min-h-0 pt-16 space-y-8${showBottomNav ? ' pb-20 md:pb-0' : ''}`}>
               {children}
             </main>
           )}
           <div className="flex-shrink-0">
             <Footer />
           </div>
+          {showBottomNav && <MobileBottomNav />}
         </CategoryNavProvider>
       </CartToastProvider>
+      </ToastProvider>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image';
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import type { GalleryItem } from '@/entities/gallery/types'
 
 function distributeIntoColumns(images: GalleryItem[], cols: number) {
@@ -107,16 +108,17 @@ export default function GalleryMasonry({ images, title, subtitle }: GalleryMason
 }
 
 function MasonryTile({ img, onClick }: { img: GalleryItem; onClick: () => void }) {
+  const t = useTranslations('gallery')
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={img.caption || 'Открыть фото'}
+      aria-label={img.caption || t('openPhoto')}
       className="group relative overflow-hidden rounded-xl bg-surface-hover cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full"
     >
       <Image
         src={img.image}
-        alt={img.caption || 'Фото'}
+        alt={img.caption || t('photo')}
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         className="w-full h-auto object-cover transition-transform duration-700 ease-out group-hover:scale-110"
@@ -149,6 +151,7 @@ function Lightbox({
   onPrev: () => void
   onNext: () => void
 }) {
+  const t = useTranslations('gallery')
   const img = images[index]
   return (
     <div
@@ -156,18 +159,18 @@ function Lightbox({
       onClick={onClose}
     >
       <div className="relative flex flex-col items-center w-full max-w-5xl px-4" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} aria-label="Закрыть" className="absolute -top-12 right-4 w-9 h-9 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+        <button onClick={onClose} aria-label={t('close')} className="absolute -top-12 right-4 w-9 h-9 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
           <IconClose />
         </button>
         <p className="absolute -top-12 left-4 text-white/50 text-xs tracking-widest font-medium tabular-nums">
           {index + 1} / {images.length}
         </p>
         <div className="relative w-full flex items-center justify-center">
-          <button onClick={onPrev} aria-label="Предыдущее фото" className="absolute left-0 z-10 -translate-x-2 sm:-translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors">
+          <button onClick={onPrev} aria-label={t('prevPhoto')} className="absolute left-0 z-10 -translate-x-2 sm:-translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors">
             <IconChevronLeft />
           </button>
-          <Image key={img._id} src={img.image} alt={img.caption || 'Фото'} width={1200} height={800} className="max-h-[75vh] max-w-full rounded-xl object-contain shadow-2xl" priority />
-          <button onClick={onNext} aria-label="Следующее фото" className="absolute right-0 z-10 translate-x-2 sm:translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors">
+          <Image key={img._id} src={img.image} alt={img.caption || t('photo')} width={1200} height={800} className="max-h-[75vh] max-w-full rounded-xl object-contain shadow-2xl" priority />
+          <button onClick={onNext} aria-label={t('nextPhoto')} className="absolute right-0 z-10 translate-x-2 sm:translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors">
             <IconChevronRight />
           </button>
         </div>
@@ -175,7 +178,7 @@ function Lightbox({
         {images.length > 1 && (
           <div className="flex items-center gap-1.5 mt-5">
             {images.map((_, i) => (
-              <button key={i} aria-label={`Фото ${i + 1}`}
+              <button key={i} aria-label={t('photoOf', { index: i + 1 })}
                 className={`rounded-full transition-all duration-200 ${i === index ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/30 hover:bg-white/50'}`}
               />
             ))}

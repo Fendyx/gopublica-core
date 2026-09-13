@@ -7,13 +7,15 @@ import { useParams, useRouter } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
 import ThemeToggle from '@/shared/ui/ThemeToggle'
-import { Menu, X, CalendarDays, ChevronDown, MapPin, ShoppingCart, User, LogIn, BookOpen } from 'lucide-react'
+import { Menu, X, CalendarDays, ChevronDown, MapPin, ShoppingCart, User, LogIn, BookOpen, Search } from 'lucide-react'
 import { useCategoryNav } from '@/shared/ui/CategoryNavContext'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useBranchSelectionUI } from '@/widgets/BranchSelection/BranchSelectionProvider'
 import { useCartStore } from '@/shared/store/cartStore'
+import { useSearchStore } from '@/shared/store/searchStore'
 import { getNavLinks } from '@/shared/lib/navigation'
 import NavMoreDropdown from '@/widgets/Navbar/NavMoreDropdown'
+import OmniSearchDropdown from '@/features/omni-search/OmniSearchDropdown'
 
 export default function Navbar() {
   const t = useTranslations('nav')
@@ -40,11 +42,28 @@ export default function Navbar() {
   const cartItemsCount = useCartStore((s) => s.items.reduce((acc, item) => acc + item.quantity, 0))
   const openCart = useCartStore((s) => s.openCart)
   const hasOnlineOrdering = tenant?.features?.hasOnlineOrdering ?? false
+  const hasSearch = tenant?.features?.hasSearch ?? false
+
+  // ── Omni-search dropdown state (shared with MobileBottomNav) ────────────
+  const { isOpen: searchOpen, openSearch, closeSearch, toggleSearch } = useSearchStore()
 
   useEffect(() => {
     const token = localStorage.getItem('customer_token')
     setIsLoggedIn(!!token)
   }, [])
+
+  // ── Global Cmd+K / Ctrl+K keyboard shortcut ────────────────────────────
+  useEffect(() => {
+    if (!hasSearch) return
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        openSearch()
+      }
+    }
+    document.addEventListener('keydown', handleGlobalKeyDown)
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown)
+  }, [hasSearch])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -129,6 +148,24 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* ── Omni-search trigger (desktop) ────────────────────────── */}
+            {hasSearch && (
+              <div className="hidden sm:block relative">
+                <button
+                  onClick={toggleSearch}
+                  className="flex items-center gap-2 px-4 py-2 min-w-[240px] rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors border border-border-light"
+                  aria-label={t('search')}
+                >
+                  <Search size={16} />
+                  <span className="hidden xl:inline-block text-muted-foreground">{t('search')}</span>
+                  <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border text-[10px] text-muted-foreground font-mono">
+                    <span className="text-[11px]">⌘</span>K
+                  </kbd>
+                </button>
+                <OmniSearchDropdown open={searchOpen} onOpenChange={(v) => v ? openSearch() : closeSearch()} />
+              </div>
+            )}
+
             <div className="hidden sm:block">
               <LanguageSwitcher />
             </div>
@@ -142,7 +179,7 @@ export default function Navbar() {
                 <Link
                   href={`/${locale}/profile`}
                   className="flex items-center gap-1.5 p-2 xl:px-3 xl:py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
-                  aria-label="Профиль"
+                  aria-label={t('profile')}
                 >
                   <User size={20} className="xl:w-[18px] xl:h-[18px]" />
                   <span className="hidden xl:inline-block">{t('profile')}</span>
@@ -151,7 +188,7 @@ export default function Navbar() {
                 <Link
                   href={`/${locale}/login`}
                   className="flex items-center gap-1.5 p-2 xl:px-3 xl:py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
-                  aria-label="Логин"
+                  aria-label={t('login')}
                 >
                   <LogIn size={20} className="xl:w-[18px] xl:h-[18px]" />
                   <span className="hidden xl:inline-block">{t('login')}</span>
@@ -181,6 +218,17 @@ export default function Navbar() {
               </Link>
             )} */}
 
+            {/* Mobile search trigger - opens mobile search input */}
+            {hasSearch && (
+              <button
+                onClick={toggleSearch}
+                className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                aria-label={t('search')}
+              >
+                <Search size={20} />
+              </button>
+            )}
+
             {tenant?.features?.showCategoryNav && tenant?.niche === 'ecommerce' && (
               <button
                 onClick={() => setMobileDrawerOpen(true)}
@@ -191,7 +239,7 @@ export default function Navbar() {
               </button>
             )}
 
-            <button ref={burgerRef} onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors" aria-label="Открыть меню">
+            <button ref={burgerRef} onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors" aria-label={t('menu')}>
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -256,6 +304,13 @@ export default function Navbar() {
               </Link>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ── Mobile search dropdown (below navbar) ──────────────────────── */}
+      {hasSearch && searchOpen && (
+        <div className="lg:hidden relative border-t border-border-light bg-background">
+          <OmniSearchDropdown open={searchOpen} onOpenChange={(v) => v ? openSearch() : closeSearch()} />
         </div>
       )}
     </header>

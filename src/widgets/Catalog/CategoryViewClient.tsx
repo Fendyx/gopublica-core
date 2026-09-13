@@ -2,6 +2,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Icon } from '@iconify/react';
+import { isEmojiIcon } from '@/shared/ui/IconPickerButton';
 import EcommerceGridLayout from './EcommerceGridLayout';
 import EcommerceCarouselLayout from './EcommerceCarouselLayout';
 import EcommerceDynamicGrid from './EcommerceDynamicGrid';
@@ -23,8 +26,25 @@ interface Props {
   tenant: any;
 }
 
+/** Resolve icon value (Iconify ID, legacy emoji, or bare name) and render. */
+function SubIcon({ iconValue }: { iconValue?: string }) {
+  if (!iconValue) return null;
+  // Iconify identifier (contains colon)
+  if (iconValue.includes(':')) {
+    return <Icon icon={iconValue} className="w-4 h-4 shrink-0" />;
+  }
+  // Legacy bare name like "Package" → "lucide:package"
+  if (!isEmojiIcon(iconValue)) {
+    return <Icon icon={`lucide:${iconValue.toLowerCase()}`} className="w-4 h-4 shrink-0" />;
+  }
+  // Legacy emoji fallback
+  return <span className="text-sm leading-none">{iconValue}</span>;
+}
+
 export default function CategoryViewClient({ category, categories, products, locale, tenant }: Props) {
   const { branchSlug } = useParams();
+  const t = useTranslations('catalog');
+  const tNav = useTranslations('nav');
   const layout = category.layout || 'grid-3';
   const globalVariant = (tenant?.theme?.productCardVariant as ProductCardVariant) || 'action-bar';
   const variant = (category.productCardVariant || globalVariant) as ProductCardVariant;
@@ -52,7 +72,7 @@ export default function CategoryViewClient({ category, categories, products, loc
         {/* Breadcrumb */}
         <div className="mb-8 text-sm text-muted-foreground">
           <Link href={`/${locale}/${branchSlug}/catalog`} className="hover:text-foreground transition-colors">
-            Catalog
+            {tNav('catalog')}
           </Link>
           {breadcrumbs.map((crumb, idx) => (
             <span key={crumb.key}>
@@ -89,7 +109,7 @@ export default function CategoryViewClient({ category, categories, products, loc
                 </p>
               )}
               <p className="text-white/80 mt-2">
-                {products.length} {products.length === 1 ? 'item' : 'items'}
+                {t('itemCount', { count: products.length })}
               </p>
             </div>
           </div>
@@ -100,7 +120,7 @@ export default function CategoryViewClient({ category, categories, products, loc
               <p className="text-muted-foreground mt-2 text-lg">{category.translations?.[locale]?.description || category.description}</p>
             )}
             <p className="text-muted-foreground mt-1">
-              {products.length} {products.length === 1 ? 'item' : 'items'}
+              {t('itemCount', { count: products.length })}
             </p>
           </div>
         )}
@@ -114,7 +134,7 @@ export default function CategoryViewClient({ category, categories, products, loc
                 href={`/${locale}/${branchSlug}/catalog/${sub.key}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm hover:bg-muted/50 transition-colors"
               >
-                {sub.icon} {sub.translations?.[locale]?.name || sub.name}
+                <SubIcon iconValue={sub.icon} /> {sub.translations?.[locale]?.name || sub.name}
               </Link>
             ))}
           </div>
@@ -122,7 +142,7 @@ export default function CategoryViewClient({ category, categories, products, loc
 
         {products.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground border border-dashed rounded-2xl">
-            В этой категории пока нет товаров.
+            {t('noItems')}
           </div>
         ) : (
           <>

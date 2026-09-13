@@ -1,6 +1,7 @@
 // Тема оформления
 export type HeroStyle = 'centered' | 'split' | 'video' | 'slider' | 'image-bg' | 'compact'
 export type EcommerceLayout = 'grid-3' | 'grid-4' | 'carousel' | 'dynamic';
+export type PdpGalleryLayout = 'classic' | 'thumbnails-left' | 'stacked-grid' | 'lookbook';
 
 export type Theme = {
   primary: string
@@ -17,7 +18,8 @@ export type Theme = {
   galleryStyle?: 'bento' | 'masonry'
   ecommerceLayout?: EcommerceLayout
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
-    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay' | 'clean'
+    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'horizontal' | 'action-overlay' | 'clean' | 'badge-top' | 'split-action'
+    pdpGalleryLayout?: PdpGalleryLayout
     categoryBgColor?: string
     pageBgColor?: string
 }
@@ -32,6 +34,27 @@ export type Features = {
   hasOnlineOrdering: boolean
   hasJobApplications?: boolean
   showCategoryNav?: boolean
+  hasSearch?: boolean
+  bottomNav?: BottomNavConfig
+}
+
+// ─── Mobile Bottom Navigation ─────────────────────────────────────────────────
+export type BottomNavItemType = 'home' | 'catalog' | 'search' | 'profile' | 'custom' | 'external'
+
+export interface BottomNavItem {
+  id: string
+  type: BottomNavItemType
+  slug?: string       // for custom pages
+  href?: string       // for external links
+  label?: string      // optional label override
+  icon?: string       // Iconify ID or lucide name
+  isVisible: boolean
+  order: number
+}
+
+export interface BottomNavConfig {
+  enabled: boolean
+  items: BottomNavItem[]
 }
 
 export type ModuleAccessState = {

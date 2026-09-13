@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { MenuItem } from '@/entities/menu-item/types';
 import AddToCartButton from '@/widgets/Catalog/AddToCartButton';
+import { resolveName, resolveDescription } from '@/shared/lib/localization';
 
 export default function FeaturedProductBanner({
   product,
@@ -19,7 +20,7 @@ export default function FeaturedProductBanner({
         {product.image ? (
           <Image
             src={product.image}
-            alt={product.name}
+            alt={resolveName(product, locale)}
             fill
             sizes="(max-width: 1024px) 50vw, 50vw"
             className="absolute inset-0 w-full h-full object-contain"
@@ -34,11 +35,11 @@ export default function FeaturedProductBanner({
       {/* Правая часть – информация о продукте */}
       <div className="flex flex-col justify-center p-4 lg:p-6 w-3/5 lg:w-1/2 gap-2 lg:gap-3">
         <h2 className="text-xl lg:text-3xl font-bold text-foreground line-clamp-2">
-          {product.name}
+          {resolveName(product, locale)}
         </h2>
-        {product.description && (
+        {resolveDescription(product, locale) && (
           <p className="text-sm text-muted-foreground line-clamp-3 hidden sm:block">
-            {product.description}
+            {resolveDescription(product, locale)}
           </p>
         )}
         <div className="text-xl lg:text-2xl font-bold text-primary">

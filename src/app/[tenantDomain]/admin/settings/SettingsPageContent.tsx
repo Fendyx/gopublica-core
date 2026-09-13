@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { useTranslations } from 'next-intl';
 import { useBranch } from '@/entities/branch/BranchContext';
@@ -66,6 +67,9 @@ import {
   CalendarCheck,
   Upload,
   ListOrdered,
+  Navigation,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { useToast } from '@/shared/ui/Toast';
@@ -90,6 +94,7 @@ export default function SettingsPageContent() {
   const t = useTranslations('admin.settingsPage');
   const tenant = useTenant();
   const { selectedBranch, branches, loading: branchLoading, refetchBranches } = useBranch();
+  const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
 
   const [businessName, setBusinessName] = useState('');
@@ -104,6 +109,7 @@ export default function SettingsPageContent() {
 
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
   const [deleteSubDialogOpen, setDeleteSubDialogOpen] = useState(false);
   const [deletingSubBranch, setDeletingSubBranch] = useState<Branch | null>(null);
@@ -115,7 +121,20 @@ export default function SettingsPageContent() {
   // Theme settings
   const [radius, setRadius] = useState('lg');
   const [cardVariant, setCardVariant] = useState('action-bar');
+  const [pdpGalleryLayout, setPdpGalleryLayout] = useState('classic');
   const [showCategoryNav, setShowCategoryNav] = useState(false);
+  const [hasSearch, setHasSearch] = useState(false);
+  const [bottomNavEnabled, setBottomNavEnabled] = useState(false);
+  const [bottomNavItems, setBottomNavItems] = useState<Array<{
+    id: string;
+    type: 'home' | 'catalog' | 'search' | 'profile' | 'custom' | 'external';
+    slug?: string;
+    href?: string;
+    label?: string;
+    icon?: string;
+    isVisible: boolean;
+    order: number;
+  }>>([]);
   const [primaryColor, setPrimaryColor] = useState('');
   const [accentColor, setAccentColor] = useState('');
   const [fontHeading, setFontHeading] = useState('');
@@ -178,8 +197,8 @@ export default function SettingsPageContent() {
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState(false);
-  const [settingsSaving, setSettingsSaving] = useState(false);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   // 👈 НОВОЕ: polling state for Telegram connection confirmation
   const [pollingActive, setPollingActive] = useState(false);
@@ -228,11 +247,11 @@ export default function SettingsPageContent() {
 
         setRadius(data.theme?.radius || 'lg');
         setCardVariant(data.theme?.productCardVariant || 'action-bar');
+        setPdpGalleryLayout(data.theme?.pdpGalleryLayout || 'classic');
         setShowCategoryNav(data.features?.showCategoryNav ?? false);
-        setPrimaryColor(data.theme?.primary || '');
-        setAccentColor(data.theme?.accent || '');
-        setFontHeading(data.theme?.fontHeading || '');
-        setFontBody(data.theme?.fontBody || '');
+        setHasSearch(data.features?.hasSearch ?? false);
+        setBottomNavEnabled(data.features?.bottomNav?.enabled ?? false);
+        setBottomNavItems(data.features?.bottomNav?.items ?? []);
 
         setSeoTitleI18n(data.seoTitleI18n || {});
         setSeoDescriptionI18n(data.seoDescriptionI18n || {});
@@ -278,9 +297,68 @@ export default function SettingsPageContent() {
       .finally(() => setTelegramLoading(false));
   }, [token, selectedBranch, tenant]);
 
+  // Re-fetch settings from API and hydrate local state (used after save to prevent stale cache)
+  const refreshSettings = useCallback(async () => {
+    if (!selectedBranch || !token) return;
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings?tenantId=${tenant?.tenantId}&branchId=${selectedBranch._id}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      setBusinessName(data.businessName || '');
+      setForm({
+        phone: data.phone || tenant?.contact?.phone || '',
+        address: data.address || tenant?.contact?.address || '',
+        email: data.email || tenant?.contact?.email || '',
+        hours: data.hours || tenant?.contact?.hours || '',
+        googleMapsUrl: data.googleMapsUrl || tenant?.contact?.googleMapsUrl || '',
+      });
+      setWorkingHours(data.workingHours || {});
+      if (data.primaryLanguage) setPrimaryLanguage(data.primaryLanguage);
+      if (data.primaryCurrency) setPrimaryCurrency(data.primaryCurrency);
+      if (Array.isArray(data.activeLocales) && data.activeLocales.length > 0) setActiveLocales(data.activeLocales);
+      if (data.defaultLocale) setDefaultLocale(data.defaultLocale);
+      setRadius(data.theme?.radius || 'lg');
+      setCardVariant(data.theme?.productCardVariant || 'action-bar');
+      setPdpGalleryLayout(data.theme?.pdpGalleryLayout || 'classic');
+      setShowCategoryNav(data.features?.showCategoryNav ?? false);
+      setHasSearch(data.features?.hasSearch ?? false);
+      setBottomNavEnabled(data.features?.bottomNav?.enabled ?? false);
+      setBottomNavItems(data.features?.bottomNav?.items ?? []);
+      setPrimaryColor(data.theme?.primary || '');
+      setAccentColor(data.theme?.accent || '');
+      setFontHeading(data.theme?.fontHeading || '');
+      setFontBody(data.theme?.fontBody || '');
+      setSeoTitleI18n(data.seoTitleI18n || {});
+      setSeoDescriptionI18n(data.seoDescriptionI18n || {});
+      setCategoryBgColor(data.theme?.categoryBgColor || tenant?.theme?.categoryBgColor || '');
+      setPageBgColor(data.theme?.pageBgColor || '');
+      setLogoUrl(data.logoUrl || '');
+      setFaviconUrl(data.faviconUrl || '');
+      setLegal({
+        legalCompanyName: data.legal?.legalCompanyName || data.businessName || '',
+        nip: data.legal?.nip || '',
+        regon: data.legal?.regon || '',
+        krs: data.legal?.krs || '',
+      });
+      if (data.notifications?.telegram) {
+        const tg = data.notifications.telegram;
+        setTelegramSettings({
+          newOrder: tg.events?.newOrder ?? true,
+          newReservation: tg.events?.newReservation ?? true,
+          newJobApplication: tg.events?.newJobApplication ?? true,
+          newPartnerRequest: tg.events?.newPartnerRequest ?? true,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to refresh settings:', err);
+    }
+  }, [selectedBranch, token, tenant]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBranch) { showToast(t('selectBranchFirst'), 'error'); return; }
+    setSaving(true);
 
     try {
       const payload = {
@@ -301,6 +379,7 @@ export default function SettingsPageContent() {
         theme: {
           radius,
           productCardVariant: cardVariant,
+          pdpGalleryLayout,
           categoryBgColor,
           pageBgColor,
           primary: primaryColor || undefined,
@@ -310,6 +389,11 @@ export default function SettingsPageContent() {
         },
         features: {
           showCategoryNav,
+          hasSearch,
+          bottomNav: {
+            enabled: bottomNavEnabled,
+            items: bottomNavItems,
+          },
         },
       };
 
@@ -322,56 +406,17 @@ export default function SettingsPageContent() {
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+        // Re-fetch settings from DB so local state reflects the fresh values
+        await refreshSettings();
+        // Invalidate Next.js router cache so TenantContext gets fresh data
+        router.refresh();
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setSaving(false);
     }
   };
-
-  // Per-tab save: sends only the fields relevant to the specified tab
-  const [savedTab, setSavedTab] = useState<string | null>(null);
-  const saveTab = async (tabName: string, tabPayload: Record<string, unknown>) => {
-    if (!selectedBranch || !token) return;
-    try {
-      const payload = { ...tabPayload, branchId: selectedBranch._id };
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/saas/settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        setSavedTab(tabName);
-        setTimeout(() => setSavedTab(null), 2000);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const saveGeneral = () => saveTab('general', {
-    ...form, businessName, workingHours,
-  });
-  const saveAppearance = () => saveTab('appearance', {
-    logoUrl, faviconUrl,
-    theme: {
-      radius,
-      productCardVariant: cardVariant,
-      categoryBgColor,
-      pageBgColor,
-      primary: primaryColor || undefined,
-      accent: accentColor || undefined,
-      fontHeading: fontHeading || undefined,
-      fontBody: fontBody || undefined,
-    },
-    features: { showCategoryNav },
-  });
-  const saveLocalization = () => saveTab('localization', {
-    primaryLanguage, primaryCurrency, activeLocales, defaultLocale,
-  });
-  const saveSeo = () => saveTab('seo', {
-    seoTitleI18n, seoDescriptionI18n,
-  });
-  const saveLegal = () => saveTab('legal', { legal });
 
   // 👈 НОВОЕ: Telegram handlers
   const handleTelegramConnect = async () => {
@@ -673,11 +718,6 @@ export default function SettingsPageContent() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <Button type="button" onClick={saveGeneral} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
-                  {savedTab === 'general' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
-                </div>
-
               </TabsContent>
 
               {/* --- ВКЛАДКА 2: APPEARANCE --- */}
@@ -922,8 +962,10 @@ export default function SettingsPageContent() {
                             { val: 'overlay', labelKey: 'hoverOverlay', descKey: 'hoverOverlayDesc', icon: Eye },
                             { val: 'minimal', labelKey: 'minimalist', descKey: 'minimalistDesc', icon: MousePointerClick },
                             { val: 'clean', labelKey: 'clean', descKey: 'cleanDesc', icon: Image },
-                            { val: 'hover-vertical', labelKey: 'verticalOverlay', descKey: 'verticalOverlayDesc', icon: Eye },
+                            { val: 'horizontal', labelKey: 'horizontal', descKey: 'horizontalDesc', icon: MousePointerClick },
                             { val: 'action-overlay', labelKey: 'actionOverlay', descKey: 'actionOverlayDesc', icon: Eye },
+                            { val: 'badge-top', labelKey: 'badgeTop', descKey: 'badgeTopDesc', icon: ShoppingBag },
+                            { val: 'split-action', labelKey: 'splitAction', descKey: 'splitActionDesc', icon: Eye },
                           ].map(opt => (
                             <button
                               key={opt.val}
@@ -937,6 +979,21 @@ export default function SettingsPageContent() {
                             </button>
                           ))}
                         </div>
+                      </div>
+
+                      {/* Product Detail Page Gallery Layout */}
+                      <div className="space-y-2">
+                        <Label>{t('appearance.pdpGalleryLayout')}</Label>
+                        <Select value={pdpGalleryLayout} onValueChange={setPdpGalleryLayout}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="classic">{t('appearance.pdpGalleryClassic')}</SelectItem>
+                            <SelectItem value="thumbnails-left">{t('appearance.pdpGalleryThumbnailsLeft')}</SelectItem>
+                            <SelectItem value="stacked-grid">{t('appearance.pdpGalleryStackedGrid')}</SelectItem>
+                            <SelectItem value="lookbook">{t('appearance.pdpGalleryLookbook')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">{t('appearance.pdpGalleryLayoutDesc')}</p>
                       </div>
 
                       {/* Category Navigation Sidebar Toggle */}
@@ -956,15 +1013,137 @@ export default function SettingsPageContent() {
                           disabled={settingsSaving}
                         />
                       </div>
+
+                      {/* Global Search (Omni-search) Toggle */}
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Search className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{t('appearance.hasSearch')}</p>
+                            <p className="text-xs text-muted-foreground">{t('appearance.hasSearchDesc')}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={hasSearch}
+                          onCheckedChange={setHasSearch}
+                          disabled={settingsSaving}
+                        />
+                      </div>
+
+                      {/* Mobile Bottom Navigation Toggle */}
+                      {tenant?.niche === 'ecommerce' && (
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              <Navigation className="w-4 h-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{t('appearance.bottomNav')}</p>
+                              <p className="text-xs text-muted-foreground">{t('appearance.bottomNavDesc')}</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={bottomNavEnabled}
+                            onCheckedChange={(checked) => {
+                              setBottomNavEnabled(checked);
+                              // When first enabling, populate with default items if empty
+                              if (checked && bottomNavItems.length === 0) {
+                                setBottomNavItems([
+                                  { id: 'home', type: 'home', isVisible: true, order: 0 },
+                                  { id: 'catalog', type: 'catalog', isVisible: true, order: 1 },
+                                  { id: 'search', type: 'search', isVisible: true, order: 2 },
+                                  { id: 'profile', type: 'profile', isVisible: true, order: 3 },
+                                ]);
+                              }
+                            }}
+                            disabled={settingsSaving}
+                          />
+                        </div>
+                      )}
+
+                      {/* Bottom Nav Items Config */}
+                      {bottomNavEnabled && tenant?.niche === 'ecommerce' && bottomNavItems.length > 0 && (
+                        <div className="space-y-2">
+                          <Label>{t('appearance.bottomNavItems')}</Label>
+                          <p className="text-xs text-muted-foreground">{t('appearance.bottomNavItemsDesc')}</p>
+                          <div className="space-y-1">
+                            {bottomNavItems
+                              .slice()
+                              .sort((a, b) => a.order - b.order)
+                              .map((item, idx) => (
+                                <div
+                                  key={item.id}
+                                  className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20"
+                                >
+                                  {/* Order buttons */}
+                                  <div className="flex flex-col gap-0.5">
+                                    <button
+                                      type="button"
+                                      disabled={idx === 0 || settingsSaving}
+                                      onClick={() => {
+                                        const sorted = [...bottomNavItems].sort((a, b) => a.order - b.order);
+                                        if (idx > 0) {
+                                          const tmp = sorted[idx].order;
+                                          sorted[idx].order = sorted[idx - 1].order;
+                                          sorted[idx - 1].order = tmp;
+                                          setBottomNavItems(sorted);
+                                        }
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                    >
+                                      <ChevronUp className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={idx === bottomNavItems.length - 1 || settingsSaving}
+                                      onClick={() => {
+                                        const sorted = [...bottomNavItems].sort((a, b) => a.order - b.order);
+                                        if (idx < sorted.length - 1) {
+                                          const tmp = sorted[idx].order;
+                                          sorted[idx].order = sorted[idx + 1].order;
+                                          sorted[idx + 1].order = tmp;
+                                          setBottomNavItems(sorted);
+                                        }
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                    >
+                                      <ChevronDown className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                  {/* Label */}
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-sm font-medium">
+                                      {item.type === 'home' && t('nav.home')}
+                                      {item.type === 'catalog' && t('nav.catalog')}
+                                      {item.type === 'search' && t('nav.search')}
+                                      {item.type === 'profile' && t('nav.profile')}
+                                      {item.type === 'custom' && (item.label || item.slug || 'Custom')}
+                                      {item.type === 'external' && (item.label || item.href || 'External')}
+                                    </span>
+                                    <span className="ml-2 text-xs text-muted-foreground capitalize">
+                                      ({item.type})
+                                    </span>
+                                  </div>
+                                  {/* Visibility toggle */}
+                                  <Switch
+                                    checked={item.isVisible}
+                                    onCheckedChange={(checked) => {
+                                      setBottomNavItems((prev) =>
+                                        prev.map((i) => i.id === item.id ? { ...i, isVisible: checked } : i)
+                                      );
+                                    }}
+                                    disabled={settingsSaving}
+                                  />
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-
-                <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <Button type="button" onClick={saveAppearance} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
-                  {savedTab === 'appearance' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
-                </div>
-
               </TabsContent>
 
               {/* --- ВКЛАДКА 3: LOCALIZATION --- */}
@@ -1089,12 +1268,6 @@ export default function SettingsPageContent() {
                     </Select>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <Button type="button" onClick={saveLocalization} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
-                  {savedTab === 'localization' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
-                </div>
-
               </TabsContent>
 
               {/* --- ВКЛАДКА 4: SEO & ALERTS --- */}
@@ -1132,12 +1305,6 @@ export default function SettingsPageContent() {
                     </AccordionItem>
                   </Accordion>
                 </div>
-
-                <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <Button type="button" onClick={saveSeo} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
-                  {savedTab === 'seo' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
-                </div>
-
               </TabsContent>
 
               {/* --- ВКЛАДКА: TELEGRAM --- */}
@@ -1418,11 +1585,6 @@ export default function SettingsPageContent() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <Button type="button" onClick={saveLegal} className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
-                  {savedTab === 'legal' && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
-                </div>
-
               </TabsContent>
 
               {/* --- ВКЛАДКА 6 (НОВАЯ): SUB-VENUES --- */}
@@ -1502,7 +1664,7 @@ export default function SettingsPageContent() {
           <Separator />
 
           <div className="flex items-center justify-between p-6 bg-muted/30 rounded-b-xl">
-            <Button type="submit" className="gap-2"><Save className="w-4 h-4" />{t('save')}</Button>
+            <Button type="submit" className="gap-2" disabled={saving}><Save className="w-4 h-4" />{t('save')}</Button>
             {saved && <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium"><CheckCircle2 className="w-4 h-4" />{t('saved')}</span>}
           </div>
         </Card>

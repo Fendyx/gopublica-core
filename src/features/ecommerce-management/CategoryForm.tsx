@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2, ImagePlus } from 'lucide-react';
-import EmojiPickerButton from '@/shared/ui/EmojiPickerButton';
+import IconPickerButton from '@/shared/ui/IconPickerButton';
 import { useCloudinaryUpload } from '@/shared/lib/useCloudinaryUpload';
 import { useTenant } from '@/entities/tenant/TenantContext';
 import { slugify } from '@/shared/lib/slugify';
@@ -35,7 +35,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
   const [form, setForm] = useState({
     name: '',
     description: '',
-    icon: '📦',
+    icon: 'lucide:package',
     layout: 'grid-3',
     coverImage: '',
     cardBgColor: '',
@@ -59,7 +59,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
       setForm({
         name: editingCategory.name || '',
         description: editingCategory.description || '',
-        icon: editingCategory.icon || '📦',
+        icon: editingCategory.icon || 'lucide:package',
         layout: editingCategory.layout || 'grid-3',
         coverImage: editingCategory.coverImage || '',
         cardBgColor: editingCategory.cardBgColor || '',
@@ -75,7 +75,7 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
       setForm({
         name: '',
         description: '',
-        icon: '📦',
+        icon: 'lucide:package',
         layout: 'grid-3',
         coverImage: '',
         cardBgColor: '',
@@ -262,8 +262,8 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
               <div className="space-y-2">
                 <Label htmlFor="cat-icon">{t('icon')}</Label>
                 <div className="flex gap-2 items-center">
-                  <Input id="cat-icon" placeholder="📦" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="text-center text-xl" maxLength={2} />
-                  <EmojiPickerButton value={form.icon} onChange={(emoji) => setForm({ ...form, icon: emoji })} />
+                  <Input id="cat-icon" placeholder="Package" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="text-sm" />
+                  <IconPickerButton value={form.icon} onChange={(iconName) => setForm({ ...form, icon: iconName })} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -291,8 +291,10 @@ export default function CategoryForm({ isOpen, onClose, editingCategory, categor
                   <SelectItem value="overlay">{t('hoverOverlay')}</SelectItem>
                   <SelectItem value="minimal">{t('minimalist')}</SelectItem>
                   <SelectItem value="clean">{t('clean')}</SelectItem>
-                  <SelectItem value="hover-vertical">{t('verticalOverlay')}</SelectItem>
+                  <SelectItem value="horizontal">{t('horizontal')}</SelectItem>
                   <SelectItem value="action-overlay">{t('actionOverlay')}</SelectItem>
+                  <SelectItem value="badge-top">{t('badgeTop')}</SelectItem>
+                  <SelectItem value="split-action">{t('splitAction')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,14 +1,25 @@
 // src/app/[tenantDomain]/[locale]/order/thank-you/page.tsx
 'use client';
 
+import { useEffect } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { CheckCircle2, Receipt, Package, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { useCartStore } from '@/shared/store/cartStore';
+import { usePlatformCartStore } from '@/shared/store/platformCartStore';
 
 export default function ThankYouPage() {
   const params = useSearchParams();
   const { locale, branchSlug } = useParams();
   const orderId = params.get('orderId') || `ORD-${Math.floor(Math.random() * 100000)}`;
+
+  // Clear both carts after a successful purchase
+  const clearCart = useCartStore((s) => s.clearCart);
+  const clearPlatformCart = usePlatformCartStore((s) => s.clear);
+  useEffect(() => {
+    clearCart();
+    clearPlatformCart();
+  }, [clearCart, clearPlatformCart]);
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12 bg-gray-50/50">

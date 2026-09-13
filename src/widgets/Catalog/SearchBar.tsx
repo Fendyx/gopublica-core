@@ -5,8 +5,8 @@ import { useLocale } from 'next-intl';
 import { Search, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import Link from 'next/link';
 import type { MenuItem } from '@/entities/menu-item/types';
+import { resolveName } from '@/shared/lib/localization';
 
 interface SearchBarProps {
   tenantId: string;
@@ -111,16 +111,21 @@ export default function SearchBar({ tenantId, branchSlug }: SearchBarProps) {
           ) : (
             <>
               {results.map((product) => (
-                <Link
+                <a
                   key={product._id}
                   href={`/${locale}/${branchSlug}/catalog/${product._id}`}
-                  onClick={() => setOpen(false)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    router.push(`/${locale}/${branchSlug}/catalog/${product._id}`);
+                    setTimeout(() => setOpen(false), 0);
+                  }}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors"
                 >
                   {product.image ? (
                     <Image
                       src={product.image}
-                      alt={product.name}
+                      alt={resolveName(product, locale)}
                       width={40}
                       height={40}
                       className="rounded-md object-cover"
@@ -129,18 +134,23 @@ export default function SearchBar({ tenantId, branchSlug }: SearchBarProps) {
                     <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">No img</div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{product.name}</p>
+                    <p className="text-sm font-medium truncate">{resolveName(product, locale)}</p>
                     <p className="text-xs text-muted-foreground">{product.price.toFixed(2)} zł</p>
                   </div>
-                </Link>
+                </a>
               ))}
-              <Link
+              <a
                 href={`/${locale}/${branchSlug}/catalog/search?q=${encodeURIComponent(query.trim())}`}
-                onClick={() => setOpen(false)}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  router.push(`/${locale}/${branchSlug}/catalog/search?q=${encodeURIComponent(query.trim())}`);
+                  setTimeout(() => setOpen(false), 0);
+                }}
                 className="block text-center py-3 text-sm text-primary hover:bg-muted/50 border-t border-border"
               >
                 View all results →
-              </Link>
+              </a>
             </>
           )}
         </div>

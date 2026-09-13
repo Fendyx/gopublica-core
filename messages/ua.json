@@ -91,7 +91,8 @@
                                        "cancel":  "Скасувати",
                                        "save":  "Зберегти",
                                        "saving":  "Збереження...",
-                                       "loading":  "Завантаження..."
+                                       "loading":  "Завантаження...",
+                                       "errorSave":  "Помилка збереження"
                                    },
                   "dashboardPage":  {
                                         "loading":  "Завантаження панелі...",
@@ -242,7 +243,8 @@
                                       "selectPhoto":  "Обрати фото",
                                       "addToGallery":  "Додати в галерею",
                                       "empty":  "Галерея порожня.",
-                                      "deleteConfirm":  "Видалити зображення?"
+                                      "deleteConfirm":  "Видалити зображення?",
+                                      "uploadHint":  "Завантажте зображення через Cloudinary або вставте URL вручну"
                                   },
                   "articlesManager":  {
                                           "title":  "Статті",
@@ -559,12 +561,28 @@
                                                           "minimalistDesc":  "Тільки текст і посилання",
                                                           "clean":  "Чистий",
                                                           "cleanDesc":  "Зображення + накладання з назвою",
-                                                          "verticalOverlay":  "Вертикальне накладання",
-                                                          "verticalOverlayDesc":  "Вертикальні кнопки",
                                                           "actionOverlay":  "Дія + Накладання",
                                                           "actionOverlayDesc":  "Інформація внизу + накладання",
+                                                          "horizontal":  "Горизонтальний",
+                                                          "horizontalDesc":  "Зображення і текст поруч",
+                                                          "badgeTop":  "Бейдж зверху",
+                                                          "badgeTopDesc":  "Бейдж знижки + ковзне Додати",
+                                                          "splitAction":  "Розділена дія",
+                                                          "splitActionDesc":  "Швидкий перегляд + Додати при наведенні",
                                                           "showCategoryNav":  "Бічна панель навігації по категоріях",
-                                                          "showCategoryNavDesc":  "Показати фіксовану бічну панель з усіма категоріями продуктів на сторінці каталогу"
+                                                          "showCategoryNavDesc":  "Показати фіксовану бічну панель з усіма категоріями продуктів на сторінці каталогу",
+                                                          "hasSearch":  "Глобальна панель пошуку",
+                                                          "hasSearchDesc":  "Показати іконку пошуку в панелі навігації, що відкриває палітру команд для пошуку продуктів, категорій та брендів",
+                                                          "bottomNav":  "Мобільна нижня навігація",
+                                                          "bottomNavDesc":  "Показати панель навігації внизу екрана на мобільних пристроях з швидким доступом до основних сторінок",
+                                                          "bottomNavItems":  "Елементи нижньої навігації",
+                                                          "bottomNavItemsDesc":  "Оберіть, які посилання відображатимуться в нижньому мобільному барі. Використовуйте стрілки для зміни порядку, перемикайте видимість.",
+                                                          "pdpGalleryLayout":  "Макет galerії продукту",
+                                                          "pdpGalleryLayoutDesc":  "Оберіть спосіб відображення зображень продукту на сторінці деталей.",
+                                                          "pdpGalleryClassic":  "Класичний (Amazon)",
+                                                          "pdpGalleryThumbnailsLeft":  "Мініатюри зліва (Shopify)",
+                                                          "pdpGalleryStackedGrid":  "Сітка (Zara)",
+                                                          "pdpGalleryLookbook":  "Лукбук (Masonry)"
                                                       },
                                        "localization":  {
                                                             "activeLanguages":  "Активні мови",
@@ -799,6 +817,7 @@
                                       "ecommerceProducts":  "E-commerce продукти",
                                       "menuItems":  "Пункти меню",
                                       "itemsPerRow":  "Елементів у рядку (десктоп)",
+                                      "itemsPerRowMobile":  "Елементів у рядку (мобільний)",
                                       "items3":  "3 елементи",
                                       "items4":  "4 елементи",
                                       "items5":  "5 елементів",
@@ -1482,7 +1501,19 @@
                     "shopByCategory":  "КУПУВАТИ ЗА КАТЕГОРІЄЮ",
                     "addedToCart":  "«{name}» додано до кошика",
                     "unavailable":  "Каталог недоступний",
-                    "ourProducts":  "Наші товари"
+                    "ourProducts":  "Наші товари",
+                    "filters":  "Фільтри",
+                    "clearAll":  "Очистити все",
+                    "category":  "Категорія",
+                    "price":  "Ціна",
+                    "availability":  "Наявність",
+                    "inStock":  "В наявності",
+                    "outOfStock":  "Немає в наявності",
+                    "tags":  "Теги",
+                    "noItems":  "У цій категорії ще немає товарів.",
+                    "itemCount":  "{count} од.",
+                    "loading":  "Завантаження каталогу...",
+                    "featured":  "Рекомендоване"
                 },
     "checkout":  {
                      "yourOrder":  "Ваше замовлення",
@@ -1534,6 +1565,9 @@
                      "carrierOrlen":  "Orlen Paczka",
                      "carrierDpd":  "DPD Pickup",
                      "showAllCarriers":  "Показати всіх перевізників",
+                     "decreaseQuantity":  "Зменшити кількість",
+                     "increaseQuantity":  "Збільшити кількість",
+                     "removeItem":  "Видалити товар",
                      "alerts":  {
                                     "selectLocker":  "Будь ласка, оберіть поштомат на карті.",
                                     "stripeNotInitialized":  "Stripe не ініціалізовано",
@@ -1577,7 +1611,13 @@
                },
     "gallery":  {
                     "title":  "Галерея",
-                    "subtitle":  "Наш заклад"
+                    "subtitle":  "Наш заклад",
+                    "openPhoto":  "Відкрити фото",
+                    "photo":  "Фото",
+                    "close":  "Закрити",
+                    "prevPhoto":  "Попереднє фото",
+                    "nextPhoto":  "Наступне фото",
+                    "photoOf":  "Фото {index}"
                 },
     "hero":  {
                  "booking":  "Забронювати столик",
@@ -1590,7 +1630,8 @@
                  "title":  "Наше меню",
                  "all":  "Всі страви",
                  "emptyCategory":  "У цій категорії немає страв.",
-                 "addToCart":  "Додати в кошик"
+                 "addToCart":  "Додати в кошик",
+                 "loading":  "Завантаження меню..."
              },
     "nav":  {
                 "home":  "Головна",
@@ -1604,7 +1645,22 @@
                 "cart":  "Кошик",
                 "partners":  "Партнери",
                 "articles":  "Статті",
-                "more":  "Більше"
+                "more":  "Більше",
+                "search":  "Пошук...",
+                "call":  "Зателефонувати"
+            },
+    "search":  {
+                "placeholder":  "Пошук товарів, категорій, брендів...",
+                "hint":  "Почніть вводити для пошуку товарів, категорій та брендів...",
+                "noResults":  "Нічого не знайдено за запитом \"",
+                "noResultsEnd":  "\"",
+                "products":  "Товари",
+                "categories":  "Категорії",
+                "brandsFilters":  "Бренди та фільтри",
+                "resultCount":  "{count} {count, plural, one {результат} few {результати} many {результатів} other {результатів}}",
+                "navigate":  "навігація",
+                "select":  "вибрати",
+                "productCount":  "{count} {count, plural, one {товар} few {товари} many {товарів} other {товарів}}"
             },
     "order":  {
                   "cancel":  {
@@ -1644,7 +1700,13 @@
                           "view":  "перегляд",
                           "selectVariant":  "Оберіть варіант",
                           "addToCart":  "Додати в кошик",
-                          "relatedProducts":  "Схожі товари"
+                          "relatedProducts":  "Схожі товари",
+                          "loginToWishlist":  "Увійдіть, щоб додати до бажаного",
+                          "copyLink":  "Копіювати посилання",
+                          "shareOnTelegram":  "Telegram",
+                          "shareOnWhatsApp":  "WhatsApp",
+                          "shareOnFacebook":  "Facebook",
+                          "linkCopied":  "Посилання скопійовано!"
                       },
     "profile":  {
                     "loadingProfile":  "Завантаження профілю...",
@@ -1657,6 +1719,11 @@
                     "goToMenu":  "Головне меню",
                     "goToMenuBtn":  "Перейти до меню",
                     "myOrders":  "Мої замовлення",
+                    "myWishlist":  "Мої бажання",
+                    "emptyWishlist":  "Ваш список бажань порожній",
+                    "emptyWishlistHint":  "Перегляньте каталог та збережіть улюблені товари.",
+                    "browseCatalog":  "Переглянути каталог",
+                    "removeFromWishlist":  "Видалити з бажаного",
                     "logout":  "Вийти",
                     "back":  "Назад",
                     "dataUpdated":  "Дані успішно оновлено",

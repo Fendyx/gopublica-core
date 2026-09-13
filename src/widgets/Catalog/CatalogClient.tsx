@@ -3,7 +3,7 @@ import { useBranch } from '@/entities/branch/BranchContext'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { useEffect, useState, useMemo } from 'react'
 import { useTenant } from '@/entities/tenant/TenantContext'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { usePathname, useParams } from 'next/navigation'
 import Menu from '@/widgets/Menu'
 import EcommerceGridLayout from '@/widgets/Catalog/EcommerceGridLayout'
@@ -31,6 +31,7 @@ export default function CatalogClient() {
   const { primaryCurrency } = useBranchSettings();
   const tenant = useTenant()
   const locale = useLocale();
+  const t = useTranslations('catalog');
   const [items, setItems] = useState<MenuItem[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [attributes, setAttributes] = useState<ProductAttribute[]>([])
@@ -78,7 +79,7 @@ export default function CatalogClient() {
     fetchCatalog()
   }, [selectedBranch, tenantId, pathname])
 
-  if (loading) return <div className="text-center py-10">Loading...</div>
+  if (loading) return <div className="text-center py-10">{t('loading')}</div>
 
   if (niche === 'ecommerce') {
     const featuredItems = items.filter(item => item.isFeatured === true);
@@ -87,7 +88,7 @@ export default function CatalogClient() {
     // Категории + виртуальная featured, если есть featured‑товары
     const hasFeatured = featuredItems.length > 0;
     const allCategories = hasFeatured
-      ? [{ key: FEATURED_KEY, name: 'Featured', layout: 'featured' }, ...categories]
+      ? [{ key: FEATURED_KEY, name: t('featured'), layout: 'featured' }, ...categories]
       : categories;
 
     // Карточки категорий (без featured)

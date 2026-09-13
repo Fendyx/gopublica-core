@@ -90,6 +90,7 @@ export function normalizeTenantData(data: any, fallbackTenantId: string): SiteCo
       ecommerceLayout: data.theme?.ecommerceLayout ?? 'grid-3',
       radius: data.theme?.radius ?? 'lg',
       productCardVariant: data.theme?.productCardVariant ?? 'action-bar',
+      pdpGalleryLayout: data.theme?.pdpGalleryLayout ?? 'classic',
       categoryBgColor: data.theme?.categoryBgColor ?? '',
     },
     features: {
@@ -101,6 +102,8 @@ export function normalizeTenantData(data: any, fallbackTenantId: string): SiteCo
       hasOnlineOrdering: data.features?.hasOnlineOrdering ?? canManageOrders ?? false,
       hasJobApplications: data.features?.hasJobApplications ?? canManageJobs ?? false,
       showCategoryNav: data.features?.showCategoryNav ?? false,
+      hasSearch: data.features?.hasSearch ?? false,
+      bottomNav: data.features?.bottomNav ?? { enabled: false, items: [] },
     },
     contact: {
       phone: data.phone ?? '',

@@ -1,6 +1,7 @@
 'use client'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import Menu from '@/widgets/Menu'
 import type { MenuItem } from '@/entities/menu-item/types'
@@ -8,6 +9,7 @@ import type { MenuItem } from '@/entities/menu-item/types'
 export default function MenuClient() {
   const { selectedBranch } = useBranch()
   const tenant = useTenant()
+  const t = useTranslations('menu')
   const [items, setItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -29,6 +31,6 @@ export default function MenuClient() {
       })
   }, [selectedBranch, tenantId])
 
-  if (loading) return <div className="text-center py-10">Loading меню...</div>
+  if (loading) return <div className="text-center py-10">{t('loading')}</div>
   return <Menu items={items} menuStyle={menuStyle} />
 }

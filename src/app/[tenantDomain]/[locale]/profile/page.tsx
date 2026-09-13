@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation'; // Добавлен useRouter
 import Link from 'next/link'; // Добавлен Link
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Lock, Trash2, Package, LogOut, Mail, Phone, CheckCircle2, AlertCircle, ShieldAlert, Loader2 } from 'lucide-react';
+import { User, Lock, Trash2, Package, LogOut, Mail, Phone, CheckCircle2, AlertCircle, ShieldAlert, Loader2, Heart, ShoppingBag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
+import { fetchWishlistProducts, removeFromWishlist, type WishlistProduct } from '@/entities/wishlist/api';
+import { useBranchSettings } from '@/entities/branch/useBranchSettings';
 
 type UserProfile = {
   _id: string;
@@ -24,6 +27,7 @@ export default function ProfilePage() {
   const router = useRouter(); // Инициализация роутера
   const t = useTranslations('profile');
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+  const { primaryCurrency } = useBranchSettings();
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +39,28 @@ export default function ProfilePage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  // ── Wishlist ────────────────────────────────────────────────────────────
+  const [wishlistProducts, setWishlistProducts] = useState<WishlistProduct[]>([]);
+  const [wishlistLoading, setWishlistLoading] = useState(true);
+
+  const fetchWishlist = async () => {
+    try {
+      const products = await fetchWishlistProducts();
+      setWishlistProducts(products);
+    } catch {
+      // silent
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  const handleRemoveFromWishlist = async (productId: string) => {
+    const ok = await removeFromWishlist(productId);
+    if (ok) {
+      setWishlistProducts((prev) => prev.filter((p) => p._id !== productId));
+    }
+  };
 
   const fetchProfile = async () => {
     const token = localStorage.getItem('customer_token');
@@ -64,6 +90,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     fetchProfile();
+    fetchWishlist();
   }, []);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -220,6 +247,11 @@ export default function ProfilePage() {
               <Package className="w-4 h-4 mr-2" /> {t('myOrders')}
             </Link>
           </Button>
+          <Button asChild variant="outline" className="shadow-sm">
+            <Link href={`/${locale}/profile/wishlist`}>
+              <Heart className="w-4 h-4 mr-2" /> {t('myWishlist')}
+            </Link>
+          </Button>
           <Button variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
             <LogOut className="w-4 h-4 mr-2" /> {t('logout')}
           </Button>
@@ -244,6 +276,79 @@ export default function ProfilePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Wishlist Section ──────────────────────────────────────────── */}
+      <Card className="shadow-sm border-border/80 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-muted/30 border-b border-border/80 p-6">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Heart className="w-5 h-5 text-primary" /> {t('myWishlist')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          {wishlistLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : wishlistProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <Heart className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
+              <p className="text-sm font-medium text-foreground mb-1">{t('emptyWishlist')}</p>
+              <p className="text-xs text-muted-foreground mb-4">{t('emptyWishlistHint')}</p>
+              <Button asChild variant="outline" size="sm" className="rounded-xl">
+                <Link href={`/${locale}/${branchSlug}/catalog`}>
+                  <ShoppingBag className="w-4 h-4 mr-2" /> {t('browseCatalog')}
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {wishlistProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="group relative flex gap-3 p-3 rounded-xl border border-border/60 hover:border-border hover:shadow-sm transition-all"
+                >
+                  <Link
+                    href={`/${locale}/${branchSlug}/catalog/${product.category}/${product._id}`}
+                    className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-muted relative"
+                  >
+                    {product.image ? (
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ShoppingBag className="w-5 h-5 text-muted-foreground/40" />
+                      </div>
+                    )}
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      href={`/${locale}/${branchSlug}/catalog/${product.category}/${product._id}`}
+                      className="text-sm font-medium text-foreground hover:text-primary transition-colors line-clamp-2"
+                    >
+                      {product.name}
+                    </Link>
+                    <p className="text-sm font-bold text-foreground mt-0.5">
+                      {product.price} {primaryCurrency}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveFromWishlist(product._id)}
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                    aria-label={t('removeFromWishlist')}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Личная информация */}

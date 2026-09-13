@@ -5,7 +5,7 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 import { BranchSection, BranchSectionItem, EntityCarouselSettings } from '@/entities/branch-section/types';
 import SectionBackground from './SectionBackground';
 import type { MenuItem } from '@/entities/menu-item/types';
-import { DESKTOP_SIZES, DESKTOP_WIDTH_CLASSES, DEFAULT_ITEMS_PER_ROW } from '@/widgets/Sections/CarouselWidths';
+import { DESKTOP_SIZES, DESKTOP_WIDTH_CLASSES, MOBILE_WIDTH_CLASSES, MOBILE_SIZES, DEFAULT_ITEMS_PER_ROW, DEFAULT_MOBILE_ITEMS_PER_ROW } from '@/widgets/Sections/CarouselWidths';
 import ProductCard from '@/widgets/Catalog/ProductCard';
 import MenuItemCard from '@/entities/menu-item/MenuItemCard';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -26,8 +26,10 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
   const settings = (section.settings || {}) as EntityCarouselSettings;
   const bg = settings.background;
   const itemsPerRow = settings.desktopItemsPerRow ?? DEFAULT_ITEMS_PER_ROW.entity;
+  const mobileItemsPerRow = settings.mobileItemsPerRow ?? DEFAULT_MOBILE_ITEMS_PER_ROW;
   const widthClass = DESKTOP_WIDTH_CLASSES[itemsPerRow];
-  const imageSizes = DESKTOP_SIZES[itemsPerRow];
+  const mobileWidthClass = MOBILE_WIDTH_CLASSES[mobileItemsPerRow];
+  const imageSizes = MOBILE_SIZES[mobileItemsPerRow];
   const mode = settings.mode || 'manual';
   const selectionMode = settings.selectionMode || 'items';
   const selectedProductIds = settings.selectedProductIds || [];
@@ -114,7 +116,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
                 <Link
                   key={item._id}
                   href={`/${locale || 'en'}/${effectiveBranchSlug}/entity/${item.slug}`}
-                  className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block group`}
+                  className={`snap-start flex-none ${mobileWidthClass} sm:w-[60%] ${widthClass} block group`}
                 >
                   <div className="relative aspect-[4/5] overflow-hidden rounded-xl">
                     {item.media.type === 'video' ? (
@@ -220,7 +222,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
           {dynamicItems.map((item) => (
             <div
               key={item._id || item.id}
-              className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block`}
+              className={`snap-start flex-none ${mobileWidthClass} sm:w-[60%] ${widthClass} block`}
             >
               {mode === 'ecommerce' ? (
                 <ProductCard
@@ -244,7 +246,7 @@ export default function EntityCarousel({ section, locale, tenantDomain, branchSl
           {settings.showViewAll && (
             <Link
               href={viewAllHref}
-              className={`snap-start flex-none w-[80%] sm:w-[60%] ${widthClass} block`}
+              className={`snap-start flex-none ${mobileWidthClass} sm:w-[60%] ${widthClass} block`}
             >
               <div className="h-full flex flex-col items-center justify-center bg-muted/30 border border-border rounded-xl p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors">
                 <ArrowRight className="w-8 h-8 text-muted-foreground mb-2" />

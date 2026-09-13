@@ -39,6 +39,64 @@ interface SectionFormProps {
 }
 
 /**
+ * Locale-tabbed editor for CTA button label translations.
+ * "Base" tab edits `cta.label` (default locale); other tabs edit `cta.labelI18n[lang]`.
+ */
+function CtaLabelI18nEditor({
+  cta,
+  onChange,
+  activeLocales,
+  defaultLocale,
+}: {
+  cta?: HeroCta;
+  onChange: (cta: HeroCta) => void;
+  activeLocales: string[];
+  defaultLocale: string;
+}) {
+  const t = useTranslations('admin.sectionForm');
+  const [tab, setTab] = useState(defaultLocale);
+
+  const handleLabelChange = (locale: string, value: string) => {
+    if (locale === defaultLocale) {
+      onChange({ ...cta, label: value });
+    } else {
+      onChange({
+        ...cta,
+        labelI18n: { ...(cta?.labelI18n || {}), [locale]: value },
+      });
+    }
+  };
+
+  const getLocaleValue = (locale: string) =>
+    locale === defaultLocale ? (cta?.label || '') : (cta?.labelI18n?.[locale] || '');
+
+  return (
+    <div>
+      <Label>{t('buttonTextLabel')}</Label>
+      <div className="flex gap-1 mt-1 mb-2">
+        {activeLocales.map((lang) => (
+          <Button
+            key={lang}
+            type="button"
+            variant={tab === lang ? 'default' : 'outline'}
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => setTab(lang)}
+          >
+            {lang === defaultLocale ? `Base (${defaultLocale.toUpperCase()})` : lang.toUpperCase()}
+          </Button>
+        ))}
+      </div>
+      <Input
+        value={getLocaleValue(tab)}
+        onChange={(e) => handleLabelChange(tab, e.target.value)}
+        placeholder={t('buttonTextPlaceholder')}
+      />
+    </div>
+  );
+}
+
+/**
  * Компонент управления CTA-ссылкой с двумя режимами:
  * - 'section': выбор существующей секции из выпадающего списка
  * - 'custom': ручной ввод произвольного URL
@@ -611,19 +669,12 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 {/* ─── Button 1 ─── */}
                 <div className="rounded-lg border p-3 space-y-3">
                   <p className="text-sm font-medium text-muted-foreground">{t('button1Label')}</p>
-                  <div>
-                    <Label>{t('buttonTextLabel')}</Label>
-                    <Input
-                      value={settings.primaryCta?.label || ''}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          primaryCta: { ...settings.primaryCta, label: e.target.value },
-                        })
-                      }
-                      placeholder={t('buttonTextPlaceholder')}
-                    />
-                  </div>
+                  <CtaLabelI18nEditor
+                    cta={settings.primaryCta}
+                    onChange={(cta) => setSettings({ ...settings, primaryCta: cta })}
+                    activeLocales={activeLocales}
+                    defaultLocale={defaultLocale}
+                  />
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label>{t('buttonStyle')}</Label>
@@ -819,19 +870,12 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                 {/* ─── Button 2 ─── */}
                 <div className="rounded-lg border p-3 space-y-3">
                   <p className="text-sm font-medium text-muted-foreground">{t('button2Label')}</p>
-                  <div>
-                    <Label>{t('buttonTextLabel')}</Label>
-                    <Input
-                      value={settings.secondaryCta?.label || ''}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          secondaryCta: { ...settings.secondaryCta, label: e.target.value },
-                        })
-                      }
-                      placeholder={t('buttonTextPlaceholder')}
-                    />
-                  </div>
+                  <CtaLabelI18nEditor
+                    cta={settings.secondaryCta}
+                    onChange={(cta) => setSettings({ ...settings, secondaryCta: cta })}
+                    activeLocales={activeLocales}
+                    defaultLocale={defaultLocale}
+                  />
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label>{t('buttonStyle')}</Label>
@@ -1139,6 +1183,25 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
               </Select>
             </div>
 
+            <div className="space-y-2">
+              <Label>{t('itemsPerRowMobile')}</Label>
+              <Select
+                value={String(settings.mobileItemsPerRow ?? 1)}
+                onValueChange={(val) =>
+                  setSettings({ ...settings, mobileItemsPerRow: Number(val) as 1 | 2 | 3 })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select items per row (mobile)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 item</SelectItem>
+                  <SelectItem value="2">2 items</SelectItem>
+                  <SelectItem value="3">3 items</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {carouselMode === 'manual' && (
               <>
                 {!initialData?._id ? (
@@ -1233,8 +1296,10 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                       <SelectItem value="overlay">Hover Overlay</SelectItem>
                       <SelectItem value="minimal">Minimalist</SelectItem>
                       <SelectItem value="clean">Clean (image only)</SelectItem>
-                      <SelectItem value="hover-vertical">Vertical Overlay</SelectItem>
+                      <SelectItem value="horizontal">Horizontal</SelectItem>
                       <SelectItem value="action-overlay">Action + Overlay</SelectItem>
+                      <SelectItem value="badge-top">Badge Top</SelectItem>
+                      <SelectItem value="split-action">Split Action</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1861,8 +1926,10 @@ export default function SectionForm({ initialData, defaultType, onSave, onCancel
                     <SelectItem value="overlay">Hover Overlay</SelectItem>
                     <SelectItem value="minimal">Minimalist</SelectItem>
                     <SelectItem value="clean">Clean (image only)</SelectItem>
-                    <SelectItem value="hover-vertical">Vertical Overlay</SelectItem>
+                    <SelectItem value="horizontal">Horizontal</SelectItem>
                     <SelectItem value="action-overlay">Action + Overlay</SelectItem>
+                    <SelectItem value="badge-top">Badge Top</SelectItem>
+                    <SelectItem value="split-action">Split Action</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import type { GalleryItem } from '@/entities/gallery/types'
 
 function getSpan(index: number): string {
@@ -96,16 +97,17 @@ function GalleryTile({
   spanClass: string
   onClick: () => void
 }) {
+  const t = useTranslations('gallery')
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={img.caption || 'Открыть фото'}
+      aria-label={img.caption || t('openPhoto')}
       className={`group relative overflow-hidden rounded-xl bg-surface-hover cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${spanClass}`}
     >
       <Image
         src={img.image}
-        alt={img.caption || 'Фото'}
+        alt={img.caption || t('photo')}
         fill
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
@@ -138,6 +140,7 @@ function Lightbox({
   onPrev: () => void
   onNext: () => void
 }) {
+  const t = useTranslations('gallery')
   const img = images[index]
 
   return (
@@ -151,7 +154,7 @@ function Lightbox({
       >
         <button
           onClick={onClose}
-          aria-label="Закрыть"
+          aria-label={t('close')}
           className="absolute -top-12 right-4 w-9 h-9 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
         >
           <IconClose />
@@ -164,7 +167,7 @@ function Lightbox({
         <div className="relative w-full flex items-center justify-center">
           <button
             onClick={onPrev}
-            aria-label="Предыдущее фото"
+            aria-label={t('prevPhoto')}
             className="absolute left-0 z-10 -translate-x-2 sm:-translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors"
           >
             <IconChevronLeft />
@@ -173,7 +176,7 @@ function Lightbox({
           <Image
             key={img._id}
             src={img.image}
-            alt={img.caption || 'Фото'}
+            alt={img.caption || t('photo')}
             width={1200}
             height={800}
             className="max-h-[75vh] max-w-full rounded-xl object-contain shadow-2xl"
@@ -182,7 +185,7 @@ function Lightbox({
 
           <button
             onClick={onNext}
-            aria-label="Следующее фото"
+            aria-label={t('nextPhoto')}
             className="absolute right-0 z-10 translate-x-2 sm:translate-x-14 w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors"
           >
             <IconChevronRight />
@@ -200,7 +203,7 @@ function Lightbox({
             {images.map((_, i) => (
               <button
                 key={i}
-                aria-label={`Фото ${i + 1}`}
+                aria-label={t('photoOf', { index: i + 1 })}
                 className={`rounded-full transition-all duration-200 ${
                   i === index
                     ? 'w-4 h-1.5 bg-white'

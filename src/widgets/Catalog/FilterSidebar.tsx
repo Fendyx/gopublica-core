@@ -53,13 +53,13 @@ function CollapsibleSection({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-border-light py-3">
+    <div className="border-b border-gray-200 py-3">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+        className="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wider text-gray-500"
       >
         {title}
-        <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && <div className="mt-2 space-y-2">{children}</div>}
     </div>
@@ -85,9 +85,9 @@ function CheckboxItem({
         onChange={onChange}
         className="rounded border-border accent-primary"
       />
-      <span className="group-hover:text-foreground truncate">{label}</span>
+      <span className="group-hover:text-gray-900 truncate">{label}</span>
       {count !== undefined && (
-        <span className="ml-auto text-xs text-muted-foreground">{count}</span>
+        <span className="ml-auto text-xs text-gray-400">{count}</span>
       )}
     </label>
   );
@@ -222,10 +222,10 @@ export default function FilterSidebar({
   return (
     <div className="space-y-2">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-border-light">
+      <div className="flex items-center justify-between pb-3 border-b border-gray-200">
         <div className="flex items-center gap-2 text-sm font-semibold">
-          <SlidersHorizontal size={14} />
-          Filters
+          <SlidersHorizontal size={16} className="text-gray-500" />
+          {t('filters')}
           {activeCount > 0 && (
             <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
               {activeCount}
@@ -237,18 +237,18 @@ export default function FilterSidebar({
             onClick={() => onFilterChange(EMPTY_FILTERS)}
             className="text-xs text-primary hover:underline"
           >
-            Clear all
+            {t('clearAll')}
           </button>
         )}
       </div>
 
       {/* Categories */}
       {filterData.catList.length > 0 && (
-        <CollapsibleSection title="Category">
+        <CollapsibleSection title={t('category')}>
           {filterData.catList.map((cat) => (
             <CheckboxItem
               key={cat.key}
-              label={cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
+              label={cat.name}
               count={cat.count}
               checked={activeFilters.categories.includes(cat.key)}
               onChange={() => toggleCategory(cat.key)}
@@ -281,7 +281,7 @@ export default function FilterSidebar({
       })}
 
       {/* Price */}
-      <CollapsibleSection title="Price" defaultOpen={false}>
+      <CollapsibleSection title={t('price')} defaultOpen={false}>
         <div className="flex items-center gap-2">
           <Input
             type="number"
@@ -302,14 +302,14 @@ export default function FilterSidebar({
       </CollapsibleSection>
 
       {/* Availability */}
-      <CollapsibleSection title="Availability" defaultOpen={false}>
+      <CollapsibleSection title={t('availability')} defaultOpen={false}>
         <CheckboxItem
-          label="In stock"
+          label={t('inStock')}
           checked={activeFilters.inStock === true}
           onChange={() => onFilterChange({ ...activeFilters, inStock: activeFilters.inStock === true ? null : true })}
         />
         <CheckboxItem
-          label="Out of stock"
+          label={t('outOfStock')}
           checked={activeFilters.inStock === false}
           onChange={() => onFilterChange({ ...activeFilters, inStock: activeFilters.inStock === false ? null : false })}
         />
@@ -317,7 +317,7 @@ export default function FilterSidebar({
 
       {/* Tags */}
       {filterData.tagList.length > 0 && (
-        <CollapsibleSection title="Tags" defaultOpen={false}>
+        <CollapsibleSection title={t('tags')} defaultOpen={false}>
           {filterData.tagList.map((tag) => (
             <CheckboxItem
               key={tag.name}

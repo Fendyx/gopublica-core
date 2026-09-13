@@ -27,8 +27,31 @@ export const DESKTOP_SIZES = {
   5: '(max-width: 640px) 80vw, (max-width: 1024px) 60vw, 18vw',
 } as const;
 
+/**
+ * Tailwind width classes for the base (mobile) breakpoint, keyed by items-per-row.
+ * Replaces the default `w-[80%]` to show N items on small screens.
+ */
+export const MOBILE_WIDTH_CLASSES = {
+  1: 'w-[80%]',
+  2: 'w-[45%]',
+  3: 'w-[30%]',
+} as const;
+
+/**
+ * `<Image sizes>` attribute that includes the mobile breakpoint, keyed by mobile items-per-row.
+ * Desktop sizes are injected from DESKTOP_SIZES at runtime by the component.
+ */
+export const MOBILE_SIZES = {
+  1: '80vw',
+  2: '45vw',
+  3: '30vw',
+} as const;
+
 /** Default items-per-row when the setting is absent (per-component). */
 export const DEFAULT_ITEMS_PER_ROW = {
   entity: 3,
   feature: 4,
 } as const;
+
+/** Default mobile items-per-row when the setting is absent. */
+export const DEFAULT_MOBILE_ITEMS_PER_ROW = 1 as const;

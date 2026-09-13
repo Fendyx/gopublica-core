@@ -95,7 +95,7 @@ export default function BranchFormPage() {
         router.push('/admin/branches');
       } else {
         const err = await res.json();
-        alert(err.error || 'Ошибка сохранения');
+        alert(err.error || t('branchesForm.errorSave'));
       }
     } catch (err) {
       console.error(err);

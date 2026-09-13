@@ -6,6 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useTranslations } from 'next-intl';
 import CategoryTree from './CategoryTree';
 import { useCategoryNav } from '@/shared/ui/CategoryNavContext';
 import type { CategoryNavItem } from '@/entities/product-category/types';
@@ -16,14 +17,15 @@ interface CategoryNavDrawerProps {
 
 export default function CategoryNavDrawer({ categories }: CategoryNavDrawerProps) {
   const { mobileDrawerOpen, setMobileDrawerOpen } = useCategoryNav();
+  const t = useTranslations('nav');
 
   if (!categories || categories.length === 0) return null;
 
   return (
     <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
       <SheetContent side="left" className="w-72 p-0" showCloseButton={false}>
-        <SheetHeader className="px-4 py-3 border-b border-border">
-          <SheetTitle className="text-base">Catalog</SheetTitle>
+        <SheetHeader className="px-4 py-3 border-b border-gray-200">
+          <SheetTitle className="text-base">{t('catalog')}</SheetTitle>
         </SheetHeader>
         <div className="py-4 overflow-y-auto h-[calc(100vh-4rem)]">
           <CategoryTree

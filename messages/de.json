@@ -91,7 +91,8 @@
                                        "cancel":  "Abbrechen",
                                        "save":  "Speichern",
                                        "saving":  "Wird gespeichert...",
-                                       "loading":  "Wird geladen..."
+                                       "loading":  "Wird geladen...",
+                                       "errorSave":  "Fehler beim Speichern"
                                    },
                   "dashboardPage":  {
                                         "loading":  "Dashboard wird geladen...",
@@ -242,7 +243,8 @@
                                       "selectPhoto":  "Foto auswählen",
                                       "addToGallery":  "Zur Galerie hinzufügen",
                                       "empty":  "Die Galerie ist leer.",
-                                      "deleteConfirm":  "Bild löschen?"
+                                      "deleteConfirm":  "Bild löschen?",
+                                      "uploadHint":  "Bild über Cloudinary hochladen oder URL manuell einfügen"
                                   },
                   "articlesManager":  {
                                           "title":  "Titel",
@@ -559,12 +561,28 @@
                                                           "minimalistDesc":  "Nur Text \u0026 Link",
                                                           "clean":  "Aufgeräumt",
                                                           "cleanDesc":  "Bild + Name-Overlay",
-                                                          "verticalOverlay":  "Vertikales Overlay",
-                                                          "verticalOverlayDesc":  "Vertikale Schaltflächen",
                                                           "actionOverlay":  "Aktion + Overlay",
                                                           "actionOverlayDesc":  "Info unten + Overlay",
+                                                          "horizontal":  "Horizontal",
+                                                          "horizontalDesc":  "Bild & Text nebeneinander",
+                                                          "badgeTop":  "Badge oben",
+                                                          "badgeTopDesc":  "Rabatt-Badge + slide-up Hinzufügen",
+                                                          "splitAction":  "Geteilte Aktion",
+                                                          "splitActionDesc":  "Schnellansicht + Hinzufügen beim Hover",
                                                           "showCategoryNav":  "Kategorien-Navigation Sidebar",
-                                                          "showCategoryNavDesc":  "Zeige eine fixierte Seitenleiste mit allen Produktkategorien auf der Katalogseite"
+                                                          "showCategoryNavDesc":  "Zeige eine fixierte Seitenleiste mit allen Produktkategorien auf der Katalogseite",
+                                                          "hasSearch":  "Globale Suchleiste",
+                                                          "hasSearchDesc":  "Zeige ein Suchsymbol in der Navigationsleiste, das eine Befehlspalette zum Suchen von Produkten, Kategorien und Marken öffnet",
+                                                          "bottomNav":  "Mobile untere Navigation",
+                                                          "bottomNavDesc":  "Zeige eine untere Navigationsleiste auf mobilen Geräten mit schnellem Zugang zu wichtigen Seiten",
+                                                          "bottomNavItems":  "Elemente der unteren Navigation",
+                                                          "bottomNavItemsDesc":  "Wählen Sie, welche Links in der unteren mobilen Leiste angezeigt werden. Pfeile zum Sortieren verwenden, Sichtbarkeit umschalten.",
+                                                          "pdpGalleryLayout":  "Produkt-Galerie-Layout",
+                                                          "pdpGalleryLayoutDesc":  "W\u00e4hlen Sie, wie Produktbilder auf der Produktdetailseite angezeigt werden.",
+                                                          "pdpGalleryClassic":  "Klassisch (Amazon)",
+                                                          "pdpGalleryThumbnailsLeft":  "Thumbnails links (Shopify)",
+                                                          "pdpGalleryStackedGrid":  "Gestapeltes Raster (Zara)",
+                                                          "pdpGalleryLookbook":  "Lookbook (Masonry)"
                                                       },
                                        "localization":  {
                                                             "activeLanguages":  "Aktive Sprachen",
@@ -799,6 +817,7 @@
                                       "ecommerceProducts":  "E-Commerce-Produkte",
                                       "menuItems":  "Menüpunkte",
                                       "itemsPerRow":  "Elemente pro Zeile (Desktop)",
+                                      "itemsPerRowMobile":  "Elemente pro Zeile (Mobil)",
                                       "items3":  "3 Elemente",
                                       "items4":  "4 Elemente",
                                       "items5":  "5 Elemente",
@@ -1441,7 +1460,19 @@
                     "shopByCategory":  "NACH KATEGORIE EINKAUFEN",
                     "addedToCart":  "«{name}» wurde in den Warenkorb gelegt",
                     "unavailable":  "Katalog nicht verfügbar",
-                    "ourProducts":  "Unsere Produkte"
+                    "ourProducts":  "Unsere Produkte",
+                    "filters":  "Filter",
+                    "clearAll":  "Alle löschen",
+                    "category":  "Kategorie",
+                    "price":  "Preis",
+                    "availability":  "Verfügbarkeit",
+                    "inStock":  "Auf Lager",
+                    "outOfStock":  "Nicht auf Lager",
+                    "tags":  "Tags",
+                    "noItems":  "In dieser Kategorie gibt es noch keine Artikel.",
+                    "itemCount":  "{count} Art.",
+                    "loading":  "Katalog wird geladen...",
+                    "featured":  "Empfohlen"
                 },
     "checkout":  {
                      "yourOrder":  "Ihre Bestellung",
@@ -1493,6 +1524,9 @@
                      "carrierOrlen":  "Orlen Paczka",
                      "carrierDpd":  "DPD Pickup",
                      "showAllCarriers":  "Alle Anbieter anzeigen",
+                     "decreaseQuantity":  "Anzahl verringern",
+                     "increaseQuantity":  "Anzahl erhöhen",
+                     "removeItem":  "Artikel entfernen",
                      "alerts":  {
                                     "selectLocker":  "Bitte wählen Sie einen Paketautomaten auf der Karte aus.",
                                     "stripeNotInitialized":  "Stripe wurde nicht initialisiert",
@@ -1536,7 +1570,13 @@
                },
     "gallery":  {
                     "title":  "Galerie",
-                    "subtitle":  "Unser Restaurant"
+                    "subtitle":  "Unser Restaurant",
+                    "openPhoto":  "Foto öffnen",
+                    "photo":  "Foto",
+                    "close":  "Schließen",
+                    "prevPhoto":  "Vorheriges Foto",
+                    "nextPhoto":  "Nächstes Foto",
+                    "photoOf":  "Foto {index}"
                 },
     "hero":  {
                  "booking":  "Tisch reservieren",
@@ -1549,7 +1589,8 @@
                  "title":  "Unser Menü",
                  "all":  "Alle Gerichte",
                  "emptyCategory":  "Keine Gerichte in dieser Kategorie.",
-                 "addToCart":  "In den Warenkorb"
+                 "addToCart":  "In den Warenkorb",
+                 "loading":  "Menü wird geladen..."
              },
     "nav":  {
                 "home":  "Startseite",
@@ -1563,7 +1604,22 @@
                 "cart":  "Warenkorb",
                 "partners":  "Partner",
                 "articles":  "Artikel",
-                "more":  "Mehr"
+                "more":  "Mehr",
+                "search":  "Suchen...",
+                "call":  "Anrufen"
+            },
+    "search":  {
+                "placeholder":  "Produkte, Kategorien, Marken suchen...",
+                "hint":  "Beginnen Sie zu tippen, um Produkte, Kategorien und Marken zu suchen...",
+                "noResults":  "Keine Ergebnisse für \"",
+                "noResultsEnd":  "\"",
+                "products":  "Produkte",
+                "categories":  "Kategorien",
+                "brandsFilters":  "Marken & Filter",
+                "resultCount":  "{count} {count, plural, one {Ergebnis} other {Ergebnisse}}",
+                "navigate":  "navigieren",
+                "select":  "auswählen",
+                "productCount":  "{count} {count, plural, one {Produkt} other {Produkte}}"
             },
     "order":  {
                   "cancel":  {
@@ -1603,7 +1659,13 @@
                           "view":  "Ansicht",
                           "selectVariant":  "Variante auswählen",
                           "addToCart":  "In den Warenkorb",
-                          "relatedProducts":  "Ähnliche Produkte"
+                          "relatedProducts":  "Ähnliche Produkte",
+                          "loginToWishlist":  "Einloggen, um zur Wunschliste hinzuzufügen",
+                          "copyLink":  "Link kopieren",
+                          "shareOnTelegram":  "Telegram",
+                          "shareOnWhatsApp":  "WhatsApp",
+                          "shareOnFacebook":  "Facebook",
+                          "linkCopied":  "Link kopiert!"
                       },
     "profile":  {
                     "loadingProfile":  "Profil wird geladen...",
@@ -1616,6 +1678,11 @@
                     "goToMenu":  "Hauptmenü",
                     "goToMenuBtn":  "Zum Menü",
                     "myOrders":  "Meine Bestellungen",
+                    "myWishlist":  "Meine Wunschliste",
+                    "emptyWishlist":  "Ihre Wunschliste ist leer",
+                    "emptyWishlistHint":  "Durchstöbern Sie den Katalog und speichern Sie Ihre Lieblingsartikel.",
+                    "browseCatalog":  "Katalog durchstöbern",
+                    "removeFromWishlist":  "Von der Wunschliste entfernen",
                     "logout":  "Abmelden",
                     "back":  "Zurück",
                     "dataUpdated":  "Daten erfolgreich aktualisiert",

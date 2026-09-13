@@ -79,7 +79,7 @@ export default function OrderSummarySidebar({
                 <button 
                   onClick={() => updateQuantity(item.uid, item.quantity - 1)}
                   className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
-                  aria-label="Уменьшить количество"
+                  aria-label={t('decreaseQuantity')}
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
@@ -89,7 +89,7 @@ export default function OrderSummarySidebar({
                 <button 
                   onClick={() => updateQuantity(item.uid, item.quantity + 1)}
                   className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
-                  aria-label="Увеличить количество"
+                  aria-label={t('increaseQuantity')}
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </button>
@@ -98,7 +98,7 @@ export default function OrderSummarySidebar({
               <button 
                 onClick={() => removeItem(item.uid)}
                 className="p-2 rounded-full text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                aria-label="Удалить товар"
+                aria-label={t('removeItem')}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

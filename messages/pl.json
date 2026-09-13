@@ -91,7 +91,8 @@
                                        "cancel":  "Anuluj",
                                        "save":  "Zapisz",
                                        "saving":  "Zapisywanie...",
-                                       "loading":  "Ładowanie..."
+                                       "loading":  "Ładowanie...",
+                                       "errorSave":  "Błąd zapisu"
                                    },
                   "dashboardPage":  {
                                         "loading":  "Ładowanie panelu...",
@@ -242,7 +243,8 @@
                                       "selectPhoto":  "Wybierz zdjęcie",
                                       "addToGallery":  "Dodaj do galerii",
                                       "empty":  "Galeria jest pusta.",
-                                      "deleteConfirm":  "Usunąć obraz?"
+                                      "deleteConfirm":  "Usunąć obraz?",
+                                      "uploadHint":  "Prześlij obraz przez Cloudinary lub wklej URL ręcznie"
                                   },
                   "articlesManager":  {
                                           "title":  "Tytuł",
@@ -506,12 +508,28 @@
                                                           "minimalistDesc":  "Tylko tekst i link",
                                                           "clean":  "Czysty",
                                                           "cleanDesc":  "Obraz + nakładka z nazwą",
-                                                          "verticalOverlay":  "Nakładka pionowa",
-                                                          "verticalOverlayDesc":  "Pionowe przyciski",
                                                           "actionOverlay":  "Akcja + Nakładka",
                                                           "actionOverlayDesc":  "Info poniżej + nakładka",
+                                                          "horizontal":  "Poziomy",
+                                                          "horizontalDesc":  "Obraz i tekst obok siebie",
+                                                          "badgeTop":  "Odznaka u góry",
+                                                          "badgeTopDesc":  "Odznaka promocji + przesuwane Dodaj",
+                                                          "splitAction":  "Rozdzielona akcja",
+                                                          "splitActionDesc":  "Szybki podgląd + Dodaj po najechaniu",
                                                           "showCategoryNav":  "Pasek nawigacji kategorii",
-                                                          "showCategoryNavDesc":  "Pokaż przyległy pasek boczny ze wszystkimi kategoriami produktów na stronie katalogu"
+                                                          "showCategoryNavDesc":  "Pokaż przyległy pasek boczny ze wszystkimi kategoriami produktów na stronie katalogu",
+                                                          "hasSearch":  "Globalna belka wyszukiwania",
+                                                          "hasSearchDesc":  "Pokaż ikonę wyszukiwania w pasku nawigacji otwierającą paletę poleceń do wyszukiwania produktów, kategorii i marek",
+                                                          "bottomNav":  "Dolna nawigacja mobilna",
+                                                          "bottomNavDesc":  "Pokaż pasek nawigacji na dole ekranu na urządzeniach mobilnych z szybkim dostępem do głównych stron",
+                                                          "bottomNavItems":  "Elementy dolnej nawigacji",
+                                                          "bottomNavItemsDesc":  "Wybierz, które linki wyświetlają się w dolnym pasku mobilnym. Użyj strzałek do zmiany kolejności, przełączaj widoczność.",
+                                                          "pdpGalleryLayout":  "Układ galerii produktu",
+                                                          "pdpGalleryLayoutDesc":  "Wybierz spos\u00f3b wy\u015bwietlania obraz\u00f3w produktu na stronie detalicznej.",
+                                                          "pdpGalleryClassic":  "Klasyczny (Amazon)",
+                                                          "pdpGalleryThumbnailsLeft":  "Miniaturki po lewej (Shopify)",
+                                                          "pdpGalleryStackedGrid":  "Siatka pionowa (Zara)",
+                                                          "pdpGalleryLookbook":  "Lookbook (Masonry)"
                                                       },
                                        "localization":  {
                                                             "activeLanguages":  "Aktywne języki",
@@ -746,6 +764,7 @@
                                       "ecommerceProducts":  "Produkty e-commerce",
                                       "menuItems":  "Pozycje menu",
                                       "itemsPerRow":  "Elementów w wierszu (desktop)",
+                                      "itemsPerRowMobile":  "Elementów w wierszu (mobile)",
                                       "items3":  "3 elementy",
                                       "items4":  "4 elementy",
                                       "items5":  "5 elementów",
@@ -1394,7 +1413,19 @@
                     "shopByCategory":  "KUPUJ WEDŁUG KATEGORII",
                     "addedToCart":  "«{name}» dodano do koszyka",
                     "unavailable":  "Katalog niedostępny",
-                    "ourProducts":  "Nasze produkty"
+                    "ourProducts":  "Nasze produkty",
+                    "filters":  "Filtry",
+                    "clearAll":  "Wyczyść wszystko",
+                    "category":  "Kategoria",
+                    "price":  "Cena",
+                    "availability":  "Dostępność",
+                    "inStock":  "W magazynie",
+                    "outOfStock":  "Brak w magazynie",
+                    "tags":  "Tagi",
+                    "noItems":  "Brak produktów w tej kategorii.",
+                    "itemCount":  "{count} prod.",
+                    "loading":  "Ładowanie katalogu...",
+                    "featured":  "Polecane"
                 },
     "checkout":  {
                      "yourOrder":  "Twoje zamówienie",
@@ -1489,7 +1520,13 @@
                },
     "gallery":  {
                     "title":  "Galeria",
-                    "subtitle":  "Nasza restauracja"
+                    "subtitle":  "Nasza restauracja",
+                    "openPhoto":  "Otwórz zdjęcie",
+                    "photo":  "Zdjęcie",
+                    "close":  "Zamknij",
+                    "prevPhoto":  "Poprzednie zdjęcie",
+                    "nextPhoto":  "Następne zdjęcie",
+                    "photoOf":  "Zdjęcie {index}"
                 },
     "hero":  {
                  "booking":  "Zarezerwuj stolik",
@@ -1502,7 +1539,8 @@
                  "title":  "Nasze menu",
                  "all":  "Wszystkie dania",
                  "emptyCategory":  "Brak dań w tej kategorii.",
-                 "addToCart":  "Dodaj do koszyka"
+                 "addToCart":  "Dodaj do koszyka",
+                 "loading":  "Ładowanie menu..."
              },
     "nav":  {
                 "home":  "Strona główna",
@@ -1516,7 +1554,22 @@
                 "cart":  "Koszyk",
                 "partners":  "Partnerzy",
                 "articles":  "Artykuły",
-                "more":  "Więcej"
+                "more":  "Więcej",
+                "search":  "Szukaj...",
+                "call":  "Zadzwoń"
+            },
+    "search":  {
+                "placeholder":  "Szukaj produktów, kategorii, marek...",
+                "hint":  "Zacznij pisać, aby szukać produktów, kategorii i marek...",
+                "noResults":  "Nie znaleziono wyników dla \"",
+                "noResultsEnd":  "\"",
+                "products":  "Produkty",
+                "categories":  "Kategorie",
+                "brandsFilters":  "Marki i filtry",
+                "resultCount":  "{count} {count, plural, one {wynik} few {wyniki} many {wyników} other {wyników}}",
+                "navigate":  "nawiguj",
+                "select":  "wybierz",
+                "productCount":  "{count} {count, plural, one {produkt} few {produkty} many {produktów} other {produktów}}"
             },
     "order":  {
                   "cancel":  {
@@ -1556,7 +1609,13 @@
                           "view":  "wyświetleń",
                           "selectVariant":  "Wybierz wariant",
                           "addToCart":  "Dodaj do koszyka",
-                          "relatedProducts":  "Powiązane produkty"
+                          "relatedProducts":  "Powiązane produkty",
+                          "loginToWishlist":  "Zaloguj się, aby dodać do listy życzeń",
+                          "copyLink":  "Kopiuj link",
+                          "shareOnTelegram":  "Telegram",
+                          "shareOnWhatsApp":  "WhatsApp",
+                          "shareOnFacebook":  "Facebook",
+                          "linkCopied":  "Link skopiowany!"
                       },
     "profile":  {
                     "loadingProfile":  "Ładowanie profilu...",
@@ -1569,6 +1628,11 @@
                     "goToMenu":  "Menu główne",
                     "goToMenuBtn":  "Przejdź do menu",
                     "myOrders":  "Moje zamówienia",
+                    "myWishlist":  "Moja lista życzeń",
+                    "emptyWishlist":  "Twoja lista życzeń jest pusta",
+                    "emptyWishlistHint":  "Przeglądaj katalog i zapisuj ulubione produkty.",
+                    "browseCatalog":  "Przeglądaj katalog",
+                    "removeFromWishlist":  "Usuń z listy życzeń",
                     "logout":  "Wyloguj się",
                     "back":  "Wstecz",
                     "dataUpdated":  "Dane zostały pomyślnie zaktualizowane",

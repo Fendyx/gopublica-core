@@ -1,10 +1,11 @@
 'use client';
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useCartStore } from '@/shared/store/cartStore';
 import { useCartToast } from '@/shared/ui/CartToast';
 import { Loader2, ShoppingBag } from 'lucide-react';
 import type { MenuItem, ProductVariant } from '@/entities/menu-item/types';
+import { resolveName } from '@/shared/lib/localization';
 
 export default function AddToCartButton({
   product,
@@ -14,6 +15,7 @@ export default function AddToCartButton({
   selectedVariant?: ProductVariant | null;
 }) {
   const t = useTranslations('productDetail');
+  const locale = useLocale();
   const addItem = useCartStore((s) => s.addItem);
   const { showToast } = useCartToast();
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ export default function AddToCartButton({
 
   const handleAdd = () => {
     setLoading(true);
-    const finalName = variantName ? `${product.name} (${variantName})` : product.name;
+    const finalName = variantName ? `${resolveName(product, locale)} (${variantName})` : resolveName(product, locale);
     addItem({
       uid: selectedVariant ? `${product._id}-${selectedVariant.id}` : product._id!,
       menuItemId: product._id!,

@@ -84,6 +84,8 @@ export type GradientDirection = 'to-r' | 'to-br' | 'to-b' | 'to-bl';
 
 export interface HeroCta {
   label?: string;
+  /** Per-locale button labels. Keys are locale codes (e.g. 'en', 'pl'). Fallback to `label` when missing. */
+  labelI18n?: Record<string, string>;
   /** Какой режим назначения ссылки: выбор секции или произвольный URL */
   targetMode?: CtaTargetMode;
   /** ID существующей секции на странице (когда targetMode === 'section') */
@@ -146,6 +148,8 @@ export interface BaseCarouselSettings {
   mode?: CarouselMode;
   /** Number of cards shown per row on desktop (md breakpoint). 3/4/5. */
   desktopItemsPerRow?: 3 | 4 | 5;
+  /** Number of cards shown per row on mobile (base breakpoint). 1/2/3. Default: 1. */
+  mobileItemsPerRow?: 1 | 2 | 3;
   /** Number of items to show per page/viewport (optional, for pagination) */
   limit?: number;
   /** Card variant for ecommerce mode - reuses existing ProductCardVariant */

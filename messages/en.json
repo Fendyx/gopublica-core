@@ -91,7 +91,8 @@
                                        "cancel":  "Cancel",
                                        "save":  "Save",
                                        "saving":  "Saving...",
-                                       "loading":  "Loading..."
+                                       "loading":  "Loading...",
+                                       "errorSave":  "Save error"
                                    },
                   "dashboardPage":  {
                                         "loading":  "Loading dashboard...",
@@ -242,7 +243,8 @@
                                       "selectPhoto":  "Select photo",
                                       "addToGallery":  "Add to gallery",
                                       "empty":  "Gallery is empty.",
-                                      "deleteConfirm":  "Delete image?"
+                                      "deleteConfirm":  "Delete image?",
+                                      "uploadHint":  "Upload an image via Cloudinary or paste a URL manually"
                                   },
                   "articlesManager":  {
                                           "title":  "Title",
@@ -506,12 +508,28 @@
                                                           "minimalistDesc":  "Only text \u0026 link",
                                                           "clean":  "Clean",
                                                           "cleanDesc":  "Image + name overlay",
-                                                          "verticalOverlay":  "Vertical Overlay",
-                                                          "verticalOverlayDesc":  "Vertical buttons",
                                                           "actionOverlay":  "Action + Overlay",
                                                           "actionOverlayDesc":  "Info below + overlay",
+                                                          "horizontal":  "Horizontal",
+                                                          "horizontalDesc":  "Side-by-side image & text",
+                                                          "badgeTop":  "Badge Top",
+                                                          "badgeTopDesc":  "Sale badge + slide-up Add",
+                                                          "splitAction":  "Split Action",
+                                                          "splitActionDesc":  "Quick view + Add on hover",
                                                           "showCategoryNav":  "Category Navigation Sidebar",
-                                                          "showCategoryNavDesc":  "Show a sticky sidebar with all product categories on the catalog page"
+                                                          "showCategoryNavDesc":  "Show a sticky sidebar with all product categories on the catalog page",
+                                                          "hasSearch":  "Global Search Bar",
+                                                          "hasSearchDesc":  "Show a search icon in the navbar that opens a command palette for searching products, categories, and brands",
+                                                          "bottomNav":  "Mobile Bottom Navigation",
+                                                          "bottomNavDesc":  "Show a bottom navigation bar on mobile devices with quick access to key pages",
+                                                          "bottomNavItems":  "Bottom Navigation Items",
+                                                          "bottomNavItemsDesc":  "Choose which links appear in the mobile bottom bar. Use arrows to reorder, toggle visibility.",
+                                                          "pdpGalleryLayout":  "Product Gallery Layout",
+                                                          "pdpGalleryLayoutDesc":  "Choose how product images are displayed on the product detail page.",
+                                                          "pdpGalleryClassic":  "Classic (Amazon)",
+                                                          "pdpGalleryThumbnailsLeft":  "Thumbnails Left (Shopify)",
+                                                          "pdpGalleryStackedGrid":  "Stacked Grid (Zara)",
+                                                          "pdpGalleryLookbook":  "Lookbook (Masonry)"
                                                       },
                                        "localization":  {
                                                             "activeLanguages":  "Active Languages",
@@ -746,6 +764,7 @@
                                       "ecommerceProducts":  "E-commerce Products",
                                       "menuItems":  "Menu Items",
                                       "itemsPerRow":  "Items per row (desktop)",
+                                      "itemsPerRowMobile":  "Items per row (mobile)",
                                       "items3":  "3 items",
                                       "items4":  "4 items",
                                       "items5":  "5 items",
@@ -1429,7 +1448,19 @@
                     "shopByCategory":  "SHOP BY CATEGORY",
                     "addedToCart":  "«{name}» added to cart",
                     "unavailable":  "Catalog unavailable",
-                    "ourProducts":  "Our products"
+                    "ourProducts":  "Our products",
+                    "filters":  "Filters",
+                    "clearAll":  "Clear all",
+                    "category":  "Category",
+                    "price":  "Price",
+                    "availability":  "Availability",
+                    "inStock":  "In stock",
+                    "outOfStock":  "Out of stock",
+                    "tags":  "Tags",
+                    "noItems":  "No items in this category yet.",
+                    "itemCount":  "{count} item(s)",
+                    "loading":  "Loading catalog...",
+                    "featured":  "Featured"
                 },
     "checkout":  {
                      "yourOrder":  "Your order",
@@ -1481,6 +1512,9 @@
                      "carrierOrlen":  "Orlen Paczka",
                      "carrierDpd":  "DPD Pickup",
                      "showAllCarriers":  "Show all carriers",
+                     "decreaseQuantity":  "Decrease quantity",
+                     "increaseQuantity":  "Increase quantity",
+                     "removeItem":  "Remove item",
                      "alerts":  {
                                     "selectLocker":  "Please select a parcel locker on the map.",
                                     "stripeNotInitialized":  "Stripe is not initialized",
@@ -1524,7 +1558,13 @@
                },
     "gallery":  {
                     "title":  "Gallery",
-                    "subtitle":  "Our Restaurant"
+                    "subtitle":  "Our Restaurant",
+                    "openPhoto":  "Open photo",
+                    "photo":  "Photo",
+                    "close":  "Close",
+                    "prevPhoto":  "Previous photo",
+                    "nextPhoto":  "Next photo",
+                    "photoOf":  "Photo {index}"
                 },
     "hero":  {
                  "booking":  "Book a table",
@@ -1537,7 +1577,8 @@
                  "title":  "Our menu",
                  "all":  "All dishes",
                  "emptyCategory":  "No dishes in this category.",
-                 "addToCart":  "Add to cart"
+                 "addToCart":  "Add to cart",
+                 "loading":  "Loading menu..."
              },
     "nav":  {
                 "home":  "Home",
@@ -1551,7 +1592,22 @@
                 "cart":  "Cart",
                 "partners":  "Partners",
                 "articles":  "Articles",
-                "more":  "More"
+                "more":  "More",
+                "search":  "Search...",
+                "call":  "Call"
+            },
+    "search":  {
+                "placeholder":  "Search products, categories, brands...",
+                "hint":  "Start typing to search products, categories, and brands...",
+                "noResults":  "No results found for \"",
+                "noResultsEnd":  "\"",
+                "products":  "Products",
+                "categories":  "Categories",
+                "brandsFilters":  "Brands & Filters",
+                "resultCount":  "{count} {count, plural, one {result} other {results}}",
+                "navigate":  "navigate",
+                "select":  "select",
+                "productCount":  "{count} {count, plural, one {product} other {products}}"
             },
     "order":  {
                   "cancel":  {
@@ -1591,7 +1647,13 @@
                           "view":  "view",
                           "selectVariant":  "Select a variant",
                           "addToCart":  "Add to Cart",
-                          "relatedProducts":  "Related Products"
+                          "relatedProducts":  "Related Products",
+                          "loginToWishlist":  "Log in to add to wishlist",
+                          "copyLink":  "Copy Link",
+                          "shareOnTelegram":  "Telegram",
+                          "shareOnWhatsApp":  "WhatsApp",
+                          "shareOnFacebook":  "Facebook",
+                          "linkCopied":  "Link copied!"
                       },
     "profile":  {
                     "loadingProfile":  "Loading profile...",
@@ -1604,6 +1666,11 @@
                     "goToMenu":  "Main menu",
                     "goToMenuBtn":  "Go to menu",
                     "myOrders":  "My Orders",
+                    "myWishlist":  "My Wishlist",
+                    "emptyWishlist":  "Your wishlist is empty",
+                    "emptyWishlistHint":  "Browse the catalog and save items you love.",
+                    "browseCatalog":  "Browse Catalog",
+                    "removeFromWishlist":  "Remove from wishlist",
                     "logout":  "Log out",
                     "back":  "Back",
                     "dataUpdated":  "Data updated successfully",

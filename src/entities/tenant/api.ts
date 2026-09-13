@@ -23,7 +23,7 @@ export interface TenantSettings {
     galleryStyle?: string;
     ecommerceLayout?: 'grid-3' | 'grid-4' | 'carousel' | 'dynamic';
     radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay' | 'clean';
+    productCardVariant?: 'overlay' | 'action-bar' | 'minimal' | 'horizontal' | 'action-overlay' | 'clean' | 'badge-top' | 'split-action';
     pageBgColor?: string;
   };
   features: {
@@ -35,6 +35,20 @@ export interface TenantSettings {
     hasOnlineOrdering: boolean;
     hasJobApplications?: boolean;
     showCategoryNav?: boolean;
+    hasSearch?: boolean;
+    bottomNav?: {
+      enabled: boolean;
+      items: Array<{
+        id: string;
+        type: 'home' | 'catalog' | 'search' | 'profile' | 'custom' | 'external';
+        slug?: string;
+        href?: string;
+        label?: string;
+        icon?: string;
+        isVisible: boolean;
+        order: number;
+      }>;
+    };
   };
   phone: string;
   address: string;

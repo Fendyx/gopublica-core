@@ -7,7 +7,7 @@ export interface AttributeRef {
   type: AttributeType;
   attributeId: string;
 }
-export type ProductCardVariant = 'overlay' | 'action-bar' | 'minimal' | 'hover-vertical' | 'action-overlay' | 'clean';
+export type ProductCardVariant = 'overlay' | 'action-bar' | 'minimal' | 'horizontal' | 'action-overlay' | 'clean' | 'badge-top' | 'split-action';
 
 export interface ProductVariant {
   id: string;

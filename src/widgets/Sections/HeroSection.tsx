@@ -79,8 +79,10 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
   // ─── Определяем, есть ли контент для отображения ───
   const hasTitle = Boolean(translations.title);
   const hasSubtitle = Boolean(translations.subtitle);
-  const hasPrimaryCta = Boolean(settings.primaryCta?.label);
-  const hasSecondaryCta = Boolean(settings.secondaryCta?.label);
+  const primaryCtaLabel = settings.primaryCta?.labelI18n?.[locale] || settings.primaryCta?.label || '';
+  const secondaryCtaLabel = settings.secondaryCta?.labelI18n?.[locale] || settings.secondaryCta?.label || '';
+  const hasPrimaryCta = Boolean(primaryCtaLabel);
+  const hasSecondaryCta = Boolean(secondaryCtaLabel);
   const hasContent = hasTitle || hasSubtitle || hasPrimaryCta || hasSecondaryCta;
 
   // ─── Embla Carousel ───
@@ -424,7 +426,7 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
                   className={ctaStyles.className}
                   style={ctaStyles.style}
                 >
-                  {settings.primaryCta!.label}
+                  {primaryCtaLabel}
                 </Link>
               );
             })()}
@@ -438,7 +440,7 @@ export default function HeroSection({ section, locale, tenantDomain }: HeroSecti
                   className={ctaStyles.className}
                   style={ctaStyles.style}
                 >
-                  {settings.secondaryCta!.label}
+                  {secondaryCtaLabel}
                 </Link>
               );
             })()}
