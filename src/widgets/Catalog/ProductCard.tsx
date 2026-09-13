@@ -117,18 +117,17 @@ function CardImage({ product, locale, aspectRatio = '1/1' }: { product: MenuItem
 export default function ProductCard({ product, variant, locale, currencySymbol = 'zł', imageAspectRatio = '1/1' }: Props) {
   const { branchSlug } = useParams();
   const branchSlugStr = Array.isArray(branchSlug) ? branchSlug[0] : branchSlug;
-  const safeVariant = variant === 'hover-vertical' ? 'action-bar' : variant;
 
   return (
     <div className="group">
-      {safeVariant === 'overlay' && <OverlayCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {safeVariant === 'action-bar' && <ActionBarCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {safeVariant === 'minimal' && <MinimalCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {safeVariant === 'horizontal' && <HorizontalCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {safeVariant === 'action-overlay' && <ActionOverlayCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {safeVariant === 'clean' && <CleanCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {safeVariant === 'badge-top' && <BadgeTopCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
-      {safeVariant === 'split-action' && <SplitActionCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'overlay' && <OverlayCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'action-bar' && <ActionBarCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'minimal' && <MinimalCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'horizontal' && <HorizontalCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'action-overlay' && <ActionOverlayCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'clean' && <CleanCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'badge-top' && <BadgeTopCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
+      {variant === 'split-action' && <SplitActionCard product={product} locale={locale} branchSlug={branchSlugStr} currencySymbol={currencySymbol} imageAspectRatio={imageAspectRatio} />}
     </div>
   );
 }
