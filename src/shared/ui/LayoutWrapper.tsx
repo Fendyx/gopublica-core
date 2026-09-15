@@ -52,6 +52,30 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     && !isAdmin
     && !isCheckout
 
+  // Keep data-theme in sync with the route context. The theme-init script only
+  // runs on full page loads; on client-side navigations (e.g. public page →
+  // /admin) nothing else corrects a public theme value, which leaves admin
+  // glass tokens undefined and surfaces transparent. Mirrors the init script's
+  // mapping logic.
+  useEffect(() => {
+    if (!mounted) return
+    const root = document.documentElement
+    const current = root.getAttribute('data-theme')
+    if (isAdmin) {
+      if (current !== 'admin-light' && current !== 'admin-dark') {
+        const next = current === 'dark' ? 'admin-dark' : 'admin-light'
+        root.setAttribute('data-theme', next)
+        try { localStorage.setItem('theme', next) } catch {}
+      }
+    } else if (!isCheckout) {
+      if (current === 'admin-light' || current === 'admin-dark') {
+        const next = current === 'admin-dark' ? 'dark' : 'light'
+        root.setAttribute('data-theme', next)
+        try { localStorage.setItem('theme', next) } catch {}
+      }
+    }
+  }, [mounted, isAdmin, isCheckout])
+
   // Админка - свой контейнер с изоляцией тем (admin-light / admin-dark)
   if (isAdmin) {
     return (

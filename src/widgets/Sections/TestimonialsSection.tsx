@@ -62,6 +62,7 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [snapCount, setSnapCount] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
 
@@ -75,8 +76,18 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
   useEffect(() => {
     if (!emblaApi) return;
     onSelect();
+    // Dots follow carousel snap points (accounts for multiple slides per view)
+    setSnapCount(emblaApi.scrollSnapList().length);
+    const onReInit = () => {
+      onSelect();
+      setSnapCount(emblaApi.scrollSnapList().length);
+    };
     emblaApi.on('select', onSelect);
-    return () => { emblaApi.off('select', onSelect); };
+    emblaApi.on('reInit', onReInit);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onReInit);
+    };
   }, [emblaApi, onSelect]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
@@ -88,7 +99,7 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
     <SectionBackground background={settings.background} className="py-12 md:py-16">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           {sectionTitle && (
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{sectionTitle}</h2>
           )}
@@ -115,8 +126,8 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
         </div>
 
         {/* Carousel */}
-        <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex items-stretch gap-4 md:gap-6">
+        <div ref={emblaRef} className="overflow-hidden cursor-grab active:cursor-grabbing">
+          <div className="flex items-stretch -ml-4 md:-ml-6">
             {items.map((item) => {
               const reviewHtml =
                 item.bodyI18n?.[locale] ||
@@ -130,12 +141,12 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
 
               const cardContent = (
                 <div
-                  className={`flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33%] ${
+                  className={`h-full w-full ${
                     cardStyle === 'card'
-                      ? 'h-full rounded-xl border bg-card p-6 shadow-sm'
+                      ? 'flex h-full flex-col rounded-xl border bg-card p-6 shadow-sm transition-shadow hover:shadow-md'
                       : cardStyle === 'quote'
-                        ? 'h-full rounded-xl border-l-4 border-primary bg-card/50 p-6 pl-8'
-                        : 'h-full p-4'
+                        ? 'flex h-full flex-col rounded-xl border-l-4 border-primary bg-card/50 p-6 pl-8'
+                        : 'flex h-full flex-col p-4'
                   }`}
                 >
                   {/* Quote icon for 'quote' style */}
@@ -146,24 +157,26 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
                   {/* Rating */}
                   <StarRating rating={rating} show={showRating} />
 
-                  {/* Review text */}
+                  {/* Review text – grows to push author row to card bottom */}
                   {(reviewHtml && reviewHtml.includes('<')) ? (
                     <div
-                      className={`text-foreground leading-relaxed ${
+                      className={`flex-1 text-foreground leading-relaxed text-sm md:text-base ${
                         cardStyle === 'card' ? 'mt-3' : cardStyle === 'quote' ? 'mt-2 italic' : 'mt-2'
                       } [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_b]:font-semibold [&_i]:italic`}
                       dangerouslySetInnerHTML={{ __html: reviewHtml }}
                     />
                   ) : reviewHtml ? (
-                    <p className={`text-foreground leading-relaxed ${
+                    <p className={`flex-1 text-foreground leading-relaxed text-sm md:text-base ${
                       cardStyle === 'card' ? 'mt-3' : cardStyle === 'quote' ? 'mt-2 italic' : 'mt-2'
                     }`}>
                       {reviewHtml}
                     </p>
-                  ) : null}
+                  ) : (
+                    <div className="flex-1" />
+                  )}
 
                   {/* Author */}
-                  <div className="flex items-center gap-3 mt-4">
+                  <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border/60">
                     {avatarUrl && (
                       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
                         <Image
@@ -183,25 +196,36 @@ export default function TestimonialsSection({ section, locale }: TestimonialsSec
               );
 
               return linkUrl ? (
-                <a key={item._id} href={linkUrl} target="_blank" rel="noopener noreferrer" className="block">
+                <a
+                  key={item._id}
+                  href={linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-[0_0_100%] min-w-0 pl-4 md:pl-6 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]"
+                >
                   {cardContent}
                 </a>
               ) : (
-                <div key={item._id}>{cardContent}</div>
+                <div
+                  key={item._id}
+                  className="flex-[0_0_100%] min-w-0 pl-4 md:pl-6 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]"
+                >
+                  {cardContent}
+                </div>
               );
             })}
           </div>
         </div>
 
-        {/* Dots */}
+        {/* Dots – one per carousel snap point */}
         {items.length > 1 && (
           <div className="flex justify-center gap-2 mt-6">
-            {items.map((_, i) => (
+            {Array.from({ length: snapCount || items.length }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => emblaApi?.scrollTo(i)}
                 className={`h-2 rounded-full transition-all ${
-                  i === selectedIndex ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30'
+                  i === selectedIndex ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
                 }`}
                 aria-label={`Go to slide ${i + 1}`}
               />

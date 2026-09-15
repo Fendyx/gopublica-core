@@ -80,6 +80,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             (function() {
               try {
                 var t = localStorage.getItem('theme');
+                // Admin pages use their own theme namespace (admin-light/admin-dark).
+                // The shared 'theme' key may hold a public value ('light'/'dark') or be
+                // empty (first visit, cleared storage). Map it so the admin glass tokens
+                // (--glass-bg, --surface-elevated, ...) are always defined — otherwise
+                // admin surfaces render transparent before a manual theme toggle.
+                if (window.location.pathname.indexOf('/admin') === 0) {
+                  if (t !== 'admin-light' && t !== 'admin-dark') {
+                    t = (t === 'dark') ? 'admin-dark' : 'admin-light';
+                    localStorage.setItem('theme', t);
+                  }
+                } else if (t === 'admin-light' || t === 'admin-dark') {
+                  // Reverse mapping: an admin theme must not leak onto public pages.
+                  t = (t === 'admin-dark') ? 'dark' : 'light';
+                  localStorage.setItem('theme', t);
+                }
                 document.documentElement.setAttribute('data-theme', t || 'light');
               } catch(e) {
                 document.documentElement.setAttribute('data-theme', 'light');
