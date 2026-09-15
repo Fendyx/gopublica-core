@@ -152,6 +152,7 @@ export default function Navbar() {
             {hasSearch && (
               <div className="hidden sm:block relative">
                 <button
+                  data-omni-search-trigger
                   onClick={toggleSearch}
                   className="flex items-center gap-2 px-4 py-2 min-w-[240px] rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors border border-border-light"
                   aria-label={t('search')}
@@ -221,6 +222,7 @@ export default function Navbar() {
             {/* Mobile search trigger - opens mobile search input */}
             {hasSearch && (
               <button
+                data-omni-search-trigger
                 onClick={toggleSearch}
                 className="lg:hidden p-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
                 aria-label={t('search')}
@@ -309,7 +311,7 @@ export default function Navbar() {
 
       {/* ── Mobile search dropdown (below navbar) ──────────────────────── */}
       {hasSearch && searchOpen && (
-        <div className="lg:hidden relative border-t border-border-light bg-background">
+        <div data-omni-search className="lg:hidden relative border-t border-border-light bg-background">
           <OmniSearchDropdown open={searchOpen} onOpenChange={(v) => v ? openSearch() : closeSearch()} />
         </div>
       )}

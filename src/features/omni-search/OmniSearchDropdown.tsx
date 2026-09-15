@@ -116,14 +116,24 @@ export default function OmniSearchDropdown({
   }, [open])
 
   // ── Click outside to close ───────────────────────────────────────────────
+  // NOTE: two instances of this dropdown are mounted at the same time (desktop
+  // + mobile, one of them hidden via CSS). A click inside the visible instance
+  // must NOT be treated as "outside" by the hidden sibling — otherwise the
+  // dropdown unmounts on mousedown, the click never lands on the result button
+  // and navigation never happens (Enter still worked because it emits no mousedown).
   useEffect(() => {
     if (!open) return
 
     const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (!dropdownRef.current?.contains(target) && !inputRef.current?.contains(target)) {
-        onOpenChange(false)
-      }
+      const target = e.target as Element | null
+      if (!target) return
+      if (dropdownRef.current?.contains(target)) return
+      if (inputRef.current?.contains(target)) return
+      // Click inside any omni-search dropdown instance (visible one) — keep open
+      if (target.closest?.('[data-omni-search]')) return
+      // Click on the navbar trigger button — it toggles via its own onClick
+      if (target.closest?.('[data-omni-search-trigger]')) return
+      onOpenChange(false)
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -173,6 +183,7 @@ export default function OmniSearchDropdown({
   return (
     <div
       ref={dropdownRef}
+      data-omni-search
       className="absolute top-full left-0 min-w-[500px] mt-2 z-50 bg-popover border border-border rounded-xl shadow-lg overflow-hidden"
     >
       {/* ── Inline Search Input ───────────────────────────────────────── */}
