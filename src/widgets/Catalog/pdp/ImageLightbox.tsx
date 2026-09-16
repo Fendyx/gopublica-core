@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -12,16 +12,13 @@ interface ImageLightboxProps {
 }
 
 /**
- * Full-screen image lightbox with prev/next navigation.
+ * Full-screen image lightbox with prev/next navigation and touch swipe.
  * Opens when a user clicks on a product image.
  */
 export default function ImageLightbox({ images, initialIndex, productName, open, onClose }: ImageLightboxProps) {
   const [current, setCurrent] = useState(initialIndex);
-
-  // Sync with external index changes
-  useEffect(() => {
-    setCurrent(initialIndex);
-  }, [initialIndex]);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const prev = useCallback(() => {
     setCurrent(i => (i > 0 ? i - 1 : images.length - 1));
@@ -30,6 +27,28 @@ export default function ImageLightbox({ images, initialIndex, productName, open,
   const next = useCallback(() => {
     setCurrent(i => (i < images.length - 1 ? i + 1 : 0));
   }, [images.length]);
+
+  // Touch swipe navigation (horizontal only; vertical gestures pass through)
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const onTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current == null || touchStartY.current == null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      const dy = e.changedTouches[0].clientY - touchStartY.current;
+      touchStartX.current = null;
+      touchStartY.current = null;
+      // Horizontal swipe threshold; ignore mostly-vertical gestures
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) next();
+        else prev();
+      }
+    },
+    [next, prev],
+  );
 
   // Keyboard navigation
   useEffect(() => {
@@ -59,6 +78,8 @@ export default function ImageLightbox({ images, initialIndex, productName, open,
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
       onClick={onClose}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       {/* Close button */}
       <button

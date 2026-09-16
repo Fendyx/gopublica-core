@@ -1,102 +1,59 @@
 'use client';
 import Image from 'next/image';
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { useTranslations } from 'next-intl';
 
+interface ProductGalleryProps {
+  images: string[];
+  /** Called after a tap (not a swipe/drag) on the main image area. */
+  onTapImage?: (index: number) => void;
+}
+
 /**
- * ProductGallery - mobile touch-swipeable carousel.
+ * ProductGallery - mobile product image carousel (Amazon/Allegro style).
  *
- * Renders all images in a horizontal track. User swipes left/right
- * to navigate between images. Dot indicators show current position.
- * Also supports clicking/tapping the main area to open lightbox.
+ * Built on Embla Carousel for native-feeling touch swipe with momentum,
+ * rubber-band edges and correct tap-vs-drag detection. Vertical page
+ * scrolling is preserved (touch-action: pan-y); only horizontal drags
+ * move the carousel.
  */
-export default function ProductGallery({ images }: { images: string[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const isDragging = useRef(false);
+export default function ProductGallery({ images, onTapImage }: ProductGalleryProps) {
   const t = useTranslations('gallery');
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: 'start',
+    containScroll: 'trimSnaps',
+    dragFree: false,
+    duration: 25,
+  });
+  const [activeIdx, setActiveIdx] = useState(0);
 
-  const goTo = useCallback((idx: number) => {
-    if (!trackRef.current) return;
-    const clamped = Math.max(0, Math.min(idx, images.length - 1));
-    trackRef.current.style.transform = `translateX(-${clamped * 100}%)`;
-    setActiveIdx(clamped);
-  }, [images.length]);
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setActiveIdx(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
 
-  // Handle touch start
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    isDragging.current = false;
-    if (trackRef.current) {
-      trackRef.current.style.transition = 'none';
-    }
-  }, []);
-
-  // Handle touch move - translate track in real-time
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStart.current || !trackRef.current) return;
-    const dx = e.touches[0].clientX - touchStart.current.x;
-    const dy = e.touches[0].clientY - touchStart.current.y;
-
-    // Only handle horizontal swipes (ignore vertical scrolling)
-    if (!isDragging.current) {
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-        isDragging.current = true;
-      } else if (Math.abs(dy) > Math.abs(dx)) {
-        touchStart.current = null;
-        return;
-      }
-    }
-
-    if (isDragging.current) {
-      e.preventDefault();
-      const offset = -(activeIdx * 100) + (dx / trackRef.current.parentElement!.clientWidth) * 100;
-      trackRef.current.style.transform = `translateX(${offset}%)`;
-    }
-  }, [activeIdx]);
-
-  // Handle touch end - snap to nearest image
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStart.current || !trackRef.current) return;
-    touchStart.current = null;
-
-    trackRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-
-    if (!isDragging.current) return;
-
-    const dx = e.changedTouches[0].clientX - (e as any)._startX || 0;
-    // Use the last known delta from touchmove
-    const endX = e.changedTouches[0].clientX;
-
-    // Determine direction based on minimum swipe distance
-    const containerWidth = trackRef.current.parentElement!.clientWidth;
-    // We need the original start position - approximate from current position
-    // Simple approach: if the user swiped significantly, go to prev/next
-    if (isDragging.current) {
-      // The drag has been tracking - just check if we moved enough
-      // Use a threshold of 20% of container width
-      const currentTransform = trackRef.current.style.transform;
-      const match = currentTransform.match(/translateX\(([-\d.]+)%\)/);
-      if (match) {
-        const currentPercent = parseFloat(match[1]);
-        const targetIdx = Math.round(-currentPercent / 100);
-        goTo(targetIdx);
-      } else {
-        goTo(activeIdx);
-      }
-    }
-  }, [activeIdx, goTo]);
-
-  // Fallback: arrow keys for keyboard nav
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goTo(activeIdx - 1);
-      if (e.key === 'ArrowRight') goTo(activeIdx + 1);
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [activeIdx, goTo]);
+  }, [emblaApi, onSelect]);
+
+  const goTo = useCallback(
+    (idx: number) => {
+      emblaApi?.scrollTo(idx);
+    },
+    [emblaApi],
+  );
+
+  // Tap (without drag) opens the lightbox at the current slide.
+  // Embla suppresses clicks that follow a drag, so this only fires on taps.
+  const handleImageClick = useCallback(() => {
+    onTapImage?.(activeIdx);
+  }, [onTapImage, activeIdx]);
 
   if (images.length === 0) {
     return (
@@ -109,38 +66,33 @@ export default function ProductGallery({ images }: { images: string[] }) {
   }
 
   return (
-    <div className="relative w-full h-full select-none overflow-hidden">
-      {/* Swipeable track */}
-      <div
-        ref={trackRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        className="flex h-full transition-transform"
-        style={{ width: `${images.length * 100}%`, transform: 'translateX(0%)' }}
-      >
-        {images.map((img, idx) => (
-          <div
-            key={idx}
-            className="relative h-full flex-shrink-0"
-            style={{ width: `${100 / images.length}%` }}
-          >
-            <Image
-              src={img}
-              alt=""
-              fill
-              sizes="100vw"
-              className="object-contain"
-              priority={idx === 0}
-              draggable={false}
-            />
-          </div>
-        ))}
+    <div className="relative w-full h-full select-none">
+      {/* Embla viewport */}
+      <div ref={emblaRef} className="h-full overflow-hidden">
+        <div className="flex h-full">
+          {images.map((img, idx) => (
+            <div
+              key={idx}
+              className="relative min-w-0 flex-[0_0_100%] touch-pan-y"
+              onClick={handleImageClick}
+            >
+              <Image
+                src={img}
+                alt={`${t('photo')} ${idx + 1}`}
+                fill
+                sizes="100vw"
+                className="object-contain pointer-events-none"
+                priority={idx === 0}
+                draggable={false}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Dot indicators */}
       {images.length > 1 && (
-        <div className="absolute bottom-5 inset-x-0 flex items-center justify-center gap-1.5 z-10 pointer-events-none">
+        <div className="absolute bottom-2 inset-x-0 flex items-center justify-center gap-1.5 z-10 pointer-events-none">
           {images.map((_, idx) => (
             <button
               key={idx}
@@ -148,7 +100,7 @@ export default function ProductGallery({ images }: { images: string[] }) {
               className={`block h-px transition-all duration-300 bg-foreground/80 pointer-events-auto ${
                 idx === activeIdx ? 'w-6 opacity-100' : 'w-2 opacity-30'
               }`}
-              aria-label={`Go to image ${idx + 1}`}
+              aria-label={`${t('photo')} ${idx + 1}`}
             />
           ))}
         </div>

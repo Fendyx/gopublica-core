@@ -119,13 +119,15 @@
                                                   },
                                         "setupChecklist":  "Setup checklist",
                                         "checklist":  {
-                                                          "setup.menu":  "Add menu items",
-                                                          "setup.services":  "Add services",
-                                                          "setup.masters":  "Add masters",
-                                                          "setup.gallery":  "Upload gallery photos",
-                                                          "setup.contact":  "Fill in contact details",
-                                                          "setup.hours":  "Set working hours",
-                                                          "setup.jobForm":  "Configure job form"
+                                                          "setup": {
+                                                              "menu":  "Add menu items",
+                                                              "services":  "Add services",
+                                                              "masters":  "Add masters",
+                                                              "gallery":  "Upload gallery photos",
+                                                              "contact":  "Fill in contact details",
+                                                              "hours":  "Set working hours",
+                                                              "jobForm":  "Configure job form"
+                                                          }
                                                       },
                                         "recentActivity":  "Recent activity",
                                         "noActivity":  "No recent activity.",
@@ -459,7 +461,7 @@
                                                     "general":  "General",
                                                     "appearance":  "Appearance",
                                                     "localization":  "Localization",
-                                                    "seoAndAlerts":  "SEO \u0026 Alerts",
+                                                    "seoAndAlerts":  "SEO",
                                                     "legal":  "Legal",
                                                     "subVenues":  "Sub-venues",
                                                     "navigation":  "Navigation"
@@ -496,7 +498,7 @@
                                                           "radiusSubtle":  "Subtle (4px)",
                                                           "radiusDefault":  "Default (10px)",
                                                           "radiusRounded":  "Rounded (16px)",
-                                                          "categoryBgColor":  "Category Block Background",
+                                                          "pageBgColorLabel":  "Page Background",
                                                           "pageBgColor":  "Page Background",
                                                           "emptyDefault":  "Empty = Default",
                                                           "productCardStyle":  "Product Card Style",
@@ -566,7 +568,22 @@
                                                       "reset":  "Reset"
                                                   },
                                        "selectBranchFirst":  "Please select a branch first",
-                                       "cancel":  "Cancel"
+                                       "cancel":  "Cancel",
+                                       "days":  {
+                                                    "monday":  "Monday",
+                                                    "tuesday":  "Tuesday",
+                                                    "wednesday":  "Wednesday",
+                                                    "thursday":  "Thursday",
+                                                    "friday":  "Friday",
+                                                    "saturday":  "Saturday",
+                                                    "sunday":  "Sunday"
+                                                },
+                                       "nav":  {
+                                                    "home":  "Home",
+                                                    "catalog":  "Products",
+                                                    "search":  "Search",
+                                                    "profile":  "Profile"
+                                                }
                                    },
                   "days":  {
                                "monday":  "Monday",

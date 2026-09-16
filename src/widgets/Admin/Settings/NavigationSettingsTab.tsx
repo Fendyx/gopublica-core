@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import {
   DndContext,
@@ -22,6 +22,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useTenant } from '@/entities/tenant/TenantContext'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { SYSTEM_PAGES, isSystemPageEnabled, buildDefaultNavigationConfig } from '@/shared/lib/navigation'
+import { getAdminLocale } from '@/shared/lib/adminLocale'
 import type { NavItem, NavigationConfig, Features } from '@/entities/tenant/types'
 import type { CustomPage } from '@/entities/branch/types'
 import { authFetch } from '@/shared/lib/authFetch'
@@ -178,25 +179,71 @@ export default function NavigationSettingsTab() {
   const tenant = useTenant()
   const { selectedBranch } = useBranch()
 
-  const [navConfig, setNavConfig] = useState<NavigationConfig>({ items: [], dropdownLabel: '' })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [loading, setLoading] = useState(true)
 
-  const features: Features = tenant?.features || {} as Features
+  const features: Features = useMemo(
+    () => tenant?.features || ({} as Features),
+    [tenant?.features]
+  )
 
-  // Load navigation config on mount
-  useEffect(() => {
-    if (!tenant) return
-
-    if (tenant.navigation && tenant.navigation.items.length > 0) {
-      setNavConfig(tenant.navigation)
-    } else {
-      // Build default config from features + custom pages
-      setNavConfig(buildDefaultNavigationConfig(features, selectedBranch?.customPages))
+  // Merge in active custom pages that are missing from the saved config.
+  // Custom pages created before any nav config was saved (or before the
+  // backend auto-sync existed) would otherwise never appear in this
+  // editor, making them impossible to manage in the navbar settings.
+  const mergeMissingCustomPages = useCallback((items: NavItem[]): NavItem[] => {
+    const branchCustomPages = selectedBranch?.customPages || []
+    const configuredKeys = new Set<string>()
+    for (const item of items) {
+      if (item.type !== 'custom') continue
+      configuredKeys.add(item.slug)
+      if (item.id.startsWith('custom-')) configuredKeys.add(item.id.slice(7))
     }
-    setLoading(false)
-  }, [tenant, selectedBranch])
+    const missing = branchCustomPages.filter(
+      (cp) => cp.isActive && !configuredKeys.has(cp.slug)
+    )
+    if (missing.length === 0) return items
+    const adminLocale = getAdminLocale()
+    const maxOrder = items.reduce((max, i) => Math.max(max, i.order || 0), 0)
+    return [
+      ...items,
+      ...missing.map((cp, i) => ({
+        id: `custom-${cp.slug}`,
+        type: 'custom' as const,
+        slug: cp.slug,
+        label: cp.titleI18n?.[adminLocale] || cp.title,
+        isVisible: true,
+        placement: 'dropdown' as const,
+        order: maxOrder + 1 + i,
+      })),
+    ]
+  }, [selectedBranch])
+
+  // Derive the effective nav config: saved tenant config (with missing custom
+  // pages merged in) or a fresh default built from features + custom pages.
+  const buildConfig = useCallback((): NavigationConfig => {
+    const savedNav = tenant?.navigation
+    if (savedNav && savedNav.items.length > 0) {
+      return {
+        items: mergeMissingCustomPages([...savedNav.items]),
+        dropdownLabel: savedNav.dropdownLabel || '',
+      }
+    }
+    return buildDefaultNavigationConfig(features, selectedBranch?.customPages)
+  }, [tenant, mergeMissingCustomPages, features, selectedBranch])
+
+  // Re-derive the config whenever the tenant or selected branch changes.
+  // Uses the React-recommended "adjust state during render" pattern instead
+  // of syncing state inside an effect (avoids cascading renders).
+  const configKey = `${tenant ? 'ready' : 'pending'}:${selectedBranch?._id ?? ''}`
+  const [navConfig, setNavConfig] = useState<NavigationConfig>(buildConfig)
+  const [prevConfigKey, setPrevConfigKey] = useState(configKey)
+  if (prevConfigKey !== configKey) {
+    setPrevConfigKey(configKey)
+    setNavConfig(buildConfig())
+  }
+
+  const loading = !tenant
 
   const sensors = useSensors(
     useSensor(PointerSensor),

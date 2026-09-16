@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import SectionBackground from './SectionBackground';
+import { Plus, Minus } from 'lucide-react';
 
 interface AccordionSectionProps {
   section: BranchSection;
@@ -22,11 +23,10 @@ function hasAttrTrue(item: BranchSectionItem, key: string): boolean {
 }
 
 /**
- * AccordionSection – renders a list of expandable FAQ-style items.
+ * AccordionSection – renders a clean, modern FAQ-style accordion.
  *
- * Each item is a BranchSectionItem with:
- *  - title  → item.translations?.[locale]?.title  (fallback: en, then slug)
- *  - body   → item.bodyI18n?.[locale] || item.body (HTML from TipTap)
+ * Design: Google-inspired minimal FAQ with smooth expand/collapse,
+ * subtle hover states, and a plus/minus icon animation.
  */
 export default function AccordionSection({ section, locale }: AccordionSectionProps) {
   const settings = (section.settings || {}) as AccordionSettings;
@@ -34,7 +34,6 @@ export default function AccordionSection({ section, locale }: AccordionSectionPr
 
   const sectionTitle = section.translations?.[locale]?.title;
 
-  // Items that should be open on initial load
   const defaultOpenValues = items
     .filter((item) => hasAttrTrue(item, 'isOpenByDefault'))
     .map((item) => item._id);
@@ -42,20 +41,39 @@ export default function AccordionSection({ section, locale }: AccordionSectionPr
   if (items.length === 0) return null;
 
   return (
-    <SectionBackground background={settings.background} className="py-12 md:py-16">
-      <div className="relative z-10 w-[90%] max-w-4xl mx-auto px-4 sm:px-6">
+    <SectionBackground background={settings.background} className="py-14 md:py-20">
+      {/* State-dependent icon styles via scoped CSS */}
+      <style>{`
+        .faq-accordion [data-state=open] .accordion-icon {
+          background-color: var(--primary, oklch(0.205 0 0));
+          background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, transparent);
+          color: var(--primary, #3b82f6);
+        }
+        .faq-accordion [data-state=open] .icon-plus {
+          display: none;
+        }
+        .faq-accordion [data-state=open] .icon-minus {
+          display: block;
+        }
+      `}</style>
+
+      <div className="relative z-10 w-[92%] max-w-3xl mx-auto px-4 sm:px-6">
+        {/* Section title */}
         {sectionTitle && (
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-center mb-8 md:mb-10">
-            {sectionTitle}
-          </h2>
+          <div className="text-center mb-10 md:mb-14">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
+              {sectionTitle}
+            </h2>
+            <div className="w-12 h-0.5 bg-primary mx-auto rounded-full" />
+          </div>
         )}
 
         <Accordion
           type="multiple"
           defaultValue={defaultOpenValues}
-          className="w-full space-y-3"
+          className="w-full faq-accordion"
         >
-          {items.map((item) => {
+          {items.map((item, index) => {
             const title =
               item.translations?.[locale]?.title ||
               item.translations?.en?.title ||
@@ -67,28 +85,72 @@ export default function AccordionSection({ section, locale }: AccordionSectionPr
               item.body ||
               '';
 
+            const isFirst = index === 0;
+            const isLast = index === items.length - 1;
+
             return (
               <AccordionItem
                 key={item._id}
                 value={item._id}
-                className="rounded-lg border-none px-4 md:px-6 [&[data-slot=accordion-item]]:border-0"
+                className={`
+                  group/item border-t border-border/60
+                  ${isFirst ? 'border-t-0' : ''}
+                  ${isLast ? 'border-b' : ''}
+                `}
               >
-                <AccordionTrigger className="text-left text-base md:text-lg font-medium py-4 hover:no-underline">
+                <AccordionTrigger
+                  className="
+                    text-left text-[15px] md:text-base font-medium
+                    py-5 md:py-5 px-1
+                    hover:no-underline
+                    transition-all duration-150
+                    hover:bg-foreground/[0.02] dark:hover:bg-foreground/[0.04]
+                    hover:px-3 rounded-lg
+                    gap-4
+                    [&[data-state=open]]:text-primary
+                    [&[data-state=open]]:px-3
+                  "
+                  icon={
+                    <span className="
+                      accordion-icon
+                      flex items-center justify-center
+                      w-7 h-7 shrink-0
+                      rounded-full
+                      bg-muted/70
+                      transition-all duration-200
+                    ">
+                      <Plus
+                        size={14}
+                        strokeWidth={2.5}
+                        className="icon-plus transition-transform duration-200"
+                      />
+                      <Minus
+                        size={14}
+                        strokeWidth={2.5}
+                        className="icon-minus transition-transform duration-200 hidden"
+                      />
+                    </span>
+                  }
+                >
                   {title}
                 </AccordionTrigger>
-                <AccordionContent className="pb-4">
+                <AccordionContent className="px-1 pb-5 pt-0">
                   {content ? (
                     <div
-                      className="prose prose-sm dark:prose-invert max-w-none
+                      className="
+                        text-sm md:text-[15px] text-muted-foreground leading-relaxed
+                        prose prose-sm dark:prose-invert max-w-none
                         prose-p:text-muted-foreground prose-p:leading-relaxed
-                        prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                        prose-strong:font-semibold
+                        prose-a:text-primary prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-primary/80
+                        prose-strong:text-foreground prose-strong:font-semibold
                         prose-ul:list-disc prose-ol:list-decimal
-                        prose-li:marker:text-primary"
+                        prose-li:marker:text-muted-foreground/50
+                        prose-li:py-0.5
+                      "
                       dangerouslySetInnerHTML={{ __html: content }}
                     />
                   ) : (
-                    <p className="text-sm text-muted-foreground">—</p>
+                    <p className="text-sm text-muted-foreground/60 italic">—</p>
                   )}
                 </AccordionContent>
               </AccordionItem>

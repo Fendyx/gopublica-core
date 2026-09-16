@@ -119,13 +119,15 @@
                                                   },
                                         "setupChecklist":  "Lista konfiguracji",
                                         "checklist":  {
-                                                          "setup.menu":  "Dodaj pozycje do menu",
-                                                          "setup.services":  "Dodaj usługi",
-                                                          "setup.masters":  "Dodaj specjalistów",
-                                                          "setup.gallery":  "Prześlij zdjęcia do galerii",
-                                                          "setup.contact":  "Uzupełnij dane kontaktowe",
-                                                          "setup.hours":  "Ustaw godziny otwarcia",
-                                                          "setup.jobForm":  "Skonfiguruj formularz rekrutacji"
+                                                          "setup": {
+                                                              "menu":  "Dodaj pozycje do menu",
+                                                              "services":  "Dodaj usługi",
+                                                              "masters":  "Dodaj specjalistów",
+                                                              "gallery":  "Prześlij zdjęcia do galerii",
+                                                              "contact":  "Uzupełnij dane kontaktowe",
+                                                              "hours":  "Ustaw godziny otwarcia",
+                                                              "jobForm":  "Skonfiguruj formularz rekrutacji"
+                                                          }
                                                       },
                                         "recentActivity":  "Ostatnia aktywność",
                                         "noActivity":  "Brak ostatniej aktywności.",
@@ -459,7 +461,7 @@
                                                     "general":  "Ogólne",
                                                     "appearance":  "Wygląd",
                                                     "localization":  "Lokalizacja",
-                                                    "seoAndAlerts":  "SEO i Alerty",
+                                                    "seoAndAlerts":  "SEO",
                                                     "legal":  "Prawne",
                                                     "subVenues":  "Podfilie",
                                                     "navigation":  "Nawigacja"
@@ -566,7 +568,22 @@
                                                       "reset":  "Resetuj"
                                                   },
                                        "selectBranchFirst":  "Najpierw wybierz filię",
-                                       "cancel":  "Anuluj"
+                                       "cancel":  "Anuluj",
+                                       "days":  {
+                                                    "monday":  "Poniedziałek",
+                                                    "tuesday":  "Wtorek",
+                                                    "wednesday":  "Środa",
+                                                    "thursday":  "Czwartek",
+                                                    "friday":  "Piątek",
+                                                    "saturday":  "Sobota",
+                                                    "sunday":  "Niedziela"
+                                                },
+                                       "nav":  {
+                                                    "home":  "Strona główna",
+                                                    "catalog":  "Produkty",
+                                                    "search":  "Szukaj",
+                                                    "profile":  "Profil"
+                                                }
                                    },
                   "days":  {
                                "monday":  "Poniedziałek",

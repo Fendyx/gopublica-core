@@ -232,6 +232,37 @@ export function getNavLinks({
     })
   }
 
+  // ── Append active custom pages missing from the config ────────────────────
+  // A custom page can be absent from the saved navigation config (e.g. the
+  // page was created before any nav config existed, or the backend auto-sync
+  // was skipped). Without this, the page would be invisible in the storefront
+  // nav AND unmanageable in the admin navigation editor. Pages deliberately
+  // hidden by the tenant are still in the config (isVisible: false), so this
+  // only affects pages that are genuinely missing.
+  const configuredCustomKeys = new Set<string>()
+  for (const item of items) {
+    if (item.type !== 'custom') continue
+    configuredCustomKeys.add(item.slug)
+    if (item.id.startsWith('custom-')) configuredCustomKeys.add(item.id.slice(7))
+  }
+  const missingCustomPages = (customPages || []).filter(
+    (cp) => cp.isActive && !configuredCustomKeys.has(cp.slug)
+  )
+  if (missingCustomPages.length > 0) {
+    const maxOrder = items.reduce((max, i) => Math.max(max, i.order || 0), 0)
+    missingCustomPages.forEach((cp, i) => {
+      resolved.push({
+        id: `custom-${cp.slug}`,
+        href: `/${locale}/${branchSlug}/p/${cp.slug}`,
+        label: cp.titleI18n?.[locale] || cp.title,
+        isVisible: true,
+        placement: 'dropdown',
+        order: maxOrder + 1 + i,
+        type: 'custom',
+      })
+    })
+  }
+
   // Sort by order within each group
   const visible = resolved.filter((l) => l.isVisible)
   visible.sort((a, b) => a.order - b.order)

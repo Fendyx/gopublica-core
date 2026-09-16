@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Heart } from 'lucide-react';
 import ProductGallery from '@/widgets/Catalog/ProductGallery';
@@ -16,6 +16,7 @@ interface MobilePDPProps {
   branchSlug: string;
   allImages: string[];
   detail: ProductDetailData;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- next-intl messages type is not exported
   t: ReturnType<() => any>;
 }
 
@@ -31,36 +32,11 @@ export default function MobilePDP({
   const openLightbox = useCallback((idx: number) => setLightboxIndex(idx), []);
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
 
-  // Track whether a swipe happened to avoid opening lightbox on swipe
-  const didSwipe = useRef(false);
-  const touchStartX = useRef(0);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    didSwipe.current = false;
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
-    if (dx > 10) didSwipe.current = true;
-  }, []);
-
-  const handleGalleryClick = useCallback(() => {
-    if (!didSwipe.current) {
-      openLightbox(0);
-    }
-  }, [openLightbox]);
-
   return (
     <>
       <div className="lg:hidden">
-        <div
-          className="sticky top-0 h-[75vh] z-0 overflow-hidden bg-muted cursor-zoom-in"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onClick={handleGalleryClick}
-        >
-          <ProductGallery images={allImages} />
+        <div className="sticky top-0 h-[75vh] z-0 overflow-hidden bg-muted cursor-zoom-in">
+          <ProductGallery images={allImages} onTapImage={openLightbox} />
 
           <div className="absolute inset-x-0 top-0 px-4 pt-4 flex items-center justify-between z-10">
             <Link

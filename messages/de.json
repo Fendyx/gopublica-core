@@ -119,13 +119,15 @@
                                                   },
                                         "setupChecklist":  "Einrichtungs-Checkliste",
                                         "checklist":  {
-                                                          "setup.menu":  "Menüpunkte hinzufügen",
-                                                          "setup.services":  "Dienstleistungen hinzufügen",
-                                                          "setup.masters":  "Spezialisten hinzufügen",
-                                                          "setup.gallery":  "Galerie-Bilder hochladen",
-                                                          "setup.contact":  "Kontaktdaten ausfüllen",
-                                                          "setup.hours":  "Öffnungszeiten festlegen",
-                                                          "setup.jobForm":  "Bewerbungsformular einrichten"
+                                                          "setup": {
+                                                              "menu":  "Menüpunkte hinzufügen",
+                                                              "services":  "Dienstleistungen hinzufügen",
+                                                              "masters":  "Spezialisten hinzufügen",
+                                                              "gallery":  "Galerie-Bilder hochladen",
+                                                              "contact":  "Kontaktdaten ausfüllen",
+                                                              "hours":  "Öffnungszeiten festlegen",
+                                                              "jobForm":  "Bewerbungsformular einrichten"
+                                                          }
                                                       },
                                         "recentActivity":  "Letzte Aktivität",
                                         "noActivity":  "Keine letzte Aktivität.",
@@ -512,7 +514,7 @@
                                                     "general":  "Allgemein",
                                                     "appearance":  "Darstellung",
                                                     "localization":  "Lokalisierung",
-                                                    "seoAndAlerts":  "SEO \u0026 Benachrichtigungen",
+                                                    "seoAndAlerts":  "SEO",
                                                     "legal":  "Rechtliches",
                                                     "subVenues":  "Unterfilialen",
                                                     "navigation":  "Navigation"
@@ -619,7 +621,22 @@
                                                       "reset":  "Zurücksetzen"
                                                   },
                                        "selectBranchFirst":  "Bitte wählen Sie zuerst eine Filiale",
-                                       "cancel":  "Abbrechen"
+                                       "cancel":  "Abbrechen",
+                                       "days":  {
+                                                    "monday":  "Montag",
+                                                    "tuesday":  "Dienstag",
+                                                    "wednesday":  "Mittwoch",
+                                                    "thursday":  "Donnerstag",
+                                                    "friday":  "Freitag",
+                                                    "saturday":  "Samstag",
+                                                    "sunday":  "Sonntag"
+                                                },
+                                       "nav":  {
+                                                    "home":  "Startseite",
+                                                    "catalog":  "Produkte",
+                                                    "search":  "Suchen",
+                                                    "profile":  "Profil"
+                                                }
                                    },
                   "days":  {
                                "monday":  "Montag",

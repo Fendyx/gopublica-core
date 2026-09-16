@@ -252,11 +252,14 @@ export default function SettingsPageContent() {
         setHasSearch(data.features?.hasSearch ?? false);
         setBottomNavEnabled(data.features?.bottomNav?.enabled ?? false);
         setBottomNavItems(data.features?.bottomNav?.items ?? []);
+        setPrimaryColor(data.theme?.primary || '');
+        setAccentColor(data.theme?.accent || '');
+        setFontHeading(data.theme?.fontHeading || '');
+        setFontBody(data.theme?.fontBody || '');
 
         setSeoTitleI18n(data.seoTitleI18n || {});
         setSeoDescriptionI18n(data.seoDescriptionI18n || {});
 
-        setCategoryBgColor(data.theme?.categoryBgColor || tenant?.theme?.categoryBgColor || '');
         setPageBgColor(data.theme?.pageBgColor || '');
 
         // ─── Branding: подтягиваем логотип и фавикон ───────────────────────────
@@ -331,7 +334,6 @@ export default function SettingsPageContent() {
       setFontBody(data.theme?.fontBody || '');
       setSeoTitleI18n(data.seoTitleI18n || {});
       setSeoDescriptionI18n(data.seoDescriptionI18n || {});
-      setCategoryBgColor(data.theme?.categoryBgColor || tenant?.theme?.categoryBgColor || '');
       setPageBgColor(data.theme?.pageBgColor || '');
       setLogoUrl(data.logoUrl || '');
       setFaviconUrl(data.faviconUrl || '');
@@ -814,30 +816,6 @@ export default function SettingsPageContent() {
                   </div>
 
                   <div className="space-y-2 pt-4">
-                    <Label>{t('appearance.categoryBgColor')}</Label>
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="color"
-                        value={categoryBgColor || '#ffffff'}
-                        onChange={(e) => setCategoryBgColor(e.target.value)}
-                        className="w-12 h-10 rounded cursor-pointer border border-border bg-transparent p-1"
-                      />
-                      <Input
-                        placeholder={t('appearance.emptyDefault')}
-                        value={categoryBgColor}
-                        onChange={(e) => setCategoryBgColor(e.target.value)}
-                        className="max-w-xs"
-                      />
-                      {categoryBgColor && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setCategoryBgColor('')}>
-                          {t('common.reset')}
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{t('leaveEmptyPageColor')}</p>
-                  </div>
-
-                  <div className="space-y-2 pt-4">
                     <Label>{t('appearance.pageBgColor')}</Label>
                     <div className="flex items-center gap-4">
                       <input
@@ -1238,35 +1216,20 @@ export default function SettingsPageContent() {
 
                 <Separator />
 
-                {/* ─── Legacy: Primary Language + Currency ───────────────────── */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5 text-muted-foreground text-xs">
-                      <Languages className="w-3.5 h-3.5" />{t('localization.primaryLanguageDeprecated')}
-                    </Label>
-                    <Select value={primaryLanguage} onValueChange={setPrimaryLanguage}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {GLOBAL_LOCALES.map((locale) => (
-                          <SelectItem key={locale.code} value={locale.code}>{locale.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5"><Banknote className="w-3.5 h-3.5 text-muted-foreground" />{t('primaryCurrency')}</Label>
-                    <Select value={primaryCurrency} onValueChange={setPrimaryCurrency}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PLN">PLN (zł)</SelectItem>
-                        <SelectItem value="EUR">EUR (€)</SelectItem>
-                        <SelectItem value="USD">USD ($)</SelectItem>
-                        <SelectItem value="UAH">UAH (₴)</SelectItem>
-                        <SelectItem value="GBP">GBP (£)</SelectItem>
-                        <SelectItem value="CZK">CZK (Kč)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                {/* ─── Currency ─────────────────────────────────────────────── */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5"><Banknote className="w-3.5 h-3.5 text-muted-foreground" />{t('primaryCurrency')}</Label>
+                  <Select value={primaryCurrency} onValueChange={setPrimaryCurrency}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PLN">PLN (zł)</SelectItem>
+                      <SelectItem value="EUR">EUR (€)</SelectItem>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="UAH">UAH (₴)</SelectItem>
+                      <SelectItem value="GBP">GBP (£)</SelectItem>
+                      <SelectItem value="CZK">CZK (Kč)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </TabsContent>
 

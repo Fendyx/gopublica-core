@@ -9,6 +9,7 @@ import { useWishlistStore } from '@/shared/store/wishlistStore';
 import { useCartToast } from '@/shared/ui/CartToast';
 import { ShoppingBag, Eye, Heart, ArrowRight } from 'lucide-react';
 import { resolveName, resolveDescription } from '@/shared/lib/localization';
+import { useTenant } from '@/entities/tenant/TenantContext';
 
 interface Props {
   product: MenuItem;
@@ -68,9 +69,12 @@ function WishlistButton({ productId }: { productId: string }) {
 // ── CardImage with secondary hover swap ─────────────────────────────────────
 
 function CardImage({ product, locale, aspectRatio = '1/1' }: { product: MenuItem; locale?: string; aspectRatio?: string }) {
+  const tenant = useTenant();
   const isVideo = /\.(mp4|webm|ogg|mov|avi|mkv)$/i.test(product.image || '');
   const hasSecondary = product.images && product.images.length > 0;
   const secondarySrc = hasSecondary ? product.images![0] : null;
+  const hoverEnabled = tenant?.features?.hoverImageSwap !== false;
+  const showSwap = hoverEnabled && !!secondarySrc;
 
   if (isVideo) {
     return (
@@ -92,16 +96,16 @@ function CardImage({ product, locale, aspectRatio = '1/1' }: { product: MenuItem
           alt={resolveName(product, locale)}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, (max-width: 1600px) 33vw, 25vw"
-          className="object-contain transition-opacity duration-500 ease-out group-hover:opacity-0"
+          className={`object-contain transition-opacity duration-500 ease-out${showSwap ? ' group-hover:opacity-0' : ''}`}
         />
       ) : (
         <div className="flex items-center justify-center w-full h-full text-muted-foreground text-sm">
           No Image
         </div>
       )}
-      {secondarySrc && (
+      {showSwap && (
         <Image
-          src={secondarySrc}
+          src={secondarySrc!}
           alt={resolveName(product, locale)}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, (max-width: 1600px) 33vw, 25vw"
