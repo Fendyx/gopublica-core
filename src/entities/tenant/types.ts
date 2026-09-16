@@ -35,6 +35,7 @@ export type Features = {
   hasJobApplications?: boolean
   showCategoryNav?: boolean
   hasSearch?: boolean
+  hoverImageSwap?: boolean
   bottomNav?: BottomNavConfig
 }
 
