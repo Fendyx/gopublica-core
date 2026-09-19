@@ -78,7 +78,7 @@ export default function RegisterPage() {
         className="w-full max-w-md"
       >
         <div className="mb-6 text-center">
-          <Link href={`/${locale}/menu`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <Link href={`/${locale}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to menu
           </Link>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('createAccount')}</h1>

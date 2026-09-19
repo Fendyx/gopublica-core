@@ -122,7 +122,10 @@ function CheckoutForm() {
         return;
     }
 
-    if (!stripe || !elements) {
+    // ── Free order detection (total below Stripe PLN minimum of 2.00) ──
+    const isFreeOrder = fees && fees.total < 2;
+
+    if (!isFreeOrder && (!stripe || !elements)) {
       setError(t('alerts.stripeNotInitialized'));
       return;
     }
@@ -131,11 +134,14 @@ function CheckoutForm() {
     setError(null);
 
     try {
-      const { error: submitError } = await elements.submit();
-      if (submitError) {
-        setError(submitError.message || t('alerts.checkCardDetails'));
-        setLoading(false);
-        return;
+      // Only submit Stripe elements for paid orders
+      if (!isFreeOrder) {
+        const { error: submitError } = await elements!.submit();
+        if (submitError) {
+          setError(submitError.message || t('alerts.checkCardDetails'));
+          setLoading(false);
+          return;
+        }
       }
 
       const tenantId = tenant?.tenantId || window.location.hostname;
@@ -198,6 +204,12 @@ function CheckoutForm() {
       const payData = await payRes.json();
       if (!payRes.ok) {
         throw new Error(payData.error || t('alerts.paymentInitError'));
+      }
+
+      // ── Free order: skip Stripe confirmation ──────────────────────────
+      if (payData.freeOrder) {
+        window.location.href = `/${locale}/order/thank-you?orderId=${orderId}`;
+        return;
       }
 
       const { clientSecret } = payData;

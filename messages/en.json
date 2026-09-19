@@ -1590,6 +1590,11 @@
     "homePage":  {
                      "siteNotFound":  "Site not found"
                  },
+    "notFound":  {
+                     "title":  "Page not found",
+                     "message":  "The page you're looking for doesn't exist or has been moved.",
+                     "goHome":  "Go to homepage"
+                 },
     "menu":  {
                  "title":  "Our menu",
                  "all":  "All dishes",

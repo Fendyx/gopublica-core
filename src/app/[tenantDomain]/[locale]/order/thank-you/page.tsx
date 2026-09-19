@@ -10,7 +10,7 @@ import { usePlatformCartStore } from '@/shared/store/platformCartStore';
 
 export default function ThankYouPage() {
   const params = useSearchParams();
-  const { locale, branchSlug } = useParams();
+  const { locale } = useParams();
   const orderId = params.get('orderId') || `ORD-${Math.floor(Math.random() * 100000)}`;
 
   // Clear both carts after a successful purchase
@@ -62,7 +62,7 @@ export default function ThankYouPage() {
 
         {/* Кнопка возврата в меню/каталог */}
         <Link 
-          href={`/${locale}/menu`} 
+          href={`/${locale}`} 
           className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
         >
           Continue Shopping

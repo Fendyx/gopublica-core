@@ -7,6 +7,6 @@ export default async function MenuRedirect({
   params: Promise<{ tenantDomain: string; locale: string }>;
 }) {
   const { locale } = await params;
-  // Мягко перенаправляем на новый универсальный роут
-  redirect(`/${locale}/catalog`);
+  // Redirect to tenant home page which auto-resolves the default branch
+  redirect(`/${locale}`);
 }

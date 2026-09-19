@@ -1602,6 +1602,11 @@
     "homePage":  {
                      "siteNotFound":  "Website nicht gefunden"
                  },
+    "notFound":  {
+                     "title":  "Seite nicht gefunden",
+                     "message":  "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+                     "goHome":  "Zur Startseite"
+                 },
     "menu":  {
                  "title":  "Unser Menü",
                  "all":  "Alle Gerichte",

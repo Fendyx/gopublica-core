@@ -17,6 +17,22 @@ export default function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // ── Safety net: redirect any "/undefined/..." paths to home
+  // This catches broken links that produce /en/undefined/... URLs
+  if (pathname.includes('/undefined')) {
+    const url = req.nextUrl.clone();
+    // Strip the /undefined segment and everything after, keep the locale prefix
+    // e.g. /en/undefined/menu → /en/  ,  /en/undefined → /en/
+    const segments = pathname.split('/').filter(Boolean);
+    const localeIdx = segments.findIndex(s => s.length === 2); // e.g. "en", "pl"
+    if (localeIdx >= 0) {
+      url.pathname = `/${segments[localeIdx]}/`;
+    } else {
+      url.pathname = '/';
+    }
+    return NextResponse.redirect(url, 302);
+  }
+
   // /admin/* - без локали, просто добавляем tenant
   if (pathname.startsWith('/admin')) {
     const url = req.nextUrl.clone();

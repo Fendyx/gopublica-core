@@ -27,7 +27,7 @@ const getStatusStyles = (status: string) => {
 };
 
 export default function MyOrdersPage() {
-  const { tenantDomain, locale, branchSlug } = useParams();
+  const { locale } = useParams();
   const router = useRouter();
   const [orders, setOrders] = useState<MyOrder[]>([]);
   const [loading, setLoading] = useState(true);

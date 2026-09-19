@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
+import { useSafeBranchSlug } from '@/shared/hooks/useSafeBranchSlug'
 import { useBranch } from '@/entities/branch/BranchContext'
 import { useBranchSettings } from '@/entities/branch/useBranchSettings'
 import { getAllVisibleNavLinks } from '@/shared/lib/navigation'
@@ -14,17 +15,19 @@ export default function Footer() {
   const settings = useBranchSettings()
   const { selectedBranch } = useBranch()
   const locale = useLocale()
-  const { branchSlug } = useParams()
+  const branchSlug = useSafeBranchSlug()
   const currentYear = new Date().getFullYear()
 
-  const navLinks = getAllVisibleNavLinks({
-    navigation: tenant?.navigation,
-    tenant,
-    customPages: selectedBranch?.customPages,
-    locale,
-    branchSlug: branchSlug as string,
-    t: (key: string) => navT(key as any),
-  })
+  const navLinks = branchSlug
+    ? getAllVisibleNavLinks({
+        navigation: tenant?.navigation,
+        tenant,
+        customPages: selectedBranch?.customPages,
+        locale,
+        branchSlug,
+        t: (key: string) => navT(key as any),
+      })
+    : []
 
   const legalLinks = [
     { href: `/${locale}/regulamin`, label: t('privacyPolicy') },

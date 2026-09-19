@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { memo, useState, useEffect } from 'react'
+import { useSafeBranchSlug } from '@/shared/hooks/useSafeBranchSlug'
 import { Home, LayoutGrid, Search, User, LogIn, ExternalLink } from 'lucide-react'
 import { Icon } from '@iconify/react'
 import { isEmojiIcon } from '@/shared/ui/IconPickerButton'
@@ -74,19 +75,19 @@ const BottomNavItemButton = memo(function BottomNavItemButton({
   )
 
   if (onClick) {
-    return <div onClick={onClick}>{content}</div>
+    return <div onClick={onClick} className="flex-1 min-w-0">{content}</div>
   }
 
   if (isExternal) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="w-full">
+      <a href={href} target="_blank" rel="noopener noreferrer" className="flex-1 min-w-0">
         {content}
       </a>
     )
   }
 
   return (
-    <Link href={href} className="w-full">
+    <Link href={href} className="flex-1 min-w-0">
       {content}
     </Link>
   )
@@ -96,7 +97,7 @@ export default function MobileBottomNav() {
   const t = useTranslations('nav')
   const locale = useLocale()
   const pathname = usePathname()
-  const { branchSlug } = useParams()
+  const branchSlug = useSafeBranchSlug()
   const tenant = useTenant()
   const { openSearch } = useSearchStore()
 
@@ -109,6 +110,10 @@ export default function MobileBottomNav() {
 
   const bottomNav = tenant?.features?.bottomNav
   if (!bottomNav?.enabled || !bottomNav.items?.length) return null
+
+  // ── Safety: don't render bottom nav when branchSlug is unresolved (e.g. /login, /register)
+  // This prevents broken "/undefined/..." links
+  if (!branchSlug) return null
 
   // Sort by order and filter visible
   const visibleItems = [...bottomNav.items]
@@ -161,7 +166,7 @@ export default function MobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-border bg-background/95 backdrop-blur-md"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center h-16 px-2">
         {items.map((item) => {
           const href = resolveHref(item)
           const label = resolveLabel(item)

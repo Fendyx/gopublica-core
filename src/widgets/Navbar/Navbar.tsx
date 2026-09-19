@@ -5,6 +5,7 @@ import { Link as IntlLink } from '@/i18n/routing'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
 import { useTenant } from '@/entities/tenant/TenantContext'
+import { useSafeBranchSlug } from '@/shared/hooks/useSafeBranchSlug'
 import LanguageSwitcher from '@/features/language-switcher/LanguageSwitcher'
 import ThemeToggle from '@/shared/ui/ThemeToggle'
 import { Menu, X, CalendarDays, ChevronDown, MapPin, ShoppingCart, User, LogIn, BookOpen, Search } from 'lucide-react'
@@ -20,7 +21,7 @@ import OmniSearchDropdown from '@/features/omni-search/OmniSearchDropdown'
 export default function Navbar() {
   const t = useTranslations('nav')
   const locale = useLocale()
-  const { branchSlug } = useParams()
+  const branchSlug = useSafeBranchSlug()
   const router = useRouter()
   const tenant = useTenant()
   const [isOpen, setIsOpen] = useState(false)
@@ -89,14 +90,18 @@ export default function Navbar() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [isOpen])
 
-  const { primary: primaryLinks, dropdown: dropdownLinks } = getNavLinks({
-    navigation: tenant?.navigation,
-    tenant,
-    customPages: selectedBranch?.customPages,
-    locale,
-    branchSlug: branchSlug as string,
-    t: (key: string) => t(key as any),
-  })
+  // ── Safety: if branchSlug is not resolved yet, skip branch-dependent links
+  // to prevent "/undefined/..." URLs (e.g. on /login, /register, /profile)
+  const { primary: primaryLinks, dropdown: dropdownLinks } = branchSlug
+    ? getNavLinks({
+        navigation: tenant?.navigation,
+        tenant,
+        customPages: selectedBranch?.customPages,
+        locale,
+        branchSlug,
+        t: (key: string) => t(key as any),
+      })
+    : { primary: [], dropdown: [] }
 
   // All links combined for mobile burger menu (primary + dropdown)
   const allLinks = [...primaryLinks, ...dropdownLinks]
@@ -297,7 +302,7 @@ export default function Navbar() {
               </Link>
             )}
 
-            {hasBooking && (
+            {hasBooking && branchSlug && (
               <Link href={`/${locale}/${branchSlug}/reservations`} onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-base font-medium text-white shadow-sm transition-opacity hover:opacity-90" style={{ backgroundColor: 'var(--color-primary)' }}>
                 <CalendarDays size={18} />
                 {t('booking')}

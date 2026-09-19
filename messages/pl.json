@@ -1552,6 +1552,11 @@
     "homePage":  {
                      "siteNotFound":  "Nie znaleziono strony"
                  },
+    "notFound":  {
+                     "title":  "Nie znaleziono strony",
+                     "message":  "Strona, której szukasz, nie istnieje lub została przeniesiona.",
+                     "goHome":  "Przejdź do strony głównej"
+                 },
     "menu":  {
                  "title":  "Nasze menu",
                  "all":  "Wszystkie dania",

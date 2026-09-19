@@ -1,4 +1,4 @@
-// src/app/[tenantDomain]/[locale]/[branchSlug]/profile/page.tsx
+// src/app/[tenantDomain]/[locale]/profile/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation'; // Добавлен useRouter
@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchWishlistProducts, removeFromWishlist, type WishlistProduct } from '@/entities/wishlist/api';
 import { useBranchSettings } from '@/entities/branch/useBranchSettings';
+import { useSafeBranchSlug } from '@/shared/hooks/useSafeBranchSlug';
 
 type UserProfile = {
   _id: string;
@@ -23,7 +24,8 @@ type UserProfile = {
 };
 
 export default function ProfilePage() {
-  const { locale, branchSlug } = useParams();
+  const { locale } = useParams();
+  const branchSlug = useSafeBranchSlug();
   const router = useRouter(); // Инициализация роутера
   const t = useTranslations('profile');
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
@@ -295,7 +297,7 @@ export default function ProfilePage() {
               <p className="text-sm font-medium text-foreground mb-1">{t('emptyWishlist')}</p>
               <p className="text-xs text-muted-foreground mb-4">{t('emptyWishlistHint')}</p>
               <Button asChild variant="outline" size="sm" className="rounded-xl">
-                <Link href={`/${locale}/${branchSlug}/catalog`}>
+                <Link href={branchSlug ? `/${locale}/${branchSlug}/catalog` : `/${locale}`}>
                   <ShoppingBag className="w-4 h-4 mr-2" /> {t('browseCatalog')}
                 </Link>
               </Button>
@@ -308,7 +310,7 @@ export default function ProfilePage() {
                   className="group relative flex gap-3 p-3 rounded-xl border border-border/60 hover:border-border hover:shadow-sm transition-all"
                 >
                   <Link
-                    href={`/${locale}/${branchSlug}/catalog/${product.category}/${product._id}`}
+                    href={branchSlug ? `/${locale}/${branchSlug}/catalog/${product.category}/${product._id}` : '#'}
                     className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-muted relative"
                   >
                     {product.image ? (
@@ -327,7 +329,7 @@ export default function ProfilePage() {
                   </Link>
                   <div className="flex-1 min-w-0">
                     <Link
-                      href={`/${locale}/${branchSlug}/catalog/${product.category}/${product._id}`}
+                      href={branchSlug ? `/${locale}/${branchSlug}/catalog/${product.category}/${product._id}` : '#'}
                       className="text-sm font-medium text-foreground hover:text-primary transition-colors line-clamp-2"
                     >
                       {product.name}
