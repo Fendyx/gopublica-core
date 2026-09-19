@@ -23,7 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   ShoppingCart, CreditCard, Truck, ArrowLeft, Loader2, CheckCircle,
-  Box, Fuel, Building2, User, MapPin,
+  Box, Fuel, Building2, User, MapPin, Plus, Minus, Trash2,
 } from 'lucide-react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -217,7 +217,7 @@ export default function PlatformCheckout() {
   const t = useTranslations('admin.gopublicaPage');
   const tCheckout = useTranslations('admin.checkout');
   const tenant = useTenant();
-  const { items, getSubtotal, clear } = usePlatformCartStore();
+  const { items, getSubtotal, updateQuantity, removeItem, clear } = usePlatformCartStore();
 
   // Form state
   const [buyerType, setBuyerType] = useState<'private' | 'business'>('private');
@@ -554,15 +554,34 @@ export default function PlatformCheckout() {
               {items.map((item) => (
                 <div key={item.productId} className="flex items-center gap-3">
                   {item.photo && (
-                    <img src={item.photo} alt={item.title} className="w-10 h-10 rounded object-cover" />
+                    <img src={item.photo} alt={item.title} className="w-10 h-10 rounded object-cover shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {item.currency} {item.price.toFixed(2)} × {item.quantity}
+                      {item.currency} {item.price.toFixed(2)}
                     </p>
                   </div>
-                  <p className="text-sm font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                    >
+                      {item.quantity <= 1 ? <Trash2 className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                    </Button>
+                    <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <p className="text-sm font-medium w-20 text-right">
                     {item.currency} {(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>

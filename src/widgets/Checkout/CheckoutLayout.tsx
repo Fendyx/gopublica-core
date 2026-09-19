@@ -214,6 +214,10 @@ function CheckoutForm() {
 
       const { clientSecret } = payData;
 
+      if (!stripe) {
+        throw new Error(t('alerts.generalError'));
+      }
+
       const { error: stripeError } = await stripe.confirmPayment({
         elements,
         clientSecret,
