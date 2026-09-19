@@ -214,7 +214,7 @@ function CheckoutForm() {
 
       const { clientSecret } = payData;
 
-      if (!stripe) {
+      if (!stripe || !elements) {
         throw new Error(t('alerts.generalError'));
       }
 
