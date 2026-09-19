@@ -32,6 +32,7 @@ export interface PlatformOrderPayload {
   buyerType: 'private' | 'business';
   nip?: string;
   businessName?: string;
+  buyerContact?: { name: string; email: string; phone: string };
   fulfillment: {
     type: 'parcel_locker' | 'courier' | 'cash_on_delivery';
     parcelLocker?: {

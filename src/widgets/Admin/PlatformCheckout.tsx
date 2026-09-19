@@ -276,11 +276,11 @@ export default function PlatformCheckout() {
 
   const canSubmit = () => {
     if (items.length === 0) return false;
-    if (!address.email) return false;
+    if (!address.email || !address.name || !address.phone) return false;
     if (buyerType === 'business' && (!nip || !businessName)) return false;
     if (paymentMethod === 'stripe') {
       if (deliveryMethod === 'parcel_locker' && !selectedLocker) return false;
-      if (deliveryMethod === 'courier' && (!address.name || !address.phone || !address.street || !address.city || !address.zip)) return false;
+      if (deliveryMethod === 'courier' && (!address.street || !address.city || !address.zip)) return false;
     }
     return true;
   };
@@ -297,6 +297,11 @@ export default function PlatformCheckout() {
         buyerType,
         nip: buyerType === 'business' ? nip : undefined,
         businessName: buyerType === 'business' ? businessName : undefined,
+        buyerContact: {
+          name: address.name,
+          email: address.email,
+          phone: address.phone,
+        },
         fulfillment: paymentMethod === 'cash_on_delivery'
           ? { type: 'cash_on_delivery' }
           : deliveryMethod === 'parcel_locker'
